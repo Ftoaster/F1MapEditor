@@ -552,6 +552,7 @@ Zuletzt geöffnet;Recently opened;ux.py
  · veraltet, wird neu berechnet; · outdated, being recalculated;views.py
 A {s0:.0f} m → B {s1:.0f} m;A {s0:.0f} m → B {s1:.0f} m;views.py
 Auf gleiche Höhe (Mittelwert);Same height (mean value);views.py
+Blick in Fahrtrichtung · Höhe {faktor}-fach;Looking in driving direction · height ×{faktor};views.py
 Bänder: ;Bands: ;views.py
 Cursor {station:.1f} m · {wert:.2f} {unit} · Steigung {gradient:+.1f} %;Cursor {station:.1f} m · {wert:.2f} {unit} · gradient {gradient:+.1f} %;views.py
 Cursor {station:.1f} m · {wert:.2f}°;Cursor {station:.1f} m · {wert:.2f}°;views.py
@@ -577,7 +578,6 @@ Querneigung eingeben …;Enter banking …;views.py
 Querneigung in Grad ab Ziel;Banking in degrees from the finish;views.py
 Querneigung in ° (+ = links höher);Banking in ° (+ = left higher);views.py
 Querneigung in ° (+ = links höher) · ↑↓ 0,1° · Mausrad: Zoom · Rechtsklick: Werkzeuge;Banking in ° (+ = left higher) · ↑↓ 0.1° · mouse wheel: zoom · right-click: tools;views.py
-Blick in Fahrtrichtung · Höhe {faktor}-fach;Looking in driving direction · height ×{faktor};views.py
 Querschnitt: Blick in Fahrtrichtung, links höher bei positiver Querneigung;Cross-section: looking in driving direction, left higher with positive banking;views.py
 Sanfter Übergang A→B (S-Kurve);Smooth transition A→B (S-curve);views.py
 Ziel;finish;views.py
@@ -927,7 +927,6 @@ Richtung umkehren;Reverse direction;window.py
 Runde geschlossen;Lap closed;window.py
 Runde offen;Lap open;window.py
 Runde schließen;Close lap;window.py
-Runde schließen / öffnen;Close / open lap;window.py
 Runde öffnen;Open lap;window.py
 "Rundenzeit, Geschwindigkeiten und Kurventabelle aus dem Fahrlinienlauf; Rohdaten einer Generatorausgabe über Werkzeuge → Generatorausgabe lesend öffnen";"Lap time, speeds and corner table from the racing-line run; raw data of a generator output via Tools → Open generator output read-only";window.py
 Rückgängig;Undo;window.py

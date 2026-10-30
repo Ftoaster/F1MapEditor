@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.1
+
+- Close/Open lap is back in the toolbar, next to the drawing tools, and lights up while the lap is open
+- With fewer than four points the button is greyed out and says why
+- A closed lap with fewer than four points can be opened again
+
+## 0.1.0
 
 First public version.
 

@@ -117,7 +117,7 @@ def main():
         if r.returncode:
             raise SystemExit("Rauchtest fehlgeschlagen")
     if not args.ohne_zip:
-        zielzip = DIST / "Mapeditor-0.1.0-win64.zip"
+        zielzip = DIST / "Mapeditor-0.1.1-win64.zip"
         with zipfile.ZipFile(zielzip, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
             for p in sorted(ZIEL.rglob("*")):
                 if p.is_file():

@@ -129,6 +129,27 @@ def test_toolbar_grouping_and_help(journey):
     w.help_dialog.close()
 
 
+def test_close_lap_button_shows_the_next_step(app):
+    w = MainWindow(Project(), auto_preview=False)
+    w.show()
+    QApplication.processEvents()
+    button = w.toolbar.widgetForAction(w.close_action)
+    assert button.isVisible() and button.objectName() == "runde"
+    assert not w.close_action.isEnabled() and "mindestens vier" in w.close_action.toolTip()
+    for x, z in [(0, 0), (100, 0), (100, 100), (0, 100)]:
+        w.document.insert(x, z)
+    QApplication.processEvents()
+    assert w.close_action.isEnabled() and w.close_action.text() == "Runde schließen" and button.property("offen") is True
+    w.close_action.trigger()
+    QApplication.processEvents()
+    assert w.document.project.closed and w.close_action.text() == "Runde öffnen" and button.property("offen") is False
+    w.close_action.trigger()
+    QApplication.processEvents()
+    assert not w.document.project.closed and w.close_action.isEnabled()
+    w.document.undo.setClean()
+    w.close()
+
+
 def test_point_list_and_property_numbers(app):
     if not (EXAMPLES / "portimao_form.json").exists():
         pytest.skip("portimao_form.json gehört nicht zum öffentlichen Stand")

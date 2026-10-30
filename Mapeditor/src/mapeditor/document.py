@@ -562,6 +562,6 @@ class Document(QObject):
         self.select(0)
 
     def close_round(self):
-        if self.ml.get("art") == "kontrollpunkte" and len(self.points) < 4:
+        if not self.project.closed and self.ml.get("art") == "kontrollpunkte" and len(self.points) < 4:
             raise ValueError(tr("Zum Schließen sind mindestens vier Kontrollpunkte erforderlich."))
         self.edit(tr("Rundenschluss ändern"), lambda raw, meta: meta.update(runde_geschlossen=not self.project.closed))

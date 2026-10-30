@@ -410,7 +410,6 @@ class MainWindow(QMainWindow):
         undo.changed.connect(self._history_status)
         redo.changed.connect(self._history_status)
         edit_menu.addActions([undo, redo])
-        self.action(edit_menu, tr("Runde schließen / öffnen"), self.toggle_closed)
         edit_menu.addSeparator()
         self.action(edit_menu, tr("Querneigung: alle Kurven automatisch"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
         self.action(edit_menu, tr("Querneigung: ganze Strecke flach"), self.flatten_bank)
@@ -488,6 +487,9 @@ class MainWindow(QMainWindow):
             self.mode_actions[mode] = action
             toolbar.addAction(action)
         toolbar.addSeparator()
+        self.close_action = tool(tr("Runde schließen"), "runde", self.toggle_closed, "")
+        toolbar.widgetForAction(self.close_action).setObjectName("runde")
+        toolbar.addSeparator()
         undo.setIcon(icon("undo"))
         redo.setIcon(icon("redo"))
         toolbar.addActions([undo, redo])
@@ -498,18 +500,14 @@ class MainWindow(QMainWindow):
         fit = tool(tr("Einpassen"), "einpassen", lambda: self.map.fit_track(), tr("Ganze Strecke zeigen"), tr("Pos1"))
         zoom_in = tool(tr("Vergrößern"), "zoom_in", lambda: self.map.scale(1.2, 1.2), tr("Hineinzoomen"), tr("Mausrad"))
         zoom_out = tool(tr("Verkleinern"), "zoom_out", lambda: self.map.scale(1 / 1.2, 1 / 1.2), tr("Herauszoomen"), tr("Mausrad"))
-        self.close_action = tool(tr("Runde schließen"), "runde", self.toggle_closed,
-                                 tr("Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen"))
-        # Zoomen geht mit dem Mausrad, die Runde wird selten geöffnet: beide im Menü statt in der Werkzeugleiste
+        # Zoomen geht mit dem Mausrad: im Menü statt in der Werkzeugleiste
         for action in (zoom_in, zoom_out):
             toolbar.removeAction(action)
         view_menu.insertSeparator(self.language_menu.menuAction())
         view_menu.insertActions(self.language_menu.menuAction(), [zoom_in, zoom_out])
         zoom_in.setShortcut(QKeySequence.ZoomIn)
         zoom_out.setShortcut(QKeySequence.ZoomOut)
-        toolbar.removeAction(self.close_action)
-        edit_menu.addSeparator()
-        edit_menu.addAction(self.close_action)
+        edit_menu.insertAction(edit_menu.actions()[2], self.close_action)
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         toolbar.addWidget(spacer)
@@ -1114,7 +1112,7 @@ class MainWindow(QMainWindow):
         reason = tr("Unbekannte Projektfassung: nur lesend.") if readonly else tr("CSV-Geometrie ist nur lesend.")
         self.add_button.setText(tr("+ Gerade") if art == "segmente" else tr("+ Punkt"))
         if hasattr(self, "close_action"):
-            self.close_action.setText(tr("Runde öffnen") if self.document.project.closed else tr("Runde schließen"))
+            self._update_close_action(art, editable, reason)
         for button in (self.add_button, self.remove_button):
             button.setEnabled(editable and (button is self.add_button or self.document.selected >= 0))
             button.setToolTip(reason if not editable else tr("Zuerst ein Objekt wählen.") if not button.isEnabled() else tr("Wirkt sofort; Strg+Z macht rückgängig."))
@@ -2656,6 +2654,20 @@ class MainWindow(QMainWindow):
         self.cleanup_dialog = CleanupDialog(self.document.project, output, packages, self)
         self.cleanup_dialog.exec()
 
+    def _update_close_action(self, art, editable, reason):
+        """Solange die Runde offen ist, ist Schließen der nächste Schritt: Der Knopf fällt dann auf (Regel ``QToolButton#runde``)."""
+        closed = self.document.project.closed
+        ready = closed or art != "kontrollpunkte" or len(self.document.points) >= 4
+        self.close_action.setText(tr("Runde öffnen") if closed else tr("Runde schließen"))
+        self.close_action.setEnabled(editable and ready)
+        self.close_action.setToolTip(reason if not editable else tr("Zum Schließen sind mindestens vier Kontrollpunkte erforderlich.")
+                                     if not ready else tr("Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen"))
+        button = self.toolbar.widgetForAction(self.close_action)
+        if button is not None and button.property("offen") != (not closed):
+            button.setProperty("offen", not closed)
+            button.style().unpolish(button)
+            button.style().polish(button)
+
     def toggle_closed(self):
         try:
             self.document.close_round()
@@ -2694,6 +2706,8 @@ class MainWindow(QMainWindow):
             "QToolButton:checked { background: #005C73; color: #FFFFFF; } "
             "QToolButton#primary { background: #0A7D4B; color: #FFFFFF; font-weight: 600; padding: 4px 14px; } "
             "QToolButton#primary:hover { background: #0E9A5D; } "
+            "QToolButton#runde[offen=\"true\"]:enabled { background: #D6A94A; color: #101820; font-weight: 600; padding: 4px 14px; } "
+            "QToolButton#runde[offen=\"true\"]:enabled:hover { background: #E8BE62; } "
             "QPushButton, QComboBox { min-height: 30px; } "
             "QLabel#heading { color: %(muted)s; font-size: 11px; font-weight: 600; letter-spacing: 1px; padding-top: 4px; } "
             "QFrame#welcome { border: 1px solid %(line)s; border-radius: 8px; } "
