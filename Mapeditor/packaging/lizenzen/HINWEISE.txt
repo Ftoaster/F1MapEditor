@@ -1,0 +1,18 @@
+Drittkomponenten im Mapeditor (Ordner _internal/ und werkzeugkasten/)
+====================================================================
+Qt 6 / PySide6 / shiboken6 (Qt for Python)  - LGPL-3.0-only (alternativ GPL/kommerziell)
+    Quelle: https://www.qt.io , https://pypi.org/project/PySide6/ (Version 6.12.0)
+    Qt-Bibliotheken liegen als unveraenderte, austauschbare DLLs in _internal/PySide6/
+    (dynamisch gelinkt). Sie duerfen durch eigene, binaerkompatible Qt-6.12-Builds ersetzt
+    werden. Der Quellcode von Qt/PySide6 ist unter den oben genannten Adressen erhaeltlich.
+    Lizenztext: LGPL-3.0.txt (und GPL-3.0.txt, auf die sie verweist).
+NumPy                       - BSD-3-Clause (+ gebuendelte Bibliotheken, siehe NumPy-LICENSE.txt:
+                              OpenBLAS BSD, GCC-Laufzeit GPL mit Runtime-Exception)
+Pillow                      - MIT-CMU (HPND), Pillow-LICENSE.txt (enthaelt Lizenzen der Teilbibliotheken)
+zstandard (python-zstandard)- BSD-3-Clause, zstandard-LICENSE.txt (zstd selbst: BSD/GPLv2 dual)
+Python 3.10 Laufzeit        - PSF-Lizenz (python310.dll, Standardbibliothek)
+PyInstaller Bootloader      - GPLv2+ mit Ausnahme, die die Weitergabe gebauter Programme beliebiger
+                              Lizenz erlaubt
+Microsoft Visual C++ Runtime (VCRUNTIME140/MSVCP140) - weiterverteilbar laut Microsoft-Lizenz
+Eigener Code (mapeditor, werkzeugkasten) - GPL-3.0-only, Lizenztext: GPL-3.0.txt.
+    Der Quelltext steht im GitHub-Repository des Projekts, von dem dieser Download stammt.

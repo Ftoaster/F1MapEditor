@@ -1,0 +1,138 @@
+
+<h2>Mapeditor – How to use</h2>
+<h3>Quick start</h3>
+<ol>
+<li><b>Create a track:</b> Project → New, then <i>Points</i> (P) and click into the map – or
+    <i>From template …</i> / <i>Generate suggestion …</i>.</li>
+<li><b>Close lap</b> (from four points). The preview is then calculated automatically.</li>
+<li><b>Fine-tuning:</b> drag points, change values on the right under <i>Properties</i>, check heights in the height profile.</li>
+<li><b>Check</b> (Ctrl+Enter): messages below under <i>Check</i>, a click jumps to the location.</li>
+<li><b>Build</b>: creates the package for the Track Installer; then test it in game and note the result under <i>Playtest</i>.</li>
+</ol>
+<h3>Map</h3>
+<table cellspacing="4">
+<tr><td><b>Mouse wheel</b></td><td>Zoom</td></tr>
+<tr><td><b>Middle mouse button / Space + drag</b></td><td>Pan</td></tr>
+<tr><td><b>Home</b> · <b>F</b></td><td>Fit the whole track · show selection</td></tr>
+<tr><td><b>Drag a box</b></td><td>Select several objects (Shift adds, Ctrl toggles, Ctrl+A all)</td></tr>
+<tr><td><b>Drag selected points</b></td><td>Move; arrow keys 0.1 m, Shift+arrow 1 m</td></tr>
+<tr><td><b>Round handle</b></td><td>Rotate the selection (Shift: 15° steps, R / Shift+R: ±1°)</td></tr>
+<tr><td><b>Double-click on the line</b></td><td>Insert a point</td></tr>
+<tr><td><b>Del</b> · <b>Esc</b></td><td>Delete selection · cancel the current gesture</td></tr>
+<tr><td><b>V</b> · <b>P</b></td><td>Select or points tool</td></tr>
+<tr><td><b>Click on T4</b></td><td>Show the corner large (braking zone to corner exit, info label with angle, radius, km/h, boards)</td></tr>
+</table>
+<h3>Show and hide</h3>
+<p>Every function can be shown or hidden: <i>View</i> → map layers (grid, edges, direction, play area, zones,
+racing line, pit/grid slots/sectors, corner numbers, input points, labels, scale, hint labels), areas (side panel,
+properties, lower area, banking field, toolbar, header and status bar), individual tabs and automation (racing line,
+autosave, open last project, start screen). Everything at a glance: <b>Customise view …</b> (Ctrl+Shift+A);
+<i>Show everything</i> restores everything. The settings are remembered. <b>Ctrl+M</b> or double-clicking a tab
+maximises the lower area.
+<b>View → Sprache / Language</b> switches between German and English immediately, without a restart (project,
+undo history, preview and map view stay).</p>
+<h3>Left column</h3>
+<p><b>Display</b> and the point list open and close with a click on their heading. Long lists start closed and open in the
+<b>Points</b> tool. <b>Zoom in</b> and <b>Zoom out</b> (also Ctrl + and Ctrl −) are in the <b>View</b> menu, <b>Open/close lap</b>
+in the <b>Edit</b> menu. The banking box on the right appears with a selection and in the <b>Banking</b> tab.</p>
+<h3>Find and recover</h3>
+<p><b>Go to</b> (field above the list): metres from the finish (e.g. 1250), corner (T4) or object (#12). The list
+shows station and corner for each point. <i>Project → Recently opened</i> and the start screen offer the last projects.
+The editor saves unsaved changes every minute to <i>.mapeditor_wiederherstellung.json</i> in the project folder;
+after a crash it offers them when opening (restoring can be undone).</p>
+<h3>Segment tracks</h3>
+<p>Dragging the end of a segment changes its length or angle, the yellow square on an arc its radius. Left: insert
+straight/arc, split, change type. For free group editing use “Convert to control points”.</p>
+<h3>Height and gradient (Height profile tab)</h3>
+<p>Every control point or segment end is a handle on the height line. <b>Drag horizontally</b> to select the range
+A→B, <b>drag vertically</b> to change the height (0.1 m grid, one undo step; selected points move together).
+Buttons above the profile: <b>Smooth transition A→B</b> (S-curve without a kink at the ends), ramp, same height,
+smooth. <b>↑/↓</b> 0.1 m, with Shift 1 m. <b>Right-click</b>: even gradient (ramp between the first and last
+selected point), same height, smooth, enter height. Between the points the gradient is shown in % (red above 8 %).
+The <b>mouse wheel</b> zooms horizontally, the middle mouse button pans, a double-click shows the whole lap.
+The selection is linked with the map and the list.</p>
+<h3>Banking (tilt to the side)</h3>
+<p>Select corner(s) or points, set the amount on the right in the <i>Banking</i> field (quick buttons Flat, 2°, 4°,
+FIA max) and choose the side: <i>Corner inside lower</i> adapts to every corner, for straights
+<i>left higher</i> or <i>right higher</i>. The change only affects the selection; the generator smooths the transitions.
+<i>All corners automatically</i> banks the whole track by corner radius (tight = the set amount, flat from R 500 m),
+<i>All flat</i> removes all banking. Check: the <i>Banking</i> and <i>Cross-section</i> tabs below.
+In the <i>Banking</i> tab the banking can be edited like the height profile: drag points (for segments the segment
+middle) vertically, drag horizontally to select a range A→B, ↑↓ changes by 0.1° (with Shift 1°), buttons or
+right-click: <i>Smooth transition A→B</i>, <i>Ramp</i>, <i>Same value</i>, <i>Smooth</i>, <i>Enter banking …</i>.
+Every change is one undo step.</p>
+<h3>Editing the cross-section</h3>
+<p><i>Cross-section</i> tab, panel <i>Edit cross-section</i> on the right: range <i>from/to</i> in metres from the
+finish (buttons <i>Selection A→B</i> or <i>Cursor ±50 m</i>), side (left, right, both in driving direction), then
+<i>Road (half)</i> for wider or narrower asphalt, <i>Kerb</i> (0 = none), <i>Grass strip</i>, <i>Run-off</i> (grass,
+gravel or asphalt) and the <i>Barrier</i> distance. Fields left at <i>automatic</i> or <i>unchanged</i> keep the
+generator's automatic layout (kerbs in corners, gravel after tight corners). <i>Apply</i> sets the section,
+<i>Automatic</i> removes your own sections in the range. The barrier moves out at most as far as there is room to the
+next part of the track; at the pit lane, the pit lane takes priority. Asphalt run-off is built in the game with the
+pit-lane asphalt and the road's driving physics.</p>
+<h3>Racing line (racing line, braking points, corners)</h3>
+<p>After every change the generator calculates the <b>racing line</b> in the background (10–50 s depending on the
+track, switch <i>Calculate racing line automatically</i> on the left; otherwise with <i>Check</i>, Ctrl+Enter). Map:
+racing line <span style="color:#F07878">red</span> = braking, <span style="color:#D6A94A">yellow</span> = coasting,
+<span style="color:#5BD08A">green</span> = full throttle; red triangles = braking point (with km/h when zoomed in),
+white squares = distance boards, <b>T1 …</b> = corner numbers as in the game (the build merges more than 15 corners),
+S2/S3 = sector boundaries, white dots = grid slots, orange = pit lane and pit boxes. Tab
+<i>Speed</i>: km/h over the lap; <i>Analysis</i>: lap time and corner table (click a row to jump to the corner).
+After a change the racing line is pale until the new one is ready. The build uses the same result as its pre-check
+(the same state is not calculated twice).</p>
+<h3>Pit lane</h3>
+<p>Choose Properties → <i>Pit lane</i>: squares appear on the map at the entry and exit; dragging moves them
+along the track (one undo step). The racing line then shows the exact pit lane.</p>
+<h3>Environment (trees, buildings, tents …)</h3>
+<p>Tab <i>Environment</i>: catalogue of the game models (search, category, preview, size). Choose a model and click the
+map to <b>place</b> it (tool <b>U</b>); clicking an object selects it, dragging moves it, a frame selects several, Del
+deletes, double-click selects the whole group. Tool <b>B</b> <b>plants an area</b>: drag a rectangle or paint with the
+brush, with density (objects per hectare), model mix (choose several models), random rotation, scale range, minimum
+distance to the track (default 15 m behind the wall), spacing between objects and a seed (same value = same scatter).
+Every scatter is a <i>group</i> and one undo step. The objects appear as circles at catalogue size (colour per
+category; View → Environment hides them). <i>Ground cover</i> keeps the grass and weeds of the carrier. The check reports
+unknown models and objects outside the track area or on the road (click jumps to the object). The build takes the
+project's file <i>umgebung.json</i>.</p>
+<p><b>Terrain:</b> In the <i>Terrain</i> box, <i>Place hill</i> puts a hill into the track area with the next click
+(height −60 … 200 m, negative = hollow; visible and drivable, the build flattens it towards the track).
+<i>Place mountain</i> puts a mountain outside the track area (zoom out first; 10 … 2000 m high, up to 12 km from the
+centre; scenery on the horizon only). Dragging the centre moves it, height and radius are changed in the box, Del
+deletes. Shapes with a red outline are misplaced or are cut off at the edge of the track area.</p>
+<h3>Build and transfer to the game</h3>
+<p><i>Build</i> suggests the next build name (e.g. testedit11) and shows the required and free storage.
+<b>Track code</b>: every code the game database knows (recommended: <i>sochi</i>); below it you see whether the
+code is already installed in the game and whether the database is activated. Several custom tracks side by side
+need different codes.
+<b>Transfer to game …</b> writes the last built package to F1 25 via quick swap: first the plan, then
+your confirmation (every time), with a backup of the affected game files under <i>injektion_sicherung</i>
+next to the working folder beforehand; afterwards the playtest entry opens. The EGO editor does not need to run: if
+the mod is deactivated there, the transfer restores the remembered database activation itself. Only the first
+installation of a track code and its first activation (“Activate mod”) go once through the Track Installer or EGO
+editor. <b>Clean up …</b> (also in the Tools menu) deletes old builds and packages
+after confirmation.</p>
+<h3>Range from the selection</h3>
+<p>If you mark connected points or segments, for example with a frame on the map, the <b>Cross-section</b> tab takes them as its <b>From / to</b> range, also across the finish line. With gaps in the selection the range stays as it is. Input you have not applied yet is kept.</p>
+<h3>Edge angle</h3>
+<p>In the <b>Cross-section</b> tab, <b>Edge angle</b> sets what happens beside the road: <b>Level</b> is the default,
+<b>Same as track</b> continues the banking at every point over the first 12 m, <b>Custom angle</b> uses a fixed value (positive
+rises outwards). Choose range and side as for the other fields, <b>Whole lap</b> takes the entire track. Then press
+<b>Apply</b>.</p>
+<h3>Ground and surroundings</h3>
+<p>Under <b>Advanced build options</b>, <b>Own ground and surroundings maps</b> replaces the template's aerial photos: the ground comes from the track surfaces, the racing line sits on the asphalt and the surroundings match hills and mountains. <b>Landscape</b> selects grass or desert (no ground cover), <b>Colour tone</b> tints grass and surroundings dry, lush or autumnal. The option is on by default.</p>
+<h3>Properties</h3>
+<p>Double-click a value, change it, Enter. <i>Italic</i> = default value (not saved). Clearing the field restores
+the default. Yes/no and choice fields open a drop-down list. Both comma and point are accepted as decimal separator.
+For a point or segment the <i>total width</i> is shown (italic: the width there according to the preview, taken
+from neighbouring points, profile sections or the road);
+<i>Asymmetric width: yes</i> creates left/right half widths (starting from the current width), <i>no</i> merges them
+back into the total width. Banking is set in the banking panel above (if you hide it, it returns as a table row).
+The check list is sorted by error, warning, note, and by station within each level.</p>
+<h3>Undo and save</h3>
+<p>Every completed change is one step: Ctrl+Z / Ctrl+Y. Save Ctrl+S, New Ctrl+N, Open Ctrl+O.</p>
+<h3>Map colours</h3>
+<p><span style="color:#67D9F5">■</span> Input (your points, immediately) ·
+<span style="color:#4E8B5A">■</span> computed road with edge strips (pale = outdated, being recalculated) ·
+<span style="color:#D6A94A">■</span> play area ±1024 m (the track must lie inside it) ·
+<span style="color:#B48CF0">■</span> Straight Mode · <span style="color:#5BD08A">■</span> DRS</p>
+<p><i>Note:</i> messages from the toolkit (check details, build log) are only available in German; in English the
+editor puts the translated rule title in front of them.</p>

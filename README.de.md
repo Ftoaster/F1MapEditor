@@ -1,0 +1,79 @@
+# Mapeditor
+
+Windows-Editor, mit dem du eigene Rennstrecken für **F1 25** entwirfst und zu installierbaren Paketen baust.
+
+> Inoffizielles Fanprojekt. Keine Verbindung zu Electronic Arts, Codemasters, der Formula One Group oder der FIA. „F1“ und
+> verwandte Namen sind Marken ihrer Inhaber. Dieses Projekt enthält keine Spieldateien.
+
+English version: [README.md](README.md)
+
+![Hauptfenster](Mapeditor/docs/screenshots/hauptansicht_teststrecke.png)
+
+## Was der Editor kann
+
+- Strecke aus Kontrollpunkten oder Geraden und Bögen zeichnen, Höhe, Querneigung und Breite bearbeiten
+- Ideallinie, Bremspunkte, Kurven, Sektoren, DRS- und Straight-Mode-Zonen berechnen
+- Querschnitt je Bereich einstellen: Randsteine, Gras, Auslauf, Barrieren und Randwinkel
+- Boxengasse und Startaufstellung setzen, Objekte aus dem Katalog des Spiels platzieren, Hügel und Berge anlegen
+- Boden, Ideallinie und Umland aus der Strecke selbst erzeugen
+- Strecke gegen Regeln prüfen, die aus den Originalstrecken abgeleitet sind
+- Paket für den Track Installer bauen oder eine installierte Strecke zum Testen direkt austauschen
+
+Die Oberfläche gibt es auf Deutsch und Englisch.
+
+## Voraussetzungen
+
+| | Download | Hinweise |
+|---|---|---|
+| System | | Windows 10 oder 11, 64 Bit |
+| Spiel | [F1 25 bei Steam](https://store.steampowered.com/app/3059520/F1_25/) | Wird nur gelesen, nötig für Katalog und Bau |
+| Installer | [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) | Version 1.6.0 oder neuer, um eine Strecke zu installieren und einmal zu aktivieren |
+| Träger-Paket | [Algarve International Circuit (Portimao) for F1 25](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/) | `portimao.zip`, **nicht enthalten**. Der Bau nutzt es als Grundlage, du wählst es im Baudialog. Nicht entpacken |
+
+Zeichnen und Prüfen geht ohne das Spiel. Nur zum Bauen brauchst du Spiel und Träger-Paket.
+
+Installer und Portimão-Mod sind Community-Projekte anderer Autoren, Bedingungen und Neuerungen stehen auf deren Seiten.
+Die Seite der Mod warnt vor Spielabstürzen mit AMD-Grafikkarten. Strecken, die darauf aufbauen, können ebenfalls betroffen sein.
+
+## Loslegen
+
+1. `Mapeditor-<Version>-win64.zip` unter [Releases](../../releases) laden und den ganzen Ordner entpacken.
+2. `Mapeditor.exe` starten. Windows warnt eventuell vor einem unbekannten Herausgeber, weil das Programm nicht signiert ist.
+3. **Projekt → Neu aus Vorlage** wählen oder `werkzeugkasten/strecke/beispiele/teststrecke.json` öffnen.
+4. **F1** öffnet die eingebaute Hilfe.
+
+## Bekannte Grenzen
+
+- **Boxengasse nur rechts.** Liegt sie links der Strecke, stehen Autos und Boxencrews bis zur Ausfahrt auf der Mauerseite.
+  Die Daten entsprechen den originalen Linksstrecken, die Ursache ist unbekannt. Rechts funktioniert alles.
+- Licht und Garagen-Lichtkarten stammen von der Trägerstrecke.
+- Sehr lange Strecken funktionieren, überschreiten aber die Größen aller Originale; die Prüfung zeigt dann Warnungen.
+- Am besten getestet sind Zeitfahren und Freies Training, andere Modi weniger.
+
+## Aus dem Quelltext bauen
+
+Dafür brauchst du [Python 3.10 oder neuer](https://www.python.org/downloads/).
+
+```powershell
+cd Mapeditor
+python einrichten.py
+.venv\Scripts\python.exe -m pytest tests -q
+.venv\Scripts\python.exe packaging\bauen.py
+```
+
+Tests, die nicht enthaltene Dateien wie das Spiel brauchen, werden übersprungen.
+
+## Sicherheit
+
+Der Editor schreibt nie von selbst in den Spielordner. Das macht nur der ausdrücklich gestartete Schnellaustausch, und der legt
+vorher eine Sicherung an. Nutze das offline, sichere vorher Spielstände und Spieldatenbank, und verwende es auf eigenes Risiko.
+
+## Lizenz
+
+Copyright (C) 2026 The Mapeditor authors
+
+Dieses Programm ist freie Software. Du darfst es unter den Bedingungen der GNU General Public License, Version 3, weitergeben
+und verändern. Es wird **ohne jede Gewährleistung** bereitgestellt. Maßgeblich ist der englische Text in [LICENSE](LICENSE). Die
+Lizenz gilt nur für den Code dieses Projekts und gewährt keine Rechte am Spiel oder an dessen Daten.
+
+Lizenzen der Drittkomponenten: `Mapeditor/packaging/lizenzen/`.

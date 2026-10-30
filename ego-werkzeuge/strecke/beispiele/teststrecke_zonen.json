@@ -1,0 +1,239 @@
+{
+  "name": "Teststrecke Zonen",
+  "beschreibung": "Fiktive Strecke für den Streckengenerator (AP6): ca. 4,9 km, 13 Kurven (Haarnadel, Schikane, schnelle Rechts, S-Kurven). Aus einem Polygon mit Ausrundungen konstruiert, daher exakt geschlossen.",
+  "mittellinie": {
+    "art": "segmente",
+    "start": {
+      "x": -151.522,
+      "z": 0.0,
+      "richtung_grad": -0.0,
+      "hoehe": 0.0
+    },
+    "segmente": [
+      {
+        "typ": "gerade",
+        "laenge": 1328.481,
+        "name": "Start-Ziel-Gerade",
+        "breite": 15.0
+      },
+      {
+        "typ": "bogen",
+        "radius": 40,
+        "winkel": 79.114,
+        "richtung": "rechts",
+        "name": "T1"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 220.88
+      },
+      {
+        "typ": "bogen",
+        "radius": 110,
+        "winkel": 37.481,
+        "richtung": "links",
+        "name": "T2"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 149.252
+      },
+      {
+        "typ": "bogen",
+        "radius": 150,
+        "winkel": 55.155,
+        "richtung": "rechts",
+        "name": "T3"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 353.96,
+        "hoehe_ende": 6.0
+      },
+      {
+        "typ": "bogen",
+        "radius": 16,
+        "winkel": 128.211,
+        "richtung": "rechts",
+        "name": "T4 Haarnadel"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 357.619,
+        "hoehe_ende": 8.0
+      },
+      {
+        "typ": "bogen",
+        "radius": 45,
+        "winkel": 90.0,
+        "richtung": "links",
+        "name": "T5 Schikane"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 195.546
+      },
+      {
+        "typ": "bogen",
+        "radius": 45,
+        "winkel": 21.038,
+        "richtung": "rechts",
+        "name": "T6 Schikane"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 325.089
+      },
+      {
+        "typ": "bogen",
+        "radius": 300,
+        "winkel": 36.837,
+        "richtung": "rechts",
+        "name": "T7 schnelle Rechts",
+        "querneigung_grad": 3.0
+      },
+      {
+        "typ": "gerade",
+        "laenge": 251.509,
+        "hoehe_ende": 3.0
+      },
+      {
+        "typ": "bogen",
+        "radius": 70,
+        "winkel": 63.733,
+        "richtung": "rechts",
+        "name": "T8"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 134.142
+      },
+      {
+        "typ": "bogen",
+        "radius": 120,
+        "winkel": 52.978,
+        "richtung": "links",
+        "name": "T9"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 59.888,
+        "hoehe_ende": 0.0
+      },
+      {
+        "typ": "bogen",
+        "radius": 130,
+        "winkel": 58.241,
+        "richtung": "rechts",
+        "name": "T10"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 125.285
+      },
+      {
+        "typ": "bogen",
+        "radius": 90,
+        "winkel": 43.21,
+        "richtung": "links",
+        "name": "T11"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 130.304
+      },
+      {
+        "typ": "bogen",
+        "radius": 60,
+        "winkel": 74.174,
+        "richtung": "rechts",
+        "name": "T12"
+      },
+      {
+        "typ": "gerade",
+        "laenge": 134.936
+      },
+      {
+        "typ": "bogen",
+        "radius": 70,
+        "winkel": 67.166,
+        "richtung": "rechts",
+        "name": "T13"
+      }
+    ]
+  },
+  "fahrbahn": {
+    "breite": 13.0,
+    "uebergang_m": 60.0,
+    "randlinie_breite": 0.25
+  },
+  "randstein": {
+    "breite": 1.5
+  },
+  "gruenstreifen": {
+    "breite": 2.5
+  },
+  "kiesbett": {
+    "aktiv": true
+  },
+  "barriere": {
+    "abstand": 22.0,
+    "hoehe": 1.2
+  },
+  "start_ziel": {
+    "s": 800.0
+  },
+  "startaufstellung": {
+    "anzahl": 22,
+    "abstand_m": 8.0,
+    "abstand_pole_m": 6.0,
+    "pole_seite": "rechts"
+  },
+  "boxengasse": {
+    "aktiv": true,
+    "seite": "links",
+    "einfahrt_vor_start_m": 520.0,
+    "ausfahrt_nach_start_m": 380.0,
+    "breite": 12.0,
+    "abstand_fahrbahn": 12.0,
+    "boxen": 11
+  },
+  "drs": {
+    "anzahl": 2,
+    "zonen": [
+      {
+        "erkennung_m": 3950,
+        "aktivierung_m": 4170,
+        "ende_m": 480
+      },
+      {
+        "erkennung_m": 1450,
+        "aktivierung_m": 1600,
+        "ende_m": 1890
+      }
+    ]
+  },
+  "ausgabe": {
+    "achsen": "y_oben_rechtshaendig"
+  },
+  "x_mode": {
+    "zonen": [
+      {
+        "von_m": 4130,
+        "bis_m": 500
+      },
+      {
+        "von_m": 1180,
+        "bis_m": 1500
+      },
+      {
+        "von_m": 1580,
+        "bis_m": 1900
+      },
+      {
+        "von_m": 2220,
+        "bis_m": 2510
+      }
+    ]
+  }
+}

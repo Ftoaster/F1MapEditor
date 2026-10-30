@@ -1,0 +1,14 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp*/
+*.egg-info/
+*.spec
+!packaging/mapeditor.spec
+
+# Trailer mit Ingame-Szenen: Videos 40–55 MB, neu erzeugbar mit packaging/trailer_ingame.py
+docs/trailer/mapeditor_trailer_ingame*.mp4
+docs/trailer/mapeditor_trailer_alle_funktionen*.mp4

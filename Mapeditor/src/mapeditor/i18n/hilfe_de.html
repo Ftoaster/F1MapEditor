@@ -1,0 +1,135 @@
+
+<h2>Mapeditor – Bedienung</h2>
+<h3>Schnellstart</h3>
+<ol>
+<li><b>Strecke anlegen:</b> Projekt → Neu, dann <i>Punkte</i> (P) und in die Karte klicken – oder
+    <i>Aus Vorlage …</i> / <i>Vorschlag erzeugen …</i>.</li>
+<li><b>Runde schließen</b> (ab vier Punkten). Die Vorschau berechnet sich danach automatisch.</li>
+<li><b>Feinarbeit:</b> Punkte ziehen, Werte rechts unter <i>Eigenschaften</i> ändern, Höhen im Höhenprofil prüfen.</li>
+<li><b>Prüfen</b> (Strg+Enter): Meldungen unten unter <i>Prüfung</i>, Klick springt zur Stelle.</li>
+<li><b>Bauen</b>: erzeugt das Paket für den Track Installer; danach im Spiel testen und unter <i>Spieltest</i> notieren.</li>
+</ol>
+<h3>Karte</h3>
+<table cellspacing="4">
+<tr><td><b>Mausrad</b></td><td>Zoomen</td></tr>
+<tr><td><b>Mittlere Maustaste / Leertaste + Ziehen</b></td><td>Verschieben</td></tr>
+<tr><td><b>Pos1</b> · <b>F</b></td><td>Ganze Strecke einpassen · Auswahl zeigen</td></tr>
+<tr><td><b>Rahmen ziehen</b></td><td>Mehrere Objekte wählen (Umschalt ergänzt, Strg schaltet um, Strg+A alle)</td></tr>
+<tr><td><b>Gewählte Punkte ziehen</b></td><td>Verschieben; Pfeiltasten 0,1 m, Umschalt+Pfeil 1 m</td></tr>
+<tr><td><b>Runder Griff</b></td><td>Auswahl drehen (Umschalt: 15°-Schritte, R / Umschalt+R: ±1°)</td></tr>
+<tr><td><b>Doppelklick auf die Linie</b></td><td>Punkt einfügen</td></tr>
+<tr><td><b>Entf</b> · <b>Esc</b></td><td>Auswahl löschen · laufende Geste abbrechen</td></tr>
+<tr><td><b>V</b> · <b>P</b></td><td>Auswahl- bzw. Punkte-Werkzeug</td></tr>
+<tr><td><b>Klick auf T4</b></td><td>Kurve groß zeigen (Bremszone bis Kurvenende, Infoschild mit Winkel, Radius, km/h, Tafeln)</td></tr>
+</table>
+<h3>Ein- und ausblenden</h3>
+<p>Jede Funktion lässt sich zeigen oder verbergen: <i>Ansicht</i> → Kartenebenen (Raster, Ränder, Richtung,
+Spielbereich, Zonen, Ideallinie, Box/Startplätze/Sektoren, Kurvennummern, Eingabepunkte, Beschriftungen, Maßstab,
+Hinweisschilder), Bereiche (Seitenleiste, Eigenschaften, unterer Bereich, Querneigungsfeld, Werkzeugleiste, Kopf- und
+Statuszeile), Reiter einzeln und Automatiken (Fahrlinie, Autosicherung, letztes Projekt öffnen, Startbildschirm).
+Alles auf einen Blick: <b>Ansicht anpassen …</b> (Strg+Umschalt+A); <i>Alles einblenden</i> stellt alles wieder her.
+Die Einstellungen bleiben gespeichert. <b>Strg+M</b> oder Doppelklick auf einen Reiter maximiert den unteren Bereich.
+<b>Ansicht → Sprache / Language</b> wechselt sofort zwischen Deutsch und Englisch, ohne Neustart (Projekt,
+Rückgängig-Verlauf, Vorschau und Kartenausschnitt bleiben).</p>
+<h3>Linke Spalte</h3>
+<p><b>Anzeige</b> und die Punktliste lassen sich mit einem Klick auf die Überschrift auf- und zuklappen. Lange Listen sind
+zunächst zu, im Werkzeug <b>Punkte</b> öffnen sie sich. <b>Vergrößern</b>, <b>Verkleinern</b> (auch Strg + und Strg −) stehen
+im Menü <b>Ansicht</b>, <b>Runde öffnen/schließen</b> im Menü <b>Bearbeiten</b>. Das Querneigungsfeld rechts erscheint bei
+einer Auswahl und im Reiter <b>Querneigung</b>.</p>
+<h3>Finden und Wiederherstellen</h3>
+<p><b>Gehe zu</b> (Feld über der Liste): Meter ab Ziel (z. B. 1250), Kurve (T4) oder Objekt (#12). Die Liste zeigt
+je Punkt Station und Kurve. <i>Projekt → Zuletzt geöffnet</i> und der Startbildschirm bieten die letzten Projekte an.
+Ungespeicherte Änderungen sichert der Editor jede Minute in <i>.mapeditor_wiederherstellung.json</i> im Projektordner;
+nach einem Absturz bietet er sie beim Öffnen an (übernehmen lässt sich rückgängig machen).</p>
+<h3>Segmentstrecken</h3>
+<p>Ende eines Segments ziehen ändert Länge bzw. Winkel, das gelbe Quadrat am Bogen den Radius. Links: Gerade/Bogen
+einfügen, teilen, Typ wechseln. Für freie Gruppenbearbeitung „In Kontrollpunkte umwandeln“.</p>
+<h3>Höhe und Steigung (Reiter Höhenprofil)</h3>
+<p>Jeder Kontrollpunkt bzw. jedes Segmentende ist ein Griff auf der Höhenlinie. <b>Waagerecht ziehen</b> wählt
+den Bereich A→B, <b>senkrecht ziehen</b> ändert die Höhe (0,1-m-Raster, ein Undo-Schritt; gewählte Punkte gemeinsam).
+Knöpfe über dem Profil: <b>Sanfter Übergang A→B</b> (S-Kurve ohne Knick an den Enden), Rampe, gleiche Höhe, glätten. <b>↑/↓</b> 0,1 m, mit Umschalt 1 m. <b>Rechtsklick</b>: gleichmäßige Steigung (Rampe
+zwischen erstem und letztem gewählten Punkt), auf gleiche Höhe, glätten, Höhe eingeben. Zwischen den Punkten
+steht die Steigung in % (rot über 8 %). <b>Mausrad</b> zoomt waagerecht, mittlere Maustaste verschiebt,
+Doppelklick zeigt die ganze Runde. Die Auswahl ist mit Karte und Liste gekoppelt.</p>
+<h3>Querneigung (Neigung zur Seite)</h3>
+<p>Kurve(n) oder Punkte wählen, rechts im Feld <i>Querneigung</i> die Stärke einstellen (Schnellknöpfe Flach, 2°, 4°,
+FIA-Max) und die Seite wählen: <i>Kurveninnenseite tiefer</i> passt sich jeder Kurve selbst an, für Geraden
+<i>links höher</i> bzw. <i>rechts höher</i>. Die Änderung wirkt nur auf die Auswahl; Übergänge glättet der Generator.
+<i>Alle Kurven automatisch</i> neigt die ganze Strecke nach Kurvenradius (eng = eingestellte Stärke, ab R 500 m flach),
+<i>Alles flach</i> entfernt jede Querneigung. Kontrolle: Reiter <i>Querneigung</i> und <i>Querschnitt</i> unten.
+Im Reiter <i>Querneigung</i> lässt sich die Querneigung wie das Höhenprofil bearbeiten: Punkte (bei Segmenten die
+Segmentmitte) senkrecht ziehen, waagerecht ziehen wählt einen Bereich A→B, ↑↓ ändert um 0,1° (mit Umschalt 1°),
+Knöpfe bzw. Rechtsklick: <i>Sanfter Übergang A→B</i>, <i>Rampe</i>, <i>Gleicher Wert</i>, <i>Glätten</i>,
+<i>Querneigung eingeben …</i>. Jede Änderung ist ein Rückgängig-Schritt.</p>
+<h3>Querschnitt bearbeiten</h3>
+<p>Reiter <i>Querschnitt</i>, rechts das Feld <i>Querschnitt bearbeiten</i>: Bereich <i>von/bis</i> in Metern ab Ziel
+(Knöpfe <i>Auswahl A→B</i> bzw. <i>Cursor ±50 m</i>), Seite (links, rechts, beide in Fahrtrichtung), dann
+<i>Fahrbahn (halb)</i> für breiteren oder schmaleren Asphalt, <i>Randstein</i> (0 = keiner), <i>Grünstreifen</i>,
+<i>Auslauf</i> (Gras, Kies oder Asphalt) und Abstand der <i>Barriere</i>. Felder auf <i>Automatik</i> bzw.
+<i>unverändert</i> lassen die Automatik des Generators (Randsteine in Kurven, Kiesbett nach engen Kurven). <i>Übernehmen</i>
+setzt den Abschnitt, <i>Automatik</i> entfernt eigene Abschnitte im Bereich. Die Barriere rückt höchstens so weit
+nach außen, wie Platz bis zum nächsten Streckenteil ist; an der Boxengasse hat diese Vorrang. Asphalt-Auslauf wird im
+Spiel mit dem Boxenasphalt und der Fahrphysik der Fahrbahn gebaut.</p>
+<h3>Fahrlinie (Ideallinie, Bremspunkte, Kurven)</h3>
+<p>Nach jeder Änderung rechnet der Generator im Hintergrund die <b>Fahrlinie</b> (je nach Strecke 10–50 s, Schalter
+<i>Fahrlinie automatisch berechnen</i> links; sonst mit <i>Prüfen</i>, Strg+Enter). Karte: Ideallinie
+<span style="color:#F07878">rot</span> = Bremsen, <span style="color:#D6A94A">gelb</span> = Rollen,
+<span style="color:#5BD08A">grün</span> = Vollgas; rote Dreiecke = Bremsbeginn (beim Hineinzoomen mit km/h),
+weiße Quadrate = Entfernungstafeln, <b>T1 …</b> = Kurvennummern wie im Spiel (mehr als 15 Kurven legt der Bau
+zusammen), S2/S3 = Sektorgrenzen, weiße Punkte = Startplätze, orange = Boxengasse und Boxen. Reiter
+<i>Geschwindigkeit</i>: km/h über die Runde; <i>Auswertung</i>: Rundenzeit und Kurventabelle (Zeile anklicken springt
+zur Kurve). Nach einer Änderung ist die Fahrlinie blass, bis die neue fertig ist. Dasselbe Ergebnis nutzt der Bau
+als Vorabprüfung (gleicher Stand wird nicht noch einmal gerechnet).</p>
+<h3>Boxengasse</h3>
+<p>Eigenschaften → <i>Boxengasse</i> wählen: auf der Karte erscheinen Quadrate an Ein- und Ausfahrt; ziehen
+verschiebt sie entlang der Strecke (ein Undo-Schritt). Die genaue Boxengasse zeigt die Fahrlinie danach.</p>
+<h3>Umgebung (Bäume, Gebäude, Zelte …)</h3>
+<p>Reiter <i>Umgebung</i>: Katalog der Spielmodelle (Suche, Kategorie, Vorschau, Größe). Ein Modell wählen und auf die
+Karte klicken <b>platziert</b> es (Werkzeug <b>U</b>); Klick auf ein Objekt wählt es, Ziehen verschiebt, Rahmen wählt
+mehrere, Entf löscht, Doppelklick wählt die ganze Gruppe. Werkzeug <b>B</b> <b>bepflanzt eine Fläche</b>: Rechteck
+aufziehen oder mit dem Pinsel malen, mit Dichte (Objekte je Hektar), Modellmischung (mehrere Modelle wählen),
+zufälliger Drehung, Skalenbereich, Mindestabstand zur Strecke (Standard 15 m hinter der Mauer), Abstand der Objekte und
+Saatwert (gleicher Wert = gleiche Streuung). Jede Streuung ist eine <i>Gruppe</i> und ein Undo-Schritt. Die Objekte
+erscheinen als Kreise in Katalogröße (Farbe je Kategorie; Ansicht → Umgebung blendet sie aus). <i>Bodenbewuchs</i>
+lässt Gras und Unkraut des Trägers stehen. Die Prüfung meldet unbekannte Modelle, Objekte außerhalb des Streckenbereichs
+oder auf der Fahrbahn (Klick springt zum Objekt). Der Bau übernimmt die Datei <i>umgebung.json</i> des Projekts.</p>
+<p><b>Gelände:</b> Im Feld <i>Gelände</i> setzt <i>Hügel setzen</i> mit dem nächsten Klick einen Hügel in den
+Streckenbereich (Höhe −60 … 200 m, negativ = Senke; sichtbar und befahrbar, zur Strecke hin flacht der Bau ihn ab).
+<i>Berg setzen</i> setzt einen Berg außerhalb des Streckenbereichs (dafür herauszoomen; 10 … 2000 m hoch, bis 12 km von
+der Mitte; nur Kulisse am Horizont). Mitte ziehen verschiebt, Höhe und Radius ändern sich im Feld, Entf löscht. Rot
+umrandete Formen liegen falsch oder werden am Rand des Streckenbereichs abgeschnitten.</p>
+<h3>Bauen und ins Spiel übertragen</h3>
+<p><i>Bauen</i> schlägt den nächsten Baunamen vor (z. B. testedit11) und zeigt Speicherbedarf und freien Platz.
+<b>Streckencode</b>: alle Codes, die die Spieldatenbank kennt (empfohlen <i>sochi</i>); darunter steht, ob der Code
+schon im Spiel installiert ist und ob die Datenbank aktiviert ist. Mehrere eigene Strecken nebeneinander brauchen
+verschiedene Codes.
+<b>Ins Spiel übertragen …</b> schreibt das zuletzt gebaute Paket per Schnellaustausch in F1 25: erst Plan, dann
+deine Bestätigung (jedes Mal), vorher Sicherung der betroffenen Spieldateien unter <i>injektion_sicherung</i>
+neben dem Arbeitsordner; danach öffnet sich der Spieltest-Eintrag. Der EGO-Editor muss dafür nicht laufen: Ist der
+Mod dort deaktiviert, stellt die Übertragung die gemerkte Datenbank-Aktivierung selbst wieder her. Nur die
+Erstinstallation eines Streckencodes und seine erste Aktivierung („Activate mod“) laufen einmalig über den
+Track Installer bzw. EGO-Editor. <b>Aufräumen …</b> (auch Menü Werkzeuge) löscht alte Bauten und Pakete nach Bestätigung.</p>
+<h3>Bereich aus der Auswahl</h3>
+<p>Markierst du zusammenhängende Punkte oder Segmente, etwa mit einem Rahmen auf der Karte, übernimmt der Reiter <b>Querschnitt</b> sie als Bereich <b>Von / bis</b>. Das gilt auch über die Ziellinie. Bei Lücken in der Auswahl bleibt der Bereich, wie er ist. Noch nicht übernommene Eingaben bleiben erhalten.</p>
+<h3>Randwinkel</h3>
+<p>Im Reiter <b>Querschnitt</b> legt <b>Randwinkel</b> fest, wie es neben der Fahrbahn weitergeht: <b>Waagerecht</b> ist der
+Standard, <b>Wie die Strecke</b> setzt die Querneigung an jeder Stelle über die ersten 12 m fort, <b>Eigener Winkel</b> nimmt
+einen festen Wert (positiv steigt nach außen). Bereich und Seite wählst du wie bei den anderen Feldern, <b>Ganze Runde</b>
+nimmt die gesamte Strecke. Danach <b>Übernehmen</b>.</p>
+<h3>Boden und Umland</h3>
+<p>Unter <b>Erweiterte Bauoptionen</b> ersetzt <b>Eigene Boden- und Umlandkarten</b> die Luftbilder der Vorlage: Der Boden entsteht aus den Flächen der Strecke, die Ideallinie liegt auf dem Asphalt, und das Umland passt zu Hügeln und Bergen. <b>Landschaft</b> wählt Gras oder Wüste (ohne Bodenbewuchs), <b>Farbton</b> färbt Gras und Umland trocken, saftig oder herbstlich. Die Option ist von Anfang an eingeschaltet.</p>
+<h3>Eigenschaften</h3>
+<p>Doppelklick auf einen Wert, ändern, Enter. <i>Kursiv</i> = Standardwert (nicht gespeichert). Feld leeren = Standard
+wiederherstellen. ja/nein- und Auswahlfelder öffnen eine Klappliste. Komma und Punkt sind als Dezimalzeichen erlaubt.
+Bei einem Punkt oder Segment steht die <i>Gesamtbreite</i> (kursiv: die Breite dort laut Vorschau, übernommen von
+Nachbarpunkten, Profilabschnitten oder der Fahrbahn);
+<i>Asymmetrische Breite: ja</i> legt Halbbreiten links/rechts an (Startwert: die jetzige Breite), <i>nein</i> führt sie
+wieder zur Gesamtbreite zusammen. Die Querneigung steht im Querneigungsfeld darüber (blendest du es aus, wieder als
+Tabellenzeile). Die Prüfliste ist nach Fehler, Warnung, Hinweis sortiert, je Stufe nach Station.</p>
+<h3>Rückgängig und Speichern</h3>
+<p>Jede abgeschlossene Änderung ist ein Schritt: Strg+Z / Strg+Y. Speichern Strg+S, Neu Strg+N, Öffnen Strg+O.</p>
+<h3>Farben der Karte</h3>
+<p><span style="color:#67D9F5">■</span> Eingabe (deine Punkte, sofort) ·
+<span style="color:#4E8B5A">■</span> berechnete Fahrbahn mit Randstreifen (blass = veraltet, wird neu berechnet) ·
+<span style="color:#D6A94A">■</span> Spielbereich ±1024 m (die Strecke muss darin liegen) ·
+<span style="color:#B48CF0">■</span> Straight Mode · <span style="color:#5BD08A">■</span> DRS</p>

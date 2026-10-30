@@ -1,0 +1,54 @@
+{
+ "name": "f1_25_ki_portimao",
+ "quellen": [
+  "portimao_ki"
+ ],
+ "iterationen": 109,
+ "rms_gesamt_kmh": 11.305,
+ "fahrzeug": {
+  "modell": "ggv",
+  "masse_kg": 801.0,
+  "leistung_kw": 511.6266,
+  "cw_a_m2": 1.3305,
+  "ca_a_m2": 2.7049,
+  "ggv": {
+   "reibwert_quer": 2.593,
+   "reibwert_bremsen": 1.9929,
+   "reibwert_antrieb": 1.042,
+   "ellipse_exponent": 2.0,
+   "verzoegerung_max_ms2": null,
+   "hoeheneinfluss": true,
+   "hoehe_glaettung_m": 10.0
+  }
+ },
+ "vorher_punktmasse_standard": {
+  "portimao_ki": {
+   "rms_kmh": 27.3,
+   "mittel_kmh": -15.04,
+   "rundenzeit_s": 85.196,
+   "rundenzeit_ref_s": 76.133,
+   "kurven": 7,
+   "kurvenspeed_abweichung_mittel_kmh": -18.76,
+   "kurvenspeed_abweichung_rms_kmh": 25.56,
+   "bremspunkt_abweichung_median_m": 25.0,
+   "bremspunkt_abweichung_mittel_abs_m": 21.4,
+   "v_max_kmh": 311.8,
+   "v_max_ref_kmh": 316.1
+  }
+ },
+ "nachher": {
+  "portimao_ki": {
+   "rms_kmh": 11.3,
+   "mittel_kmh": -0.8,
+   "rundenzeit_s": 75.161,
+   "rundenzeit_ref_s": 76.133,
+   "kurven": 7,
+   "kurvenspeed_abweichung_mittel_kmh": 9.2,
+   "kurvenspeed_abweichung_rms_kmh": 14.11,
+   "bremspunkt_abweichung_median_m": 25.0,
+   "bremspunkt_abweichung_mittel_abs_m": 32.1,
+   "v_max_kmh": 308.7,
+   "v_max_ref_kmh": 316.1
+  }
+ }
+}

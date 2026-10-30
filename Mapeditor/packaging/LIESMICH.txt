@@ -1,0 +1,15 @@
+Mapeditor - Strecken fuer F1 25 entwerfen und pruefen
+=====================================================
+Start: Mapeditor.exe (Ordner nicht verschieben, nur komplett kopieren).
+Der Ordner "werkzeugkasten" enthaelt den Streckengenerator (Python-Quelltext), "lizenzen"
+die Lizenztexte der Drittkomponenten (Qt/PySide6 unter LGPLv3, siehe lizenzen/HINWEISE.txt).
+Der Mapeditor selbst steht unter der GPL-3.0 (lizenzen/GPL-3.0.txt); kein Anspruch auf Gewaehrleistung.
+Der Editor schreibt nie in den Spielordner. Projekte und Bauten liegen in selbst
+gewaehlten Ordnern.
+
+AP26: Im Auswahlmodus auf freier Kartenflaeche einen Rahmen ziehen.
+Umschalt ergaenzt die Auswahl, Strg schaltet Treffer um; Strg+A waehlt alle.
+Einen gewaehlten Kontrollpunkt ziehen: ganze Gruppe verschieben. Pfeile: 0,1 m,
+Umschalt+Pfeile: 1 m. Esc verwirft den Zug; Strg+Z macht ihn rueckgaengig.
+Mehrere Punkte: Hoehe gemeinsam rechts bearbeiten (Gedankenstrich = gemischt).
+Segmentgruppen: zuerst den Knopf "In Kontrollpunkte umwandeln" in der Statuszeile nutzen.

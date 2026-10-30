@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=63"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapeditor"
+version = "0.1.0"
+description = "Desktop-Editor für EGO-Streckendefinitionen"
+license = {text = "GPL-3.0-only"}
+requires-python = ">=3.10"
+dependencies = ["PySide6>=6.12,<7", "numpy>=1.23", "pillow", "zstandard"]
+
+[project.scripts]
+mapeditor = "mapeditor.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mapeditor = ["mapeditor.ico", "i18n/*.csv", "i18n/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

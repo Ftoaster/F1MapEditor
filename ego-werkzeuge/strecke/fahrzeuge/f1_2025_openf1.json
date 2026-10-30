@@ -1,0 +1,189 @@
+{
+ "name": "f1_2025_openf1",
+ "quellen": [
+  "Monza",
+  "Spa",
+  "Budapest",
+  "Silverstone",
+  "Zandvoort",
+  "Suzuka"
+ ],
+ "iterationen": 193,
+ "rms_gesamt_kmh": 14.661,
+ "fahrzeug": {
+  "modell": "ggv",
+  "masse_kg": 810.0,
+  "leistung_kw": 572.2599,
+  "cw_a_m2": 1.2148,
+  "ca_a_m2": 2.6561,
+  "ggv": {
+   "reibwert_quer": 2.9499,
+   "reibwert_bremsen": 1.3637,
+   "reibwert_antrieb": 1.0599,
+   "ellipse_exponent": 2.0,
+   "verzoegerung_max_ms2": null,
+   "hoeheneinfluss": true,
+   "hoehe_glaettung_m": 10.0
+  }
+ },
+ "vorher_punktmasse_standard": {
+  "Monza": {
+   "rms_kmh": 35.94,
+   "mittel_kmh": -31.82,
+   "rundenzeit_s": 92.072,
+   "rundenzeit_ref_s": 78.792,
+   "kurven": 6,
+   "kurvenspeed_abweichung_mittel_kmh": -54.06,
+   "kurvenspeed_abweichung_rms_kmh": 59.5,
+   "bremspunkt_abweichung_median_m": 127.0,
+   "bremspunkt_abweichung_mittel_abs_m": 111.8,
+   "v_max_kmh": 311.6,
+   "v_max_ref_kmh": 348.0
+  },
+  "Spa": {
+   "rms_kmh": 38.52,
+   "mittel_kmh": -31.41,
+   "rundenzeit_s": 118.879,
+   "rundenzeit_ref_s": 100.562,
+   "kurven": 24,
+   "kurvenspeed_abweichung_mittel_kmh": -61.9,
+   "kurvenspeed_abweichung_rms_kmh": 64.52,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 32.1,
+   "v_max_kmh": 311.9,
+   "v_max_ref_kmh": 339.0
+  },
+  "Budapest": {
+   "rms_kmh": 39.95,
+   "mittel_kmh": -34.12,
+   "rundenzeit_s": 91.632,
+   "rundenzeit_ref_s": 74.89,
+   "kurven": 41,
+   "kurvenspeed_abweichung_mittel_kmh": -75.02,
+   "kurvenspeed_abweichung_rms_kmh": 82.07,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 35.5,
+   "v_max_kmh": 302.9,
+   "v_max_ref_kmh": 318.0
+  },
+  "Silverstone": {
+   "rms_kmh": 48.5,
+   "mittel_kmh": -39.73,
+   "rundenzeit_s": 102.05,
+   "rundenzeit_ref_s": 84.892,
+   "kurven": 29,
+   "kurvenspeed_abweichung_mittel_kmh": -77.08,
+   "kurvenspeed_abweichung_rms_kmh": 85.15,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 32.7,
+   "v_max_kmh": 307.3,
+   "v_max_ref_kmh": 324.0
+  },
+  "Zandvoort": {
+   "rms_kmh": 44.92,
+   "mittel_kmh": -34.7,
+   "rundenzeit_s": 85.357,
+   "rundenzeit_ref_s": 68.662,
+   "kurven": 7,
+   "kurvenspeed_abweichung_mittel_kmh": -51.56,
+   "kurvenspeed_abweichung_rms_kmh": 60.96,
+   "bremspunkt_abweichung_median_m": 33.0,
+   "bremspunkt_abweichung_mittel_abs_m": 73.0,
+   "v_max_kmh": 305.0,
+   "v_max_ref_kmh": 326.0
+  },
+  "Suzuka": {
+   "rms_kmh": 38.78,
+   "mittel_kmh": -27.5,
+   "rundenzeit_s": 101.78,
+   "rundenzeit_ref_s": 86.983,
+   "kurven": 6,
+   "kurvenspeed_abweichung_mittel_kmh": -40.77,
+   "kurvenspeed_abweichung_rms_kmh": 45.72,
+   "bremspunkt_abweichung_median_m": 87.0,
+   "bremspunkt_abweichung_mittel_abs_m": 81.5,
+   "v_max_kmh": 308.0,
+   "v_max_ref_kmh": 325.0
+  }
+ },
+ "nachher": {
+  "Monza": {
+   "rms_kmh": 12.54,
+   "mittel_kmh": -6.43,
+   "rundenzeit_s": 79.738,
+   "rundenzeit_ref_s": 78.792,
+   "kurven": 6,
+   "kurvenspeed_abweichung_mittel_kmh": -0.41,
+   "kurvenspeed_abweichung_rms_kmh": 14.19,
+   "bremspunkt_abweichung_median_m": 127.0,
+   "bremspunkt_abweichung_mittel_abs_m": 111.8,
+   "v_max_kmh": 328.1,
+   "v_max_ref_kmh": 348.0
+  },
+  "Spa": {
+   "rms_kmh": 11.43,
+   "mittel_kmh": -0.5,
+   "rundenzeit_s": 100.021,
+   "rundenzeit_ref_s": 100.562,
+   "kurven": 24,
+   "kurvenspeed_abweichung_mittel_kmh": -2.43,
+   "kurvenspeed_abweichung_rms_kmh": 6.42,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 32.6,
+   "v_max_kmh": 329.3,
+   "v_max_ref_kmh": 339.0
+  },
+  "Budapest": {
+   "rms_kmh": 10.92,
+   "mittel_kmh": 1.74,
+   "rundenzeit_s": 72.975,
+   "rundenzeit_ref_s": 74.89,
+   "kurven": 41,
+   "kurvenspeed_abweichung_mittel_kmh": -12.67,
+   "kurvenspeed_abweichung_rms_kmh": 20.63,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 37.2,
+   "v_max_kmh": 316.1,
+   "v_max_ref_kmh": 318.0
+  },
+  "Silverstone": {
+   "rms_kmh": 13.43,
+   "mittel_kmh": -1.01,
+   "rundenzeit_s": 83.299,
+   "rundenzeit_ref_s": 84.892,
+   "kurven": 29,
+   "kurvenspeed_abweichung_mittel_kmh": -19.14,
+   "kurvenspeed_abweichung_rms_kmh": 32.3,
+   "bremspunkt_abweichung_median_m": 0.0,
+   "bremspunkt_abweichung_mittel_abs_m": 32.1,
+   "v_max_kmh": 326.0,
+   "v_max_ref_kmh": 324.0
+  },
+  "Zandvoort": {
+   "rms_kmh": 19.69,
+   "mittel_kmh": -0.52,
+   "rundenzeit_s": 68.938,
+   "rundenzeit_ref_s": 68.662,
+   "kurven": 7,
+   "kurvenspeed_abweichung_mittel_kmh": -2.87,
+   "kurvenspeed_abweichung_rms_kmh": 21.63,
+   "bremspunkt_abweichung_median_m": 25.0,
+   "bremspunkt_abweichung_mittel_abs_m": 69.3,
+   "v_max_kmh": 322.3,
+   "v_max_ref_kmh": 326.0
+  },
+  "Suzuka": {
+   "rms_kmh": 17.73,
+   "mittel_kmh": 6.62,
+   "rundenzeit_s": 83.948,
+   "rundenzeit_ref_s": 86.983,
+   "kurven": 6,
+   "kurvenspeed_abweichung_mittel_kmh": 8.39,
+   "kurvenspeed_abweichung_rms_kmh": 13.24,
+   "bremspunkt_abweichung_median_m": 90.5,
+   "bremspunkt_abweichung_mittel_abs_m": 80.0,
+   "v_max_kmh": 327.0,
+   "v_max_ref_kmh": 325.0
+  }
+ }
+}

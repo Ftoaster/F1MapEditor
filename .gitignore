@@ -1,0 +1,17 @@
+# Bauten und Umgebungen
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp*/
+*.egg-info/
+
+# ZIP für den GitHub-Release, nicht für das Repository
+release-assets/
+
+# Niemals: Spieldateien und Pakete
+*.erp
+*.mipmaps
+*.zip
