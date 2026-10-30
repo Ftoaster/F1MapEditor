@@ -9,7 +9,7 @@ einmaligen echten EXE-Paketbaus: [stand.md](stand.md) und `ap25_exe_bautest.json
 | Messwert | Wert |
 |---|---|
 | Ordner `Mapeditor/dist/Mapeditor/` | ca. 141 MB (vor Beschneiden 166 MB) |
-| ZIP `Mapeditor-0.1.1-win64.zip` | ca. 56 MB |
+| ZIP `Mapeditor-0.1.2-win64.zip` | ca. 56 MB |
 | Werkzeugkasten (46 Dateien, nur Code + Beispiel-JSON) | ca. 1,2 MB |
 | Start bis Fenster (offscreen, warm) | 0,3 s |
 | Start bis fertige Generatorvorschau Teststrecke (eigener Arbeiterprozess) | 0,9 s gesamt |
@@ -144,7 +144,9 @@ LGPL-konforme Weitergabe bei `onedir`:
 
 ## Öffentlicher Stand für GitHub
 
-`packaging/release_vorbereiten.py` stellt den Ordner `Mapeditor-Release/` im Arbeits-Repository zusammen (dort per `.gitignore`
-ausgeschlossen). Es kopiert nur eine Positivliste, die Texte kommen aus `packaging/release/`, und es bricht ab bei persönlichen
+`packaging/release_veroeffentlichen.py` klont das öffentliche Repository in einen Arbeitsordner neben den Quellen, erzeugt den Stand,
+testet ihn, baut und prüft die ZIP und veröffentlicht sie mit `--ausfuehren`. Ohne Schalter ist es ein Probelauf. Der Ordner wird danach
+gelöscht, es gibt also nur einen Stand. `packaging/release_vorbereiten.py` kopiert dabei nur eine Positivliste, die Texte kommen aus
+`packaging/release/`, und es bricht ab bei persönlichen
 Daten, festen Pfaden, Spieldateien oder zu großen Dateien. Aus dem Spiel abgeleitete Daten (`portimao_form.json`,
 `kalibrierung_portimao*.json`) fehlen bewusst, die Tests dazu werden übersprungen.

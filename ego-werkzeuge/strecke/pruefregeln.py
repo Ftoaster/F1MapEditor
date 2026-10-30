@@ -38,6 +38,8 @@ STUFEN = ("eingabe", "generator", "profil", "logik", "bau", "paket")
 
 #: AO-Atlas des Portimão-Trägers deckt das Terrain in X/Z ±1024 m ab (docs/formate/licht.md, platzierung.py).
 AO_HALBBREITE_M = 1024.0
+#: Loch des Außenterrains im Portimão-Träger (x0, z0, Kante in m): Die Strecke muss vollständig darin liegen
+LOCH_AUSSENTERRAIN = (-920.13, -1008.23, 2048.0)
 #: Bremslinien der Hauptroute paarweise mindestens so viele Gates auseinander (Spieltest 15.10.2026).
 BREMSLINIEN_MIN_ABSTAND_GATES = 3
 #: Haupt-Bremslinien im Portimão-Träger (ID-Satz der 38 ``.brakelinesettings``: 15 Haupt + 3 Box).
@@ -138,6 +140,8 @@ _R = [
     # Außenterrains (x -920…1128, z -1008…1040): dort brechen spiel_geometrie/gelaende den Bau ab.
     Regel("LAGE_AUSSERHALB_AO", "KO-01", WARNUNG, "eingabe", "Strecke/Logik außerhalb X/Z ±1024 m (AO-Abdeckung des Trägers)",
           QUELLEN["platzierung"], "AO-Atlas des Portimão-Trägers; trägerbezogen (Baku, Monza … liegen weiter außen)"),
+    Regel("LAGE_AUSSERHALB_LOCH", "KO-02", FEHLER, "generator", "Strecke liegt nicht vollständig im Loch des Außenterrains",
+          QUELLEN["schritt2"], "spiel_geometrie.geometrie_einsetzen bricht sonst ab"),
     Regel("DRS_ANZAHL", "DR-01", WARNUNG, "generator", "Weniger DRS-Zonen als gewünscht",
           "ego-werkzeuge/strecke/erzeugung.py", "Generatorbericht"),
     Regel("DRS_ZONE_UNGUELTIG", "DR-02", FEHLER, "eingabe",
@@ -623,12 +627,14 @@ def _ki_haupt(lo, m, erwartete_ids):
         i = idx[l["gate_id"]]
         drin, vor = _in_kurve(i, kurven, n, True)
         if not drin:
-            text = "Haupt-Bremslinie %d (Gate %d) liegt außerhalb jeder Kurve" % (l["id"], l["gate_id"])
+            text = ("Haupt-Bremslinie %d (Gate %d) liegt außerhalb jeder Kurve. F1 25 erwartet Haupt-Bremslinien innerhalb "
+                    "corner_start … corner_end." % (l["id"], l["gate_id"]))
             if vor is not None:
                 g_k = route[(i + vor) % n]
                 meter = ((lo.fortschritt(g_k) - lo.fortschritt(l["gate_id"])) % 1.0) * lo.L
-                text += ", %.0f m vor dem nächsten Kurvenanfang (Gate %d)" % (meter, g_k)
-            text += ". F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end."
+                text = ("Haupt-Bremslinie %d (Gate %d) liegt außerhalb jeder Kurve, %.0f m vor dem nächsten Kurvenanfang "
+                        "(Gate %d). F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end."
+                        % (l["id"], l["gate_id"], meter, g_k))
             m.append(meldung("KI_BREMSLINIE_AUSSERHALB_KURVE", text,
                              lo.gate_ort(l["gate_id"], "brake_line %d" % l["id"])))
     belegt = sorted((idx[l["gate_id"]], l["id"]) for l in haupt_bl)
@@ -1184,7 +1190,8 @@ def _zonen_eingabe_pruefen(ml, param, m, welt_bei):
 def _generator_pruefen(erg, d, v, m):
     import json
     import os
-    gp = {"DRS_ANZAHL", "BOX_FEHLT", "KI_KURVEN_FUER_BREMSLINIEN", "BOX_MAUER_AUF_BOXENLINIE", "LAGE_AUSSERHALB_AO"}
+    gp = {"DRS_ANZAHL", "BOX_FEHLT", "KI_KURVEN_FUER_BREMSLINIEN", "BOX_MAUER_AUF_BOXENLINIE", "LAGE_AUSSERHALB_AO",
+          "LAGE_AUSSERHALB_LOCH"}
     netz = None
     if isinstance(erg, (str, os.PathLike)):
         with open(os.path.join(erg, "strecke_logik.json"), encoding="utf-8") as f:
@@ -1254,6 +1261,18 @@ def _generator_pruefen(erg, d, v, m):
             m.append(meldung("LAGE_AUSSERHALB_AO", "Generatornetz: %d Vertices außerhalb X/Z ±%d m (inkl. Versatz)"
                              % (int(aussen.sum()), AO_HALBBREITE_M), ort(None, None, netz["vertices"][i] + v, "Netz"),
                              ist=int(aussen.sum()), soll=0, stufe="generator"))
+        x0, z0, kante = LOCH_AUSSENTERRAIN
+        lo, hi = V.min(axis=0), V.max(axis=0)
+        if lo[0] <= x0 or hi[0] >= x0 + kante or lo[1] <= z0 or hi[1] >= z0 + kante:
+            groesse = hi - lo
+            if max(groesse) >= kante:
+                text = ("Strecke ist mit %.0f × %.0f m größer als das Loch des Außenterrains (Kante %.0f m): Der Bau bricht ab, "
+                        "Strecke verkleinern" % (groesse[0], groesse[1], kante))
+            else:
+                ziel = (x0 + kante / 2 - (lo[0] + hi[0]) / 2 + v[0], z0 + kante / 2 - (lo[1] + hi[1]) / 2 + v[2])
+                text = ("Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den "
+                        "Spielweltversatz auf [%.0f, %.0f, %.0f] stellen" % (ziel[0], v[1], ziel[1]))
+            m.append(meldung("LAGE_AUSSERHALB_LOCH", text, ist=_r(float(max(groesse))), soll=kante, stufe="generator"))
     return gp
 
 

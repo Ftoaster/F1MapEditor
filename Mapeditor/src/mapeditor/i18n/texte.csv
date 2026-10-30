@@ -661,6 +661,7 @@ Bau läuft · zuerst Abbrechen wählen und das Bauende abwarten.;Build running �
 Bauen;Build;window.py
 Bauen / Paket …;Build / package …;window.py
 Beenden;Exit;window.py
+Bei umgekehrter Fahrtrichtung nicht möglich.;Not possible with the driving direction reversed.;window.py
 Beispiel nicht gefunden: {error};Example not found: {error};window.py
 Bepflanzen;Plant;window.py
 Bepflanzen nicht möglich: keine Fläche oder kein Modell.;Planting not possible: no area or no model.;window.py
@@ -737,6 +738,7 @@ Entwurfsstand E{revision};Draft state E{revision};window.py
 Ergebnisse deiner Spieltests notieren;Record the results of your playtests;window.py
 Erkannte Kurven;Detected corners;window.py
 Erkennungspunkt · m ab Ziel;Detection point · m from finish;window.py
+Erst die Runde schließen: Gefüllt wird entlang der berechneten Strecke.;Close the lap first: gaps are filled along the computed track.;window.py
 Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen;Connect the first and last point, or open the lap again;window.py
 Externe Ausgabe · Zuordnung zum Entwurf ungeprüft · schreibgeschützt;External output · relation to the draft unchecked · read-only;window.py
 Fahrbahn (ganze Strecke);Road (whole track);window.py
@@ -819,7 +821,7 @@ Katalog nicht verfügbar: {error};Catalogue not available: {error};window.py
 Katalog wird geladen …;Loading catalogue …;window.py
 Katalog wird neu aufgebaut (das dauert) …;Rebuilding the catalogue (this takes a while) …;window.py
 Keine Auswertung: der Generator lief für diesen Stand nicht (Meldungen unter Prüfung).;No analysis: the generator did not run for this state (messages under Check).;window.py
-Keine großen Lücken zwischen Kontrollpunkten.;No large gaps between control points.;window.py
+Keine großen Lücken. Zwei benachbarte Punkte wählen füllt genau diese Lücke.;No large gaps. Select two neighbouring points to fill exactly that gap.;window.py
 Keine laufende Berechnung. Die nächste Änderung startet die Automatik.;No calculation running. The next change starts the automation.;window.py
 Keine laufende Berechnung. Die Vorschau startet 400 ms nach einer Änderung.;No calculation running. The preview starts 400 ms after a change.;window.py
 Keine Lücke gefunden. Zwei benachbarte Punkte wählen oder Lücke > 4× Punktabstand.;No gap found. Select two neighbouring points or a gap > 4× the point spacing.;window.py

@@ -25,6 +25,7 @@ Vorschau und Fahrlinie): `docs/screenshots/englisch.png`.
 | `src/mapeditor/i18n/__init__.py` | `tr()`, `trn()`, `N_()`, `setze_sprache()`, `qlocale()`, `dezimal()`, `html()`, `rule_title()` |
 | `src/mapeditor/i18n/texte.csv` | **Übersetzungstabelle** aller Oberflächentexte: Spalten `de;en;ort` (829 Einträge) |
 | `src/mapeditor/i18n/regeln.csv` | Titel der 56 Prüfregeln des Werkzeugkastens: `id;kurz;de;en` |
+| `src/mapeditor/i18n/meldungen.csv` | Meldungsvorlagen des Werkzeugkastens: `de;en;ort` |
 | `src/mapeditor/i18n/hilfe_de.html`, `hilfe_en.html` | Bedienungshilfe (F1) je Sprache |
 | `src/mapeditor/i18n/pflege.py` | Schlüssel im Quelltext finden, Tabelle prüfen und abgleichen |
 
@@ -95,10 +96,13 @@ Weitere Sprache: Spalte (z. B. `fr`) in `texte.csv` und `regeln.csv`, Eintrag in
 | Autosicherung, Wiederherstellung | autosave, recovery |
 
 ## Grenzen / offene Punkte
-- **Meldungen des Werkzeugkastens** (`ego-werkzeuge/`, unverändert) sind nur deutsch: Prüfmeldungstexte,
-  Bauphasen und -protokoll. Auf Englisch stellt der Editor den übersetzten **Regeltitel** aus `regeln.csv` (nach
-  Regel-ID) vor den deutschen Originaltext und übersetzt Stufen/Prüfstufen; Zahlen bleiben im Originalformat.
-  Neue Regeln im Werkzeugkasten → Zeile in `regeln.csv` ergänzen (der Test meldet fehlende).
+- **Meldungen des Werkzeugkastens** (`ego-werkzeuge/strecke`) sind deutsch und werden fertig formatiert geliefert. Auf Englisch
+  bildet `i18n.meldung(text)` sie über `meldungen.csv` ab: Spalte `de` ist die Vorlage mit `{}`, Spalte `en` die Übersetzung (`{2}`,
+  wenn die Reihenfolge abweicht). Werte werden erneut übersetzt, so greifen auch verschachtelte Meldungen. Unbekannte Texte bleiben
+  stehen. Der Editor stellt den übersetzten **Regeltitel** aus `regeln.csv` davor. `tr(…, error=…)` übersetzt `error` automatisch.
+  `python -m mapeditor.i18n.pflege --schreiben` nimmt neue Vorlagen auf (aus `meldung(…)`, Fehlern, `warnungen.append(…)` und den
+  Variablen `text`, `grund`, dazu die Bauphasen), der Test meldet fehlende Übersetzungen. Neue Regeln im Werkzeugkasten → Zeile in `regeln.csv` ergänzen.
+  Nicht übersetzt sind das Bauprotokoll und Fehlermeldungen aus `ego/`.
 - Gespeicherte Daten (Projektname „Neue Strecke“ bei neuen Projekten, Segmentnamen, Protokolltexte) bleiben in
   der Sprache, in der sie entstanden.
 - Befehlszeilenhilfe (`--help`) und technische Protokollzeilen (Prozessgruppe, Abbruchdatei) bleiben deutsch.

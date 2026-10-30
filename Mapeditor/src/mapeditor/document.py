@@ -451,6 +451,28 @@ class Document(QObject):
         limit = max(minimum, factor * median)
         return [(i, d) for i, d in enumerate(dist) if d > limit]
 
+    def gap_step(self):
+        """Punktabstand beim Füllen: der übliche Abstand der Strecke, begrenzt auf 2–20 m."""
+        pts = [point_xyz(p) for p in self.points]
+        n = len(pts)
+        dist = sorted(math.dist((pts[i][0], pts[i][2]), (pts[(i + 1) % n][0], pts[(i + 1) % n][2])) for i in range(n))
+        return max(2.0, min(20.0, dist[n // 2]))
+
+    def gap_targets(self):
+        """Was „Lücken füllen“ bearbeitet: {i: Abstand}. Zwei gewählte Nachbarpunkte mit Platz für mindestens einen neuen
+        Punkt: nur diese Lücke, sonst alle großen Lücken (``gaps``)."""
+        chosen = sorted(self.selected_indices)
+        n = len(self.points)
+        if len(chosen) == 2:
+            a, b = chosen
+            i = a if b == a + 1 else b if a == 0 and b == n - 1 and self.project.closed else None
+            if i is not None:
+                p, q = point_xyz(self.points[i]), point_xyz(self.points[(i + 1) % n])
+                distance = math.dist((p[0], p[2]), (q[0], q[2]))
+                if distance >= 1.5 * self.gap_step():
+                    return {i: distance}
+        return dict(self.gaps())
+
     def fill_gaps(self, fills):
         """Füllt Lücken in einem Undo-Schritt. ``fills``: {i: [(x, y, z), …]} – Punkte zwischen Punkt i und i+1."""
         fills = {i: pts for i, pts in fills.items() if pts}

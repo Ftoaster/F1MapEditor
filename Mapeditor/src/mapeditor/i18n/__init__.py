@@ -9,6 +9,8 @@ Aufbau (Begründung in ``docs/uebersetzung.md``):
 * Konstanten auf Modulebene markiert ``N_("…")`` (gibt den Text unverändert zurück); übersetzt wird erst bei der
   Anzeige mit ``tr(konstante)``. So wirkt ein Sprachwechsel ohne Neuimport der Module.
 * Lange Texte (Hilfe) liegen als eigene Dateien je Sprache daneben: ``hilfe_de.html``, ``hilfe_en.html``.
+* Meldungen des Werkzeugkastens sind deutsch und fertig formatiert. ``meldung(text)`` bildet sie bei der Anzeige über
+  ``meldungen.csv`` (Vorlagen mit ``{}``) ab; ``pflege`` prüft, dass jede Vorlage des Werkzeugkastens dort steht.
 """
 
 from __future__ import annotations
@@ -99,8 +101,11 @@ def _nachschlagen(text):
 
 
 def tr(text, **werte):
-    """Oberflächentext in der aktiven Sprache; ``werte`` füllen benannte Platzhalter ``{name}``."""
+    """Oberflächentext in der aktiven Sprache; ``werte`` füllen benannte Platzhalter ``{name}``, ``error`` kommt meist
+    aus dem Werkzeugkasten und läuft durch ``meldung``."""
     uebersetzt = _nachschlagen(text)
+    if "error" in werte:
+        werte["error"] = meldung(werte["error"])
     return uebersetzt.format(**werte) if werte else uebersetzt
 
 
@@ -138,6 +143,57 @@ def rule_title(regel_id):
         except OSError:
             _cache["regeln"] = {}
     return (_cache["regeln"].get(regel_id) or {}).get(_sprache) or None
+
+
+MELDUNGEN = HIER / "meldungen.csv"
+#: Tiefe verschachtelter Meldungen („… (Träger Portimão: 15 …)“ um eine Fehlermeldung herum)
+MELDUNG_TIEFE = 3
+
+
+def _meldungsmuster():
+    """(exakte Texte, [(Regex, Vorlage)]): längster fester Text zuerst, damit allgemeine Vorlagen zuletzt greifen."""
+    if "meldungen" not in _cache:
+        try:
+            zeilen = lade_tabelle(MELDUNGEN)
+        except OSError:
+            zeilen = []
+        exakt, muster = {}, []
+        for zeile in zeilen:
+            de, en = zeile.get("de"), zeile.get("en")
+            if not de or not en:
+                continue
+            if "{}" not in de:
+                exakt[de] = en
+                continue
+            teile = de.split("{}")
+            muster.append((sum(map(len, teile)), re.compile("(.+?)".join(map(re.escape, teile)), re.DOTALL), en))
+        _cache["meldungen"] = (exakt, [(regex, en) for _laenge, regex, en in sorted(muster, key=lambda m: -m[0])])
+    return _cache["meldungen"]
+
+
+def _einsetzen(vorlage, werte):
+    """``{}`` der Reihe nach füllen, ``{2}`` gezielt, wenn die englische Satzstellung abweicht."""
+    folge = iter(werte)
+    return re.sub(r"\{(\d*)\}", lambda t: werte[int(t.group(1)) - 1] if t.group(1) else next(folge), vorlage)
+
+
+def _uebersetzen(text, tiefe=0):
+    exakt, muster = _meldungsmuster()
+    if text in exakt:
+        return exakt[text]
+    if tiefe > MELDUNG_TIEFE or not re.search("[^\\W\\d_]", text):
+        return text
+    for regex, vorlage in muster:
+        treffer = regex.fullmatch(text)
+        if treffer:
+            return _einsetzen(vorlage, [_uebersetzen(w, tiefe + 1) for w in treffer.groups()])
+    return "/".join(_uebersetzen(w, tiefe + 1) for w in text.split("/")) if tiefe and "/" in text else text
+
+
+def meldung(text):
+    """Meldung des Werkzeugkastens in der aktiven Sprache; Unbekanntes bleibt, wie es ist."""
+    text = str(text)
+    return text if _sprache == STANDARD or not text else _uebersetzen(text)
 
 
 def html(name):

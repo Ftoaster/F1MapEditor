@@ -9,6 +9,7 @@ Schreibt nur nach Mapeditor/build und Mapeditor/dist. Nie in den Spielordner.
 import argparse
 import fnmatch
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -26,6 +27,11 @@ ZIEL = DIST / "Mapeditor"
 KOPIEREN = [("strecke", ["*.py", "beispiele/*.json", "fahrzeuge/*.json"]), ("ego", ["*.py"]),
             (".", ["neue_strecke_tool.py", "paket_tool.py", "erp_tool.py", "strecke_tool.py", "injektor_tool.py"])]
 MAX_DATEI = 1_000_000  # Sicherung: nichts über 1 MB (keine ERPs/Pakete)
+
+
+def version():
+    text = (EDITOR / "src" / "mapeditor" / "__init__.py").read_text(encoding="utf-8")
+    return re.search(r'__version__ = "([^"]+)"', text).group(1)
 
 
 def werkzeugkasten_kopieren(ziel):
@@ -117,7 +123,7 @@ def main():
         if r.returncode:
             raise SystemExit("Rauchtest fehlgeschlagen")
     if not args.ohne_zip:
-        zielzip = DIST / "Mapeditor-0.1.1-win64.zip"
+        zielzip = DIST / f"Mapeditor-{version()}-win64.zip"
         with zipfile.ZipFile(zielzip, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
             for p in sorted(ZIEL.rglob("*")):
                 if p.is_file():

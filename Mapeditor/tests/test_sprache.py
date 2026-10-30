@@ -9,7 +9,7 @@ from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import QMenuBar, QStatusBar, QToolBar
 
 from mapeditor import ansicht, i18n
-from mapeditor.i18n import lade_regeln, lade_tabelle, platzhalter, pflege, setze_sprache, sprache, tr, trn
+from mapeditor.i18n import lade_regeln, lade_tabelle, meldung, platzhalter, pflege, setze_sprache, sprache, tr, trn
 from mapeditor.project import Project
 from mapeditor.ux import choice_value, edit_text, help_html, zahl
 from mapeditor.window import MainWindow, parse_value
@@ -52,6 +52,41 @@ def test_regelkatalog_uebersetzt():
     regeln = {z["id"]: z for z in lade_regeln()}
     for regel in pruefregeln.katalog():
         assert regel["id"] in regeln and regeln[regel["id"]]["en"].strip(), regel["id"]
+
+
+def test_meldungen_des_werkzeugkastens_vollstaendig():
+    befund = pflege.meldungen_pruefen()
+    assert not any(befund.values()), befund
+
+
+@pytest.mark.parametrize("deutsch, englisch_erwartet", [
+    ("keine Kurvenlinien für Bremslinien (Träger Portimão: 15 Haupt-Bremslinien)",
+     "no corner lines for braking lines (Portimão carrier: 15 main braking lines)"),
+    ("Ideallinie konvergiert nicht: KKT-Rest 0.0012", "Racing line does not converge: KKT residual 0.0012"),
+    ("Geometrie und Fahrphysik", "Geometry and driving physics"),
+    ("Fahrbahnrand an 12 Stationen außerhalb X/Z ±1024 m (inkl. Versatz (0, 0, 0))",
+     "Track edge outside X/Z ±1024 m at 12 stations (including offset (0, 0, 0))"),
+    ("rechts: an 3 Stationen weniger als 2.5 m Platz bis zum nächsten Streckenteil (Barriere auf Mindestabstand gesetzt)",
+     "right: less than 2.5 m of space to the next part of the track at 3 stations (barrier set to minimum distance)"),
+    ("Objekt b1 steht auf asphalt/randstein", "Object b1 stands on asphalt/kerb"),
+    ("Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den Spielweltversatz auf "
+     "[69, 0, -18] stellen",
+     "Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the game world offset to "
+     "[69, 0, -18]"),
+])
+def test_meldung_englisch(englisch, deutsch, englisch_erwartet):
+    assert meldung(deutsch) == englisch_erwartet
+
+
+def test_unbekannte_meldung_bleibt_und_deutsch_unveraendert(englisch):
+    assert meldung("Etwas ganz Neues 12") == "Etwas ganz Neues 12"
+    setze_sprache("de")
+    text = "keine Kurvenlinien für Bremslinien (Träger Portimão: 15 Haupt-Bremslinien)"
+    assert meldung(text) == text
+
+
+def test_fehlerwert_in_tr_wird_uebersetzt(englisch):
+    assert "Racing line does not converge" in tr("Fehler · Vorschau: {error}", error="Ideallinie konvergiert nicht: KKT-Rest 1")
 
 
 def test_deutsch_ist_standard_und_unveraendert():

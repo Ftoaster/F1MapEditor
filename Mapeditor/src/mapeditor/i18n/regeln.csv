@@ -4,6 +4,7 @@ DEF_WARNUNG;IN-02;Hinweis des Definitionsladers/der Mittellinie (z. B. Schließf
 GEO_RAND_FALTUNG;GE-01;Fahrbahnrand faltet sich (Radius kleiner als Halbbreite);Track edge folds over (radius smaller than half-width)
 GEO_RAENDER_SCHNITT;GE-01;Fahrbahnränder schneiden sich in der Draufsicht;Track edges intersect in plan view
 LAGE_AUSSERHALB_AO;KO-01;Strecke/Logik außerhalb X/Z ±1024 m (AO-Abdeckung des Trägers);Track/logic outside X/Z ±1024 m (AO coverage of the carrier package)
+LAGE_AUSSERHALB_LOCH;KO-02;Strecke liegt nicht vollständig im Loch des Außenterrains;Track does not lie completely inside the hole of the outer terrain
 DRS_ANZAHL;DR-01;Weniger DRS-Zonen als gewünscht;Fewer DRS zones than requested
 DRS_ZONE_UNGUELTIG;DR-02;Eigene DRS-Zone unbrauchbar (zu kurz, länger als die halbe Runde oder Erkennung nicht vor der Aktivierung);Custom DRS zone unusable (too short, longer than half a lap, or detection not before activation)
 DRS_ZONEN_UEBERLAPPEN;DR-03;Eigene DRS-Aktivierungszonen überlappen sich;Custom DRS activation zones overlap

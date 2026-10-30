@@ -1,6 +1,7 @@
 """Echter Generator für Vorschau; ausschließlich Attrappen für Bau/Laufzeit."""
 
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -8,7 +9,7 @@ import pytest
 from PySide6.QtCore import QElapsedTimer
 from PySide6.QtTest import QTest
 
-from mapeditor.adapter import ProcessJob, build_command, calculate_preview, toolkit_path, worker_command
+from mapeditor.adapter import ProcessJob, build_command, calculate_analysis, calculate_preview, toolkit_path, worker_command
 from mapeditor.project import Project
 from conftest import EXAMPLES, ROOT
 
@@ -116,3 +117,22 @@ def test_worker_json_protocol(app):
     wait_until(lambda: bool(done))
     assert done[0][0] == 0
     assert json.loads(done[0][1])["length"] > 4900
+
+
+def ring(radius, anzahl=150):
+    punkte = [{"x": round(radius * math.cos(k / anzahl * math.tau), 3), "z": round(radius * math.sin(k / anzahl * math.tau), 3), "y": 0.0}
+              for k in range(anzahl)]
+    return {"name": "Ring", "mittellinie": {"art": "kontrollpunkte", "punkte": punkte}, "ideallinie": {"schritt_m": 15.0}}
+
+
+def test_grosser_ring_hat_kurven_fuer_alle_bremslinien(tmp_path):
+    """Radius über der Kurvenschwelle (500 m): Die Prüfung fand keine Kurve, der Bau scheiterte an den Bremslinien."""
+    ergebnis = calculate_analysis({"raw": ring(700.0), "basis": str(tmp_path), "shift": [0, 0, 0]})
+    assert ergebnis["analysis"]["kurven"]
+    assert not [i["kurz"] for i in ergebnis["issues"] if i["kurz"] == "KI-04"]
+
+
+def test_strecke_ausserhalb_des_aussenterrains_nennt_den_versatz(tmp_path):
+    ergebnis = calculate_analysis({"raw": ring(950.0, 300), "basis": str(tmp_path), "shift": [0, 0, 0]})
+    meldungen = [i for i in ergebnis["issues"] if i["kurz"] == "KO-02"]
+    assert len(meldungen) == 1 and meldungen[0]["level"] == "Fehler" and "Spielweltversatz auf [" in meldungen[0]["text"]

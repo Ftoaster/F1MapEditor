@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2
+
+- Fill gaps now also works for two selected neighbouring points when the lap has no large gap
+- Fill gaps stays off until the lap is closed and says why, instead of failing after the click
+- Error messages, warnings and build phases now appear in the selected language
+- Builds work when the output folder is on a different drive than the program
+- Large rings with no tight corner can be built: corners are found from the strongest curvature and long corners take all braking lines
+- The check reports a track outside the outer terrain hole and names the game world offset that fixes it
+
 ## 0.1.1
 
 - Close/Open lap is back in the toolbar, next to the drawing tools, and lights up while the lap is open

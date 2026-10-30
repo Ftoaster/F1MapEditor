@@ -23,7 +23,7 @@ from .adapter import (ProcessJob, check_key, env_cache_folder, import_template, 
                       worker_command)
 from .appearance import ensure_fonts
 from .document import Document
-from .i18n import N_, SPRACHEN, rule_title, setze_sprache, sprache, tr, trn
+from .i18n import N_, SPRACHEN, meldung, rule_title, setze_sprache, sprache, tr, trn
 from .input_geometry import input_geometry
 from .project import Project, point_xyz, read_json, set_point
 from .views import CrossSection, MapView, ProfileView, SpeedView
@@ -117,7 +117,7 @@ CHECK_STAGES = [N_("eingabe"), N_("generator"), N_("profil"), N_("logik"), N_("b
 def issue_texts(issue):
     """(Kürzel, Text) einer Prüfmeldung. Der Werkzeugkasten liefert nur deutsche Texte; auf Englisch steht der
     übersetzte Regeltitel (``i18n/regeln.csv``) vor dem Originaltext."""
-    short, text = issue.get("kurz", issue["id"]), str(issue.get("text", ""))
+    short, text = issue.get("kurz", issue["id"]), meldung(issue.get("text", ""))
     title = rule_title(issue.get("id"))
     if title:
         text = f"{title} – {text}" if text else title
@@ -1120,14 +1120,7 @@ class MainWindow(QMainWindow):
             button.setVisible(art == "segmente")
             button.setEnabled(editable and (i in (0, 3) or self.document.selected >= 0))
             button.setToolTip(reason if readonly else tr("Zuerst ein Segment wählen.") if not button.isEnabled() else tr("Wirkt sofort; Strg+Z macht rückgängig."))
-        gaps = self.document.gaps() if art == "kontrollpunkte" else []
-        self.gap_button.setVisible(art == "kontrollpunkte")
-        self.gap_button.setEnabled(editable and bool(gaps))
-        self.gap_button.setText(tr("Lücken füllen ({anzahl})", anzahl=len(gaps)) if gaps else tr("Lücken füllen"))
-        self.gap_button.setToolTip(reason if not editable else
-                                   tr("Keine großen Lücken zwischen Kontrollpunkten.") if not gaps else
-                                   tr("Füllt Lücken entlang der sichtbaren Strecke (Generatorvorschau) mit Punkten im "
-                                   "üblichen Abstand. Zwei benachbarte Punkte gewählt: nur diese Lücke. Strg+Z: rückgängig."))
+        self._update_gap_button()
         self.mode_actions["punkte"].setVisible(art == "kontrollpunkte")
         self.mode_actions["punkte"].setEnabled(editable and art == "kontrollpunkte")
         self.mode_actions["punkte"].setToolTip(tr("Klick fügt einen Kontrollpunkt ein.") if editable else reason)
@@ -1168,6 +1161,7 @@ class MainWindow(QMainWindow):
             profile.selected = set(self.document.selected_indices)
             profile.update()
         self._update_height_bar()
+        self._update_gap_button()
         if not self.loading_list:
             self.loading_list = True
             self._sync_list_selection()
@@ -1800,18 +1794,29 @@ class MainWindow(QMainWindow):
     def remove_object(self):
         self.document.delete()
 
+    def _update_gap_button(self):
+        """Der Knopf ist aktiv, wenn ein Klick etwas füllen kann: geschlossene Runde (gefüllt wird entlang der berechneten
+        Strecke) und eine große Lücke oder zwei gewählte Nachbarpunkte; sonst nennt er den Grund."""
+        if not hasattr(self, "gap_button"):
+            return
+        doc = self.document
+        points = doc.ml.get("art", "kontrollpunkte") == "kontrollpunkte"
+        targets = doc.gap_targets() if points else {}
+        reason = (tr("Unbekannte Projektfassung: nur lesend.") if doc.project.readonly else
+                  tr("Erst die Runde schließen: Gefüllt wird entlang der berechneten Strecke.") if not doc.project.closed else
+                  tr("Bei umgekehrter Fahrtrichtung nicht möglich.") if doc.project.raw["mittellinie"].get("umkehren") else
+                  tr("Keine großen Lücken. Zwei benachbarte Punkte wählen füllt genau diese Lücke.") if not targets else "")
+        self.gap_button.setVisible(points)
+        self.gap_button.setEnabled(points and not reason)
+        self.gap_button.setText(tr("Lücken füllen ({anzahl})", anzahl=len(targets)) if targets else tr("Lücken füllen"))
+        self.gap_button.setToolTip(reason or tr("Füllt Lücken entlang der sichtbaren Strecke (Generatorvorschau) mit Punkten im "
+                                                "üblichen Abstand. Zwei benachbarte Punkte gewählt: nur diese Lücke. Strg+Z: rückgängig."))
+
     def fill_gaps(self):
         """Lücken zwischen Kontrollpunkten entlang der sichtbaren (Generator-)Strecke füllen."""
         doc = self.document
-        gaps = dict(doc.gaps())
-        chosen = sorted(doc.selected_indices)
+        gaps = doc.gap_targets()
         n = len(doc.points)
-        if len(chosen) == 2:
-            a, b = chosen
-            if b == a + 1:
-                gaps = {a: math.dist(*(((point_xyz(doc.points[i])[0], point_xyz(doc.points[i])[2])) for i in (a, b)))}
-            elif a == 0 and b == n - 1 and doc.project.closed:
-                gaps = {b: math.dist(*(((point_xyz(doc.points[i])[0], point_xyz(doc.points[i])[2])) for i in (b, a)))}
         if not gaps:
             self.status_label.setText(tr("Keine Lücke gefunden. Zwei benachbarte Punkte wählen oder Lücke > 4× Punktabstand."))
             return
@@ -1826,8 +1831,7 @@ class MainWindow(QMainWindow):
             self.status_label.setText(tr("Vorschau passt nicht zu den Kontrollpunkten – Vorschau erneuern (Strg+Enter)."))
             return
         pts = [point_xyz(p) for p in doc.points]
-        dist = [math.dist((pts[i][0], pts[i][2]), (pts[(i + 1) % n][0], pts[(i + 1) % n][2])) for i in range(n)]
-        step = max(2.0, min(20.0, sorted(dist)[len(dist) // 2]))
+        step = doc.gap_step()
         fills = {}
         for i in gaps:
             s0, s1 = source[i], source[(i + 1) % n]
@@ -1853,7 +1857,7 @@ class MainWindow(QMainWindow):
         try:
             self.document.convert_to_points()
         except ValueError as error:
-            self.status_label.setText(str(error))
+            self.status_label.setText(meldung(error))
 
     def set_mode(self, mode, focus=True):
         if mode == "punkte" and self.document.ml.get("art") != "kontrollpunkte":
@@ -2649,7 +2653,7 @@ class MainWindow(QMainWindow):
         try:
             output, packages = build_folders(self.document.project)
         except ValueError as error:
-            self.error(str(error))
+            self.error(meldung(error))
             return
         self.cleanup_dialog = CleanupDialog(self.document.project, output, packages, self)
         self.cleanup_dialog.exec()
@@ -2672,7 +2676,7 @@ class MainWindow(QMainWindow):
         try:
             self.document.close_round()
         except ValueError as error:
-            self.error(str(error))
+            self.error(meldung(error))
 
     def change_theme(self, theme):
         if not self.document.project.readonly:
@@ -2726,7 +2730,7 @@ class MainWindow(QMainWindow):
                 toolkit_path(folder)
                 self.document.edit(tr("Werkzeugkasten zuordnen"), lambda raw, meta: meta.update(werkzeugkasten=folder))
             except ValueError as error:
-                self.error(str(error))
+                self.error(meldung(error))
 
     def choose_shift(self):
         current = self.document.project.manifest.get("versatz", [0, 0, 0])
@@ -2738,7 +2742,7 @@ class MainWindow(QMainWindow):
                     raise ValueError(tr("Drei endliche Zahlen als JSON-Liste erwartet."))
                 self.document.edit(tr("Spielweltversatz ändern"), lambda raw, meta: meta.update(versatz=value))
             except ValueError as error:
-                self.error(str(error))
+                self.error(meldung(error))
 
     def open_output(self):
         filename, _ = QFileDialog.getOpenFileName(self, tr("Vorhandene strecke_logik.json lesen"), filter=tr("JSON (*.json)"))
@@ -2746,7 +2750,7 @@ class MainWindow(QMainWindow):
             try:
                 self.load_output(filename)
             except (ValueError, OSError) as error:
-                self.error(str(error))
+                self.error(meldung(error))
 
     def load_output(self, filename):
         data = read_json(filename)
@@ -2798,7 +2802,7 @@ class MainWindow(QMainWindow):
             if self.confirm_discard():
                 self.replace_project(project)
         except (ValueError, OSError, KeyError, TypeError) as error:
-            self.error(str(error))
+            self.error(meldung(error))
 
     def replace_project(self, project):
         if self.build_dialog and self.build_dialog.job:
@@ -2988,7 +2992,7 @@ class MainWindow(QMainWindow):
         try:
             root = toolkit_path(self.document.project.manifest.get("werkzeugkasten"))
         except ValueError as error:
-            self.env_panel.set_catalog(None, str(error))
+            self.env_panel.set_catalog(None, meldung(error))
             return
         self.env_job = ProcessJob(self)
         self.env_job.done.connect(self._env_catalog_done)

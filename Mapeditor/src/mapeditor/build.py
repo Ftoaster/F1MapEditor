@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 
 from .adapter import (BUILD_PVS, TRACK_CODES, BuildJob, ProcessJob, build_command, check_key, default_carrier,
                       game_status_command, injector_command, parse_game_status, toolkit_path, worker_command)
-from .i18n import N_, tr
+from .i18n import N_, meldung, tr
 from .paths import writable_path
 from .ux import zahl
 
@@ -434,7 +434,7 @@ class BuildDialog(QDialog):
             output, packages = build_folders(self.project, self.output.text(), self.packages.text())
             self.space.setText(space_text(output, packages))
         except ValueError as error:
-            self.space.setText(str(error))
+            self.space.setText(meldung(error))
 
     def choose(self, field, file):
         if file:
@@ -504,7 +504,7 @@ class BuildDialog(QDialog):
             self.job.start(worker_command(), {"task": "analyse", "raw": copy.deepcopy(self.project.raw),
                                               "basis": str(self.project.folder), "toolkit": str(root), "shift": shift})
         except (ValueError, OSError) as error:
-            self.phase.setText(str(error))
+            self.phase.setText(meldung(error))
 
     def umgebung_datei(self):
         """Gespeicherte ``umgebung.json`` des Projekts für den Bau (Schalter ``--umgebung``); None ohne Umgebung."""
@@ -528,7 +528,7 @@ class BuildDialog(QDialog):
             if hasattr(self.main, "store_analysis") and "analysis" in response:
                 self.main.store_analysis(self.check_key, response)
         except (ValueError, KeyError, OSError) as error:
-            self.phase.setText(str(error))
+            self.phase.setText(meldung(error))
             self.busy(False)
             return
         self.use_check(response)
@@ -543,7 +543,7 @@ class BuildDialog(QDialog):
                 raise ValueError(tr("Vorabprüfung: Fehler beheben, bevor ein Fahrpaket gebaut werden kann."))
             self.launch()
         except (ValueError, KeyError, OSError) as error:
-            self.phase.setText(str(error))
+            self.phase.setText(meldung(error))
             self.busy(False)
 
     def launch(self):
@@ -577,7 +577,7 @@ class BuildDialog(QDialog):
         from .adapter import issue_from_message
         issue = issue_from_message(message)
         self.messages.append(issue)
-        self.issue_list.addItem(f"{issue['level']} · {issue.get('kurz', issue['id'])} · {issue['text']}")
+        self.issue_list.addItem(f"{tr(issue['level'])} · {issue.get('kurz', issue['id'])} · {meldung(issue['text'])}")
         self.issue_list.item(self.issue_list.count() - 1).setData(Qt.UserRole, issue)
         self.main.add_build_issue(issue, self.record["id"] if self.record else tr("Vorabprüfung"))
 
@@ -591,7 +591,7 @@ class BuildDialog(QDialog):
             self.record["eingabe"] = entry
             self.log.appendPlainText(tr("Schnappschuss: ") + json.dumps(entry, ensure_ascii=False))
         elif typ == "phase":
-            self.phase.setText(event.get("titel", event.get("phase", "Bau")))
+            self.phase.setText(meldung(event.get("titel", event.get("phase", tr("Bau")))))
             self.progress.setValue(round(float(event.get("fortschritt", 0)) * 1000))
         elif typ == "meldung":
             self.add_message(event["meldung"])
@@ -602,7 +602,7 @@ class BuildDialog(QDialog):
         elif typ == "ergebnis":
             self.result = event
         elif typ in ("fehler", "abbruch"):
-            self.phase.setText(event.get("text", typ))
+            self.phase.setText(meldung(event.get("text", typ)))
             self.log.appendPlainText(json.dumps(event, ensure_ascii=False))
 
     def build_finished(self, code, text):
@@ -742,7 +742,7 @@ class BuildDialog(QDialog):
         try:
             output, packages = build_folders(self.project, self.output.text(), self.packages.text())
         except ValueError as error:
-            self.phase.setText(str(error))
+            self.phase.setText(meldung(error))
             return
         CleanupDialog(self.project, output, packages, self).exec()
         self.update_space()

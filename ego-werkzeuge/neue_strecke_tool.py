@@ -68,6 +68,14 @@ def _pfad_pruefen(pfad):
         raise BauFehler("Ausgabe in geschütztem Ordner (%s)" % pfad)
 
 
+def _relativ(pfad):
+    """Pfad für Berichte relativ zum Werkzeug; auf einem anderen Laufwerk bleibt er absolut."""
+    try:
+        return os.path.relpath(pfad, HIER)
+    except ValueError:
+        return os.path.abspath(pfad)
+
+
 def _log(text):
     if EREIGNISSE is not None:   # AP24: im JSON-Modus als Ereignis
         EREIGNISSE.senden("log", phase=EREIGNISSE.phase, text=str(text))
@@ -518,7 +526,7 @@ def cmd_bauen(args):
                             % ", ".join(os.path.join(paket_ordner, n + ".zip") for n in vorhanden))
     bericht = {"zeitpunkt": datetime.datetime.now().isoformat(timespec="seconds"), "name": args.name,
                "warnungen": [], "schritte": {}, "versatz": list(platzierung.VERSATZ),
-               "definition": os.path.relpath(args.definition, HIER), "ausgabe": os.path.relpath(aus, HIER),
+               "definition": _relativ(args.definition), "ausgabe": _relativ(aus),
                "profil": args.profil, "eingabe": getattr(args, "eingabe_info", None)}
     regel_meldungen, gesehen, geprueft = [], set(), set()
     args.weltkarten = bool(args.weltkarten) and not args.ohne_geometrie
@@ -544,7 +552,7 @@ def cmd_bauen(args):
     netz = _netz_platziert(npz)
     _phase("traeger")
     traeger, manifest, images_roh, minimap_roh = traeger_entpacken(args)
-    bericht["traeger"] = {"pfad": os.path.relpath(traeger, HIER), "groesse": os.path.getsize(traeger)}
+    bericht["traeger"] = {"pfad": _relativ(traeger), "groesse": os.path.getsize(traeger)}
 
     a = erp.open_erp(traeger)
     _log("Träger erfassen …")
@@ -771,7 +779,7 @@ def cmd_bauen(args):
                                 katalog_daten=umg_katalog, logik=lg,
                                 titel="%s – Umgebung: %d Objekte (Welt, x rechts, z unten)" % (
                                     args.name, len(umg_daten["objekte"]))))
-    bericht["bilder"] = [os.path.relpath(b, HIER) for b in bilder]
+    bericht["bilder"] = [_relativ(b) for b in bilder]
 
     # --- Pakete (mit --atomar zuerst in <ausgabe>/_paket_tmp, erst nach der Prüfung in den Paketordner)
     fertige = []
@@ -846,7 +854,7 @@ def cmd_bauen(args):
                     if teile and teile[0] in ("OK", "FEHLER") and len(teile) == 2:
                         name_text = teile[1]
                         pruefung.append((name_text[:40].strip(), teile[0] == "OK", name_text[40:].strip()))
-                bericht["pakete"][name] = {"pfad": os.path.relpath(endziel, HIER), "groesse": groesse,
+                bericht["pakete"][name] = {"pfad": _relativ(endziel), "groesse": groesse,
                                            "pruefung": pruefung, "rueckgabe": rueckgabe,
                                            "fehler": sum(1 for _, ok, _ in pruefung if not ok)}
                 z = {"ok": True}

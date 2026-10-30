@@ -697,13 +697,17 @@ def _bremslinien_in_kurven(ai, anzahl, min_abstand, protokoll):
                              "radius_m": round(1 / max(k[i % n], 1e-9), 1),
                              "scheitel_radius_m": round(1 / max(k[scheitel % n], 1e-9), 1)})
                 break
-    # zweite Linien in den längsten Kurven: stärkste noch freie Krümmung
-    for s, e in sorted(kurven, key=lambda kv: -(kv[1] - kv[0])):
-        if len(belegt) >= anzahl:
-            break
-        frei = [i for i in range(s + 1, e + 1) if abstand_ok(i % n, belegt)]
-        if frei:
-            belegt.append(max(frei, key=lambda i: k[i % n]) % n)
+    # weitere Linien in den längsten Kurven, stärkste noch freie Krümmung, reihum bis alle IDs vergeben sind
+    # (ein Ring hat nur wenige Kurven, der Träger verlangt trotzdem alle Bremslinien)
+    vorher = -1
+    while vorher != len(belegt) < anzahl:
+        vorher = len(belegt)
+        for s, e in sorted(kurven, key=lambda kv: -(kv[1] - kv[0])):
+            if len(belegt) >= anzahl:
+                break
+            frei = [i for i in range(s + 1, e + 1) if abstand_ok(i % n, belegt)]
+            if frei:
+                belegt.append(max(frei, key=lambda i: k[i % n]) % n)
     if len(belegt) < anzahl:
         raise WeltFehler("zu wenige Kurven-Gates für %d Bremslinien" % anzahl)
     protokoll["bremslinien_kurven"] = {"kurven": len(kurven), "mit_generator_bremse": sum(map(mit_bremse, kurven)),

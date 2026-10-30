@@ -6,9 +6,10 @@ import math
 import pytest
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QApplication, QPushButton
 
-from mapeditor.project import point_xyz
+from mapeditor.project import Project, point_xyz
+from mapeditor.window import MainWindow
 from test_journeys import current_preview, journey, undo  # noqa: F401  (Fixture)
 
 
@@ -72,3 +73,55 @@ def test_button_hidden_for_segments_and_disabled_without_gaps(journey):
     assert not gap_button(w).isVisible()
     w2 = journey("portimao_form.json")
     assert gap_button(w2).isVisible() and not gap_button(w2).isEnabled()
+
+
+def ring(skip=()):
+    """Fenster mit einer offenen Runde aus 40 Punkten (Abstand 15,7 m), ohne die Punkte aus ``skip``."""
+    w = MainWindow(Project(), auto_preview=False)
+    for k in range(40):
+        if k not in skip:
+            w.document.insert(100 * math.cos(k / 40 * math.tau), 100 * math.sin(k / 40 * math.tau))
+    QApplication.processEvents()
+    return w
+
+
+def done(w):
+    w.document.undo.setClean()
+    w.close()
+
+
+def test_button_needs_closed_lap_and_says_why(app):
+    w = ring(range(10, 20))
+    button = gap_button(w)
+    assert not button.isEnabled() and "Runde schließen" in button.toolTip() and button.text() == "Lücken füllen (1)"
+    w.toggle_closed()
+    QApplication.processEvents()
+    assert button.isEnabled() and "Generatorvorschau" in button.toolTip()
+    w.document.edit("Richtung", lambda raw, meta: raw["mittellinie"].update(umkehren=True))
+    QApplication.processEvents()
+    assert not button.isEnabled() and "umgekehrter" in button.toolTip()
+    done(w)
+
+
+def test_selected_neighbours_enable_the_button_without_a_large_gap(app):
+    w = ring({10})                                  # Abstand 31 m: doppelt so groß wie üblich, keine große Lücke
+    w.toggle_closed()
+    QApplication.processEvents()
+    button = gap_button(w)
+    assert not w.document.gaps() and not button.isEnabled() and "benachbarte" in button.toolTip()
+    w.document.select_many({9, 10}, 9)
+    assert button.isEnabled() and button.text() == "Lücken füllen (1)"
+    w.document.select_many({2, 3}, 2)               # üblicher Abstand: kein Platz für einen weiteren Punkt
+    assert not button.isEnabled()
+    w.document.select_many({0, len(w.document.points) - 1}, 0)
+    assert not button.isEnabled()
+    done(w)
+
+
+def test_closing_pair_counts_as_neighbours(app):
+    w = ring({39})
+    w.toggle_closed()
+    QApplication.processEvents()
+    w.document.select_many({0, len(w.document.points) - 1}, 0)
+    assert w.document.gap_targets().keys() == {len(w.document.points) - 1}
+    done(w)

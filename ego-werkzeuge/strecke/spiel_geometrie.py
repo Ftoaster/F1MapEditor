@@ -375,6 +375,8 @@ def render_netze(netz: dict, pos: np.ndarray, t: g.Terrain, vorlagen: dict) -> T
     netze, info = [], {}
 
     def anfuegen(klasse, sel_tri, uv0, zus, normalen):
+        if not len(sel_tri):                  # z. B. Ring ohne Randsteine: leere Klassen entfallen
+            return
         material = KLASSEN[klasse][0]
         ids, lokal = _teilnetz(sel_tri)
         n = len(ids)

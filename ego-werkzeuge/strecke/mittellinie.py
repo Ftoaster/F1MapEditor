@@ -655,6 +655,8 @@ def kurven_finden(ml, schwelle=1.0 / 500.0, mindestwinkel_grad=15.0, zusammenfas
     Eine Kurve ist ein zusammenhängender Bereich mit |Krümmung| > schwelle und gleichem
     Vorzeichen; gleichsinnige Bereiche mit kürzerer Lücke werden zusammengefasst.
     Rückgabe: Liste von Dicts (Indizes können > n sein, wenn eine Kurve über s = 0 reicht).
+    Bleibt eine Runde unter der Schwelle (Kreis mit Radius > 500 m), zählt die stärkste Krümmung als Maßstab: Der Träger
+    braucht Kurven für seine Bremslinien.
     """
     k = ml.kappa_glatt
     n = len(k)
@@ -697,5 +699,8 @@ def kurven_finden(ml, schwelle=1.0 / 500.0, mindestwinkel_grad=15.0, zusammenfas
             "winkel_grad": winkel,
             "min_radius_m": float(1.0 / max(np.max(np.abs(ml.kappa[idx])), 1e-12)),
         })
+    ersatz = 0.7 * float(np.max(np.abs(k)))
+    if not kurven and 0.0 < ersatz < schwelle:
+        return kurven_finden(ml, ersatz, mindestwinkel_grad, zusammenfassen_m)
     kurven.sort(key=lambda kv: kv["i_anfang"])
     return kurven
