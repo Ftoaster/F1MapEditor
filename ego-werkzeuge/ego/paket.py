@@ -29,8 +29,10 @@ KOPIER_BLOCK = 8 * 1024 * 1024
 PFLICHTFELDER = ("track_code", "track_name", "author_name", "version", "erp", "ui", "copy_directories")
 # Logik-Ressourcen, die jede Strecke hat (siehe docs/streckenaufbau.md)
 STRECKEN_TYPEN = ("World", "WOInstances", "TRN~", "AISplineData", "TrackSpace", "TSQuadTree", "TM", "TS",
-                  "TrackInfoBinary", "TrackInfoTex", "PVSObjIDRes", "PVSVisRes", "CrowdPlacement", "Spline",
+                  "TrackInfoBinary", "TrackInfoTex", "CrowdPlacement", "Spline",
                   "AIBraking", "VPTimes", "IBLSH", "DDGIRes", "LightMapLocRes")
+#: Sichtbarkeitsdaten: alle Spielstrecken und Portimão-Mod 1.0.0 haben sie, Mod 1.0.2 liefert keine (der Bau lässt den PVS-Schritt dann aus)
+OPTIONALE_TYPEN = ("PVSObjIDRes", "PVSVisRes")
 
 
 class PaketFehler(ValueError):
@@ -151,8 +153,10 @@ class ModPaket:
                 melde("Ressourcen unter tracks/%s/" % self.track_code, eigene, "%d" % eigene)
                 typen = {r.resource_type for r in a}
                 ohne = [t for t in STRECKEN_TYPEN if t not in typen]
+                ohne_pvs = [t for t in OPTIONALE_TYPEN if t not in typen]
                 melde("Strecken-Ressourcentypen", not ohne,
-                      "alle %d vorhanden" % len(STRECKEN_TYPEN) if not ohne else "fehlen: %s" % ", ".join(ohne))
+                      ("alle %d vorhanden" % len(STRECKEN_TYPEN) + (", ohne PVS (Träger ohne Sichtbarkeitsdaten)" if ohne_pvs else ""))
+                      if not ohne else "fehlen: %s" % ", ".join(ohne))
                 # AP16: Einstiegswelt und externe Mip-Pfade müssen zum Code bzw. Kopierziel passen
                 welt = "%swep/%s_common.wep" % (praefix, self.track_code)
                 melde("Welt %s_common.wep" % self.track_code, welt in kennungen)

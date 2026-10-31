@@ -91,6 +91,24 @@ LAYER_REGELN = {
     "offtrack_vehicles": (LEEREN, "abgestellte Fahrzeuge (2.025)"),
     "speedtrees": (LEEREN, "Bäume (1.274) stehen teils auf der neuen Fahrbahn"),
     "speedtrees_distant": (LEEREN, "Billboard-Baumgruppen der alten Umgebung (Lage nur im Modell, nicht prüfbar)"),
+    # --- Ebenen der Portimão-Mod 1.0.2 (neues Konvertierungsskript, andere Namen und zusätzliche Ebenen) ------------
+    "trees": (LEEREN, "Bäume (1.274) der Mod 1.0.2 (vorher speedtrees); würden in der Luft über der neuen Strecke hängen"),
+    "trees_distant": (LEEREN, "Billboard-Baumgruppen der Mod 1.0.2 (vorher speedtrees_distant)"),
+    "braking_boards": (LEEREN, "Entfernungstafeln (36) der alten Streckenführung; neue Tafeln kommen aus der Ebene dressing"),
+    "terrain_sponsors": (LEEREN, "Werbeflächen auf dem alten Gelände (vorher terrain_sponsors_f1)"),
+    "zone_signs_xmode": (LEEREN, "Schilder der alten Straight-Mode-Zonen"),
+    "zone_signs_drs_*": (LEEREN, "Schilder der alten DRS-Zonen (Ebenenname trägt einen Hash)"),
+    "audio_occlusion_next_gen": (BEHALTEN, "Audio-Verdeckung, nur Klang"),
+    "trackmarkup_audio_corner_assist": (BEHALTEN, "schon im Original leer"),
+    "trackmarkup_audio_whoosh_left": (BEHALTEN, "schon im Original leer"),
+    "trackmarkup_audio_whoosh_right": (BEHALTEN, "schon im Original leer"),
+    "trackmarkup_drs": (BEHALTEN, "schon im Original leer"),
+    "trackmarkup_xmode": (BEHALTEN, "schon im Original leer"),
+    "objects_garages_f1_26": (LEEREN, "Boxengebäude der alten Boxengasse (F1 2026; im Bau an die neuen Boxen versetzt)"),
+    "objects_garages_f1_26_myteam": (LEEREN, "Boxengebäude der alten Boxengasse (F1 2026 MyTeam; versetzt)"),
+    "objects_garages_f1_previous_myteam": (LEEREN, "Boxengebäude der alten Boxengasse (MyTeam Vorgänger; versetzt)"),
+    "objects_garages_f1_story": (LEEREN, "Boxengebäude der alten Boxengasse (Story; versetzt)"),
+    "objects_garages_f2_26": (LEEREN, "Boxengebäude der alten Boxengasse (F2 2026; versetzt)"),
     "groundcover": (LEEREN, "Bodenbewuchs nach Portimão-Maske; würde auf neuer Fahrbahn wachsen"),
     "decals": (LEEREN, "Decals (810) projizieren auf die alte Fahrbahnlage"),
     "drs": (LEEREN, "DRS-Tafeln der alten Zonen (unsichtbar geschaltet, Lage im Modell)"),
@@ -279,13 +297,26 @@ class TraegerZustand:
 
 
 # =============================================================================== Welt aufräumen
+UNBEKANNTER_LAYER = "unbekannter Layer: unverändert gelassen"
+
+
+def regel_fuer(regeln, kurz):
+    """Regel eines Layers: genauer Name, sonst ein Eintrag mit ``*`` am Ende als Vorsatz (Mod 1.0.2 hängt Hashes an Namen)."""
+    if kurz in regeln:
+        return regeln[kurz]
+    for muster, regel in regeln.items():
+        if muster.endswith("*") and kurz.startswith(muster[:-1]):
+            return regel
+    return (BEHALTEN, UNBEKANNTER_LAYER)
+
+
 def welt_aufraeumen(archiv, zustand, regeln=None):
     """Leert die Layer mit Regel LEEREN. Entfernt nur Instanzen des Original-Trägers, prüft vorher,
     dass keine davon vom EventGraph angesprochen wird. Gibt einen Bericht je Layer zurück."""
     regeln = regeln or LAYER_REGELN
     bericht = []
     for kurz, r in sorted(layer_ressourcen(archiv, zustand.code).items()):
-        aktion, grund = regeln.get(kurz, (BEHALTEN, "unbekannter Layer: unverändert gelassen"))
+        aktion, grund = regel_fuer(regeln, kurz)
         p = pkg.lesen(r.fragments[0].read())
         inst = p.instanzen()
         eintrag = {"layer": kurz, "aktion": aktion, "grund": grund, "vorher": len(inst), "entfernt": 0,
@@ -946,7 +977,10 @@ def plaetze_berechnen(lg, zustand, protokoll):
 
 #: Garagen-Layer des Trägers (je Spielmodus einer; Portimão: je Box ein Satz garage_main_a, garage_shadow,
 #: Tafel, Teamfarben, Bodenmarkierung, Kommandostand). Keine Physik, keine EventGraph-Verweise (geprüft 29.10.2026).
-GARAGEN_LAYER = ("objects_garages_f1", "objects_garages_f1_myteam", "objects_garages_f2", "objects_garages_classic")
+GARAGEN_LAYER = ("objects_garages_f1", "objects_garages_f1_myteam", "objects_garages_f2", "objects_garages_classic",
+                 # Portimão-Mod 1.0.2: eine Ebene je Spielmodus mehr (2026, Story, MyTeam-Vorgänger)
+                 "objects_garages_f1_26", "objects_garages_f1_26_myteam", "objects_garages_f1_previous_myteam",
+                 "objects_garages_f1_story", "objects_garages_f2_26")
 #: Kommandostände an der Boxenmauer (Modellname beginnt so); werden an die neue Mauer gerückt
 KOMMANDOSTAND = "pit_perch"
 #: Abstand Modellursprung – Rückseite des Stands in Meter (Modellhülle quer −0,71…+0,59). In Portimão steht er auf der

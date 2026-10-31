@@ -219,7 +219,7 @@ Strecke reicht bis an den Rand des Außenterrain-Lochs;Track reaches the edge of
 Terrainmaterial fehlt oder ist mehrdeutig: {};Terrain material is missing or ambiguous: {};spiel_geometrie.py
 trn_flags: kanten oder alle7;trn_flags: kanten or alle7;spiel_geometrie.py
 TRN~ muss genau ein Fragment haben;TRN~ must have exactly one fragment;spiel_geometrie.py
-Träger enthält kein Portimão-Terrain bzw. keine TRN~;Carrier contains no Portimão terrain or no TRN~;spiel_geometrie.py
+Träger passt nicht: In der Portimão-Mod (Version {}) fehlt {}. Getestet sind die Versionen {} (Download-Seite der Mod, Reiter „History“).;Carrier does not fit: the Portimão mod (version {}) has no {}. Tested versions: {} (mod download page, History tab).;spiel_geometrie.py
 welt_uv: konstant oder echt;welt_uv: konstant or echt;spiel_geometrie.py
 AP12 unterstützt genau eine Haupt- und eine Boxenspline;AP12 supports exactly one main and one pit spline;spiel_ki.py
 "Brems-ID-Sätze verschieden; profil-Modus oder konsistente Logik nötig";"Brake ID sets differ; profile mode or consistent logic needed";spiel_ki.py
@@ -253,6 +253,7 @@ Vorlage muss genau einen TrackSpace enthalten;Template must contain exactly one 
 VP-Referenzzeit fehlt;VP reference time is missing;spiel_ki.py
 VP-Vorlage benötigt zwei Routentabellen;VP template needs two route tables;spiel_ki.py
 VP-Zielabtastung zu groß;VP target sampling too large;spiel_ki.py
+vp_abtastung: auto, skaliert oder original;vp_abtastung: auto, skaliert or original;spiel_ki.py
 Ziel-aispline passt räumlich nicht zur Logik (zuerst Logik schreiben);Target aispline does not match the logic spatially (write the logic first);spiel_ki.py
 Zuerst den Ziel-TrackSpace schreiben: Splinepunkte weichen ab;Write the target TrackSpace first: spline points differ;spiel_ki.py
 Zuerst die Ziel-aispline schreiben: Gate-IDs/-Zahl weichen ab;Write the target aispline first: gate IDs or count differ;spiel_ki.py
@@ -293,6 +294,8 @@ Biom Wüste: Texturen fehlen nach dem Kopieren: {};Desert biome: textures are mi
 Biom {} unbekannt;Biome {} unknown;spiel_weltkarten.py
 Farbton {} unbekannt;Colour tone {} unknown;spiel_weltkarten.py
 kein Asphaltnetz por_track_a;no asphalt mesh por_track_a;spiel_weltkarten.py
+Material {}: Textur im Slot {} fehlt ({});Material {}: texture in slot {} is missing ({});spiel_weltkarten.py
+Material {}: {} Treffer;Material {}: {} matches;spiel_weltkarten.py
 Textur {}: {} Treffer;Texture {}: {} matches;spiel_weltkarten.py
 Brems-IDs fehlen in {}/{};Brake IDs are missing in {}/{};spielformat.py
 Doppelte Gate-ID;Duplicate gate ID;spielformat.py
@@ -408,6 +411,7 @@ Umgebungsdatei muss im Projektordner liegen: {};Environment file must be in the 
 "{} Umgebungsobjekte (Richtwert ≤ {}; Portimão hat 1.274 Bäume)";"{} environment objects (guide value ≤ {}; Portimão has 1,274 trees)";umgebung.py
 {} {}: hoehe_m {} außerhalb {}…{};{} {}: hoehe_m {} outside {}…{};umgebung.py
 {} {}: radius_m {} außerhalb {}…{};{} {}: radius_m {} outside {}…{};umgebung.py
+Träger enthält kein Portimão-Terrain bzw. keine TRN~;Carrier contains no Portimão terrain or no TRN~;unbenutzt
 Kurvenzahl {} außerhalb {}–{}.;Number of corners {} outside {}–{}.;vorschlag.py
 Länge {} m außerhalb {}–{} m.;Length {} m outside {}–{} m.;vorschlag.py
 Mindestradius {} m außerhalb {}–{} m.;Minimum radius {} m outside {}–{} m.;vorschlag.py

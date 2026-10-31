@@ -160,6 +160,23 @@ def geschwindigkeit_neu(logik, parametersatz='f1_25_ki_portimao', glaettung_m=4.
     return logik
 
 
+#: Stützpunkte je Zeittabelle der Portimão-Vorlagen (Hauptroute, Boxenroute); in allen 83.976 Sätzen beider Mod-Versionen gleich
+VP_SAMPLES = (931, 305)
+#: Obergrenze der umgerechneten VPTimes (roh, MB·10⁶). Verifiziert: LongBoy auf Mod 1.0.0 mit 294 MB lädt im Spiel; auf Mod 1.0.2
+#: stürzt das Spiel mit 449 MB ab, mit 251 MB (Stützpunkte der Vorlage) lädt es. Wo dazwischen die Grenze liegt, ist unbekannt.
+VP_GRENZE_BYTES = 300e6
+
+
+def vp_abtastung_waehlen(vorlage_bytes, faktoren, modus='auto', grenze=VP_GRENZE_BYTES):
+    """(Abtastung, geschätzte Bytes) der umgerechneten VPTimes. ``auto``: mit der Streckenlänge skaliert, solange die Schätzung
+    unter ``grenze`` bleibt, sonst Stützpunktzahl der Vorlage (Hauptroute). Schätzung: Bytes der Vorlage × Stützpunktgewicht."""
+    gewicht = (VP_SAMPLES[0]*faktoren[0]+VP_SAMPLES[1]*faktoren[1])/sum(VP_SAMPLES)
+    geschaetzt = vorlage_bytes*gewicht
+    if modus == 'auto':
+        modus = 'original' if geschaetzt > grenze else 'skaliert'
+    return modus, geschaetzt
+
+
 def _interpolieren(werte, n, faktor=1):
     if n == len(werte) and faktor == 1:
         return list(werte)
@@ -317,6 +334,8 @@ def _ki_ressource(auftrag):
         for route, t in enumerate(d.vp_tabellen):
             for s in t.saetze:
                 n = max(2, int(round((s.anzahl-1)*faktoren[route]))+1)
+                if route == 0 and g['vp_abtastung'] == 'original':
+                    n = s.anzahl          # Stützpunktzahl der Mod behalten (Eingrenzung des Absturzes mit Mod 1.0.2)
                 if n > 100000:
                     raise ValueError('VP-Zielabtastung zu groß')
                 if modus == 'profil' and route == 0:
@@ -361,16 +380,23 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     Optionen: modus='skalieren'|'profil', bremsmodus='vorlage'|'profil', profil_fahrzeug=None|Parametersatz
     (Profil vorher mit diesem Fahrzeugsatz neu rechnen, z. B. 'f1_25_ki_portimao'),
     ers_strategie='neutral'|'behalten', granular_samples=None|int,
-    referenz_zeit_s=None|float. Profil und explizite Bremsgeschwindigkeiten sind
+    referenz_zeit_s=None|float, ohne_pakete=Fahrzeugpakete (z. B. ``f1_2024_story_vehicle_package``), deren KI-Daten
+    unverändert bleiben (Portimão-Mod 1.0.2: Absturz beim Laden mit angepassten Daten, Eingrenzung läuft).
+    Profil und explizite Bremsgeschwindigkeiten sind
     Versuchsmodelle. Ohne Profil bleiben Verbrauchsformen normiert erhalten.
     """
-    erlaubt = {'modus', 'bremsmodus', 'ers_strategie', 'granular_samples', 'referenz_zeit_s', 'profil_fahrzeug'}
+    erlaubt = {'modus', 'bremsmodus', 'ers_strategie', 'granular_samples', 'referenz_zeit_s', 'profil_fahrzeug', 'ohne_pakete', 'nur_typen', 'vp_abtastung'}
     if set(optionen)-erlaubt:
         raise TypeError('Unbekannte KI-Optionen: '+', '.join(sorted(set(optionen)-erlaubt)))
     modus = optionen.get('modus', 'skalieren')
     bremsmodus = optionen.get('bremsmodus', 'vorlage')
     strategie = optionen.get('ers_strategie', 'neutral')
     samples = optionen.get('granular_samples')
+    ohne = tuple(optionen.get('ohne_pakete') or ())
+    nur_typen = frozenset(optionen.get('nur_typen') or ())
+    vp_abtastung = optionen.get('vp_abtastung') or 'auto'
+    if vp_abtastung not in ('auto', 'skaliert', 'original'):
+        raise ValueError('vp_abtastung: auto, skaliert oder original')
     if modus not in ('skalieren', 'profil') or bremsmodus not in ('vorlage', 'profil'):
         raise ValueError('Unbekannter KI-/Bremsmodus')
     if strategie not in ('neutral', 'behalten'):
@@ -445,14 +471,20 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
         if referenz is not None and (not math.isfinite(float(referenz)) or float(referenz) <= 0):
             raise ValueError('Positive endliche Referenzzeit erforderlich')
         zeitfaktor = float(profil['zeit'][-1]/referenz) if modus == 'profil' else faktoren[0]
-        auftraege, ergebnisse = [], []
+        auftraege, ergebnisse, uebersprungen = [], [], 0
         for res in ziele:
             suffix = res.identifier.split('/ai/', 1)[-1]
             if suffix not in quellen or quellen[suffix].resource_type != res.resource_type:
                 raise ValueError('KI-Vorlagenressource fehlt: '+res.identifier)
             if len(res.fragments) != len(quellen[suffix].fragments):
                 raise ValueError('Quell-/Zielfragmente verschieden')
-            if (res.resource_type in FAHRZEUGFELDER and len(res.fragments) == 1 and
+            if nur_typen and res.resource_type not in nur_typen:
+                ergebnisse.append((res.resource_type, None))      # Typ ausgenommen (Eingrenzung des Absturzes)
+                uebersprungen += 1
+            elif any('/ai/%s/' % paket in res.identifier for paket in ohne):
+                ergebnisse.append((res.resource_type, None))      # Paket ausgenommen: Daten der Mod bleiben
+                uebersprungen += 1
+            elif (res.resource_type in FAHRZEUGFELDER and len(res.fragments) == 1 and
                     quellen[suffix].fragments[0].read() == res.fragments[0].read()):
                 # Kennfelder bleiben unverändert; Vorlage = Ziel → nichts zu tun (Rundlauf ist bitgenau,
                 # vorher ≈ 50 s CPU für Parsen und Zurückschreiben ohne Änderung)
@@ -462,11 +494,15 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
                 auftraege.append((res.resource_type,
                                   [(f.read_packed(), f.size, f.compression) for f in quellen[suffix].fragments],
                                   [(f.read_packed(), f.size, f.compression) for f in res.fragments]))
+        vp_bytes = 0 if nur_typen and 'VPTimes' not in nur_typen else sum(
+            f.size for res in ziele if res.resource_type == 'VPTimes'
+            and not any('/ai/%s/' % paket in res.identifier for paket in ohne) for f in res.fragments)
+        vp_abtastung, vp_geschaetzt = vp_abtastung_waehlen(vp_bytes, faktoren, vp_abtastung)
         # 26.10.2026: Ressourcen sind unabhängig → auf alle Kerne verteilt (vorher ≈ 140 s auf einem Kern)
         gemeinsam = {'modus': modus, 'profil': profil, 'faktoren': faktoren, 'referenz': referenz,
                      'gates': projektionsgates, 'linien': linien, 'splines': neu, 'bremsmodus': bremsmodus,
                      'pit_limit': pit_limit, 'samples': samples, 'zeitfaktor': zeitfaktor,
-                     'strategie': strategie, 'gleiche_geometrie': gleiche_geometrie}
+                     'strategie': strategie, 'gleiche_geometrie': gleiche_geometrie, 'vp_abtastung': vp_abtastung}
         # größte Ressourcen zuerst (zstd Stufe 19 der VPTimes ist der teuerste Teil)
         berechnet = parallel.abbilden(_ki_ressource, auftraege, gemeinsam,
                                       aufwand=[sum(f[1] for f in a[1]) for a in auftraege])
@@ -481,6 +517,9 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
             geaendert.append(res.identifier)
     return {'modus': modus, 'bremsmodus': bremsmodus, 'ers_strategie': strategie,
             'ressourcen': len(ziele), 'typen': typzahlen, 'geaendert': len(geaendert),
+            'ohne_pakete': list(ohne), 'nur_typen': sorted(nur_typen), 'uebersprungen': uebersprungen,
+            'vp_abtastung': vp_abtastung, 'vp_geschaetzt_mb': round(vp_geschaetzt/1e6, 1),
+            'vp_grenze_mb': round(VP_GRENZE_BYTES/1e6, 1),
             'geaenderte_kennungen': geaendert, 'laengen_alt_m': [s.laenge for s in alt],
             'laengen_neu_m': [s.laenge for s in neu], 'laengenfaktoren': faktoren,
             'brems_ids': sorted(int(l['id']) for l in linien),

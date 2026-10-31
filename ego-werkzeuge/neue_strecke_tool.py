@@ -555,6 +555,16 @@ def cmd_bauen(args):
     bericht["traeger"] = {"pfad": _relativ(traeger), "groesse": os.path.getsize(traeger)}
 
     a = erp.open_erp(traeger)
+    if not args.ohne_geometrie:           # Träger gleich prüfen, nicht erst nach Minuten (Mod-Version 1.0.2 passt nicht)
+        mod_geo, _fehler = modul_laden("strecke.spiel_geometrie")
+        if mod_geo is not None and hasattr(mod_geo, "traeger_pruefen"):
+            try:
+                mod_geo.traeger_pruefen(a, manifest)
+            except mod_geo.GeometrieFehler:
+                nah = sorted({r.identifier for r in a.find_all("terrain") if r.identifier.startswith("eaid://environment_package/tracks/")})
+                _log("Träger: Mod-Version %s, Code %s, %d Ressourcen; Terrain-Kennungen: %s"
+                     % (manifest.get("version", "?"), manifest.get("track_code", "?"), len(a), ", ".join(nah[:6]) or "keine"))
+                raise
     _log("Träger erfassen …")
     zustand = spiel_welt.TraegerZustand.erfassen(a)
     trn_hash = next(r.hash for r in a if r.resource_type == "TRN~")
@@ -646,6 +656,11 @@ def cmd_bauen(args):
             welt_regeln[kurz] = (spiel_welt.ANPASSEN, "Garagenmodule des Trägers, an die neuen Boxen versetzt")
     _log("Welt aufräumen …")
     welt = spiel_welt.welt_aufraeumen(a, zustand, welt_regeln)
+    for e in welt:      # Ebenen, die die Regeltabelle nicht kennt (neue Mod-Version): bleiben, aber nicht unbemerkt
+        if e["grund"] == spiel_welt.UNBEKANNTER_LAYER and e["vorher"] > 0:
+            text = "Ebene %s (%d Instanzen) hat keine Regel und bleibt unverändert" % (e["layer"], e["vorher"])
+            _log("WARNUNG: " + text)
+            bericht["warnungen"].append(text)
     bericht["schritte"]["welt"] = welt
     physik = spiel_welt.verbliebene_physik(a)
     bericht["schritte"]["physik_verblieben"] = physik
@@ -683,6 +698,12 @@ def cmd_bauen(args):
         # profil: VPTimes aus dem eigenen Geschwindigkeitsprofil, gerechnet mit dem an der Spiel-KI kalibrierten
         # Fahrzeug (25.10.2026; vorher Portimãos Zeitkurve über dem Rundenanteil → Bremszonen ohne Bezug zu den Kurven)
         extra = {"profil_fahrzeug": "f1_25_ki_portimao"} if args.ki_daten == "profil" else {}
+        if args.ki_vp_abtastung:
+            extra["vp_abtastung"] = args.ki_vp_abtastung
+        if args.ki_nur_typen:
+            extra["nur_typen"] = tuple(p.strip() for p in args.ki_nur_typen.split(",") if p.strip())
+        if args.ki_ohne_pakete:
+            extra["ohne_pakete"] = tuple(p.strip() for p in args.ki_ohne_pakete.split(",") if p.strip())
         bericht["schritte"]["ki_daten"] = spiel_ki.ki_daten_anpassen(
             a, lg, vorlage=traeger, modus=args.ki_daten, **extra)
     # --- Licht
@@ -712,7 +733,12 @@ def cmd_bauen(args):
         bericht["schritte"]["pvs"] = {"zellen": 0, "vorher_byte": 0, "nachher_byte": 0, "uebersprungen": True}
     else:
         _phase("pvs")
-        if args.pvs_variante == "strecke":
+        if not a.find_all(r"\.volumedata\.pvsbin$"):
+            # Portimão-Mod 1.0.2 liefert keine PVS-Daten (ohne PVSObjIDRes/PVSVisRes gibt es nichts zu ersetzen)
+            _log("Träger ohne PVS (Portimão-Mod 1.0.2): PVS-Schritt entfällt")
+            bericht["schritte"]["pvs"] = {"zellen": 0, "vorher_byte": 0, "nachher_byte": 0, "uebersprungen": True,
+                                          "grund": "Träger ohne PVS"}
+        elif args.pvs_variante == "strecke":
             # 16.10.2026: Original-PVS lässt die neue Fahrbahn neben der Box (alter Portimão-Bereich) unsichtbar
             _log("PVS-Zellen entlang der neuen Strecke …")
             from strecke import spiel_pvs
@@ -1371,6 +1397,13 @@ def argumente(argv):
     s.add_argument("--ki-daten", choices=("vorlage", "skalieren", "profil"), default="vorlage",
                    help="KI-Daten je Fahrzeug: vorlage = Portimão unverändert (Standard), skalieren/profil = an die neue "
                         "Strecke angepasst (AP12, experimentell)")
+    s.add_argument("--ki-vp-abtastung", choices=("auto", "skaliert", "original"), default="",
+                   help="Stützpunkte der Zeittabellen (VPTimes, Hauptroute): auto (Standard) = skaliert mit der Streckenlänge, "
+                        "solange die Gesamtmenge unter 300 MB bleibt, sonst wie in der Vorlage (Mod 1.0.2 stürzt darüber ab)")
+    s.add_argument("--ki-nur-typen", default="",
+                   help="nur diese KI-Ressourcentypen anpassen (Komma), z. B. VPTimes; Rest unverändert")
+    s.add_argument("--ki-ohne-pakete", default="",
+                   help="Fahrzeugpakete (Komma), deren KI-Daten unverändert bleiben, z. B. f1_2024_story_vehicle_package")
     s.add_argument("--pvs-korridor", type=float, default=60.0, help="Korridorbreite je Seite für --pvs-variante strecke")
     s.add_argument("--nur-original-pvs", action="store_true",
                    help="nur die Variante mit Original-PVS schreiben und verpacken (spart ~3 GB)")

@@ -620,10 +620,11 @@ def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str]
             raise StreckencodeFehler("Unerwartetes Kopierziel %r" % c.get("destination"))
         c["destination"] = "asset_groups/environment_package/tracks/%s/mipmaps/" % regeln.neu
     if aktivierung_vorlage:
-        akt = m.setdefault("activation", {})
-        akt["copy_from_track"] = aktivierung_vorlage
-        akt.setdefault("overrides", [])
-        akt.setdefault("track_overrides", [])
+        # immer die schlanke, im Spiel bewährte Aktivierung (Kopie einer vorhandenen Strecke, nur Länge und Kurven): Mod 1.0.2
+        # bringt eine eigene mit (copy_from_track zandvoort, 151 Overrides, 83 Streckenwerte), die zu Portimão gehört.
+        # Die drei Streckenwerte, die der Bau vorher gesetzt hat (``metadaten_setzen``), bleiben erhalten.
+        eigene = [e for e in (m.get("activation") or {}).get("track_overrides") or [] if e.get("path") in METADATEN_SCHLUESSEL]
+        m["activation"] = {"copy_from_track": aktivierung_vorlage, "overrides": [], "track_overrides": eigene}
     return m
 
 

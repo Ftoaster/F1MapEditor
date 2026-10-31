@@ -4,7 +4,8 @@ Ersetzt im geöffneten Träger-Archiv (Portimão-Slot-ERP)
 
 * die sichtbare Fahrbahn ``…/portimao_terrain.idf?context=render`` (TerrainRes) durch das
   Generatornetz plus eine Rasen-Grundfläche, die das Loch des Außenterrains vollständig füllt,
-* die Fahrphysik ``…/portimao_terrain.idf?context=physics_terrain`` (TRN~) durch dieselben Dreiecke
+* die Fahrphysik ``…/portimao_terrain.idf?context=physics_terrain`` (TRN~, in Mod 1.0.2 ``portimao_terrain_retained_<hash>.idf``,
+  gefunden mit ``physik_kennung``) durch dieselben Dreiecke
   mit Oberflächencodes (Version 2, ``ego.trn_erzeugen``). Von Portimão bleibt keine Physik übrig.
 
 Das Außenterrain ``portimao_outer_terrain`` bleibt unverändert: Es hat ein exakt 2048 × 2048 m
@@ -38,6 +39,17 @@ BASIS = 'eaid://environment_package/tracks/portimao/terrain/idf/'
 TERRAIN = BASIS + 'portimao_terrain.idf?context=render'
 AUSSEN = BASIS + 'portimao_outer_terrain.idf?context=render'
 PHYSIK = BASIS + 'portimao_terrain.idf?context=physics_terrain'
+
+
+def physik_kennung(archiv: erp.ErpFile) -> str:
+    """Kennung der Fahrphysik (TRN~) des Portimão-Terrains. Mod 1.0.0: ``PHYSIK``; Mod 1.0.2 (neues Konvertierungsskript)
+    nennt sie ``portimao_terrain_retained_<hash>.idf?context=physics_terrain``. Bei genau einer passenden TRN~ unter
+    ``BASIS`` gilt diese, sonst ``PHYSIK``."""
+    if archiv.find(PHYSIK) is not None:
+        return PHYSIK
+    kandidaten = [r.identifier for r in archiv.resources if r.resource_type == 'TRN~' and r.identifier.startswith(BASIS)
+                  and r.identifier.endswith('?context=physics_terrain')]
+    return kandidaten[0] if len(kandidaten) == 1 else PHYSIK
 
 #: Abbildung Generatorklasse -> vorhandenes Portimão-Terrainmaterial (Dateiname) und TRN-Code.
 #: Begründung und UV-Maßstäbe: docs/neue_strecke.md, Abschnitt „Geometrie“.
@@ -233,7 +245,7 @@ def vorlagen_lesen(archiv: erp.ErpFile, materialien: Sequence[str], codes: Seque
         erg['uv_welt'][name] = [float(v) for v in n.uv_welt[k]]
         erg['uv_welt_punkt'][name] = [float(v) for v in n.positionen[k]]
     try:
-        kacheln = trn.open_trn(archiv.find(PHYSIK).data()).geometry()
+        kacheln = trn.open_trn(archiv.find(physik_kennung(archiv)).data()).geometry()
         v, tri, cs, attr, _, _ = trn.mesh_mit_attributen(kacheln)
         cs = np.array([c if isinstance(c, str) else c.decode('latin1') for c in cs])
         for code in codes:
@@ -765,6 +777,21 @@ def huegel_anwenden(gp: np.ndarray, strecke: np.ndarray, loch: dict, hoehen, *, 
 
 
 # ----------------------------------------------------------------------------- Hauptfunktion
+#: Fassung der Portimão-Mod, mit der alles gebaut und im Spiel getestet ist (overtake.gg, Reiter „History“)
+GETESTETE_MOD_VERSION = '1.0.0 und 1.0.2'
+
+
+def traeger_pruefen(archiv: erp.ErpFile, manifest: Optional[dict] = None) -> None:
+    """Wirft ``GeometrieFehler``, wenn die Fahrbahn der Portimão-Mod fehlt. Die Version 1.0.2 der Mod (23.10.2026,
+    „new conversion script“) benennt ihre Ressourcen anders (``physik_kennung``); getestet sind ``GETESTETE_MOD_VERSION``."""
+    fehlt = [kennung for kennung in (TERRAIN, physik_kennung(archiv)) if archiv.find(kennung) is None]
+    if fehlt:
+        version = str((manifest or {}).get('version') or '?')
+        raise GeometrieFehler('Träger passt nicht: In der Portimão-Mod (Version %s) fehlt %s. Getestet sind die Versionen '
+                              '%s (Download-Seite der Mod, Reiter „History“).'
+                              % (version, fehlt[0], GETESTETE_MOD_VERSION))
+
+
 def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
     """Ersetzt im geöffneten Träger-Archiv (Portimão) die sichtbare Fahrbahn und die Fahrphysik durch
     die generierte Strecke (Koordinaten über strecke/platzierung.py). Gibt einen Bericht (dict) zurück.
@@ -817,10 +844,9 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
         raise ValueError('physik_umfang: voll, ohne_grund oder fahrbahn')
     physik_kante_max = optionen.get('physik_kante_max')
     physik_kante_max = float(physik_kante_max) if physik_kante_max else None
+    traeger_pruefen(archiv)
     terrain_res = archiv.find(TERRAIN)
-    physik_res = archiv.find(PHYSIK)
-    if terrain_res is None or physik_res is None:
-        raise GeometrieFehler('Träger enthält kein Portimão-Terrain bzw. keine TRN~')
+    physik_res = archiv.find(physik_kennung(archiv))
     if len(physik_res.fragments) != 1:
         raise GeometrieFehler('TRN~ muss genau ein Fragment haben')
     netz = netz_laden(netz_npz, optionen.get('definition'))
@@ -977,7 +1003,7 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
                                                       anzahl=kontrolle['raster'].anzahl),
                                           vorbelegungen=len(kontrolle['vorbelegungen']),
                                           ressourcen=kontrolle['ressourcen']))
-    bericht['physik'] = dict(kennung=PHYSIK, bytes=len(roh), kacheln=len(kacheln), dreiecke=int(len(pt)),
+    bericht['physik'] = dict(kennung=physik_res.identifier, bytes=len(roh), kacheln=len(kacheln), dreiecke=int(len(pt)),
                              vertices=int(len(pv)), dreiecke_je_klasse=trn_zahlen,
                              dreiecke_je_code=dict(zip(codes_neu.tolist(), anzahl.tolist())),
                              mauer_physik=mauer_physik, version='0x20002', erzeuger=trn_statistik,
@@ -997,5 +1023,5 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
                                        verfahren=grund_art)
     bericht['aussen'] = dict(kennung=AUSSEN, geaendert=False,
                              grund='Strecke liegt vollständig im 2048-m-Loch; Grundfläche schließt an den Innenrand an')
-    bericht['geaenderte_ressourcen'] = sorted(set(kontrolle['ressourcen']) | {PHYSIK})
+    bericht['geaenderte_ressourcen'] = sorted(set(kontrolle['ressourcen']) | {physik_res.identifier})
     return _json(bericht)

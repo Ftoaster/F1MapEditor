@@ -28,12 +28,12 @@ Die Oberfläche gibt es auf Deutsch und Englisch.
 | System | | Windows 10 oder 11, 64 Bit |
 | Spiel | [F1 25 bei Steam](https://store.steampowered.com/app/3059520/F1_25/) | Wird nur gelesen, nötig für Katalog und Bau |
 | Installer | [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) | Version 1.6.0 oder neuer, um eine Strecke zu installieren und einmal zu aktivieren |
-| Träger-Paket | [Algarve International Circuit (Portimao) for F1 25](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/) | `portimao.zip`, **nicht enthalten**. Der Bau nutzt es als Grundlage, du wählst es im Baudialog. Nicht entpacken |
+| Träger-Paket | [Algarve International Circuit (Portimao) for F1 25](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/) | `portimao.zip`, **Version 1.0.0 oder 1.0.2** (1.0.2 ist der aktuelle Download, 1.0.0 steht im [Reiter „History“](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/history) der Modseite). **Nicht enthalten**. Der Bau nutzt sie als Grundlage, du wählst sie im Baudialog. Nicht entpacken |
 
 Zeichnen und Prüfen geht ohne das Spiel. Nur zum Bauen brauchst du Spiel und Träger-Paket.
 
 Installer und Portimão-Mod sind Community-Projekte anderer Autoren, Bedingungen und Neuerungen stehen auf deren Seiten.
-Die Seite der Mod warnt vor Spielabstürzen mit AMD-Grafikkarten. Strecken, die darauf aufbauen, können ebenfalls betroffen sein.
+Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 behebt das. Strecken, die Mapeditor auf 1.0.2 baut, sind im Zeitfahren getestet; ob sie auf AMD-Karten laufen, ist nicht getestet.
 
 ## Loslegen
 

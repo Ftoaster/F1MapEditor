@@ -52,17 +52,58 @@ NEUTRALE_NORMALE = "eaid://environment_package/core_assets/shared_textures/defau
 def textur_kennung(a, name):
     """Kennung der ``….tif.image``-Ressource, deren Dateiname ``name`` ist (Pfad nach Umbenennung egal)."""
     treffer = [r.identifier for r in a if r.resource_type == "GfxSurfaceRes" and r.identifier.endswith("/" + name + ".tif.image")]
+    if len(treffer) > 1:
+        # Mod 1.0.2 legt für die Sponsorenfläche Kopien unter stageN/<hash>/ an; die Bodenkarte liegt in terrain/textures/
+        treffer = [k for k in treffer if "/terrain/textures/" in k] or treffer
     if len(treffer) != 1:
         raise KeyError("Textur %s: %d Treffer" % (name, len(treffer)))
     return treffer[0]
 
 
-def karte_schreiben(a, name, rgba, arbeit, tag):
+def material_textur_kennung(a, material, slot="me_macroMap"):
+    """Kennung der ``….tif.image``-Ressource, die das Material ``material`` (Dateiname) im ``slot`` nutzt. Mod 1.0.2 nennt die
+    Außenterrain-Karten ``stage24_<hash>.tif`` statt ``por_terrain_a_02_m.tif``; das Material kennt den echten Namen."""
+    treffer = [x for x in a if x.resource_type == "GfxMaterialRes" and x.identifier.endswith("/" + material)]
+    if len(treffer) != 1:
+        raise KeyError("Material %s: %d Treffer" % (material, len(treffer)))
+    textur = grafik.Material.aus_bytes(treffer[0].data()).texturen().get(slot)
+    if not textur or a.find(textur + ".image") is None:
+        raise KeyError("Material %s: Textur im Slot %s fehlt (%s)" % (material, slot, textur))
+    return textur + ".image"
+
+
+def textur_kopien(a, kennung):
+    """Weitere ``….tif.image``-Ressourcen mit denselben Pixeldaten wie ``kennung``. Mod 1.0.2 (neues Konvertierungsskript) legt
+    Kopien mit Hash-Namen an (``stage24_<hash>.tif``), die 28 Materialien (Asphalt, Beton, Linien, Gitter …) statt der
+    Standardkarte benutzen; die Beschreibungsblöcke unterscheiden sich, die Pixel nicht."""
+    res = a.find(kennung)
+    if res is None or len(res.fragments) < 2:
+        return []
+    groesse, pixel = res.fragments[1].size, None
+    kopien = []
+    for x in a:
+        if (x.resource_type != "GfxSurfaceRes" or x.identifier == kennung or len(x.fragments) < 2
+                or x.fragments[1].size != groesse):
+            continue
+        if pixel is None:
+            pixel = res.fragments[1].read()
+        if x.fragments[1].read() == pixel:
+            kopien.append(x.identifier)
+    return kopien
+
+
+def karte_schreiben(a, name, rgba, arbeit, tag, kennung=None):
     if arbeit:
         Image.fromarray(rgba, "RGBA").save(os.path.join(arbeit, "%s_%s.png" % (tag, name)))
-    k = textur_kennung(a, name)
-    return {"textur": k, **{kk: v for kk, v in gts.textur_ersetzen(a, k, rgba, format=69, mips="voll").items()
-                            if isinstance(v, (int, float, str))}}
+    k = kennung or textur_kennung(a, name)
+    kopien = textur_kopien(a, k)               # vor dem Ersetzen: danach gleichen die Pixel nicht mehr
+    erg = {"textur": k, **{kk: v for kk, v in gts.textur_ersetzen(a, k, rgba, format=69, mips="voll").items()
+                           if isinstance(v, (int, float, str))}}
+    for kopie in kopien:
+        gts.textur_ersetzen(a, kopie, rgba, format=69, mips="voll")
+    if kopien:
+        erg["kopien"] = len(kopien)
+    return erg
 
 
 def grasmaterialien(a):
@@ -338,7 +379,7 @@ def aussenkarten(a, arbeit, tag, farben=None):
         fein[loch] = np.nan
         rgb = aussen_farben(fein, k / AUSSEN_N, ((x0 - vx0) / vk, (z0 - vz0) / vk, k / vk), farben)
         bild = np.dstack([rgb, np.full((AUSSEN_N, AUSSEN_N), alpha, np.uint8)])
-        e = karte_schreiben(a, karte, bild, arbeit, tag)
+        e = karte_schreiben(a, karte, bild, arbeit, tag, kennung=material_textur_kennung(a, material))
         e.update(netz_quadrat_m=round(k, 1), mittel_rgb=[round(float(v), 1) for v in rgb[~loch].mean(0)],
                  hoehe_m=[round(float(np.nanmin(fein)), 1), round(float(np.nanmax(fein)), 1)])
         erg[karte] = e

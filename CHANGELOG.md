@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3
+
+- Works with the Portimão mod 1.0.2 (the current download) as well as 1.0.0 (see issue #1)
+- On mod 1.0.2 the carrier's trees, old distance boards, zone signs and sponsor areas no longer float over the new track, and the road, kerbs and
+  lines use the generated ground maps (the mod keeps copies of them under hashed names)
+- Garages of the 2026, story and MyTeam variants move to the new pit boxes
+- The AI timing tables keep the carrier's resolution on long tracks when they would otherwise exceed the size the game loads (300 MB estimate);
+  with mod 1.0.0 nothing changes
+- The build checks the carrier right after unpacking and names the mod version when it does not fit
+- The build warns about carrier layers it has no rule for, so a future mod version does not go unnoticed
+
 ## 0.1.2
 
 - Fill gaps now also works for two selected neighbouring points when the lap has no large gap

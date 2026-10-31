@@ -9,7 +9,7 @@ einmaligen echten EXE-Paketbaus: [stand.md](stand.md) und `ap25_exe_bautest.json
 | Messwert | Wert |
 |---|---|
 | Ordner `Mapeditor/dist/Mapeditor/` | ca. 141 MB (vor Beschneiden 166 MB) |
-| ZIP `Mapeditor-0.1.2-win64.zip` | ca. 56 MB |
+| ZIP `Mapeditor-0.1.3-win64.zip` | ca. 56 MB |
 | Werkzeugkasten (46 Dateien, nur Code + Beispiel-JSON) | ca. 1,2 MB |
 | Start bis Fenster (offscreen, warm) | 0,3 s |
 | Start bis fertige Generatorvorschau Teststrecke (eigener Arbeiterprozess) | 0,9 s gesamt |
