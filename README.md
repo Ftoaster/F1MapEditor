@@ -7,7 +7,7 @@ Windows desktop editor for designing your own race tracks for **F1 25** and buil
 
 German version: [README.de.md](README.de.md)
 
-![Main window](Mapeditor/docs/screenshots/hauptansicht_teststrecke.png)
+![Main window](Mapeditor/docs/screenshots/hauptansicht_en.png)
 
 ## What it does
 
