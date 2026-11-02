@@ -5,6 +5,7 @@ Arbeiterprozess nicht verfügbar: {error};Worker process not available: {error};
 Arbeiterprozess ohne gültige Antwort: ;Worker process returned no valid answer: ;adapter.py
 Bauname bereits vorhanden. Vorschlag: {name}_neu;Build name already exists. Suggestion: {name}_neu;adapter.py
 Bauname: 1–80 Buchstaben/Ziffern, Bindestrich oder Unterstrich.;Build name: 1–80 letters/digits, hyphen or underscore.;adapter.py
+Bauziel {wert!r} unbekannt.;Unknown build target {wert!r}.;adapter.py
 belegt;occupied;adapter.py
 "Code des Portimão-Mods (Träger); eine Übertragung ersetzt Portimão";"Code of the Portimão mod (carrier); a transfer replaces Portimão";adapter.py
 "Code des Sepang-Mods; eine Übertragung ersetzt Sepang";"Code of the Sepang mod; a transfer replaces Sepang";adapter.py
@@ -22,6 +23,7 @@ Layout-Variante von Suzuka;Layout variant of Suzuka;adapter.py
 Layout-Variante von Texas;Layout variant of Texas;adapter.py
 "nur wenige Datenbankeinträge; ob die Strecke auswählbar wird, ist offen";"only a few database entries; unclear whether the track becomes selectable";adapter.py
 PVS-Variante {pvs!r} unbekannt.;PVS variant {pvs!r} unknown.;adapter.py
+Raster {wert!r} unbekannt.;Unknown grid size {wert!r}.;adapter.py
 riskant;risky;adapter.py
 Streckencode {code!r} nicht erlaubt (nur {wert}).;Track code {code!r} not allowed (only {wert}).;adapter.py
 Streckendaten vorhanden;track data present;adapter.py
@@ -107,20 +109,22 @@ What's new: {beschreibung}";build.py
  · Spieltest offen; · playtest open;build.py
  – zu wenig!; – not enough!;build.py
 %p % · Phasenfortschritt;%p % · phase progress;build.py
+24 Autos (Standard);24 cars (default);build.py
+26 Autos;26 cars;build.py
 <b>{name}</b> jetzt in F1 25 schreiben?;Write <b>{name}</b> to F1 25 now?;build.py
 Abbrechen;Cancel;build.py
 Abbruchdatei konnte nicht angelegt werden: {error};Could not create cancel file: {error};build.py
 abgebrochen;cancelled;build.py
 Absturz;Crash;build.py
+Absturz in der letzten Sitzung · Details im Ergebnis;Crash in the last session · details under Result;build.py
 Alte Bauten aufräumen;Clean up old builds;build.py
-Alte Bauten und Pakete mit Größe und Spieltest-Ergebnis anzeigen und löschen;Show old builds and packages with size and playtest result, and delete them;build.py
 Arbeitsordner;Working folder;build.py
 "Arbeitsordner: {output}
 Paketordner: {packages}
 Vorausgewählt: alles außer dem jüngsten Bau, dem jüngsten Bau mit Spieltest „ok“ und dem zuletzt ins Spiel übertragenen Paket.";"Working folder: {output}
 Package folder: {packages}
 Preselected: everything except the newest build, the newest build with playtest “ok” and the package last transferred to the game.";build.py
-Aufräumen …;Clean up …;build.py
+aus dem Namen;from the name;build.py
 aus der Definition: {name};from the definition: {name};build.py
 Ausgewählte löschen …;Delete selected …;build.py
 Bau;Build;build.py
@@ -131,6 +135,7 @@ Bau-Status;Build status;build.py
 Baueinstellungen ändern;Change build settings;build.py
 Bauen / Paket;Build / package;build.py
 BAUEN / PAKET   ·   Profil empfohlen;BUILD / PACKAGE   ·   recommended profile;build.py
+Bauen für;Build for;build.py
 Bauname;Build name;build.py
 Bauten löschen?;Delete builds?;build.py
 Bedarf etwa {required} · frei {free} auf {drive};Needs about {required} · free {free} on {drive};build.py
@@ -154,6 +159,7 @@ Ersetzt Portimãos Luftbilder: Boden aus den Flächen der Strecke, Ideallinie au
 Erweiterte Bauoptionen ▸;Advanced build options ▸;build.py
 Erweiterte Bauoptionen ▾;Advanced build options ▾;build.py
 Erzeugt die Zeit-/Geschwindigkeitskurve der KI (VPTimes) aus dem eigenen Profil statt Portimãos Daten zu übernehmen. Ohne diese Option liegen Bremszonen ohne Bezug zu den Kurven (25.10.2026). Neu, noch nicht im Spiel bestätigt.;Generates the AI time/speed curve (VPTimes) from the track's own profile instead of taking over Portimão's data. Without this option braking zones have no relation to the corners (25.10.2026). New, not yet confirmed in game.;build.py
+Erzeugt ein Addon: im Launcher auf die Seite Addons ziehen, dann über den Launcher starten. Der Code entsteht aus dem Streckennamen, das Menü zeigt diesen Namen.;Creates an addon: drag it onto the launcher's Addons page, then start the game from the launcher. The code comes from the track name, and the menus show that name.;build.py
 Exitcode {code};Exit code {code};build.py
 Farbton;Colour tone;build.py
 fehlgeschlagen;failed;build.py
@@ -163,7 +169,11 @@ Gras (Standard);Grass (default);build.py
 Größe;Size;build.py
 Herbst;Autumn;build.py
 Im Explorer zeigen;Show in Explorer;build.py
+Im Launcher installieren;Install in launcher;build.py
+Im Launcher installieren und starten;Install in launcher and start;build.py
+Im Launcher installiert. Dort oder hier starten.;Installed in the launcher. Start it there or from here.;build.py
 im Spiel;in game;build.py
+Im Swofty Launcher auf die Seite Addons ziehen und über den Launcher starten.;Drag it onto the Addons page of Swofty Launcher and start the game from the launcher.;build.py
 In der aktiven Datenbank ist {code} nicht eingeschaltet (EGO-Editor: Database activation).;{code} is not enabled in the active database (EGO editor: Database activation).;build.py
 Ins Spiel schreiben;Write to game;build.py
 Ins Spiel übertragen …;Transfer to game …;build.py
@@ -171,6 +181,9 @@ Ins Spiel übertragen?;Transfer to game?;build.py
 Kein fertiges Paket in diesem Bau.;No finished package in this build.;build.py
 KI-Fahrdaten an die Strecke anpassen (Bremspunkte der Fahrhilfe und KI-Tempo);Adapt AI driving data to the track (braking points of the driving assist and AI pace);build.py
 Landschaft;Landscape;build.py
+Legt Startplätze, Garagen und Boxen für 26 Autos an. Damit 26 Autos fahren, braucht das Spiel zusätzlich ein Addon wie Custom Grid Size.;Adds grid slots, garages and pit boxes for 26 cars. For 26 cars to actually race, the game also needs an addon such as Custom Grid Size.;build.py
+Letzte Sitzung ausgewertet · kein Absturz gemeldet;Last session read · no crash reported;build.py
+Letzte Sitzung auswerten;Read last session;build.py
 läuft;running;build.py
 Löschen;Delete;build.py
 Mit Trägerabweichung geprüft;Checked with carrier deviation;build.py
@@ -193,6 +206,8 @@ Prüfbericht: ;Check report: ;build.py
 Prüfen und bauen;Check and build;build.py
 Prüffehler · Paket verworfen;Check error · package discarded;build.py
 Prüfung {stufe}: {zusammenfassung};Check {stufe}: {zusammenfassung};build.py
+Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit. Die Reifenwahl ist eine Schätzung.;Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time. The tyre choice is an estimate.;build.py
+Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke berechnen;Work out laps, fuel, tyres and AI times from the track;build.py
 Saftig;Lush;build.py
 Schnappschuss: ;Snapshot: ;build.py
 Schnellaustausch abgebrochen · nichts geändert.;Quick swap cancelled · nothing changed.;build.py
@@ -215,8 +230,15 @@ Streckencode;Track code;build.py
 Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). Der Bau erzeugt einen Schnappschuss; während des Baus kann weitergearbeitet werden.";"Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.
 Before the build the project is saved and checked (same state: result of the last check). The build creates a snapshot; you can keep working during the build.";build.py
 Streckenname;Track name;build.py
+Swofty Launcher;Swofty Launcher;build.py
+Swofty Launcher: Addon mit eigenem Streckencode und eigenem Namen im Menü, beliebig viele Strecken. Start nur über den Launcher, offline und ohne EA AntiCheat.;Swofty Launcher: an addon with its own track code and its own name in the menus, for as many tracks as you like. Starts only from the launcher, offline and without EA AntiCheat.;build.py
+Swofty Launcher: Fehler · {text};Swofty Launcher: error · {text};build.py
+Swofty Launcher: {schritt};Swofty Launcher: {schritt};build.py
+Swofty-Addons kommen über den Launcher ins Spiel.;Swofty addons reach the game through the launcher.;build.py
+swofty.exe wählen (Ordner bin des Launchers);Choose swofty.exe (the launcher's bin folder);build.py
 Technisches Protokoll anzeigen;Show technical log;build.py
 Teststrecke;Test track;build.py
+Track Installer (EGO-Editor);Track Installer (EGO Editor);build.py
 Trocken;Dry;build.py
 Trägerpaket (ZIP);Carrier package (ZIP);build.py
 Trägerpaket fehlt: {carrier};Carrier package missing: {carrier};build.py
@@ -234,6 +256,7 @@ Wird abgebrochen …;Cancelling …;build.py
 Wird abgebrochen … nächste Phasengrenze, spätestens nach 120 s beenden.;Cancelling … next phase boundary, ends after 120 s at the latest.;build.py
 Wählen …;Choose …;build.py
 Wüste;Desert;build.py
+Zeigt die Zusammenfassung der letzten Sitzung im Swofty Launcher mit Absturzdaten.;Shows the summary of the last session in Swofty Launcher, with crash data.;build.py
 "Zeitlimit beim Abbruch · Prozessbaum beendet; temporäre Pakete entfernt";"Timeout while cancelling · process tree ended; temporary packages removed";build.py
 ZIP (*.zip);ZIP (*.zip);build.py
 Zu wenig freier Speicher auf {anchor}: {free:.1f} GB frei, {required:.1f} GB benötigt.;Not enough free space on {anchor}: {free:.1f} GB free, {required:.1f} GB needed.;build.py

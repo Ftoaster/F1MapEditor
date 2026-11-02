@@ -14,7 +14,7 @@ hidden = [
     "numpy", "zstandard", "PIL", "PIL.Image", "PIL.ImageDraw", "PIL.ImageFont", "PIL.ImageFilter",
     "uuid", "zlib", "zipfile", "hashlib", "struct", "traceback", "html", "importlib",
     "dataclasses", "contextlib", "collections", "datetime", "argparse", "shutil", "subprocess",
-    "csv", "tempfile", "xml.etree.ElementTree",  # strecke/importe.py (Schritt F)
+    "csv", "tempfile", "unicodedata", "xml.etree.ElementTree",  # strecke/importe.py (Schritt F)
     "multiprocessing", "concurrent.futures", "concurrent.futures.process", "concurrent.futures.thread",  # ego/parallel.py
 ]
 excludes = [

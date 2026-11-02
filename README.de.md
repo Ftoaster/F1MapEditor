@@ -18,6 +18,7 @@ English version: [README.md](README.md)
 - Boden, Ideallinie und Umland aus der Strecke selbst erzeugen
 - Strecke gegen Regeln prüfen, die aus den Originalstrecken abgeleitet sind
 - Paket für den Track Installer bauen oder eine installierte Strecke zum Testen direkt austauschen
+- Oder ein Addon für den [Swofty Launcher](https://f1.swofty.net/) bauen, mit dem eigenen Streckennamen im Menü des Spiels
 
 Die Oberfläche gibt es auf Deutsch und Englisch.
 
@@ -27,13 +28,14 @@ Die Oberfläche gibt es auf Deutsch und Englisch.
 |---|---|---|
 | System | | Windows 10 oder 11, 64 Bit |
 | Spiel | [F1 25 bei Steam](https://store.steampowered.com/app/3059520/F1_25/) | Wird nur gelesen, nötig für Katalog und Bau |
-| Installer | [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) | Version 1.6.0 oder neuer, um eine Strecke zu installieren und einmal zu aktivieren |
+| Installer, einer von beiden | **[Swofty Launcher](https://f1.swofty.net/) (empfohlen)** | Baut ein Addon: eigener Streckenname im Menü, keine Grenze durch Installer-Plätze, Installieren und Starten aus dem Editor, Absturzauswertung nach jeder Sitzung. Gespielt wird offline und ohne EA AntiCheat |
+| | [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) | Version 1.6.0 oder neuer, um eine Strecke zu installieren und einmal zu aktivieren |
 | Träger-Paket | [Algarve International Circuit (Portimao) for F1 25](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/) | `portimao.zip`, **Version 1.0.0 oder 1.0.2** (1.0.2 ist der aktuelle Download, 1.0.0 steht im [Reiter „History“](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/history) der Modseite). **Nicht enthalten**. Der Bau nutzt sie als Grundlage, du wählst sie im Baudialog. Nicht entpacken |
 
 Zeichnen und Prüfen geht ohne das Spiel. Nur zum Bauen brauchst du Spiel und Träger-Paket.
 
 Installer und Portimão-Mod sind Community-Projekte anderer Autoren, Bedingungen und Neuerungen stehen auf deren Seiten.
-Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 behebt das. Strecken, die Mapeditor auf 1.0.2 baut, sind im Zeitfahren getestet; ob sie auf AMD-Karten laufen, ist nicht getestet.
+Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 behebt das. Strecken, die Mapeditor auf 1.0.2 baut, sind im Zeitfahren und im Grand Prix mit KI-Boxenstopps getestet; ob sie auf AMD-Karten laufen, ist nicht getestet.
 
 ## Loslegen
 
@@ -48,7 +50,10 @@ Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 be
   Die Daten entsprechen den originalen Linksstrecken, die Ursache ist unbekannt. Rechts funktioniert alles.
 - Licht und Garagen-Lichtkarten stammen von der Trägerstrecke.
 - Sehr lange Strecken funktionieren, überschreiten aber die Größen aller Originale; die Prüfung zeigt dann Warnungen.
-- Am besten getestet sind Zeitfahren und Freies Training, andere Modi weniger.
+- Am besten getestet sind Zeitfahren und Grand Prix, andere Modi weniger.
+- Swofty Launcher: Nach dem Entfernen eines Strecken-Addons einen neuen Grand Prix starten, nicht „Fortsetzen“. Ein Spielstand auf einer fehlenden Strecke lässt das Spiel abstürzen.
+- Die Option für 26 Autos legt nur die Plätze auf der Strecke an. Die Autos selbst brauchen ein Raster-Addon, Strecken des Originalspiels haben 24 Plätze.
+- Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke sind über den Swofty Launcher getestet, noch nicht über den EGO-Installer. Die Reifenwahl ist eine Schätzung.
 
 ## Aus dem Quelltext bauen
 
@@ -66,7 +71,8 @@ Tests, die nicht enthaltene Dateien wie das Spiel brauchen, werden übersprungen
 ## Sicherheit
 
 Der Editor schreibt nie von selbst in den Spielordner. Das macht nur der ausdrücklich gestartete Schnellaustausch, und der legt
-vorher eine Sicherung an. Nutze das offline, sichere vorher Spielstände und Spieldatenbank, und verwende es auf eigenes Risiko.
+vorher eine Sicherung an. Installieren und Starten im Launcher übergeben an den Swofty Launcher, der den Spielordner nach jeder
+Sitzung zurücksetzt. Nutze das offline, sichere vorher Spielstände und Spieldatenbank, und verwende es auf eigenes Risiko.
 
 ## Lizenz
 

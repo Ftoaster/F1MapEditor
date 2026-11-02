@@ -116,6 +116,7 @@ Prüfung der Logik;Checking the logic;neue_strecke_tool.py
 Prüfung ohne Bau;Check without build;neue_strecke_tool.py
 PVS;PVS;neue_strecke_tool.py
 Streckenlogik;Track logic;neue_strecke_tool.py
+Swofty-Addon;Swofty addon;neue_strecke_tool.py
 Tiefe Paketprüfung;Deep package check;neue_strecke_tool.py
 Träger entpacken/erfassen;Unpacking and reading the carrier;neue_strecke_tool.py
 Umgebung (Bäume, Objekte);Environment (trees, objects);neue_strecke_tool.py
@@ -153,6 +154,7 @@ Haupt-Bremslinie {} (Gate {}) liegt außerhalb jeder Kurve. F1 25 erwartet Haupt
 Hauptlinie hat nur {} Knoten;Main line has only {} nodes;pruefregeln.py
 Keine Kurve der Boxenroute mit pair_id zur Streckenkurve (25/30 Originale haben eine);No corner of the pit route has a pair_id to a track corner (25 of 30 originals have one);pruefregeln.py
 KI-Boxenroute ohne Kurvenlinien (Originale: 1–5 Kurven);AI pit route has no corner lines (originals: 1–5 corners);pruefregeln.py
+KI-Route {}: Der Überholraum ändert sich auf keinem der {} Tore. Das Spiel stürzt ab, sobald ein KI-Auto sie fährt (der Swofty Launcher korrigiert das beim Bau);AI route {}: the passing space does not change at any of its {} gates. The game crashes as soon as an AI car drives it (Swofty Launcher fixes this when it builds);pruefregeln.py
 Kleinster Radius {} m bei {} m (Originale ≥ {} m);Smallest radius {} m at {} m (originals ≥ {} m);pruefregeln.py
 Krümmungsänderung {} /m² bei {} m (Originale ≤ {}) – mittellinie.approximation_m (z. B. 6–8) oder Klothoiden-Übergänge verwenden;Curvature change {} /m² at {} m (originals ≤ {}): use mittellinie.approximation_m (e.g. 6–8) or clothoid transitions;pruefregeln.py
 Link {} verbindet fehlendes Gate ({} → {});Link {} connects a missing gate ({} → {});pruefregeln.py

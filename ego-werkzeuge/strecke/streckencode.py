@@ -37,8 +37,11 @@ import heapq
 import json
 import os
 import re
+import shutil
 import struct
 import time
+import unicodedata
+import zipfile
 from collections import Counter, defaultdict
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
@@ -78,7 +81,7 @@ class StreckencodeFehler(ValueError):
     """Umbenennung nicht möglich oder Prüfung fehlgeschlagen."""
 
 
-def code_bewerten(code: str) -> Tuple[bool, str]:
+def code_bewerten(code: str, ziel: str = "ego") -> Tuple[bool, str]:
     """(zulässig, Hinweis). Unzulässig: Formatfehler, Spielstrecke, Installer-Vorlage."""
     if not CODE_MUSTER.match(code or ""):
         return False, "Code darf nur Kleinbuchstaben, Ziffern und Unterstrich enthalten (Installer-Regel)"
@@ -88,11 +91,104 @@ def code_bewerten(code: str) -> Tuple[bool, str]:
         return False, "Code einer Strecke des Spiels – würde die Original-Strecke laden"
     if code in VERBOTEN:
         return False, "Code ist reserviert (Ladevorlage bzw. gemeinsame Dateien des Spiels)"
+    if ziel == ZIEL_SWOFTY:
+        return True, "eigener Code, der Swofty Launcher legt die Strecke in der Datenbank an"
     if code in DB_ALTSTRECKEN:
         return True, "in der Spieldatenbank vorhanden (%s)" % DB_ALTSTRECKEN[code]
     return True, ("WARNUNG: Code ist in der Spieldatenbank nicht vorhanden. Der Track Installer kopiert "
                   "die Dateien, überspringt die Strecke aber bei der Datenbank-Aktivierung "
                   "(„Track not found in database“) – im Spiel nicht auswählbar.")
+
+
+# =============================================================================== Swofty Launcher
+#: Ziele des Baus: ``ego`` = Paket für den Track Installer, ``swofty`` = Addon für den Swofty Launcher (docs/swofty_launcher.md).
+ZIEL_EGO, ZIEL_SWOFTY = "ego", "swofty"
+ZIELE = (ZIEL_EGO, ZIEL_SWOFTY)
+#: Basis der Aktivierung: Der Launcher nimmt eine Strecke nur in die Listen auf, in denen ihre Basis steht. ``zandvoort`` steht
+#: in allen 7 ``available_tracks``-Listen, ``portimao`` nur in einer.
+SWOFTY_VORLAGE = "zandvoort"
+
+
+def swofty_code(name: Optional[str]) -> str:
+    """Eigener Streckencode aus dem Streckennamen; nie der Code einer Spielstrecke oder eines Altplatzes."""
+    code = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
+    code = re.sub(r"[^a-z0-9]+", "_", code).strip("_")[:36].strip("_") or "strecke"
+    return code + "_me" if code in SPIELSTRECKEN | VERBOTEN | set(DB_ALTSTRECKEN) else code
+
+
+def swofty_namen(code: str, name: str) -> Tuple[list, list]:
+    """(Sprachoperationen, Zuordnung Feld → Schlüssel) für den eigenen Streckennamen im Menü."""
+    kuerzel = (re.sub(r"[^A-Za-z0-9]", "", name)[:3] or code[:3]).upper()
+    texte = {"title": name, "gp": name + " Grand Prix", "gp_short": name + " GP", "tla": kuerzel}
+    schluessel = {k: "lng_mapeditor_%s_%s" % (code, k) for k in texte}
+    felder = {"title": "title", "country_name": "title", "circuit": "title", "city_name": "title",
+              "city_name_short": "title", "gp_long_name": "gp", "gp_long_name_multiline": "gp",
+              "gp_short_name": "gp_short", "acronym_name": "tla"}
+    ops = [{"op": "lang.set", "language": "*", "key": schluessel[k], "value": v} for k, v in texte.items()]
+    return ops, [(feld, schluessel[k]) for feld, k in felder.items()]
+
+
+def swofty_addon_bauen(quelle: str, ziel: str, name: Optional[str] = None, protokoll=print) -> dict:
+    """Geprüftes Paket (ZIP) als Swofty-Addon (ZIP) schreiben: ``swofty.json``, ``assets/track.json``, Paket unter ``track/``.
+    Ein Addon statt eines Strecken-ZIPs, weil nur so eigene Menütexte möglich sind; die Id kollidiert nicht mit dem Katalog."""
+    with zipfile.ZipFile(quelle) as z:
+        m = json.loads(z.read("manifest.json"))
+        code = m["track_code"]
+        name = name or m.get("track_name") or code
+        ops, felder = swofty_namen(code, name)
+        akt = m.get("activation") or {}
+        m["activation"] = {"copy_from_track": SWOFTY_VORLAGE, "copy_slot": SWOFTY_VORLAGE,
+                           "overrides": (akt.get("overrides") or []) + [{"path": "TrackNameData_0." + f, "value": s} for f, s in felder],
+                           "track_overrides": (akt.get("track_overrides") or []) + [{"path": f, "value": s} for f, s in felder]}
+        m["author_name"], m["version"] = "Mapeditor", "1.0.0"
+        addon = {"schema_version": 1, "id": "mapeditor." + code, "name": name, "version": "1.0.0", "author": "Mapeditor",
+                 "description": "Custom track built with Mapeditor on the Portimão mod as carrier.",
+                 "category": "tracks", "kind": ["database", "erp"],
+                 "compat": {"game": "f1_25"}, "operations": {"assets": ["assets/track.json"]}}
+        spur = {"schema_version": 1, "ops": [{"op": "track.add", "source": "track"}] + ops}
+        protokoll("Swofty-Addon %s …" % addon["id"])
+        with zipfile.ZipFile(ziel, "w", zipfile.ZIP_STORED, allowZip64=True) as a:
+            a.writestr("swofty.json", json.dumps(addon, ensure_ascii=False, indent=2))
+            a.writestr("assets/track.json", json.dumps(spur, ensure_ascii=False, indent=2))
+            a.writestr("track/manifest.json", json.dumps(m, ensure_ascii=False, indent=2))
+            for i in z.infolist():
+                if i.filename != "manifest.json" and not i.is_dir():
+                    with z.open(i) as e, a.open("track/" + i.filename, "w", force_zip64=True) as d:
+                        shutil.copyfileobj(e, d, 1 << 24)
+    return {"id": addon["id"], "code": code, "name": name, "groesse": os.path.getsize(ziel)}
+
+
+def swofty_raster_addon(ziel: str) -> dict:
+    """Test-Addon für 26 Autos nach ``docs/reference/gamedb/recipes.md`` des Launchers: vier Fahrer ohne Cockpit in zwei Teams,
+    die 2026 nicht fahren. Neue Team-Zeilen hängen beim Laden in ``render_badge`` (ihnen fehlen die Logos, Spieltest 2.11.2026),
+    daher vorhandene Teams von 2025 mit den Autos von 2026. Nur für Strecken mit 26 Plätzen: Spielstrecken haben 24 und
+    stürzen damit ab."""
+    liste = "entrants.entrant_lists.entrant_list_34"
+    ops = []
+    for team, auto, fahrer in (("williams", "williams_2026", (("yuki_tsunoda", "2026-williams_alex_albon"), ("jack_doohan", "2026-williams_carlos_sainz-jr"))),
+                               ("haas", "haas_2026", (("guanyu_zhou", "2026-haas_esteban_ocon"), ("logan_sargeant", "2026-haas_oliver_bearman")))):
+        for platz, (f, aussehen) in enumerate(fahrer):
+            eintrag = "f1_2026-" + f
+            ops.append({"op": "add-row", "table": "entrants.entrant_lists.entrants",
+                        "from": "entrants.entrant_lists.entrants.entrant[_metadata_=f1_2026-lando_norris]",
+                        "set": {"_metadata_": eintrag, "driver": f, "driver_customisation": aussehen}})
+            ops.append({"op": "add-row", "table": liste, "from": liste + ".entrant[_metadata_=williams_driver_01]",
+                        "set": {"_metadata_": "mapeditor_%s_driver_%d" % (team, platz + 1), "entrant_reference": eintrag,
+                                "team": team, "team_position": str(platz), "vehicle": auto}})
+    for modus, wert in (("f1_26", "26"), ("f1_generic_2026", "26"), ("f1_custom_team_2026", "28")):
+        ops.append({"op": "set", "select": "entrants.entrant_setup_modes.entrant_setup_mode[_metadata_=%s]" % modus,
+                    "field": "max_entrants", "value": wert})
+    for feld in ("worldEri", "worldAssetGroup"):
+        ops.append({"op": "set", "select": "track_data.track_layers.TrackLayer[_metadata_=f1_26]", "field": feld,
+                    "value_from": "track_data.track_layers.TrackLayer[_metadata_=myteam_26].%s" % feld})
+    addon = {"schema_version": 1, "id": "mapeditor.raster26", "name": "Mapeditor grid test (26 cars)", "version": "1.0.1",
+             "author": "Mapeditor", "description": "Test only: 26 cars in 2026 races. Use only with Mapeditor tracks built for 26 cars.",
+             "category": "seasons", "kind": ["database"], "compat": {"game": "f1_25"},
+             "operations": {"database": ["db/raster.json"]}}
+    with zipfile.ZipFile(ziel, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("swofty.json", json.dumps(addon, indent=2))
+        z.writestr("db/raster.json", json.dumps({"schema_version": 1, "ops": ops}, indent=2))
+    return {"id": addon["id"], "ops": len(ops)}
 
 
 # =============================================================================== Regeln
@@ -605,8 +701,17 @@ def erp_pruefen(quelle: str, ziel: str, regeln: Umbenennung, mip_namen: Optional
 
 
 # =============================================================================== Paket
+def zusatz_anhaengen(manifest: dict, zusatz: Optional[dict]) -> None:
+    """Renndaten (``strecke/renndaten.py``) an die Aktivierung hängen."""
+    if zusatz:
+        akt = manifest.setdefault("activation", {})
+        akt.setdefault("overrides", []).extend(zusatz["overrides"])
+        akt.setdefault("track_overrides", []).extend(zusatz["track_overrides"])
+
+
 def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str] = None,
-                        aktivierung_vorlage: Optional[str] = None) -> dict:
+                        aktivierung_vorlage: Optional[str] = None, zusatz: Optional[dict] = None,
+                        aktivierung_behalten: bool = False) -> dict:
     m = copy.deepcopy(manifest)
     if m.get("track_code") != regeln.alt:
         raise StreckencodeFehler("Manifest hat track_code %r statt %r" % (m.get("track_code"), regeln.alt))
@@ -619,12 +724,15 @@ def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str]
         if c.get("destination") != alt:
             raise StreckencodeFehler("Unerwartetes Kopierziel %r" % c.get("destination"))
         c["destination"] = "asset_groups/environment_package/tracks/%s/mipmaps/" % regeln.neu
-    if aktivierung_vorlage:
+    if aktivierung_behalten:          # Paket aus dem eigenen Bau: Renndaten bleiben, nur die Basis wechselt
+        m["activation"]["copy_from_track"] = aktivierung_vorlage
+    elif aktivierung_vorlage:
         # immer die schlanke, im Spiel bewährte Aktivierung (Kopie einer vorhandenen Strecke, nur Länge und Kurven): Mod 1.0.2
         # bringt eine eigene mit (copy_from_track zandvoort, 151 Overrides, 83 Streckenwerte), die zu Portimão gehört.
         # Die drei Streckenwerte, die der Bau vorher gesetzt hat (``metadaten_setzen``), bleiben erhalten.
         eigene = [e for e in (m.get("activation") or {}).get("track_overrides") or [] if e.get("path") in METADATEN_SCHLUESSEL]
         m["activation"] = {"copy_from_track": aktivierung_vorlage, "overrides": [], "track_overrides": eigene}
+    zusatz_anhaengen(m, zusatz)
     return m
 
 
@@ -669,7 +777,8 @@ def _json(roh):
 
 def paket_bauen_umbenannt(ziel: str, manifest, images, minimap, erp_pfad: str, mipmaps, regeln: Umbenennung,
                           arbeitsordner: str, name: Optional[str] = None, aktivierung_vorlage: Optional[str] = None,
-                          ueberschreiben: bool = False, protokoll=print) -> dict:
+                          ueberschreiben: bool = False, protokoll=print, zusatz: Optional[dict] = None,
+                          aktivierung_behalten: bool = False) -> dict:
     """Wie paket.paket_bauen, aber vorher ERP, Manifest und UI-JSONs auf den neuen Code umbenennen.
     mipmaps: Folge (Name im ZIP, Quelle) wie bei paket.paket_bauen; Dateinamen bleiben."""
     os.makedirs(arbeitsordner, exist_ok=True)
@@ -677,7 +786,7 @@ def paket_bauen_umbenannt(ziel: str, manifest, images, minimap, erp_pfad: str, m
     mip = list(mipmaps)
     mip_namen = {n.rsplit("/", 1)[-1] for n, _ in mip}
     bericht = {"erp": erp_umbenennen(erp_pfad, neu_erp, regeln, mip_namen=mip_namen, protokoll=protokoll)}
-    m = manifest_umbenennen(_json(manifest), regeln, name, aktivierung_vorlage)
+    m = manifest_umbenennen(_json(manifest), regeln, name, aktivierung_vorlage, zusatz, aktivierung_behalten)
     img, mm = regeln.json(_json(images)), regeln.json(_json(minimap))
     bericht["manifest"] = m
     protokoll("Paket %s …" % ziel)
@@ -688,7 +797,7 @@ def paket_bauen_umbenannt(ziel: str, manifest, images, minimap, erp_pfad: str, m
 
 def paket_umbenennen(quelle: str, ziel: str, code: str, name: Optional[str] = None,
                      aktivierung_vorlage: Optional[str] = None, arbeitsordner: Optional[str] = None,
-                     ueberschreiben: bool = False, protokoll=print) -> dict:
+                     ueberschreiben: bool = False, protokoll=print, aktivierung_behalten: bool = False) -> dict:
     """Mod-Paket (ZIP) mit neuem Streckencode bauen. Die Quelle bleibt unverändert."""
     if os.path.exists(ziel) and not ueberschreiben:
         raise FileExistsError("Zieldatei existiert bereits: %s" % ziel)
@@ -701,7 +810,8 @@ def paket_umbenennen(quelle: str, ziel: str, code: str, name: Optional[str] = No
         alt_erp = p.erp_entpacken(os.path.join(arbeit, "quelle_" + os.path.basename(p.erp_name)))
         mip = [(i.filename, (p.zip, i)) for i in p.mipmap_eintraege()]
         bericht = paket_bauen_umbenannt(ziel, p.manifest_roh, p.images_roh, p.minimap_roh, alt_erp, mip, regeln,
-                                        arbeit, name, aktivierung_vorlage, ueberschreiben, protokoll)
+                                        arbeit, name, aktivierung_vorlage, ueberschreiben, protokoll,
+                                        aktivierung_behalten=aktivierung_behalten)
     os.remove(alt_erp)
     os.remove(bericht.pop("neu_erp"))
     with paket.ModPaket(ziel) as q:

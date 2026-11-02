@@ -254,6 +254,32 @@ def cmd_bauen(args):
     print("Paket geschrieben: %s (%.2f GB)" % (args.ziel, groesse / 1e9))
 
 
+def cmd_swofty_addon(args):
+    """Paket aus dem eigenen Bau als Swofty-Addon mit neuem Code; die Renndaten bleiben erhalten."""
+    from strecke import streckencode
+    _ziel_pruefen(args.ziel)
+    ok, hinweis = streckencode.code_bewerten(args.code, streckencode.ZIEL_SWOFTY)
+    print("Code %s: %s" % (args.code, hinweis))
+    if not ok:
+        return 1
+    zwischen = args.ziel + ".paket.zip"
+    streckencode.paket_umbenennen(args.quelle, zwischen, args.code, name=args.name, aktivierung_vorlage=streckencode.SWOFTY_VORLAGE,
+                                  aktivierung_behalten=True, ueberschreiben=True)
+    try:
+        print(streckencode.swofty_addon_bauen(zwischen, args.ziel, args.name))
+    finally:
+        os.remove(zwischen)
+    return 0
+
+
+def cmd_swofty_raster(args):
+    """Test-Addon für 26 Autos schreiben (nur mit Strecken, die mit --raster 26 gebaut sind)."""
+    from strecke import streckencode
+    _ziel_pruefen(args.ziel)
+    print(streckencode.swofty_raster_addon(args.ziel))
+    return 0
+
+
 def cmd_umbenennen(args):
     """Paket mit neuem Streckencode (AP16). Quelle bleibt unverändert."""
     from strecke import streckencode
@@ -315,6 +341,15 @@ def main(argv=None):
                                                    "der Installer für fehlende Datensätze kopiert (z. B. portimao)")
     s.add_argument("--ueberschreiben", action="store_true")
     s.set_defaults(func=cmd_umbenennen)
+    s = sub.add_parser("swofty-addon", help="Paket als Swofty-Addon mit eigenem Code schreiben")
+    s.add_argument("quelle")
+    s.add_argument("ziel")
+    s.add_argument("--code", required=True)
+    s.add_argument("--name", required=True)
+    s.set_defaults(func=cmd_swofty_addon)
+    s = sub.add_parser("swofty-raster", help="Test-Addon für 26 Autos schreiben")
+    s.add_argument("ziel")
+    s.set_defaults(func=cmd_swofty_raster)
     s = sub.add_parser("installiert", help="prüfen, welches Paket im Spiel-Slot liegt (nur lesend)")
     s.add_argument("pakete", nargs="+")
     s.add_argument("--slot", type=int, default=None,

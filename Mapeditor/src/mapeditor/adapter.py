@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import runpy
+import zipfile
 
 from PySide6.QtCore import QObject, QProcess, QProcessEnvironment, QTimer, Signal
 from .i18n import N_, tr
@@ -60,8 +61,36 @@ TRACK_CODES = (
 #: Erweiterte Bauoptionen (überschreiben das Profil „empfohlen“): Streckencode, Streckenname, PVS-Variante
 BUILD_CODES = tuple(code for code, _, _ in TRACK_CODES)
 BUILD_PVS = ("strecke", "alles")
+BUILD_ZIELE = ("ego", "swofty")
 BUILD_BIOME = ("standard", "wueste")
 BUILD_FARBTOENE = ("standard", "trocken", "saftig", "herbst")
+
+
+def swofty_programm(gewaehlt=None):
+    """``swofty.exe``: gewählter Pfad, Installationsordner des Launchers oder PATH; None, wenn keiner da ist."""
+    kandidaten = [gewaehlt, Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "SwoftyLauncher" / "bin" / "swofty.exe",
+                  shutil.which("swofty")]
+    return next((Path(k) for k in kandidaten if k and Path(k).is_file()), None)
+
+
+def swofty_addon_id(paket):
+    with zipfile.ZipFile(paket) as z:
+        return json.loads(z.read("swofty.json"))["id"]
+
+
+def swofty_installieren(programm, paket):
+    """Befehle zum Installieren und Einschalten; wie alle Schritte des Launchers über ``swofty.exe``."""
+    return [[str(programm), "addons", "install", str(paket)], [str(programm), "addons", "enable", swofty_addon_id(paket)]]
+
+
+def swofty_starten(programm):
+    """Spiel über den Launcher starten; endet nach dem Spiel mit Sitzungszusammenfassung."""
+    return [[str(programm), "run", "--apply"]]
+
+
+def swofty_auswerten(programm):
+    """Zusammenfassung der letzten Sitzung samt Absturzdaten."""
+    return [str(programm), "logs"]
 
 
 def build_command(toolkit, project_folder, output, packages, name="entwurf", python=None,
@@ -97,8 +126,13 @@ def _option_args(options):
     """Erweiterte Bauoptionen als CLI-Argumente (nur gesetzte, geprüfte Werte)."""
     options = options or {}
     args = []
+    ziel = options.get("ziel") or "ego"
+    if ziel not in BUILD_ZIELE:
+        raise ValueError(tr("Bauziel {wert!r} unbekannt.", wert=ziel))
+    if ziel != "ego":
+        args += ["--ziel", ziel]
     code = options.get("streckencode")
-    if code:
+    if code and ziel == "ego":
         if code not in BUILD_CODES:
             raise ValueError(tr("Streckencode {code!r} nicht erlaubt (nur {wert}).", code=code, wert=', '.join(BUILD_CODES)))
         args += ["--streckencode", code]
@@ -112,6 +146,13 @@ def _option_args(options):
         if pvs not in BUILD_PVS:
             raise ValueError(tr("PVS-Variante {pvs!r} unbekannt.", pvs=pvs))
         args += ["--pvs-variante", pvs]
+    if "renndaten" in options:
+        args.append("--renndaten" if options["renndaten"] else "--no-renndaten")
+    raster = options.get("raster")
+    if raster:
+        if raster != 26:
+            raise ValueError(tr("Raster {wert!r} unbekannt.", wert=raster))
+        args += ["--raster", str(raster)]
     if "weltkarten" in options:
         args.append("--weltkarten" if options["weltkarten"] else "--no-weltkarten")
     if options.get("weltkarten"):

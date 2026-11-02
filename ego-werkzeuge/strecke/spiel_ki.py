@@ -155,7 +155,9 @@ def geschwindigkeit_neu(logik, parametersatz='f1_25_ki_portimao', glaettung_m=4.
     fz = rennlinie.fahrzeug_erzeugen(p)
     prof = rennlinie.profil_berechnen(kappa, ds, fz, hoehe=xyz[:, 1])
     ideal['geschwindigkeit_m_s'] = np.asarray(prof['v'], float).tolist()
+    dt = ds/np.maximum(np.asarray(prof['v'], float), 1.0)
     logik['ki_profil'] = {'parametersatz': parametersatz, 'rundenzeit_s': float(prof['rundenzeit']),
+                          'a_quer_mittel': float(np.sum(np.abs(prof['a_quer'])*dt)/np.sum(dt)),
                           'v_min_kmh': float(np.min(prof['v'])*3.6), 'v_max_kmh': float(np.max(prof['v'])*3.6)}
     return logik
 

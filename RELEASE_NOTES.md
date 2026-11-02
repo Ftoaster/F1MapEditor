@@ -1,18 +1,19 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
-## New in 0.1.3
+## New in 0.2.0
 
-- **Works with the Portimão mod 1.0.2** (the current download) as well as 1.0.0 (issue #1)
-- On 1.0.2 the old trees and signs no longer hang over the new track, and the road uses the generated ground maps
-- Garages of the 2026, story and MyTeam variants move to the new pit boxes
-- AI timing tables are kept small enough for the game to load on long tracks; with 1.0.0 nothing changes
-- The build names the carrier's mod version when it does not fit, and warns about layers it does not know
+- **Build for Swofty Launcher:** an addon with the track's own name in the game's menus, no installer slots, as many tracks as you like
+- **Install and start from the editor**, with a crash summary after each session
+- **Laps, fuel, tyres and AI lap times** are worked out from the track
+- **Grid option for 26 cars:** grid slots, garages and pit boxes on your track
+- **New check KI-07:** finds AI routes that crash the game as soon as an AI car drives them
+- The build dialog only shows the buttons you can use right now
 
 **Unofficial fan project, not affiliated with EA, Codemasters, Formula One Group or the FIA. Contains no game files.**
 
 ## Download
 
-`Mapeditor-0.1.3-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.2.0-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need
@@ -20,7 +21,9 @@ show a warning.
 - Windows 10 or 11, 64-bit
 - [F1 25 on Steam](https://store.steampowered.com/app/3059520/F1_25/), to build packages
 - [Algarve International Circuit (Portimao) for F1 25](https://www.overtake.gg/downloads/algarve-international-circuit-portimao-for-f1-25.87333/) (`portimao.zip`), **version 1.0.0 or 1.0.2**, **not included**, as the base for building
-- [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) 1.6.0 or newer, to install a track and activate it once
+- An installer, one of these:
+  - **[Swofty Launcher](https://f1.swofty.net/) (recommended):** own track name in the menus, install and start from the editor. Modded play runs offline and without EA AntiCheat
+  - [EGO GameDatabases Editor](https://apps.sztefek.eu/app/ego-gamedatabases-editor) 1.6.0 or newer, to install a track and activate it once
 
 Drawing and checking tracks works without the game.
 
@@ -36,10 +39,13 @@ Drawing and checking tracks works without the game.
 
 - **Pit lane on the right only.** On the left, cars and pit crews stand on the wall side until the car leaves.
 - Lighting comes from the carrier track.
-- Version 1.0.0 of the Portimão mod can crash on AMD graphics cards, which its version 1.0.2 fixes. Tracks built on 1.0.2 are tested in Time Trial only; races with AI on 1.0.2 are less tested, and on long tracks the AI timing tables there have a coarser resolution.
+- Version 1.0.0 of the Portimão mod can crash on AMD graphics cards, which its version 1.0.2 fixes. Tracks built on 1.0.2 are tested in Time Trial and in Grand Prix with AI pit stops. Whether they run on AMD cards is not tested.
+- Swofty Launcher: if you remove a track addon, start a new Grand Prix instead of Continue. A saved session on a track that is gone crashes the game.
+- The 26-car option only adds the places to the track. The cars themselves need a grid addon, and tracks of the original game hold 24.
+- Laps, fuel, tyres and AI times from the track are tested through Swofty Launcher, not yet through the EGO installer. The tyre choice is an estimate.
 
 Use offline and at your own risk. Back up your save data and game database first.
 
 ## Licence
 
-GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.1.3`.
+GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.2.0`.

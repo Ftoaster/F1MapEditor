@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+- New build target Swofty Launcher: an addon with its own track code and its own track name in the game's menus, no installer slots
+- New check KI-07: an AI route on which the passing space never changes crashes the game as soon as an AI car drives it
+- Laps, fuel, tyres and AI lap times are worked out from the track, for both build targets
+- Buttons to install an addon in Swofty Launcher, and to start the game from there, with a summary of crashes afterwards
+- Grid option for 26 cars: grid slots, garages and pit boxes for the track (the cars themselves need a grid addon)
+- The build dialog only shows the buttons you can use right now, Clean up moved to the Tools menu
+
 ## 0.1.3
 
 - Works with the Portimão mod 1.0.2 (the current download) as well as 1.0.0 (see issue #1)

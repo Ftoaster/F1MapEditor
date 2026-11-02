@@ -53,7 +53,7 @@ import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 from ego import bxml, erp, grafik, licht, paket, pkg, pvs, spielpfade, streckenlogik, trn, tsquadtree  # noqa: E402
-from strecke import platzierung, pruefregeln, spiel_welt, streckencode  # noqa: E402
+from strecke import platzierung, pruefregeln, renndaten, spiel_welt, streckencode  # noqa: E402
 from strecke.spielformat import Schreiber  # noqa: E402
 
 AUSGABE = os.path.join(HIER, "testausgabe", "neue_strecke", "zusammenbau")
@@ -408,7 +408,8 @@ PHASEN = (("vorbereiten", "Eingabe und Optionen", 0.005), ("pruefen_vorab", "Pr�
           ("logik", "Streckenlogik", 0.01), ("pruefen_logik", "Prüfung der Logik", 0.005), ("licht", "Licht", 0.005),
           ("erp_schreiben", "ERP schreiben", 0.04), ("pvs", "PVS", 0.25), ("pruefen_bau", "ERP neu lesen und prüfen", 0.06),
           ("draufsichten", "Draufsichten", 0.01), ("paket", "Paket schreiben", 0.36),
-          ("paket_pruefen", "Tiefe Paketprüfung", 0.02), ("abschluss", "Abschluss", 0.02))
+          ("paket_pruefen", "Tiefe Paketprüfung", 0.015), ("swofty", "Swofty-Addon", 0.005),
+          ("abschluss", "Abschluss", 0.02))
 _PHASE_START = {}
 _s = 0.0
 for _n, _t, _w in PHASEN:
@@ -508,7 +509,7 @@ def cmd_bauen(args):
     if args.nur_original_pvs and args.nur_hauptvariante:
         raise BauFehler("--nur-original-pvs und --nur-hauptvariante schließen sich aus")
     if args.streckencode != streckencode.STANDARD_ALT:  # AP16: Code erst beim Verpacken umbenennen
-        ok, hinweis = streckencode.code_bewerten(args.streckencode)
+        ok, hinweis = streckencode.code_bewerten(args.streckencode, args.ziel)
         _log("Streckencode %s: %s" % (args.streckencode, hinweis))
         if not ok:
             raise BauFehler("unzulässiger Streckencode %s" % args.streckencode)
@@ -532,7 +533,7 @@ def cmd_bauen(args):
     args.weltkarten = bool(args.weltkarten) and not args.ohne_geometrie
     if args.weltkarten:
         args.welt_uv = "echt"
-    optionen = dict(streckencode=args.streckencode, pvs_variante=args.pvs_variante,
+    optionen = dict(streckencode=args.streckencode, pvs_variante=args.pvs_variante, ziel=args.ziel,
                     nur_original_pvs=args.nur_original_pvs, ohne_geometrie=args.ohne_geometrie,
                     ohne_minimap=args.ohne_minimap)
     _phase("pruefen_vorab")
@@ -567,6 +568,7 @@ def cmd_bauen(args):
                 raise
     _log("Träger erfassen …")
     zustand = spiel_welt.TraegerZustand.erfassen(a)
+    zustand.raster = args.raster
     trn_hash = next(r.hash for r in a if r.resource_type == "TRN~")
     bericht["traeger"].update(ressourcen=len(a), layer=len(zustand.layer_uids), welten=len(zustand.welten),
                               evgt_verweise=len(zustand.evgt_uids),
@@ -825,6 +827,13 @@ def cmd_bauen(args):
         if meta:
             streckencode.metadaten_setzen(neu_manifest, meta)
         bericht["manifest_metadaten"] = meta
+        zusatz = None
+        if args.renndaten:   # Runden, Kraftstoff, Reifen, KI-Zeiten (strecke/renndaten.py)
+            zusatz = renndaten.aus_logik(lg, lg["laenge_m"])
+            bericht["renndaten"] = zusatz["bericht"]
+            _log("Renndaten: %s" % (zusatz["bericht"],))
+            if args.streckencode == streckencode.STANDARD_ALT:
+                streckencode.zusatz_anhaengen(neu_manifest, zusatz)
         mm = minimap_json if minimap_json is not None else minimap_roh
         if args.pruefregeln != "aus":
             m = []
@@ -864,7 +873,7 @@ def cmd_bauen(args):
                         ziel, neu_manifest, images_roh, mm, pfad, mip,
                         streckencode.Umbenennung(streckencode.STANDARD_ALT, args.streckencode),
                         os.path.join(aus, "%s_%s" % (name, args.streckencode)), name=args.streckenname,
-                        aktivierung_vorlage=args.aktivierung_vorlage, ueberschreiben=True, protokoll=_log)
+                        aktivierung_vorlage=args.aktivierung_vorlage, ueberschreiben=True, protokoll=_log, zusatz=zusatz)
                     groesse = erg["groesse"]
                     os.remove(erg["neu_erp"])
                     bericht.setdefault("streckencode", {})[name] = {
@@ -888,6 +897,12 @@ def cmd_bauen(args):
                     m = []
                     geprueft |= pruefregeln.paket_pruefung_bewerten(pruefung, m)
                     z = _meldungen_senden(pruefregeln.bericht(m, geprueft, ["paket"]), "paket", regel_meldungen, gesehen)
+                if args.ziel == streckencode.ZIEL_SWOFTY and (z["ok"] or args.fehlerhafte_behalten):
+                    _phase("swofty")
+                    addon = streckencode.swofty_addon_bauen(ziel, ziel + ".addon", args.streckenname, protokoll=_log)
+                    os.replace(ziel + ".addon", ziel)
+                    groesse = addon["groesse"]
+                    bericht["pakete"][name].update(groesse=groesse, swofty=addon)
                 if args.atomar:
                     if z["ok"] or args.fehlerhafte_behalten:
                         _abbruch_pruefen()
@@ -901,7 +916,7 @@ def cmd_bauen(args):
                         _log("Paket %s verworfen (Prüffehler; --fehlerhafte-behalten zum Behalten)" % name)
                         continue
                 fertige.append({"name": name, "pfad": os.path.abspath(endziel), "groesse": groesse,
-                                "pruefung_ok": z["ok"]})
+                                "pruefung_ok": z["ok"], "ziel": args.ziel})
         finally:
             quelle.close()
             if args.atomar and os.path.isdir(tmp):
@@ -1083,7 +1098,7 @@ BAUPROFILE = {
         "beschreibung": "Empfohlener Bau (16.10.2026, v20 im Spiel fahrbar): PVS entlang der Strecke, "
                         "Boxengassen-Korrektur (AP21), Code sochi, nur Hauptvariante",
         "optionen": {"pvs_variante": "strecke", "boxen_korrektur": True, "streckencode": "sochi",
-                     "aktivierung_vorlage": "portimao", "nur_hauptvariante": True, "weltkarten": True},
+                     "aktivierung_vorlage": "portimao", "nur_hauptvariante": True, "weltkarten": True, "renndaten": True},
         "streckenname": "aus der Definition (Feld name), sonst Teststrecke",
         "beleg": "CLAUDE.md „Empfohlener Bau“, docs/schritt2_ergebnisse.md (v20_pvs_strecke ✔)",
     },
@@ -1193,7 +1208,17 @@ def _vorbereiten(args):
             args.eingabe_info["umgebung"] = {"quelle": args.umgebung, "schnappschuss": os.path.abspath(ziel),
                                              "sha256": hashlib.sha256(roh).hexdigest()}
             args.umgebung = os.path.abspath(ziel)
-    if args.profil and args.streckenname is None and args.streckencode != streckencode.STANDARD_ALT:
+    if args.raster:   # Plätze im Generator: Startaufstellung und Boxen der Eingabekopie (docs/swofty_launcher.md)
+        with open(args.definition, encoding="utf-8-sig") as f:
+            daten = json.load(f)
+        daten.setdefault("startaufstellung", {})["anzahl"] = args.raster
+        daten.setdefault("boxengasse", {})["boxen"] = (args.raster + 1) // 2
+        args.definition = os.path.join(args.ausgabe, "eingabe", "definition_raster.json")
+        os.makedirs(os.path.dirname(args.definition), exist_ok=True)
+        with open(args.definition, "w", encoding="utf-8") as f:
+            json.dump(daten, f, ensure_ascii=False)
+    swofty = args.ziel == streckencode.ZIEL_SWOFTY
+    if (swofty or args.profil and args.streckencode != streckencode.STANDARD_ALT) and args.streckenname is None:
         name = None
         try:
             with open(args.definition, encoding="utf-8-sig") as f:
@@ -1201,6 +1226,10 @@ def _vorbereiten(args):
         except (OSError, ValueError):
             pass
         args.streckenname = name or "Teststrecke"
+    if swofty:  # eigener Code statt eines Altplatzes, Basis aus den Streckenlisten (docs/swofty_launcher.md)
+        if args.streckencode == streckencode.STANDARD_ALT or args.streckencode in streckencode.DB_ALTSTRECKEN:
+            args.streckencode = streckencode.swofty_code(args.streckenname)
+        args.aktivierung_vorlage = streckencode.SWOFTY_VORLAGE
 
 
 def _huegel_liste(text):
@@ -1413,6 +1442,13 @@ def argumente(argv):
     s.add_argument("--streckencode", default=streckencode.STANDARD_ALT,
                    help="Code der Strecke im Paket; muss in der Spieldatenbank vorhanden sein (z. B. sochi), "
                         "siehe docs/streckencode.md. Standard portimao = keine Umbenennung")
+    s.add_argument("--ziel", choices=streckencode.ZIELE, default=streckencode.ZIEL_EGO,
+                   help="ego = Paket für den Track Installer, swofty = Addon für den Swofty Launcher mit eigenem Code und "
+                        "Namen im Menü (docs/swofty_launcher.md)")
+    s.add_argument("--renndaten", action=argparse.BooleanOptionalAction, default=False,
+                   help="Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke berechnen (strecke/renndaten.py)")
+    s.add_argument("--raster", type=int, choices=(26,), default=None,
+                   help="Plätze, Garagen und Boxen für so viele Autos in der Welt anlegen (Standard: 24 wie der Träger)")
     s.add_argument("--streckenname", default=None, help="track_name im Manifest (nur mit --streckencode)")
     s.add_argument("--aktivierung-vorlage", default=None,
                    help="activation.copy_from_track im Manifest (nur mit --streckencode), z. B. portimao")

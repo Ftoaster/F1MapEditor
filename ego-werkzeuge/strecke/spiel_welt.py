@@ -19,6 +19,7 @@ Entscheidungen je Layer: ``LAYER_REGELN`` (mit Begründung, auch im Bericht
 """
 
 import copy
+import hashlib
 import math
 import struct
 from collections import Counter, defaultdict
@@ -29,7 +30,7 @@ from ego import bxml, licht, pkg, pvs, streckenlogik
 from . import platzierung
 from .pruefregeln import (BOXEN_VERLAENGERUNG_NACH_M, BOXEN_VERLAENGERUNG_VOR_M,  # AP24: Regeln zentral
                           BREMSLINIEN_MIN_ABSTAND_GATES, ZEITFAHR_ZONEN)
-from .spielformat import Schreiber, _pfad, _struktur_eindeutig, _tabellenwert
+from .spielformat import Schreiber, _pfad, _platz_klonen, _struktur_eindeutig, _tabellenwert
 
 BEHALTEN, LEEREN, ANPASSEN = "behalten", "leeren", "anpassen"
 
@@ -236,6 +237,7 @@ class TraegerZustand:
         self.lichtkarte = None
         self.schreiber = None
         self.plaetze = {}          # Kurzname -> {name: (matrix, uid, template)}
+        self.raster = None         # Autos, für die die Welt Plätze braucht (None: wie der Träger)
         self.pvs_obj = None
 
     @classmethod
@@ -867,6 +869,42 @@ def _nummer(name):
 
 #: Anker der Garagenszene quer zur Box Richtung Garage (Originale: 1,7–10,8 m)
 F1GARAGE_QUER_M = 6.5
+#: Layer mit dem letzten Startplatz; hier ergänzt auch der Swofty Launcher Plätze (activation/grid.rs)
+RASTER_LAYER = "vehicles_current_myteam"
+RASTER_ARTEN = (("GridSlot", 2, 1), ("PitGarage", 2, 1), ("PitBox", 1, 2), ("F1Garage", 1, 2))
+
+
+def raster_vormerken(zustand, autos):
+    """Fehlende Plätze für ``autos`` Autos vormerken (je Art Kopie des Vorgängers in ``RASTER_LAYER``); die Lage rechnet
+    ``plaetze_berechnen`` wie bei allen Plätzen, angelegt werden sie in ``platz_layer_setzen``."""
+    d = zustand.plaetze[RASTER_LAYER]
+    praefix = next(iter(d)).rsplit("$", 1)[0] + "$"
+    for art, schritt, je_auto in RASTER_ARTEN:
+        anzahl = autos if je_auto == 1 else (autos + 1) // 2
+        vorhanden = {_nummer(k)[1]: k for k in d if _nummer(k)[0] == art.lower()}
+        for n in range(max(vorhanden) + 1, anzahl + 1):
+            m, _, tpl = d[vorhanden[n - schritt]]
+            name = "%s%s%d" % (praefix, art, n)
+            d[name] = (m, hashlib.md5(("raster:%s:%s" % (zustand.code, name)).encode()).hexdigest(), tpl)
+            vorhanden[n] = name
+
+
+def _platz_anlegen(p, zustand, kurz, name):
+    """Vorgemerkten Platz in der Ebene anlegen; Garagen verweisen auf ihre beiden PitGarages."""
+    art, n = _nummer(name)
+    schritt = 2 if art in ("gridslot", "pitgarage") else 1
+    vorlage = next(i for i in p.instanzen() if _nummer(i.name) == (art, n - schritt))
+    d = zustand.plaetze[kurz]
+    inst = _platz_klonen(p, vorlage, name, d[name][1])
+    if art == "f1garage":
+        comp = _pfad(p, inst.block, "overrides", "F1Garage").wert.ziel
+        p.feld(comp, "id").wert = p.neuer_wert(p.feld(comp, "id").wert, struct.pack("<i", n))
+        for seite, nummer in (("left car placement", 2 * n - 1), ("right car placement", 2 * n)):
+            uid = next(v[1] for k, v in d.items() if _nummer(k) == ("pitgarage", nummer))
+            p.feld(comp, seite).wert = p.neuer_wert(p.feld(comp, seite).wert, bytes.fromhex(uid))
+    else:
+        comp = _pfad(p, inst.block, "overrides", "VehPlacement").wert.ziel
+        p.feld(comp, "Id").wert = p.neuer_wert(p.feld(comp, "Id").wert, struct.pack("<I", n))
 
 
 def plaetze_berechnen(lg, zustand, protokoll):
@@ -883,6 +921,8 @@ def plaetze_berechnen(lg, zustand, protokoll):
     * ohne Gebäude: Platzhalter **in der Boxengasse** an der Box (ohne Querversatz), wie bis 27.10.2026.
 
     Box 12 und Startplätze 23/24 werden extrapoliert."""
+    if zustand.raster:
+        raster_vormerken(zustand, zustand.raster)
     sp = lg["spielformate"]
     gen = {}
     for p in sp["vehicles_layer"]["placements"]:
@@ -1110,6 +1150,9 @@ def platz_layer_setzen(archiv, zustand, plaetze, kurznamen=("vehicles_myteam", "
             continue
         r = res[kurz]
         p = pkg.lesen(r.fragments[0].read())
+        vorhanden = {i.name for i in p.instanzen()}
+        for name in sorted(set(neu) - vorhanden, key=lambda k: (_nummer(k)[0] == "f1garage", _nummer(k)[1])):
+            _platz_anlegen(p, zustand, kurz, name)
         for inst in p.instanzen():
             if inst.name in neu:
                 _struktur_eindeutig(p, inst)

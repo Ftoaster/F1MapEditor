@@ -34,6 +34,39 @@ def test_alle_codes_der_spieldatenbank():
             "--streckencode", code]
 
 
+def test_ziel_swofty_ohne_spielcode():
+    root = ROOT / "ego-werkzeuge"
+    befehl = build_command(root, root, root / "b", root / "p", "x", options={"ziel": "swofty", "streckencode": "sochi"})
+    assert befehl[befehl.index("--ziel") + 1] == "swofty" and "--streckencode" not in befehl
+    assert "--ziel" not in build_command(root, root, root / "b", root / "p", "x", options={"ziel": "ego"})
+    with pytest.raises(ValueError):
+        build_command(root, root, root / "b", root / "p", "x", options={"ziel": "unbekannt"})
+
+
+def test_launcher_befehle(tmp_path):
+    import zipfile
+    from mapeditor.adapter import swofty_auswerten, swofty_installieren, swofty_programm, swofty_starten
+    addon = tmp_path / "a.zip"
+    with zipfile.ZipFile(addon, "w") as z:
+        z.writestr("swofty.json", json.dumps({"id": "mapeditor.longer"}))
+    programm = tmp_path / "swofty.exe"
+    programm.write_bytes(b"")
+    assert swofty_programm(programm) == programm
+    assert swofty_installieren(programm, addon) == [[str(programm), "addons", "install", str(addon)],
+                                                    [str(programm), "addons", "enable", "mapeditor.longer"]]
+    assert swofty_starten(programm) == [[str(programm), "run", "--apply"]]
+    assert swofty_auswerten(programm) == [str(programm), "logs"]
+
+
+def test_optionen_renndaten_und_raster():
+    root = ROOT / "ego-werkzeuge"
+    befehl = build_command(root, root, root / "b", root / "p", "x", options={"renndaten": False, "raster": 26})
+    assert "--no-renndaten" in befehl and befehl[befehl.index("--raster") + 1] == "26"
+    assert "--raster" not in build_command(root, root, root / "b", root / "p", "x", options={"renndaten": True, "raster": 0})
+    with pytest.raises(ValueError):
+        build_command(root, root, root / "b", root / "p", "x", options={"raster": 30})
+
+
 def test_zustandstexte():
     assert code_label("sochi", "empfohlen", ZUSTAND) == "sochi  ·  empfohlen  ·  im Spiel"
     assert code_label("hanoi", "gut", ZUSTAND) == "hanoi  ·  gut"
@@ -84,6 +117,32 @@ def test_dialog_zeigt_alle_codes_mit_zustand(window, tmp_path):
     assert "hanoi" in d.profile_hint.text()
     tips = {d.code.itemData(i): d.code.itemData(i, 0x03) for i in range(d.code.count())}   # Qt.ToolTipRole
     assert all(tips[c] for c, _, _ in TRACK_CODES)
+
+
+def test_dialog_ziel_swofty(window, tmp_path):
+    from mapeditor.build import BuildDialog
+    dialog = BuildDialog(window)
+    dialog.target.setCurrentIndex(dialog.target.findData("swofty"))
+    assert dialog.options()["ziel"] == "swofty" and dialog.code.isHidden() and "Addon" in dialog.code_info.text()
+    assert dialog.main_form.getWidgetPosition(dialog.track_name)[0] >= 0 and not dialog.track_name.isHidden()
+    assert dialog.advanced_form.getWidgetPosition(dialog.track_name)[0] < 0
+    assert dialog.install_button.isHidden() and not dialog.diagnosis_button.isHidden()   # noch kein Addon gebaut
+    dialog.inject_record = {"paket": "x.zip"}
+    dialog.set_inject_target({"paket": "x.zip", "optionen": {"ziel": "swofty"}})
+    assert dialog.inject_record is None and not dialog.inject_button.isEnabled()
+    assert dialog.install_button.isEnabled() and dialog.play_button.isEnabled()
+    assert not dialog.install_button.isHidden() and not dialog.play_button.isHidden() and dialog.inject_button.isHidden()
+    assert dialog.cancel_button.isHidden() and dialog.explorer_button.isHidden() and dialog.report_button.isHidden()
+    dialog._launcher_report("[loader] [crash] armed\n[info] game exited with code -1 after 49.0s (crash)\n[crash] reason       unhandled ACCESS_VIOLATION")
+    assert "Absturz in" in dialog.phase.text() and "crash" in dialog.result_text.toPlainText()
+    dialog._launcher_report("[loader] [crash] armed\n[info] game exited with code 0 after 113.1s (quit)\n[crash] reason       TerminateProcess(0 = 0x0)")
+    assert "kein Absturz" in dialog.phase.text()
+    dialog.target.setCurrentIndex(dialog.target.findData("ego"))
+    assert not dialog.code.isHidden()
+    assert dialog.install_button.isHidden() and dialog.diagnosis_button.isHidden()
+    assert dialog.advanced_form.getWidgetPosition(dialog.track_name)[0] == 0
+    assert dialog.main_form.getWidgetPosition(dialog.track_name)[0] < 0
+    dialog.close()
 
 
 def test_sprachwechsel_mit_offenem_baudialog(window, tmp_path):

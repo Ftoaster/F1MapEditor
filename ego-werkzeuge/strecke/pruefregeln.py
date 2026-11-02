@@ -103,6 +103,7 @@ QUELLEN = {
     "absturz": "docs/zwischenstand/absturz_analyse.md",
     "bremslinien": "docs/zwischenstand/absturz_analyse.md#ursache-gefunden-15102026-nachts-bremslinien-außerhalb-der-kurven",
     "ap21": "docs/zwischenstand/ap21.md",
+    "swofty": "docs/swofty_launcher.md",
     "streckencode": "docs/streckencode.md",
     "schritt2": "docs/schritt2_ergebnisse.md",
     "platzierung": "ego-werkzeuge/strecke/platzierung.py",
@@ -226,6 +227,9 @@ _R = [
           "Box-Bremslinie nicht innerhalb einer Kurve der Boxenroute (R4)", QUELLEN["ap21"], "30/30 Originale"),
     Regel("KI_BOX_PAIR_ID_FEHLT", "KI-03", HINWEIS, "logik",
           "Kein pair_id zwischen Boxenausfahrts- und Streckenkurve (R5)", QUELLEN["ap21"], "25/30 Originale"),
+    Regel("KI_ROUTE_OHNE_RAUMWECHSEL", "KI-07", WARNUNG, "logik",
+          "KI-Route ohne Wechsel des Überholraums", QUELLEN["swofty"],
+          "Swofty Launcher: Absturz, sobald ein KI-Auto eine solche Route fährt, oft die Boxengasse"),
     Regel("ZONE_ZEITFAHR_TRIGGER_AUSSERHALB", "ZO-01", WARNUNG, "logik",
           "ai_flying_lap_trigger überlappt rollingstart_tt nicht", QUELLEN["absturz"],
           "Portimão: Trigger in rollingstart_tt; Absturz v1/v2 ohne Überlappung (mit Vorlagen-Fortschritt), "
@@ -749,9 +753,57 @@ def _zonen(lo, m, vorlage_m):
     return gp
 
 
+#: ``ai_track_config.space_lines`` aller Strecken laut Swofty Launcher (activation/ailine.rs), eigene Umsetzung
+RAUM_ABSOLUT_M, RAUM_MITTE_ANTEIL, RAUM_SEITE_ANTEIL = 2.2, 0.35, 0.15
+RAUM_ENG_LINKS, RAUM_ENG_RECHTS, RAUM_BEIDE, RAUM_GEMISCHT = "eng_links", "eng_rechts", "beide", "gemischt"
+
+
+def raumklasse(links, rechts):
+    """Überholraum eines Tors aus den Abständen seiner weißen Linien."""
+    l, r = abs(links), abs(rechts)
+    summe = l + r
+    if not summe:
+        return RAUM_GEMISCHT
+    al, ar = l / summe, r / summe
+    if (l <= RAUM_ABSOLUT_M < r) or al < RAUM_SEITE_ANTEIL:
+        return RAUM_ENG_LINKS
+    if (r <= RAUM_ABSOLUT_M < l) or ar < RAUM_SEITE_ANTEIL:
+        return RAUM_ENG_RECHTS
+    return RAUM_GEMISCHT if min(al, ar) < RAUM_MITTE_ANTEIL else RAUM_BEIDE
+
+
+def raum_wechselt(klassen):
+    """Mindestens ein Wechsel; gemischte Tore zählen nur als Anfang einer Route."""
+    return len({k for k in klassen if k != RAUM_GEMISCHT} | set(klassen[:1])) > 1
+
+
+def _raumklassen(lo, route):
+    klassen = []
+    for g in route:
+        weg = {w.get("type"): float(w.get("length", 0)) for w in lo.gates[g].get("waypoints", [])}
+        links = weg.get("left_white_line", weg.get("left_track_limit"))
+        rechts = weg.get("right_white_line", weg.get("right_track_limit"))
+        if links is None or rechts is None:
+            return None
+        klassen.append(raumklasse(links, rechts))
+    return klassen
+
+
+def _raumwechsel(lo, m):
+    for name, route in (("track", lo.route_haupt), ("pit", lo.route_box)):
+        klassen = _raumklassen(lo, [g for g in route if g in lo.gates])
+        if klassen and not raum_wechselt(klassen):
+            m.append(meldung("KI_ROUTE_OHNE_RAUMWECHSEL",
+                             "KI-Route %s: Der Überholraum ändert sich auf keinem der %d Tore. Das Spiel stürzt ab, sobald ein KI-Auto "
+                             "sie fährt (der Swofty Launcher korrigiert das beim Bau)" % (name, len(klassen)),
+                             ort(lo.box["name"] if name == "pit" and lo.box else None, None, None, "route " + name),
+                             ist=0, soll="≥ 1"))
+
+
 def _box(lo, m):
     gp = {"BOX_SPLINE_NICHT_VERLAENGERT", "BOX_SPLINE_SPRUNG", "BOX_TS_ABDECKUNG", "BOX_IN_HAUPT_TS",
-          "KI_BOX_KURVEN_FEHLEN", "KI_BOX_BREMSLINIE_AUSSERHALB_KURVE", "KI_BOX_PAIR_ID_FEHLT"}
+          "KI_BOX_KURVEN_FEHLEN", "KI_BOX_BREMSLINIE_AUSSERHALB_KURVE", "KI_BOX_PAIR_ID_FEHLT", "KI_ROUTE_OHNE_RAUMWECHSEL"}
+    _raumwechsel(lo, m)
     pit = lo.box
     pn = pit["name"]
     P = np.asarray(pit["position"], float)
@@ -917,7 +969,7 @@ def bau_pruefungen_bewerten(pr: dict, m: list) -> set:
 
 # =============================================================================== Profil
 def profil_pruefen(streckencode=None, pvs_variante=None, nur_original_pvs=False, ohne_geometrie=False,
-                   ohne_minimap=False, m=None) -> set:
+                   ohne_minimap=False, m=None, ziel="ego") -> set:
     from . import streckencode as sc
     m = m if m is not None else []
     gp = set()
@@ -927,7 +979,7 @@ def profil_pruefen(streckencode=None, pvs_variante=None, nur_original_pvs=False,
             m.append(meldung("STRECKENCODE_TRAEGER", "Code %s bleibt; eine installierte Portimão-Mod wird ersetzt. "
                              "Empfohlen: --streckencode sochi" % streckencode, ist=streckencode, soll="sochi"))
         else:
-            ok, hinweis = sc.code_bewerten(streckencode)
+            ok, hinweis = sc.code_bewerten(streckencode, ziel)
             if not ok:
                 m.append(meldung("STRECKENCODE_UNZULAESSIG", "Streckencode %s: %s" % (streckencode, hinweis),
                                  ist=streckencode))

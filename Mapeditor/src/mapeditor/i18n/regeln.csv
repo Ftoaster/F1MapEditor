@@ -35,6 +35,7 @@ KI_VERWEIS_UNGUELTIG;KI-05;KI-Linie verweist auf ein nicht vorhandenes Gate;AI l
 KI_BOX_KURVEN_FEHLEN;KI-03;KI-Boxenroute ohne Kurvenlinien (R4);AI pit route without corner lines (R4)
 KI_BOX_BREMSLINIE_AUSSERHALB_KURVE;KI-03;Box-Bremslinie nicht innerhalb einer Kurve der Boxenroute (R4);Pit braking line not inside a corner of the pit route (R4)
 KI_BOX_PAIR_ID_FEHLT;KI-03;Kein pair_id zwischen Boxenausfahrts- und Streckenkurve (R5);No pair_id between pit exit corner and track corner (R5)
+KI_ROUTE_OHNE_RAUMWECHSEL;KI-07;KI-Route ohne Wechsel des Überholraums;AI route without a change of passing space
 ZONE_ZEITFAHR_TRIGGER_AUSSERHALB;ZO-01;ai_flying_lap_trigger überlappt rollingstart_tt nicht;ai_flying_lap_trigger does not overlap rollingstart_tt
 ZONE_ZEITFAHR_ABSTAND;ZO-01;Zeitfahr-/ERS-/X-Mode-Zone nicht im Meterabstand der Vorlage zur Ziellinie;Time trial/ERS/X-mode zone not at the template's distance from the finish line
 ZONE_BEREICH_UNGUELTIG;ZO-03;Zone mit Fortschritt außerhalb 0…1 oder unbekannter Spline;Zone with progress outside 0…1 or unknown spline
