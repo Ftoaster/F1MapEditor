@@ -402,10 +402,12 @@ def render_netze(netz: dict, pos: np.ndarray, t: g.Terrain, vorlagen: dict) -> T
         eintrag['dreiecke'] += int(len(lokal))
         eintrag['vertices'] += int(n)
 
-    # Asphalt: u quer (32 m), v längs (−s/32 m), Zusatz = (UV0, Rundenfortschritt, 1 − u_quer)
+    # Asphalt: u quer (32 m), v längs (−s/32 m), Zusatz = (UV0, Rundenfortschritt, 1 − u_quer). Auch unter den Linien:
+    # por_line_a (ts_painted_line) wird überblendet und ist außerhalb der Farbe durchsichtig; im Original liegen die
+    # Linien deckungsgleich auf durchgehendem Asphalt (Trailer 3.11.2026: Linien ohne Asphalt waren durchsichtig).
     dr = uvg[:, 0] * np.nan_to_num(W)
     uv0_asph = np.c_[dr / PERIODE_FLAECHE, -s / p_flaeche]
-    anfuegen('asphalt', tri[o == k['asphalt']], uv0_asph,
+    anfuegen('asphalt', tri[(o == k['asphalt']) | (o == k['linie'])], uv0_asph,
              lambda ids, welt: np.c_[uv0_asph[ids], s[ids] / L, 1.0 - uvg[ids, 0]], nrm_boden)
     # Boxengasse: wie Asphalt, Zusatz.zw = Welt-UV (wie por_track_pit_01 im Original)
     uv0_box = np.c_[quer / PERIODE_FLAECHE, -s / p_flaeche]

@@ -220,10 +220,11 @@ class BuildDialog(QDialog):
                                   "Portimãos Daten zu übernehmen. Ohne diese Option liegen Bremszonen ohne Bezug zu "
                                   "den Kurven (25.10.2026). Neu, noch nicht im Spiel bestätigt."))
         form.addRow("", self.ki_profil)
-        self.race_data = QCheckBox(tr("Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke berechnen"))
+        self.race_data = QCheckBox(tr("Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse)"))
         self.race_data.setChecked(bool(settings.get("renndaten", True)))
         self.race_data.setToolTip(tr("Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der "
-                                     "geschätzten Rundenzeit. Die Reifenwahl ist eine Schätzung."))
+                                     "geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für "
+                                     "Bestenlisten. Die Reifenwahl ist eine Schätzung."))
         form.addRow("", self.race_data)
         self.target = QComboBox()
         self.target.addItem(tr("Track Installer (EGO-Editor)"), "ego")

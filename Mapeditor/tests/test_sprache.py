@@ -112,6 +112,10 @@ def test_englisch_text_mehrzahl_zahlen(englisch):
     assert parse_value("yes", True, "aktiv") is True
     assert choice_value("richtung", "left") == "links"
     assert parse_value("right", "links", "richtung") == "rechts"
+    # Tempolimit der Boxengasse: nur 60 oder 80 km/h (Werte der Spielstrecken)
+    assert parse_value("60", 80.0, "tempolimit_kmh") == 60.0 and parse_value("80", 80.0, "tempolimit_kmh") == 80.0
+    with pytest.raises(ValueError, match="60, 80"):
+        parse_value("70", 80.0, "tempolimit_kmh")
     assert "How to use" in help_html() and "Bedienung" not in help_html()
 
 

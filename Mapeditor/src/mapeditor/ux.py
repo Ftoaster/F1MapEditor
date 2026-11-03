@@ -56,6 +56,8 @@ CHOICES = {
     "seite": ["links", "rechts"],
     "pole_seite": ["links", "rechts"],
     "schliessen": ["verteilen", "fehler"],
+    # Boxengasse: nur die Tempolimits der Spielstrecken (TrackPitData, docs/hooks_untersuchung.md)
+    "tempolimit_kmh": [60.0, 80.0],
 }
 
 
@@ -64,7 +66,9 @@ CHOICE_WORDS = [N_("gerade"), N_("bogen"), N_("klothoide"), N_("links"), N_("rec
 
 
 def choice_text(value):
-    """Auswahlwert der Definition in der Oberflächensprache (``links`` → ``left``)."""
+    """Auswahlwert der Definition in der Oberflächensprache (``links`` → ``left``, Zahlen als Text)."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return edit_text(float(value))
     return tr(value) if isinstance(value, str) and value in CHOICE_WORDS else value
 
 
@@ -73,6 +77,8 @@ def choice_value(key, text):
     for value in CHOICES.get(key, []):
         if text.strip().lower() in (value, choice_text(value).lower()):
             return value
+    if any(isinstance(v, float) for v in CHOICES.get(key, [])):
+        raise ValueError(tr("Bitte einen der Werte {werte} wählen.", werte=", ".join(choice_text(v) for v in CHOICES[key])))
     return text
 
 

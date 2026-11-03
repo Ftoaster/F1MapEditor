@@ -37,6 +37,17 @@ undo history, preview and map view stay).</p>
 <b>Points</b> tool. <b>Zoom in</b> and <b>Zoom out</b> (also Ctrl + and Ctrl −) are in the <b>View</b> menu.
 <b>Fill gaps</b> is active when the lap is closed and either a gap is longer than 20 m and four times the usual point spacing, or
 two neighbouring points are selected. The banking box on the right appears with a selection and in the <b>Banking</b> tab.</p>
+<h3>Combining tracks: copy and paste points</h3>
+<p>Copy selected points (or segments) with <b>Ctrl+C</b> or cut them with <b>Ctrl+X</b>, and paste them with <b>Ctrl+V</b> into
+another or the same track, also between two open Mapeditor windows. The shortcuts work in the map, and every command is in the
+<b>Edit</b> menu too. Pasting only works on an <b>open</b> control point track: the piece joins one of the two open ends with its
+fitting end (distance and the bend against the driving direction decide, a piece lying the wrong way round is reversed). If it
+lies more than 50 m away, it moves to the open end, otherwise it keeps its coordinates. Afterwards it is selected, the Select tool
+is active, and the piece can be moved and rotated. When it is added at the start, cross-section sections and the finish line move along by the piece's length.</p>
+<p><b>Open lap here</b> opens a closed lap behind the selected point; with several selected points it removes them and opens
+the lap there. Red rings show where a pasted piece overlaps the track; <b>Cut overlap</b> shortens the selected piece at an open
+end from the first overlap on. <b>Reverse order of selection</b> turns a piece round. Finally <b>Close lap</b> and
+<b>Fill gaps</b>. The check rejects crossings and bridges (GE-01).</p>
 <h3>Find and recover</h3>
 <p><b>Go to</b> (field above the list): metres from the finish (e.g. 1250), corner (T4) or object (#12). The list
 shows station and corner for each point. <i>Project → Recently opened</i> and the start screen offer the last projects.
@@ -84,7 +95,9 @@ After a change the racing line is pale until the new one is ready. The build use
 (the same state is not calculated twice).</p>
 <h3>Pit lane</h3>
 <p>Choose Properties → <i>Pit lane</i>: squares appear on the map at the entry and exit; dragging moves them
-along the track (one undo step). The racing line then shows the exact pit lane.</p>
+along the track (one undo step). The racing line then shows the exact pit lane.
+The speed limit is 60 or 80 km/h like on the game's tracks; with <i>Work out race data from the track</i> (build dialog) it goes into the game
+together with the time a pit stop costs.</p>
 <h3>Environment (trees, buildings, tents …)</h3>
 <p>Tab <i>Environment</i>: catalogue of the game models (search, category, preview, size). Choose a model and click the
 map to <b>place</b> it (tool <b>U</b>); clicking an object selects it, dragging moves it, a frame selects several, Del

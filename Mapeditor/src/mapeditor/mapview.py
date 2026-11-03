@@ -109,6 +109,8 @@ class MapView(QGraphicsView):
         # Zonen-Overlay (vom Fenster gesetzt): [{"art", "index", "a", "b", "det", "auto", "label"}]
         self.zones = []
         self.zone_selected = None      # (art, index) der Zone mit Griffen
+        self.overlap_marks = []        # eingefügtes Stück überschneidet die Strecke: [(x, z)], gilt bis zur nächsten Änderung
+        self.overlap_revision = -1
         self.zone_drag = None          # (art, index, feld) während eines Griffzugs
         # Fahrlinienlauf (adapter.analysis_summary): Ideallinie, Bremszonen, Tafeln, Startplätze, Boxen, Sektoren
         self.analysis = None
@@ -442,7 +444,17 @@ class MapView(QGraphicsView):
                 painter.drawText(corner + QPointF(6, 16), tr("Spielbereich ±1024 m"))
         if self.show_scale:
             self._scale_bar(painter, width, height, text_color)
+        if self.overlap_marks and self.overlap_revision == self.document.revision:
+            painter.setPen(QPen(QColor("#E5484D"), 3))
+            painter.setBrush(Qt.NoBrush)
+            for x, z in self.overlap_marks:
+                painter.drawEllipse(QPointF(*to_view(x, z)), 9, 9)
         painter.restore()
+
+    def set_overlap_marks(self, marks):
+        """Rote Ringe an Punkten eines eingefügten Stücks, die die Strecke überschneiden (bis zur nächsten Änderung)."""
+        self.overlap_marks, self.overlap_revision = list(marks), self.document.revision
+        self.viewport().update()
 
     # ------------------------------------------------------------------ Umgebung (Zeichnen)
     def env_radius_m(self, objekt):

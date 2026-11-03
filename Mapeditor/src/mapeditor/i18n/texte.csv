@@ -208,8 +208,8 @@ Prüfbericht: ;Check report: ;build.py
 Prüfen und bauen;Check and build;build.py
 Prüffehler · Paket verworfen;Check error · package discarded;build.py
 Prüfung {stufe}: {zusammenfassung};Check {stufe}: {zusammenfassung};build.py
-Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit. Die Reifenwahl ist eine Schätzung.;Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time. The tyre choice is an estimate.;build.py
-Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke berechnen;Work out laps, fuel, tyres and AI times from the track;build.py
+Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für Bestenlisten. Die Reifenwahl ist eine Schätzung.;Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time, plus the pit lane speed limit and the time a pit stop costs, and the minimum lap time for leaderboards. The tyre choice is an estimate.;build.py
+Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse);Work out race data from the track (laps, fuel, tyres, AI, pit lane);build.py
 Saftig;Lush;build.py
 Schnappschuss: ;Snapshot: ;build.py
 Schnellaustausch abgebrochen · nichts geändert.;Quick swap cancelled · nothing changed.;build.py
@@ -1004,7 +1004,7 @@ Stützstellenabstand · m;Sample spacing · m;window.py
 Tafeln;Boards;window.py
 Tafeln ab Geschwindigkeitsabbau · km/h;Boards from speed loss · km/h;window.py
 Tafeln · m vor der Kurve;Boards · m before the corner;window.py
-Tempolimit · km/h (Entwurf);Speed limit · km/h (draft);window.py
+Tempolimit · km/h;Speed limit · km/h;window.py
 Thema ändern;Change theme;window.py
 TrackSpace-Linien;TrackSpace lines;window.py
 T{spiel} · ;T{spiel} · ;window.py
@@ -1096,3 +1096,40 @@ Zusammenfassen · m;Merge · m;window.py
 Übergang min. · m;Transition min. · m;window.py
 Übergang · m;Transition · m;window.py
 "Übergang: ja, nein, Länge > 0 oder {""anfang"": …, ""ende"": …}.";"Transition: yes, no, length > 0 or {""anfang"": …, ""ende"": …}.";window.py
+Bitte einen der Werte {werte} wählen.;Please choose one of {werte}.;ux.py
+Das gewählte Stück überschneidet die Strecke nicht.;The selected piece does not overlap the track.;kopieren.py
+Die Punkte stammen aus einer neueren Mapeditor-Version.;The points come from a newer Mapeditor version.;kopieren.py
+Die Runde ist schon offen.;The lap is already open.;document.py
+Die Zwischenablage enthält keine kopierten Streckenpunkte.;The clipboard holds no copied track points.;kopieren.py
+Diese Eingabeart lässt sich nicht kopieren.;This kind of input cannot be copied.;kopieren.py
+Einfügen geht nur bei offener Strecke: erst „Runde öffnen“ oder „Runde hier öffnen“.;Pasting only works on an open track: first use “Open lap” or “Open lap here”.;kopieren.py
+Einfügen geht nur in Kontrollpunkt-Strecken: Segmente erst in Kontrollpunkte umwandeln.;Pasting only works on control point tracks: convert segments to control points first.;document.py
+Nach dem Abschneiden blieben zu wenige Punkte übrig.;Too few points would be left after cutting.;kopieren.py
+Nichts gewählt: erst Punkte wählen (Rahmen ziehen oder Strg+A).;Nothing selected: select points first (drag a box or Ctrl+A).;kopieren.py
+Nur zusammenhängende Punkte oder Segmente lassen sich kopieren.;Only connected points or segments can be copied.;kopieren.py
+Punkte ausschneiden;Cut points;window.py
+Punkte einfügen;Paste points;document.py, window.py
+Punkte kopieren;Copy points;window.py
+Reihenfolge der Auswahl umkehren;Reverse order of selection;window.py
+Reihenfolge umgekehrt · Strg+Z: rückgängig.;Order reversed · Ctrl+Z: undo.;window.py
+Reihenfolge umkehren;Reverse order;document.py
+Runde an der Auswahl geöffnet · Strg+V fügt kopierte Punkte an ein offenes Ende.;Lap opened at the selection · Ctrl+V adds copied points to an open end.;window.py
+Runde hier öffnen;Open lap here;document.py, window.py
+Streckenmeter um {meter} m verschoben;track metres shifted by {meter} m;window.py
+Strg+Z: rückgängig;Ctrl+Z: undo;window.py
+Umkehren geht nur bei Kontrollpunkten.;Reversing only works with control points.;document.py
+Zum Umkehren mindestens zwei zusammenhängende Punkte wählen.;Select at least two connected points to reverse.;document.py
+Zum Öffnen einen Punkt oder ein zusammenhängendes Stück wählen.;Select one point or a connected piece to open the lap there.;kopieren.py
+an das offene Ende verschoben ({abstand} m entfernt);moved to the open end ({abstand} m away);window.py
+hinten angehängt;added at the end;window.py
+umgedreht;reversed;window.py
+vorne angefügt;added at the start;window.py
+{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.;{anzahl} points cut · Ctrl+Z: undo.;window.py
+{anzahl} Punkte eingefügt;{anzahl} points pasted;window.py
+{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.;{anzahl} points copied · paste into an open track with Ctrl+V.;window.py
+{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.;{anzahl} overlapping points removed · Ctrl+Z: undo.;window.py
+Überstand abschneiden;Cut overlap;document.py, window.py
+überschneidet die Strecke an {anzahl} Punkten (rot) · „Überstand abschneiden“ oder verschieben;overlaps the track at {anzahl} points (red) · “Cut overlap” or move it;window.py
+„Runde hier öffnen“ geht nur bei Kontrollpunkten.;“Open lap here” only works with control points.;document.py
+„Überstand abschneiden“ braucht eine offene Strecke und ein gewähltes Stück an einem ihrer Enden.;“Cut overlap” needs an open track and a selected piece at one of its ends.;kopieren.py
+„Überstand abschneiden“ geht nur bei Kontrollpunkten.;“Cut overlap” only works with control points.;document.py

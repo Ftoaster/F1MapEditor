@@ -51,7 +51,7 @@ LABELS = {
     "aktiv": N_("Aktiv"), "seite": N_("Seite in Fahrtrichtung"), "einfahrt_vor_start_m": N_("Einfahrt vor Ziel · m"),
     "ausfahrt_nach_start_m": N_("Ausfahrt nach Ziel · m"), "abstand_fahrbahn": N_("Abstand Fahrbahn · m"),
     "anlauf_m": N_("Anlauf · m"), "hinter_box_m": N_("Hinter Boxen · m"), "boxen": N_("Boxenzahl"),
-    "box_abstand_m": N_("Boxenabstand · m"), "tempolimit_kmh": N_("Tempolimit · km/h (Entwurf)"),
+    "box_abstand_m": N_("Boxenabstand · m"), "tempolimit_kmh": N_("Tempolimit · km/h"),
     "mauer_hoehe": N_("Boxenmauerhöhe · m"), "mauer_dicke": N_("Boxenmauerdicke · m"), "mauer_abstand_m": N_("Boxenmauerabstand · m"),
     "linien": N_("Linien (Tempolimit, Ein-/Ausfahrt)"), "linie_breite_m": N_("Linienbreite · m"),
     "gebaeude": N_("Garagengebäude"), "gebaeude_tiefe_m": N_("Garagentiefe · m"), "gebaeude_hoehe_m": N_("Garagenhöhe · m"),
@@ -411,6 +411,16 @@ class MainWindow(QMainWindow):
         redo.changed.connect(self._history_status)
         edit_menu.addActions([undo, redo])
         edit_menu.addSeparator()
+        # Kopieren/Einfügen von Streckenpunkten (Issue #2); Kürzel nur in der Karte, Textfelder kopieren wie gewohnt
+        self.clip_actions = [
+            self.action(edit_menu, tr("Punkte kopieren"), self.copy_points, "Ctrl+C"),
+            self.action(edit_menu, tr("Punkte ausschneiden"), self.cut_points, "Ctrl+X"),
+            self.action(edit_menu, tr("Punkte einfügen"), self.paste_points, "Ctrl+V"),
+        ]
+        self.action(edit_menu, tr("Runde hier öffnen"), self.open_here)
+        self.action(edit_menu, tr("Reihenfolge der Auswahl umkehren"), self.reverse_selection)
+        self.action(edit_menu, tr("Überstand abschneiden"), self.cut_overhang)
+        edit_menu.addSeparator()
         self.action(edit_menu, tr("Querneigung: alle Kurven automatisch"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
         self.action(edit_menu, tr("Querneigung: ganze Strecke flach"), self.flatten_bank)
         view_menu = self.menuBar().addMenu(tr("&Ansicht"))
@@ -593,6 +603,9 @@ class MainWindow(QMainWindow):
         self.left_layout = left_layout
 
         self.map = MapView(self.document)
+        for action in self.clip_actions:
+            action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
+            self.map.addAction(action)
         self.map.mode_changed.connect(self.set_mode)
         self.map.draft_changed.connect(self._draft_profiles)
         # Profile während einer Kartengeste höchstens ~15× pro Sekunde neu zeichnen (Leistung beim Ziehen).
@@ -2960,6 +2973,88 @@ class MainWindow(QMainWindow):
     def error(self, text):
         self.status_label.setText(text)
         QMessageBox.warning(self, "Mapeditor", text)
+
+    # ------------------------------------------------------------------ Kopieren und Einfügen (Issue #2)
+    def copy_points(self):
+        from PySide6.QtCore import QMimeData
+        from . import kopieren
+        try:
+            daten = kopieren.kopie(self.document)
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return False
+        text = kopieren.als_text(daten)
+        mime = QMimeData()
+        mime.setData(kopieren.MIME, text.encode("utf-8"))
+        mime.setText(text)
+        QApplication.clipboard().setMimeData(mime)
+        self.status_label.setText(tr("{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.",
+                                     anzahl=len(daten["punkte"])))
+        return True
+
+    def cut_points(self):
+        if self.document.project.readonly or not self.copy_points():
+            return
+        anzahl = len(self.document.selected_indices)
+        self.document.delete()
+        self.status_label.setText(tr("{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.", anzahl=anzahl))
+
+    def paste_points(self):
+        from . import kopieren
+        mime = QApplication.clipboard().mimeData()
+        roh = bytes(mime.data(kopieren.MIME)).decode("utf-8") if mime is not None and mime.hasFormat(kopieren.MIME) else             (mime.text() if mime is not None else "")
+        try:
+            plan = self.document.paste_points(kopieren.aus_text(roh))
+        except ValueError as error:
+            self.map.overlap_marks = []
+            self.status_label.setText(meldung(error))
+            return
+        # Das eingefügte Stück ist gewählt: im Auswahlwerkzeug verschiebt Ziehen es, statt einen Punkt zu setzen
+        self.set_mode("auswahl")
+        a, b = plan["neu"]
+        teile = [tr("{anzahl} Punkte eingefügt", anzahl=b - a + 1),
+                 tr("hinten angehängt") if plan["hinten"] else tr("vorne angefügt")]
+        if plan["umgedreht"]:
+            teile.append(tr("umgedreht"))
+        if plan["verschoben"] is not None:
+            teile.append(tr("an das offene Ende verschoben ({abstand} m entfernt)", abstand=round(plan["abstand_m"])))
+        if plan["versatz_m"]:
+            teile.append(tr("Streckenmeter um {meter} m verschoben", meter=round(plan["versatz_m"], 1)))
+        marken = [point_xyz(self.document.points[i]) for i in plan["ueberschneidungen"]]
+        self.map.set_overlap_marks([(x, z) for x, _, z in marken])
+        if marken:
+            teile.append(tr("überschneidet die Strecke an {anzahl} Punkten (rot) · „Überstand abschneiden“ oder verschieben",
+                            anzahl=len(marken)))
+        teile.append(tr("Strg+Z: rückgängig"))
+        self.status_label.setText(" · ".join(teile))
+
+    def open_here(self):
+        try:
+            self.document.open_here()
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.set_mode("auswahl")
+        self.status_label.setText(tr("Runde an der Auswahl geöffnet · Strg+V fügt kopierte Punkte an ein offenes Ende."))
+
+    def reverse_selection(self):
+        try:
+            self.document.reverse_selection()
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.set_mode("auswahl")
+        self.status_label.setText(tr("Reihenfolge umgekehrt · Strg+Z: rückgängig."))
+
+    def cut_overhang(self):
+        try:
+            anzahl = self.document.cut_overhang()
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.set_mode("auswahl")
+        self.map.set_overlap_marks([])
+        self.status_label.setText(tr("{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.", anzahl=anzahl))
 
     def show_help(self):
         self.help_dialog = HelpDialog(self)

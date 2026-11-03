@@ -53,6 +53,7 @@ Version 1.0.0 of the mod can crash on AMD graphics cards, which its version 1.0.
 - Swofty Launcher: if you remove a track addon, start a new Grand Prix instead of Continue. A saved session on a track that is gone crashes the game.
 - The 26-car option only adds the places to the track. The cars themselves need a grid addon, and tracks of the original game hold 24.
 - Laps, fuel, tyres and AI times from the track are tested through Swofty Launcher, not yet through the EGO installer. The tyre choice is an estimate.
+- Swofty Launcher: when you drive into the pits yourself (pit assist off), the game shows no gate to your pit crew. Under the EGO installer it did. The cause is not found yet.
 
 ## Build from source
 

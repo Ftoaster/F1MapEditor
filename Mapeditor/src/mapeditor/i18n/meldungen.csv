@@ -434,3 +434,4 @@ x_mode.zonen[{}].partial_versatz_m muss ≥ 0 sein (leer = ohne Partial);x_mode.
 {}.zonen muss eine Liste sein;{}.zonen must be a list;zonen.py
 {}.zonen[{}] muss ein Objekt sein;{}.zonen[{}] must be an object;zonen.py
 {}.zonen[{}].{} fehlt oder ist keine Zahl;{}.zonen[{}].{} is missing or not a number;zonen.py
+boxengasse.tempolimit_kmh muss {} sein (Werte der Spielstrecken);boxengasse.tempolimit_kmh must be {} (the values of the game's tracks);definition.py

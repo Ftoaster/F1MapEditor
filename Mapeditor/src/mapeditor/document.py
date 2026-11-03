@@ -587,3 +587,72 @@ class Document(QObject):
         if not self.project.closed and self.ml.get("art") == "kontrollpunkte" and len(self.points) < 4:
             raise ValueError(tr("Zum Schließen sind mindestens vier Kontrollpunkte erforderlich."))
         self.edit(tr("Rundenschluss ändern"), lambda raw, meta: meta.update(runde_geschlossen=not self.project.closed))
+
+    # ------------------------------------------------------------------ Kopieren und Einfügen (Issue #2)
+    def _nur_punkte(self, text):
+        if self.project.readonly:
+            raise ValueError(tr("Unbekannte Projektfassung: nur lesend."))
+        if self.ml.get("art") != "kontrollpunkte":
+            raise ValueError(text)
+
+    def paste_points(self, punkte):
+        """Kopierte Punkte an das passende offene Ende binden (ein Undo-Schritt); danach sind sie gewählt.
+        Rückgabe: Plan (``kopieren.einfuegen_plan``) samt ``ueberschneidungen`` (Indizes der neuen Punkte)."""
+        from . import kopieren
+        self._nur_punkte(tr("Einfügen geht nur in Kontrollpunkt-Strecken: Segmente erst in Kontrollpunkte umwandeln."))
+        plan = kopieren.einfuegen_plan(self.points, punkte, self.project.closed)
+        def operation(raw, meta):
+            raw["mittellinie"]["punkte"] = copy.deepcopy(plan["punkte"])
+            kopieren.stationen_verschieben(raw, plan["versatz_m"])
+        self.edit(tr("Punkte einfügen"), operation)
+        a, b = plan["neu"]
+        self.select_many(range(a, b + 1), a if plan["hinten"] else b)
+        plan["ueberschneidungen"] = kopieren.ueberschneidungen(
+            self.points, plan["neu"], kopieren.mindestabstand(self.project.raw)) if len(self.points) > b - a + 1 else []
+        return plan
+
+    def open_here(self):
+        """Geschlossene Runde an der Auswahl öffnen: hinter einem Punkt bzw. gewählte Punkte entfernen und dort öffnen.
+        Streckenmeter ab dem ersten Punkt wandern mit (fester Versatz modulo Rundenlänge)."""
+        from . import kopieren
+        self._nur_punkte(tr("„Runde hier öffnen“ geht nur bei Kontrollpunkten."))
+        if not self.project.closed:
+            raise ValueError(tr("Die Runde ist schon offen."))
+        punkte, versatz, laenge = kopieren.oeffnen_plan(self.points, self.selected_indices)
+        def operation(raw, meta):
+            raw["mittellinie"]["punkte"] = copy.deepcopy(punkte)
+            kopieren.stationen_verschieben(raw, -versatz, laenge)
+            meta["runde_geschlossen"] = False
+        self.edit(tr("Runde hier öffnen"), operation)
+        self.select(len(punkte) - 1)
+
+    def reverse_selection(self):
+        """Reihenfolge eines zusammenhängenden Stücks umkehren (z. B. ein falsch herum angebundenes Stück)."""
+        from . import kopieren
+        self._nur_punkte(tr("Umkehren geht nur bei Kontrollpunkten."))
+        folge = kopieren.kette(self.selected_indices, len(self.points), self.project.closed)
+        if folge is None or len(folge) < 2:
+            raise ValueError(tr("Zum Umkehren mindestens zwei zusammenhängende Punkte wählen."))
+        def operation(raw, meta):
+            punkte = raw["mittellinie"]["punkte"]
+            alt = [punkte[i] for i in folge]
+            for i, p in zip(folge, reversed(alt)):
+                punkte[i] = p
+        self.edit(tr("Reihenfolge umkehren"), operation)
+
+    def cut_overhang(self):
+        """Gewähltes Stück an einem offenen Ende ab der ersten Überschneidung mit der Strecke kürzen.
+        Rückgabe: Anzahl entfernter Punkte."""
+        from . import kopieren
+        self._nur_punkte(tr("„Überstand abschneiden“ geht nur bei Kontrollpunkten."))
+        punkte, weg, versatz = kopieren.ueberstand_plan(self.points, self.selected_indices,
+                                                         kopieren.mindestabstand(self.project.raw), self.project.closed)
+        rest = sorted(set(self.selected_indices) - set(weg))
+        vorne = 0 in weg
+        def operation(raw, meta):
+            raw["mittellinie"]["punkte"] = copy.deepcopy(punkte)
+            kopieren.stationen_verschieben(raw, versatz)
+        self.edit(tr("Überstand abschneiden"), operation)
+        verschiebung = len(weg) if vorne else 0
+        self.select_many([i - verschiebung for i in rest], None)
+        return len(weg)

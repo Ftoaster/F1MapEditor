@@ -4,6 +4,10 @@ Die Regeln stammen aus der Aktivierung der Portimão-Mod 1.0.2 (4.653 m) und tre
 und 170/120 km (F2), Kraftstoff je Kilometer, Ladung = Verbrauch je Runde × (Runden + 2,5). Die KI-Zeiten skalieren die
 Portimão-Staffel mit der geschätzten Rundenzeit: Der Fahrzeugsatz ``f1_25_ki_portimao`` trifft dort 75,2 s (``ggv_test.md``),
 genau den Stufenwert der Mod. Die Reifenwahl ist eine Schätzung ohne Spielbeleg.
+
+Dazu Werte, die sonst von der Vorlage stammen (docs/hooks_untersuchung.md): ``lb_min_time`` (Mindestzeit für Bestenlisten,
+bei den Spielstrecken 0,93–0,96 × Polezeit, Zandvoort 66,1 s) und ``TrackPitData`` (Tempolimit und Zeitverlust eines
+Boxenstopps; die Spielstrecken haben 60 oder 80 km/h und 19–36 s, nass meist 5 s mehr).
 """
 
 import math
@@ -31,6 +35,14 @@ KLASSEN = (
 REIFEN_DATENSAETZE = ["f1_2025", "sprint_f1_2025", "f1_2026", "sprint_f1_2026"]
 #: Mittlere Querbeschleunigung über die Zeit (m/s²) → (härteste, mittlere, weichste Mischung), größte Belastung zuerst
 REIFEN_STUFEN = ((16.0, ("C1", "C2", "C3")), (13.0, ("C2", "C3", "C4")), (0.0, ("C3", "C4", "C5")))
+#: Mindestzeit für Bestenlisten relativ zur Modellrunde; unter den 0,93 der Spielstrecken, weil das Fahrzeugmodell abweicht
+MINDESTZEIT_ANTEIL = 0.85
+#: TrackPitData nur in diesen Datensätzen (die übrigen erben sie, geprüft an Zandvoort)
+BOXEN_DATENSAETZE = ["f1", "f2"]
+STANDZEIT_S = 2.5                     # Reifenwechsel
+BREMS_ANFAHR_S = 3.0                  # Verzögern vor und Beschleunigen nach dem Tempolimit
+BOXENZEIT_GRENZEN_S = (15.0, 40.0)
+BOXENZEIT_NASS_PLUS_S = 5.0
 
 #: KI-Zeit je Schwierigkeitsstufe relativ zur Stufe 1,0 (Portimão-Staffel der Mod, 75,2076 s; F2 85,9804 s)
 STAFFEL_F1 = (85.7753, 83.704, 81.2043, 79.1973, 77.088, 76.2436, 75.2076, 74.7959, 74.3843, 73.9727)
@@ -64,8 +76,18 @@ def _zeiten(staffel, faktor):
     return ",".join("%.4f" % (t * faktor) for t in staffel)
 
 
-def berechnen(laenge_m, rundenzeit_s, a_quer_mittel):
-    """``{"overrides": […], "track_overrides": […], "bericht": {…}}`` im Format von ``activation``."""
+def boxenzeit(laenge_m, rundenzeit_s, box):
+    """Zeitverlust eines Boxenstopps (s): Weg durch die Gasse mit Tempolimit statt mit mittlerem Rundentempo auf der
+    Strecke zwischen Ein- und Ausfahrt, dazu Standzeit sowie Bremsen und Anfahren; begrenzt auf die Spanne der Spielstrecken."""
+    v_box = float(box["tempolimit_kmh"]) / 3.6
+    strecke_m = ((float(box["ausfahrt_main_progress"]) - float(box["einfahrt_main_progress"])) % 1.0) * laenge_m
+    verlust = float(box["laenge_m"]) / v_box - strecke_m / (laenge_m / rundenzeit_s) + STANDZEIT_S + BREMS_ANFAHR_S
+    return round(min(max(verlust, BOXENZEIT_GRENZEN_S[0]), BOXENZEIT_GRENZEN_S[1]), 1)
+
+
+def berechnen(laenge_m, rundenzeit_s, a_quer_mittel, box=None):
+    """``{"overrides": […], "track_overrides": […], "bericht": {…}}`` im Format von ``activation``. ``box``: Boxengasse der
+    Logik (``laenge_m``, ``tempolimit_kmh``, ``einfahrt_main_progress``, ``ausfahrt_main_progress``) oder None."""
     laenge_km = laenge_m / 1000.0
     overrides = []
 
@@ -89,17 +111,27 @@ def berechnen(laenge_m, rundenzeit_s, a_quer_mittel):
     reifen = reifen_waehlen(a_quer_mittel)
     for feld, mischung in zip(("compound_harder", "compound_medium", "compound_softer"), reifen):
         setzen(REIFEN_DATENSAETZE, "TyreData_0." + feld, mischung)
+    bericht = {}
+    if box:
+        verlust = boxenzeit(laenge_m, rundenzeit_s, box)
+        setzen(BOXEN_DATENSAETZE, "TrackPitData_0.pitSpeedLimit", "%g" % float(box["tempolimit_kmh"]))
+        setzen(BOXEN_DATENSAETZE, "TrackPitData_0.pitStopTime_Dry", "%g" % verlust)
+        setzen(BOXEN_DATENSAETZE, "TrackPitData_0.pitStopTime_Wet", "%g" % (verlust + BOXENZEIT_NASS_PLUS_S))
+        bericht.update(tempolimit_kmh=float(box["tempolimit_kmh"]), boxenzeit_s=verlust)
     faktor = rundenzeit_s / ZEIT_BEZUG_S
-    streckenwerte = [{"path": "fuel_burn_per_lap", "value": "%.2f" % (VERBRAUCH_STRECKE_KG_KM * laenge_km)}]
+    mindestzeit = round(MINDESTZEIT_ANTEIL * rundenzeit_s, 3)
+    streckenwerte = [{"path": "fuel_burn_per_lap", "value": "%.2f" % (VERBRAUCH_STRECKE_KG_KM * laenge_km)},
+                     {"path": "lb_min_time", "value": "%g" % mindestzeit}]
     for pakete, wert in ((PAKETE_EINZELWERT, "%.4f" % rundenzeit_s), (PAKETE_F1, _zeiten(STAFFEL_F1, faktor)),
                          (PAKETE_F2, _zeiten(STAFFEL_F2, faktor))):
         streckenwerte += [{"path": "ai_track_difficulties.%s.time" % p, "value": wert} for p in pakete]
     return {"overrides": overrides, "track_overrides": streckenwerte,
             "bericht": {"laenge_m": laenge_m, "rundenzeit_s": round(rundenzeit_s, 3), "a_quer_mittel": round(a_quer_mittel, 2),
-                        "runden_f1": runden(laenge_m, "f1"), "runden_f2": runden(laenge_m, "f2"), "reifen": list(reifen)}}
+                        "runden_f1": runden(laenge_m, "f1"), "runden_f2": runden(laenge_m, "f2"), "reifen": list(reifen),
+                        "mindestzeit_s": mindestzeit, **bericht}}
 
 
 def aus_logik(lg, laenge_m):
     """Renndaten einer gebauten Logik mit dem an der Spiel-KI kalibrierten Fahrzeugsatz."""
     profil = spiel_ki.geschwindigkeit_neu(lg)["ki_profil"]
-    return berechnen(float(laenge_m), profil["rundenzeit_s"], profil["a_quer_mittel"])
+    return berechnen(float(laenge_m), profil["rundenzeit_s"], profil["a_quer_mittel"], lg.get("boxengasse"))

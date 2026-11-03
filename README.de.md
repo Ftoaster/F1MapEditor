@@ -53,6 +53,7 @@ Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 be
 - Swofty Launcher: Nach dem Entfernen eines Strecken-Addons einen neuen Grand Prix starten, nicht „Fortsetzen“. Ein Spielstand auf einer fehlenden Strecke lässt das Spiel abstürzen.
 - Die Option für 26 Autos legt nur die Plätze auf der Strecke an. Die Autos selbst brauchen ein Raster-Addon, Strecken des Originalspiels haben 24 Plätze.
 - Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke sind über den Swofty Launcher getestet, noch nicht über den EGO-Installer. Die Reifenwahl ist eine Schätzung.
+- Swofty Launcher: Beim manuellen Einfahren in die Box (Boxenassistent aus) zeigt das Spiel kein Tor zur eigenen Boxencrew. Unter dem EGO-Installer war es da. Die Ursache ist noch nicht gefunden.
 
 ## Aus dem Quelltext bauen
 

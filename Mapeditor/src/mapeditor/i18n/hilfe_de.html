@@ -38,6 +38,19 @@ zunächst zu, im Werkzeug <b>Punkte</b> öffnen sie sich. <b>Vergrößern</b>, <
 im Menü <b>Ansicht</b>. <b>Lücken füllen</b> ist aktiv, wenn die Runde geschlossen ist und entweder eine Lücke über 20 m und über
 dem Vierfachen des üblichen Punktabstands besteht oder zwei benachbarte Punkte gewählt sind. Das Querneigungsfeld rechts erscheint bei
 einer Auswahl und im Reiter <b>Querneigung</b>.</p>
+<h3>Strecken kombinieren: Punkte kopieren und einfügen</h3>
+<p>Gewählte Punkte (oder Segmente) mit <b>Strg+C</b> kopieren bzw. <b>Strg+X</b> ausschneiden, in einer anderen oder derselben
+Strecke mit <b>Strg+V</b> einfügen, auch zwischen zwei geöffneten Mapeditor-Fenstern. Die Kürzel gelten in der Karte, alle
+Befehle stehen auch im Menü <b>Bearbeiten</b>. Eingefügt wird nur in eine <b>offene</b> Kontrollpunkt-Strecke: Das Stück bindet
+mit seinem passenden Ende an eines der beiden offenen Enden (Abstand und Knick zur Fahrtrichtung entscheiden, falsch herum
+liegende Stücke werden umgedreht). Liegt es weiter als 50 m entfernt, rückt es an das offene Ende, sonst bleibt es an seinen
+Koordinaten. Danach ist es gewählt, das Auswahlwerkzeug ist aktiv, und das Stück lässt sich verschieben und drehen. Wird vorne angefügt, wandern Querschnittsabschnitte
+und die Ziellinie um die Länge des Stücks mit.</p>
+<p><b>Runde hier öffnen</b> öffnet eine geschlossene Runde hinter dem gewählten Punkt, bei mehreren gewählten Punkten entfernt
+es diese und öffnet die Runde dort. Überschneidet das eingefügte Stück die Strecke, zeigen rote Ringe die Stellen;
+<b>Überstand abschneiden</b> kürzt das gewählte Stück an einem offenen Ende ab der ersten Überschneidung.
+<b>Reihenfolge der Auswahl umkehren</b> dreht ein Stück um. Zum Schluss <b>Runde schließen</b> und <b>Lücken füllen</b>.
+Kreuzungen und Brücken lehnt die Prüfung ab (GE-01).</p>
 <h3>Finden und Wiederherstellen</h3>
 <p><b>Gehe zu</b> (Feld über der Liste): Meter ab Ziel (z. B. 1250), Kurve (T4) oder Objekt (#12). Die Liste zeigt
 je Punkt Station und Kurve. <i>Projekt → Zuletzt geöffnet</i> und der Startbildschirm bieten die letzten Projekte an.
@@ -84,7 +97,9 @@ zur Kurve). Nach einer Änderung ist die Fahrlinie blass, bis die neue fertig is
 als Vorabprüfung (gleicher Stand wird nicht noch einmal gerechnet).</p>
 <h3>Boxengasse</h3>
 <p>Eigenschaften → <i>Boxengasse</i> wählen: auf der Karte erscheinen Quadrate an Ein- und Ausfahrt; ziehen
-verschiebt sie entlang der Strecke (ein Undo-Schritt). Die genaue Boxengasse zeigt die Fahrlinie danach.</p>
+verschiebt sie entlang der Strecke (ein Undo-Schritt). Die genaue Boxengasse zeigt die Fahrlinie danach.
+Das Tempolimit ist 60 oder 80 km/h wie bei den Strecken des Spiels; mit <i>Renndaten aus der Strecke berechnen</i> (Baudialog) kommt es
+zusammen mit dem Zeitverlust eines Boxenstopps ins Spiel.</p>
 <h3>Umgebung (Bäume, Gebäude, Zelte …)</h3>
 <p>Reiter <i>Umgebung</i>: Katalog der Spielmodelle (Suche, Kategorie, Vorschau, Größe). Ein Modell wählen und auf die
 Karte klicken <b>platziert</b> es (Werkzeug <b>U</b>); Klick auf ein Objekt wählt es, Ziehen verschiebt, Rahmen wählt

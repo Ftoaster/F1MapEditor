@@ -186,6 +186,8 @@ STANDARD = {
         "hinter_box_m": 4.0,         # Fläche zwischen Boxengasse und Garagenwand
         "boxen": 11,
         "box_abstand_m": 14.0,
+        # Tempolimit in der Boxengasse: Die Spielstrecken nutzen nur 60 oder 80 km/h (TrackPitData, 3.11.2026); der Bau
+        # schreibt es mit --renndaten in die Spieldatenbank (strecke/renndaten.py), die KI-Fahrdaten rechnen damit
         "tempolimit_kmh": 80.0,
         "mauer_hoehe": 1.0,
         "mauer_dicke": 0.4,
@@ -430,6 +432,10 @@ def aus_dict(daten, basisordner=".", quelle="<dict>"):
                               uebergaenge=info.get("uebergaenge"))
 
 
+#: Tempolimits der Boxengasse, die das Spiel bei seinen Strecken nutzt (TrackPitData.pitSpeedLimit)
+TEMPOLIMITS_KMH = (60.0, 80.0)
+
+
 def _parameter_pruefen(p):
     """Verhindert unbrauchbare Abstände, Fahrzeugwerte und Oberflächencodes früh."""
     def endlich(obj):
@@ -462,6 +468,9 @@ def _parameter_pruefen(p):
         wert = p[gruppe][name]
         if not isinstance(wert,int) or isinstance(wert,bool) or wert < (0 if gruppe=='drs' else 1):
             raise ValueError('%s.%s muss eine gültige ganze Anzahl sein' % (gruppe,name))
+    if float(p['boxengasse']['tempolimit_kmh']) not in TEMPOLIMITS_KMH:
+        raise ValueError('boxengasse.tempolimit_kmh muss %s sein (Werte der Spielstrecken)'
+                         % '/'.join('%g' % v for v in TEMPOLIMITS_KMH))
     seitenraum_pruefen(p.get('seitenraum'))
     from . import zonen
     zonen.eingabe_pruefen(p)

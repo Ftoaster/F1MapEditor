@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2
+
+- Combine tracks (issue #2): copy and paste track points with Ctrl+C / Ctrl+X / Ctrl+V, also between two editor windows. A pasted piece joins the open end of an open track with its fitting end, red rings show where it overlaps the track, and new commands open a lap at the selection, cut an overlap and reverse a piece
+- Pit lane speed limit 60 or 80 km/h (the values of the game's tracks); race data writes it to the game with the time a pit stop costs
+- Race data also sets the leaderboard minimum lap time from the track, so short tracks no longer inherit 66 s from the base track
+- White lines no longer show holes: the track now lies under the painted lines as on the original tracks, so worn paint shows tarmac instead of a see-through gap
+- Known issue: through Swofty Launcher the gate to your pit crew is missing when you drive into the pits yourself
+
 ## 0.2.1
 
 - Pit lane on the left works: the build sets the track's mirror flags (`pitMirrored` and friends) like the original left-side tracks
