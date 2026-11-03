@@ -12,6 +12,8 @@ German version: [README.de.md](README.de.md)
 ## What it does
 
 - Draw a track from control points or straights and bends, and edit height, banking and width
+- Trace a track from a map image: a few clicks in driving direction, the editor finds the road in between and checks the lap
+- Combine and resize tracks: copy and paste points between windows, scale by a factor or to a length
 - Compute the racing line, braking points, corners, sectors, DRS and Straight Mode zones
 - Edit the cross-section per range: kerbs, grass, run-off, barriers and the edge angle beside the road
 - Place the pit lane, grid and environment objects from the game's own catalogue, add hills and mountains

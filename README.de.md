@@ -12,6 +12,8 @@ English version: [README.md](README.md)
 ## Was der Editor kann
 
 - Strecke aus Kontrollpunkten oder Geraden und Bögen zeichnen, Höhe, Querneigung und Breite bearbeiten
+- Strecke auf einem Kartenbild nachzeichnen: wenige Klicks in Fahrtrichtung, der Editor findet die Fahrbahn dazwischen und prüft die Runde
+- Strecken kombinieren und in der Größe ändern: Punkte zwischen Fenstern kopieren und einfügen, um einen Faktor oder auf eine Länge skalieren
 - Ideallinie, Bremspunkte, Kurven, Sektoren, DRS- und Straight-Mode-Zonen berechnen
 - Querschnitt je Bereich einstellen: Randsteine, Gras, Auslauf, Barrieren und Randwinkel
 - Boxengasse und Startaufstellung setzen, Objekte aus dem Katalog des Spiels platzieren, Hügel und Berge anlegen

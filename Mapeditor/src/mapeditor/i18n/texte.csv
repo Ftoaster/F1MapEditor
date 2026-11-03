@@ -100,6 +100,67 @@ Zonen auf der Strecke;Zones on the track;ansicht.py
 Zonenbeschriftungen;Zone labels;ansicht.py
 Zustand oben und Bedienhinweis unten in der Karte;State at the top and usage hint at the bottom of the map;ansicht.py
 Zustand, Prüfsumme und Werkzeug unten;State, checksum and tool at the bottom;ansicht.py
+ · orange „B“: zweiter möglicher Weg, Klick darauf wählt ihn; · orange “B”: second possible route, click it to choose it;bildvorlage.py
+ · rechnet …; · computing …;bildvorlage.py
+Alle Punkte löschen;Delete all points;bildvorlage.py
+Alle Stützpunkte löschen;Delete all guide points;bildvorlage.py
+Als Strecke übernehmen;Use as track;bildvorlage.py
+Bild nicht auswertbar: {error};Image cannot be analysed: {error};bildvorlage.py
+Bild nicht lesbar: {error};Image cannot be read: {error};bildvorlage.py
+Bild zu klein ({breite} × {hoehe} Pixel).;Image too small ({breite} × {hoehe} pixels).;bildvorlage.py
+Bild {breite} × {hoehe} Pixel = {mb} × {mh} · {massstab};Image {breite} × {hoehe} pixels = {mb} × {mh} · {massstab};bildvorlage.py
+Bildart;Image type;bildvorlage.py
+Bildart der Vorlage;Image type of the reference image;bildvorlage.py
+Bildvorlage entfernen;Remove reference image;bildvorlage.py
+Das Bild der Vorlage fehlt im Projektordner ({datei}) · Projekt → „Bildvorlage laden …“;The reference image is missing in the project folder ({datei}) · Project → “Load reference image …”;bildvorlage.py
+Deckkraft;Opacity;bildvorlage.py
+Deckkraft der Bildvorlage;Opacity of the reference image;bildvorlage.py
+Kartenansicht (Linien);Map view (lines);bildvorlage.py
+Kartenansicht: Strecke als gezeichnete Linie (empfohlen). Luftbild: Fahrbahn nach ihrer Farbe am ersten Stützpunkt.;Map view: track drawn as a line (recommended). Satellite: road surface by its colour at the first guide point.;bildvorlage.py
+Kein Stück doppelt befahren;No section driven twice;bildvorlage.py
+Keine Bildvorlage. Projekt → „Bildvorlage laden …“ oder ein Bildschirmfoto mit Strg+V einfügen.;No reference image. Project → “Load reference image …” or paste a screenshot with Ctrl+V.;bildvorlage.py
+Keine Runde gefunden – bitte weitere Stützpunkte in Fahrtrichtung setzen;No lap found – please set more guide points in driving direction;bildvorlage.py
+Keine Überschneidung;No crossing;bildvorlage.py
+Klicke auf die Start-Ziel-Linie der Strecke (erster Stützpunkt);Click the start/finish line of the track (first guide point);bildvorlage.py
+Letzten Punkt löschen;Delete last point;bildvorlage.py
+Luftbild (Farbe);Satellite (colour);bildvorlage.py
+Länge und Vollständigkeit;Length and completeness;bildvorlage.py
+Länge {laenge} · Vollständigkeit ungeprüft (Maßstab messen und Soll-Länge eintragen);Length {laenge} · completeness not checked (measure the scale and enter the target length);bildvorlage.py
+Maßstab aus Soll-Länge;Scale from target length;bildvorlage.py
+Maßstab des Bilds. Am sichersten über „Maßstab messen“ an der Maßstabsleiste.;Scale of the image. Most reliable via “Measure scale” on the scale bar.;bildvorlage.py
+Maßstab festlegen;Set scale;bildvorlage.py
+Maßstab gemessen;Scale measured;bildvorlage.py
+Maßstab messen;Measure scale;bildvorlage.py
+Maßstab so, dass die erkannte Runde die Soll-Länge hat. Ob die Runde vollständig ist, lässt sich dann nicht mehr prüfen.;Scale so that the detected lap has the target length. Whether the lap is complete can then no longer be checked.;bildvorlage.py
+Maßstab ungeprüft;Scale not checked;bildvorlage.py
+Maßstab: Anfang der Maßstabsleiste anklicken (1/2) · Esc: abbrechen;Scale: click the start of the scale bar (1/2) · Esc: cancel;bildvorlage.py
+Maßstab: Ende der Maßstabsleiste anklicken (2/2) · Esc: abbrechen;Scale: click the end of the scale bar (2/2) · Esc: cancel;bildvorlage.py
+Meter je Pixel;Metres per pixel;bildvorlage.py
+Nächsten Punkt in Fahrtrichtung anklicken · Klick auf den Start oder Enter schließt die Runde · Rücktaste: letzten Punkt löschen;Click the next point in driving direction · click the start or press Enter to close the lap · Backspace: delete last point;bildvorlage.py
+Nächsten Punkt in Fahrtrichtung anklicken · rechts: „Runde automatisch suchen“;Click the next point in driving direction · right: “Find lap automatically”;bildvorlage.py
+Offizielle Streckenlänge. Mit gemessenem Maßstab prüft der Editor damit, ob die Runde vollständig ist.;Official track length. With a measured scale the editor uses it to check that the lap is complete.;bildvorlage.py
+Prüfung fehlgeschlagen: {error};Check failed: {error};bildvorlage.py
+rechnet …;computing …;bildvorlage.py
+Rote Ringe: hier stimmt die Runde nicht – klicke auf die Fahrbahn, wo sie weitergeht;Red rings: the lap is wrong here – click the road where it continues;bildvorlage.py
+Runde automatisch suchen;Find lap automatically;bildvorlage.py
+Runde geschlossen;Lap closed;bildvorlage.py
+Runde gültig · rechts „Als Strecke übernehmen“ · Punkte ziehen passt sie an;Lap valid · right: “Use as track” · drag points to adjust it;bildvorlage.py
+Runde schließen;Close lap;bildvorlage.py
+Runde wird geprüft;Checking lap;bildvorlage.py
+Soll-Länge;Target length;bildvorlage.py
+Soll-Länge der Bildvorlage;Target length of the reference image;bildvorlage.py
+Start;Start;bildvorlage.py
+Start · Klick schließt;Start · click closes;bildvorlage.py
+Stützpunkt einfügen;Insert guide point;bildvorlage.py
+Stützpunkt löschen;Delete guide point;bildvorlage.py
+Stützpunkt setzen;Set guide point;bildvorlage.py
+Stützpunkt verschieben;Move guide point;bildvorlage.py
+unbekannt;unknown;bildvorlage.py
+Vollständig: Länge {laenge} (Soll {soll});Complete: length {laenge} (target {soll});bildvorlage.py
+Vom ersten Stützpunkt aus die ganze Runde suchen (klappt bei klaren Kartenbildern);Find the whole lap from the first guide point (works on clear map images);bildvorlage.py
+Wie stark das Bild unter der Strecke zu sehen ist;How strongly the image shows under the track;bildvorlage.py
+Zwei Klicks auf Anfang und Ende der Maßstabsleiste im Bild, dann ihre Länge eingeben;Two clicks on the start and end of the scale bar in the image, then enter its length;bildvorlage.py
+Zwischen zwei Stützpunkten wurde kein Weg gefunden – Punkt näher an die Fahrbahn ziehen;No route found between two guide points – drag the point closer to the road;bildvorlage.py
 "
 Was ist neu: {beschreibung}";"
 What's new: {beschreibung}";build.py
@@ -208,8 +269,8 @@ Prüfbericht: ;Check report: ;build.py
 Prüfen und bauen;Check and build;build.py
 Prüffehler · Paket verworfen;Check error · package discarded;build.py
 Prüfung {stufe}: {zusammenfassung};Check {stufe}: {zusammenfassung};build.py
-Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für Bestenlisten. Die Reifenwahl ist eine Schätzung.;Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time, plus the pit lane speed limit and the time a pit stop costs, and the minimum lap time for leaderboards. The tyre choice is an estimate.;build.py
 Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse);Work out race data from the track (laps, fuel, tyres, AI, pit lane);build.py
+Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für Bestenlisten. Die Reifenwahl ist eine Schätzung.;Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time, plus the pit lane speed limit and the time a pit stop costs, and the minimum lap time for leaderboards. The tyre choice is an estimate.;build.py
 Saftig;Lush;build.py
 Schnappschuss: ;Snapshot: ;build.py
 Schnellaustausch abgebrochen · nichts geändert.;Quick swap cancelled · nothing changed.;build.py
@@ -283,6 +344,8 @@ Auswahl löschen;Delete selection;document.py
 Berg setzen;Place mountain;document.py
 Bitte Gerade oder Bogen wählen.;Please choose straight or arc.;document.py
 Bodenbewuchs ändern;Change ground cover;document.py
+Die Runde ist schon offen.;The lap is already open.;document.py
+Einfügen geht nur in Kontrollpunkt-Strecken: Segmente erst in Kontrollpunkte umwandeln.;Pasting only works on control point tracks: convert segments to control points first.;document.py
 Gelände löschen;Delete terrain shape;document.py
 Gelände verschieben;Move terrain shape;document.py
 Gelände ändern;Change terrain shape;document.py
@@ -293,8 +356,11 @@ Lücken füllen;Fill gaps;document.py
 Punkt einfügen;Insert point;document.py
 Punkt löschen;Delete point;document.py
 Punkt verschieben;Move point;document.py
+Punkte einfügen;Paste points;document.py
 Punktgruppe drehen;Rotate point group;document.py
 Punktgruppe ändern;Change point group;document.py
+Reihenfolge umkehren;Reverse order;document.py
+Runde hier öffnen;Open lap here;document.py
 Rundenschluss ändern;Change lap closure;document.py
 Segment einfügen;Insert segment;document.py
 Segment löschen;Delete segment;document.py
@@ -311,11 +377,27 @@ Umgebungsobjekt ändern;Change environment object;document.py
 Umgebungsobjekte löschen;Delete environment objects;document.py
 Umgebungsobjekte verschieben;Move environment objects;document.py
 Umgebungsobjekte ändern;Change environment objects;document.py
+Umkehren geht nur bei Kontrollpunkten.;Reversing only works with control points.;document.py
+Unbekannte Projektfassung: nur lesend.;Unknown project version: read-only.;document.py
 Zum Schließen sind mindestens vier Kontrollpunkte erforderlich.;At least four control points are needed to close the lap.;document.py
+Zum Umkehren mindestens zwei zusammenhängende Punkte wählen.;Select at least two connected points to reverse.;document.py
+Überstand abschneiden;Cut overlap;document.py
+„Runde hier öffnen“ geht nur bei Kontrollpunkten.;“Open lap here” only works with control points.;document.py
+„Überstand abschneiden“ geht nur bei Kontrollpunkten.;“Cut overlap” only works with control points.;document.py
 Länge muss positiv und endlich sein.;Length must be positive and finite.;input_geometry.py
 Radius muss positiv sein.;Radius must be positive.;input_geometry.py
 Segment {index}: {exc};Segment {index}: {exc};input_geometry.py
 Unbekannte Segmentart: {kind};Unknown segment type: {kind};input_geometry.py
+Das gewählte Stück überschneidet die Strecke nicht.;The selected piece does not overlap the track.;kopieren.py
+Die Punkte stammen aus einer neueren Mapeditor-Version.;The points come from a newer Mapeditor version.;kopieren.py
+Die Zwischenablage enthält keine kopierten Streckenpunkte.;The clipboard holds no copied track points.;kopieren.py
+Diese Eingabeart lässt sich nicht kopieren.;This kind of input cannot be copied.;kopieren.py
+Einfügen geht nur bei offener Strecke: erst „Runde öffnen“ oder „Runde hier öffnen“.;Pasting only works on an open track: first use “Open lap” or “Open lap here”.;kopieren.py
+Nach dem Abschneiden blieben zu wenige Punkte übrig.;Too few points would be left after cutting.;kopieren.py
+Nichts gewählt: erst Punkte wählen (Rahmen ziehen oder Strg+A).;Nothing selected: select points first (drag a box or Ctrl+A).;kopieren.py
+Nur zusammenhängende Punkte oder Segmente lassen sich kopieren.;Only connected points or segments can be copied.;kopieren.py
+Zum Öffnen einen Punkt oder ein zusammenhängendes Stück wählen.;Select one point or a connected piece to open the lap there.;kopieren.py
+„Überstand abschneiden“ braucht eine offene Strecke und ein gewähltes Stück an einem ihrer Enden.;“Cut overlap” needs an open track and a selected piece at one of its ends.;kopieren.py
  (Automatik); (automatic);mapview.py
  · Ende ziehen; · drag end;mapview.py
 Asphalt;Asphalt;mapview.py
@@ -339,6 +421,7 @@ Loslassen übernimmt · Esc bricht ab;Release applies · Esc cancels;mapview.py
 Mauer;Wall;mapview.py
 Mit gedrückter Maustaste malen: dort wird bepflanzt · Radius und Dichte im Reiter „Umgebung“ · Esc: zurück;Paint with the mouse button held: planting happens there · radius and density in the “Environment” tab · Esc: back;mapview.py
 Modell im Katalog wählen und klicken zum Platzieren · Rahmen ziehen wählt mehrere · Esc: zurück;Choose a model in the catalogue and click to place · drag a frame to select several · Esc: back;mapview.py
+Nachzeichnen;Trace;mapview.py
 noch keine Strecke;no track yet;mapview.py
 Punkt ziehen: verschieben · Entf: löschen · rechts: Höhe und Breite;Drag point: move · Del: delete · right: height and width;mapview.py
 Punkte setzen;Set points;mapview.py
@@ -550,14 +633,17 @@ wird beim Bau aus dem Spiel kopiert;copied from the game during the build;umgebu
 Nicht im Katalog.";"{modell}
 Not in the catalogue.";umgebung_ui.py
 {name} „{id}“ · X {x} · Z {z};{name} “{id}” · X {x} · Z {z};umgebung_ui.py
+Aus Bild nachzeichnen …;Trace from image …;ux.py
 Aus Vorlage …;From template …;ux.py
 Bedienung;How to use;ux.py
 Beispiel ansehen;View example;ux.py
+Bitte einen der Werte {werte} wählen.;Please choose one of {werte}.;ux.py
 bogen;arc;ux.py
 Echte Strecke (TUM-CSV), GPX-Spur oder Spielstrecke;Real track (TUM CSV), GPX track or game track;ux.py
 fehler;error;ux.py
 gerade;straight;ux.py
 ja;yes;ux.py
+Kartenausschnitt (Bildschirmfoto) als Vorlage, Strecke mit Klicks nachziehen;Map screenshot as reference, trace the track with clicks;ux.py
 klothoide;clothoid;ux.py
 nein;no;ux.py
 Projekt öffnen …;Open project …;ux.py
@@ -632,6 +718,7 @@ Stage: ";window.py
  · Höhe {hoehe_ende}; · height {hoehe_ende};window.py
  · neuer Stand folgt automatisch; · new state follows automatically;window.py
  · Objekt {kennung}; · object {kennung};window.py
+ · reicht bis {weite} vom Ursprung, Spielbereich ±1.024 m: Maßstab prüfen oder Strecke verschieben; · reaches {weite} from the origin, game area ±1,024 m: check the scale or move the track;window.py
  · Soll: ; · target: ;window.py
  · Strg+Z macht rückgängig.; · Ctrl+Z undoes.;window.py
  · Tafeln {tafeln}; · boards {tafeln};window.py
@@ -665,6 +752,7 @@ Aktuellen Entwurf prüfen;Check current draft;window.py
 Alle;All;window.py
 Alle gewählten Punkte auf ihren Mittelwert;All selected points to their mean value;window.py
 Alte Bauten aufräumen …;Clean up old builds …;window.py
+an das offene Ende verschoben ({abstand} m entfernt);moved to the open end ({abstand} m away);window.py
 Anfangsradius · m;Start radius · m;window.py
 Anlauf · m;Run-up · m;window.py
 Annahmen / Grenzen;Assumptions / limits;window.py
@@ -692,6 +780,14 @@ Beispiel nicht gefunden: {error};Example not found: {error};window.py
 Bepflanzen;Plant;window.py
 Bepflanzen nicht möglich: keine Fläche oder kein Modell.;Planting not possible: no area or no model.;window.py
 "Berechnung gehört zu einem älteren Entwurf; neuer Stand folgt automatisch.";"The calculation belongs to an older draft; the new state follows automatically.";window.py
+"Bilder (*.png *.jpg *.jpeg *.bmp *.webp);;Alle Dateien (*)";"Images (*.png *.jpg *.jpeg *.bmp *.webp);;All files (*)";window.py
+Bildvorlage als Strecke übernehmen;Use reference image as track;window.py
+Bildvorlage aus Zwischenablage;Reference image from clipboard;window.py
+Bildvorlage ersetzen;Replace reference image;window.py
+Bildvorlage laden;Load reference image;window.py
+Bildvorlage laden …;Load reference image …;window.py
+Bildvorlage {quelle} geladen ({breite} × {hoehe} Pixel) · zuerst rechts „Maßstab messen“, dann auf die Start-Ziel-Linie klicken;Reference image {quelle} loaded ({breite} × {hoehe} pixels) · first “Measure scale” on the right, then click the start/finish line;window.py
+Bildvorlage · Nachzeichnen;Image reference · Trace;window.py
 Bis Eingabe-s · m;To input s · m;window.py
 Bitte den Streckencode der Spielstrecke angeben (z. B. monza).;Please enter the track code of the game track (e.g. monza).;window.py
 Bitte eine ganze Zahl eingeben.;Please enter a whole number.;window.py
@@ -717,13 +813,17 @@ Definition / Manifest öffnen …;Open definition / manifest …;window.py
 Definition oder projekt.json öffnen;Open definition or projekt.json;window.py
 Der Cursor liegt außerhalb des Bereichs: Die Ansicht zeigt den Randwinkel nur innerhalb.;The cursor is outside the range: the view shows the edge angle only inside it.;window.py
 Der gewählte Ordner enthält bereits ein Projekt. Ersetzen?;The chosen folder already contains a project. Replace it?;window.py
+"Der Maßstab ist nicht an der Maßstabsleiste gemessen; Länge und Größe können falsch sein.";"The scale was not measured on the scale bar; length and size may be wrong.";window.py
 Dicke · m;Thickness · m;window.py
+Die bisherige Bildvorlage und ihre Stützpunkte werden ersetzt. Fortfahren?;The current reference image and its guide points will be replaced. Continue?;window.py
+Die bisherige Strecke wird ersetzt (Strg+Z macht es rückgängig).;The current track will be replaced (Ctrl+Z undoes it).;window.py
 Die Umgebung konnte nicht geprüft werden: {error};The environment could not be checked: {error};window.py
 "Die Vorlage ist {breite:.0f} × {tiefe:.0f} m groß und passt nicht in die Spielwelt (X/Z ±1024 m).
 
 Gleichmäßig verkleinern? Breiten und Höhen bleiben. Bei „Nein“ bleibt die Originalgröße; die Prüfung meldet sie dann als Fehler.";"The template is {breite:.0f} × {tiefe:.0f} m and does not fit into the game world (X/Z ±1024 m).
 
 Scale it down evenly? Widths and heights are kept. With “No” the original size is kept; the check then reports it as an error.";window.py
+Die Zwischenablage enthält kein Bild. Ausschnitt mit Win+Umschalt+S aufnehmen, dann einfügen.;The clipboard contains no image. Take a snip with Win+Shift+S, then paste.;window.py
 Diese Regel wurde in dieser Prüfung noch nicht geprüft.;This rule has not been checked yet in this check.;window.py
 Doppelklick auf einen Reiter: unteren Bereich maximieren / zurück (Strg+M);Double-click a tab: maximise / restore the lower area (Ctrl+M);window.py
 Doppelklick oder Tippen zum Ändern, Enter übernimmt. Feld leeren = Standard wiederherstellen.;Double-click or type to change, Enter applies. Clear the field = restore the default.;window.py
@@ -765,6 +865,7 @@ Ergebnisse deiner Spieltests notieren;Record the results of your playtests;windo
 Erkannte Kurven;Detected corners;window.py
 Erkennungspunkt · m ab Ziel;Detection point · m from finish;window.py
 Erst die Runde schließen: Gefüllt wird entlang der berechneten Strecke.;Close the lap first: gaps are filled along the computed track.;window.py
+Erst eine Bildvorlage laden: Projekt → „Bildvorlage laden …“ oder Strg+V mit einem Bildschirmfoto;Load a reference image first: Project → “Load reference image …” or Ctrl+V with a screenshot;window.py
 Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen;Connect the first and last point, or open the lap again;window.py
 Externe Ausgabe · Zuordnung zum Entwurf ungeprüft · schreibgeschützt;External output · relation to the draft unchecked · read-only;window.py
 Fahrbahn (ganze Strecke);Road (whole track);window.py
@@ -824,6 +925,7 @@ Halbbreite rechts · m;Half-width right · m;window.py
 Helles Thema;Light theme;window.py
 Herauszoomen;Zoom out;window.py
 Hineinzoomen;Zoom in;window.py
+hinten angehängt;added at the end;window.py
 Hinter Boxen · m;Behind pit boxes · m;window.py
 Hinweis;Hint;window.py
 Höhe eingeben;Enter height;window.py
@@ -881,6 +983,7 @@ Länge · m;Length · m;window.py
 Lücke · m;Gap · m;window.py
 Lücken füllen ({anzahl});Fill gaps ({anzahl});window.py
 Lücken füllen braucht eine aktuelle Vorschau (Strg+Enter) und keine umgekehrte Richtung.;Filling gaps needs an up-to-date preview (Ctrl+Enter) and no reversed direction.;window.py
+Maßstab gemessen: {wert} je Pixel;Scale measured: {wert} per pixel;window.py
 Mausrad;Mouse wheel;window.py
 Max. Schließfehler · m;Max. closing error · m;window.py
 Meldung, Regel-ID oder Bau-ID suchen …;Search message, rule ID or build ID …;window.py
@@ -892,6 +995,7 @@ Mittellinie;Centreline;window.py
 Mittellinie: Glättung, Übergänge;Centreline: smoothing, transitions;window.py
 "Mittellinienobjekte; Auswahl synchron mit Karte und Profil";"Centreline objects; selection synchronised with map and profile";window.py
 Nachlauf · m;Run-out · m;window.py
+Nachzeichnen braucht eine Bildvorlage: Projekt → „Bildvorlage laden …“ oder ein Bildschirmfoto mit Strg+V einfügen.;Tracing needs a reference image: Project → “Load reference image …” or paste a screenshot with Ctrl+V.;window.py
 Name;Name;window.py
 Neu;New;window.py
 Neu aus Vorlage …;New from template …;window.py
@@ -904,6 +1008,7 @@ Noch keine Änderung zum Rückgängigmachen.;No change to undo yet.;window.py
 Noch nicht geprüft;Not checked yet;window.py
 noch nicht gespeichert;not saved yet;window.py
 nur lesend: unbekannte Projektfassung;read-only: unknown project version;window.py
+Ob die Runde vollständig ist, wurde nicht geprüft (dazu Maßstab messen und Soll-Länge eintragen).;Whether the lap is complete was not checked (measure the scale and enter the target length).;window.py
 Offener Entwurf · Eingabe bearbeitbar · Generatorstandards geladen · keine berechnete Runde;Open draft · input editable · generator defaults loaded · no computed lap;window.py
 Offener Entwurf · Eingabepunkte bearbeitbar · keine Generatorvorschau;Open draft · input points editable · no generator preview;window.py
 Ordner mit strecke/definition.py wählen;Choose the folder containing strecke/definition.py;window.py
@@ -929,6 +1034,8 @@ Prüfung folgt …;Check follows …;window.py
 Prüfung · ok;Check · ok;window.py
 Punkte;Points;window.py
 PUNKTE;POINTS;window.py
+Punkte ausschneiden;Cut points;window.py
+Punkte kopieren;Copy points;window.py
 Querneigung ({anzahl} Objekte);Banking ({anzahl} objects);window.py
 Querneigung bearbeiten: geschlossene Runde mit Vorschau nötig.;Editing banking needs a closed lap with a preview.;window.py
 Querneigung eingeben;Enter banking;window.py
@@ -950,11 +1057,12 @@ Radius · m;Radius · m;window.py
 Rampe;Ramp;window.py
 Rampe · m;Ramp · m;window.py
 Randlinie · m;Edge line · m;window.py
+Reihenfolge der Auswahl umkehren;Reverse order of selection;window.py
+Reihenfolge umgekehrt · Strg+Z: rückgängig.;Order reversed · Ctrl+Z: undo.;window.py
 Richtung;Direction;window.py
 Richtung umkehren;Reverse direction;window.py
-Runde geschlossen;Lap closed;window.py
+Runde an der Auswahl geöffnet · Strg+V fügt kopierte Punkte an ein offenes Ende.;Lap opened at the selection · Ctrl+V adds copied points to an open end.;window.py
 Runde offen;Lap open;window.py
-Runde schließen;Close lap;window.py
 Runde öffnen;Open lap;window.py
 "Rundenzeit, Geschwindigkeiten und Kurventabelle aus dem Fahrlinienlauf; Rohdaten einer Generatorausgabe über Werkzeuge → Generatorausgabe lesend öffnen";"Lap time, speeds and corner table from the racing-line run; raw data of a generator output via Tools → Open generator output read-only";window.py
 Rückgängig;Undo;window.py
@@ -997,9 +1105,14 @@ Straight Mode: Zonen;Straight Mode: zones;window.py
 Straight-Mode-Zone;Straight Mode zone;window.py
 Strecke;Track;window.py
 STRECKE;TRACK;window.py
+Strecke auf der Bildvorlage nachzeichnen  (N);Trace the track on the reference image  (N);window.py
+Strecke auf einer Bildvorlage (Kartenausschnitt) nachzeichnen;Trace the track on a reference image (map screenshot);window.py
 Strecke mit allen Regeln prüfen, Ergebnis unten unter „Prüfung“;"Check the track against all rules; result below under “Check”";window.py
+Strecke übernommen: {anzahl} Punkte, {laenge};Track taken over: {anzahl} points, {laenge};window.py
+Streckenmeter um {meter} m verschoben;track metres shifted by {meter} m;window.py
 Streuung {n};Scatter {n};window.py
 Strg+Enter;Ctrl+Enter;window.py
+Strg+Z: rückgängig;Ctrl+Z: undo;window.py
 Stützstellenabstand · m;Sample spacing · m;window.py
 Tafeln;Boards;window.py
 Tafeln ab Geschwindigkeitsabbau · km/h;Boards from speed loss · km/h;window.py
@@ -1007,10 +1120,11 @@ Tafeln · m vor der Kurve;Boards · m before the corner;window.py
 Tempolimit · km/h;Speed limit · km/h;window.py
 Thema ändern;Change theme;window.py
 TrackSpace-Linien;TrackSpace lines;window.py
+Trotzdem übernehmen?;Use it anyway?;window.py
 T{spiel} · ;T{spiel} · ;window.py
 Umgebung geändert · {anzahl} Objekte;Environment changed · {anzahl} objects;window.py
 umgebung.json ist nicht lesbar und bleibt unverändert: {error};umgebung.json is unreadable and stays unchanged: {error};window.py
-Unbekannte Projektfassung: nur lesend.;Unknown project version: read-only.;window.py
+umgedreht;reversed;window.py
 Unebenheiten in der Auswahl ausgleichen (A und B bleiben);Even out bumps in the selection (A and B stay);window.py
 ungespeicherte Änderungen;unsaved changes;window.py
 Ungespeicherter Entwurf;Unsaved draft;window.py
@@ -1026,6 +1140,7 @@ Vorlage;Template;window.py
 Vorlage zu groß;Template too large;window.py
 Vorlage {name} wird gelesen;Reading template {name};window.py
 Vorlauf · m;Lead-in · m;window.py
+vorne angefügt;added at the start;window.py
 Vorschau abbrechen;Cancel preview;window.py
 Vorschau abgebrochen · Karte zeigt deine Eingabe, die berechnete Fahrbahn ist veraltet;Preview cancelled · the map shows your input, the computed road is outdated;window.py
 Vorschau aktuell · Länge {length} · kleinster Radius {min_radius} · {direction};Preview up to date · length {length} · smallest radius {min_radius} · {direction};window.py
@@ -1043,11 +1158,13 @@ Warnung;Warning;window.py
 Welche Einstellungen angezeigt werden;Which settings are shown;window.py
 Werkzeug: Auswahl;Tool: select;window.py
 Werkzeug: Bepflanzen (B);Tool: Plant (B);window.py
+Werkzeug: Nachzeichnen (N);Tool: Trace (N);window.py
 Werkzeug: Punkte (EINFÜGEN);Tool: points (INSERT);window.py
 Werkzeug: Umgebung (U);Tool: Environment (U);window.py
 Werkzeugkasten wählen …;Choose toolkit …;window.py
 Werkzeugkasten zuordnen;Assign toolkit;window.py
 Wert;Value;window.py
+Wie viele Meter zeigt die gemessene Maßstabsleiste?;How many metres does the measured scale bar show?;window.py
 Wiederherstellen?;Restore?;window.py
 Wiederherstellung übernehmen;Apply recovery;window.py
 Wiederholen;Redo;window.py
@@ -1066,10 +1183,15 @@ Zuerst ein Segment wählen.;Select a segment first.;window.py
 Zuerst eine(n) {noun} anlegen.;Create a {noun} first.;window.py
 Zum Bepflanzen zuerst im Katalog ein oder mehrere Modelle wählen.;To plant, first choose one or more models in the catalogue.;window.py
 Zusammenfassen · m;Merge · m;window.py
+Zwischenablage;Clipboard;window.py
 {anzahl} Einträge;{anzahl} entries;window.py
 {anzahl} Lücke(n) mit {added} Punkten entlang der sichtbaren Strecke gefüllt · Strg+Z: rückgängig.;Filled {anzahl} gap(s) with {added} points along the visible track · Ctrl+Z: undo.;window.py
 {anzahl} Objekte gewählt. ;{anzahl} objects selected. ;window.py
 {anzahl} Objekte in der Gruppe „{gruppe}“ gesetzt · Strg+Z macht rückgängig.;{anzahl} objects placed in the group “{gruppe}” · Ctrl+Z undoes.;window.py
+{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.;{anzahl} points cut · Ctrl+Z: undo.;window.py
+{anzahl} Punkte eingefügt;{anzahl} points pasted;window.py
+{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.;{anzahl} points copied · paste into an open track with Ctrl+V.;window.py
+{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.;{anzahl} overlapping points removed · Ctrl+Z: undo.;window.py
 {an} von {alle} an;{an} of {alle} on;window.py
 {errors} Fehler · {warnings} Warnungen · {unchecked} nicht geprüft · Stufen: {stages};Errors: {errors} · warnings: {warnings} · not checked: {unchecked} · stages: {stages};window.py
 {kurven} Kurven, kleinster Radius {radius} m, Versuch {versuch};{kurven} corners, smallest radius {radius} m, attempt {versuch};window.py
@@ -1096,40 +1218,19 @@ Zusammenfassen · m;Merge · m;window.py
 Übergang min. · m;Transition min. · m;window.py
 Übergang · m;Transition · m;window.py
 "Übergang: ja, nein, Länge > 0 oder {""anfang"": …, ""ende"": …}.";"Transition: yes, no, length > 0 or {""anfang"": …, ""ende"": …}.";window.py
-Bitte einen der Werte {werte} wählen.;Please choose one of {werte}.;ux.py
-Das gewählte Stück überschneidet die Strecke nicht.;The selected piece does not overlap the track.;kopieren.py
-Die Punkte stammen aus einer neueren Mapeditor-Version.;The points come from a newer Mapeditor version.;kopieren.py
-Die Runde ist schon offen.;The lap is already open.;document.py
-Die Zwischenablage enthält keine kopierten Streckenpunkte.;The clipboard holds no copied track points.;kopieren.py
-Diese Eingabeart lässt sich nicht kopieren.;This kind of input cannot be copied.;kopieren.py
-Einfügen geht nur bei offener Strecke: erst „Runde öffnen“ oder „Runde hier öffnen“.;Pasting only works on an open track: first use “Open lap” or “Open lap here”.;kopieren.py
-Einfügen geht nur in Kontrollpunkt-Strecken: Segmente erst in Kontrollpunkte umwandeln.;Pasting only works on control point tracks: convert segments to control points first.;document.py
-Nach dem Abschneiden blieben zu wenige Punkte übrig.;Too few points would be left after cutting.;kopieren.py
-Nichts gewählt: erst Punkte wählen (Rahmen ziehen oder Strg+A).;Nothing selected: select points first (drag a box or Ctrl+A).;kopieren.py
-Nur zusammenhängende Punkte oder Segmente lassen sich kopieren.;Only connected points or segments can be copied.;kopieren.py
-Punkte ausschneiden;Cut points;window.py
-Punkte einfügen;Paste points;document.py, window.py
-Punkte kopieren;Copy points;window.py
-Reihenfolge der Auswahl umkehren;Reverse order of selection;window.py
-Reihenfolge umgekehrt · Strg+Z: rückgängig.;Order reversed · Ctrl+Z: undo.;window.py
-Reihenfolge umkehren;Reverse order;document.py
-Runde an der Auswahl geöffnet · Strg+V fügt kopierte Punkte an ein offenes Ende.;Lap opened at the selection · Ctrl+V adds copied points to an open end.;window.py
-Runde hier öffnen;Open lap here;document.py, window.py
-Streckenmeter um {meter} m verschoben;track metres shifted by {meter} m;window.py
-Strg+Z: rückgängig;Ctrl+Z: undo;window.py
-Umkehren geht nur bei Kontrollpunkten.;Reversing only works with control points.;document.py
-Zum Umkehren mindestens zwei zusammenhängende Punkte wählen.;Select at least two connected points to reverse.;document.py
-Zum Öffnen einen Punkt oder ein zusammenhängendes Stück wählen.;Select one point or a connected piece to open the lap there.;kopieren.py
-an das offene Ende verschoben ({abstand} m entfernt);moved to the open end ({abstand} m away);window.py
-hinten angehängt;added at the end;window.py
-umgedreht;reversed;window.py
-vorne angefügt;added at the start;window.py
-{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.;{anzahl} points cut · Ctrl+Z: undo.;window.py
-{anzahl} Punkte eingefügt;{anzahl} points pasted;window.py
-{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.;{anzahl} points copied · paste into an open track with Ctrl+V.;window.py
-{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.;{anzahl} overlapping points removed · Ctrl+Z: undo.;window.py
-Überstand abschneiden;Cut overlap;document.py, window.py
 überschneidet die Strecke an {anzahl} Punkten (rot) · „Überstand abschneiden“ oder verschieben;overlaps the track at {anzahl} points (red) · “Cut overlap” or move it;window.py
-„Runde hier öffnen“ geht nur bei Kontrollpunkten.;“Open lap here” only works with control points.;document.py
-„Überstand abschneiden“ braucht eine offene Strecke und ein gewähltes Stück an einem ihrer Enden.;“Cut overlap” needs an open track and a selected piece at one of its ends.;kopieren.py
-„Überstand abschneiden“ geht nur bei Kontrollpunkten.;“Cut overlap” only works with control points.;document.py
+(Eingabelinie, die Vorschau zeigt die genaue Länge);(input line, the preview shows the exact length);window.py
+Aktuelle Länge;Current length;skalieren.py
+Auf Länge;To length;skalieren.py
+Die ganze Strecke wird um ihre Mitte größer oder kleiner: Punkte, Segmentlängen und Radien, Abschnitte und Zonen sowie die Lage der Umgebung. Höhen, Breiten und die Größe der Umgebungsobjekte bleiben. Strg+Z macht es rückgängig.;The whole track grows or shrinks around its centre: points, segment lengths and radii, sections and zones, and the position of the environment. Heights, widths and the size of environment objects stay. Ctrl+Z undoes it.;skalieren.py
+Ergebnis;Result;skalieren.py
+Faktor muss zwischen {a} und {b} liegen.;Factor must be between {a} and {b}.;skalieren.py
+Faktor {faktor} · etwa {laenge} m;Factor {faktor} · about {laenge} m;skalieren.py
+Keine Strecke zum Skalieren.;No track to scale.;document.py, window.py
+Skalierungsfaktor;Scale factor;skalieren.py
+Strecke skalieren;Scale track;document.py, skalieren.py
+Strecke skalieren …;Scale track …;window.py
+Strecke um Faktor {faktor} skaliert, neue Länge etwa {laenge} m{hinweis} · Strg+Z: rückgängig.;Track scaled by factor {faktor}, new length about {laenge} m{hinweis} · Ctrl+Z: undo.;window.py
+Um Faktor;By factor;skalieren.py
+Ziellänge in Metern;Target length in metres;skalieren.py
+Ganze Strecke um einen Faktor oder auf eine Länge in Metern skalieren. Strg+Z macht rückgängig.;Scale the whole track by a factor or to a length in metres. Ctrl+Z undoes it.;window.py

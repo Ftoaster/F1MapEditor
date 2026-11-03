@@ -26,6 +26,10 @@ class Change(QUndoCommand):
         raw, manifest, env = copy.deepcopy(state)
         # Änderte sich nur die Umgebung, bleiben Vorschau und Fahrlinie gültig (Revision zählt nicht weiter).
         document.env_only = raw == project.raw and manifest == project.manifest
+        # Ebenso nur die Bildvorlage (Stützpunkte, Maßstab, Deckkraft im Manifest unter ``bildvorlage``).
+        ohne_bild = lambda m: {k: v for k, v in m.items() if k != "bildvorlage"}
+        document.bild_only = (not document.env_only and raw == project.raw and env == project.umgebung
+                              and ohne_bild(manifest) == ohne_bild(project.manifest))
         project.raw, project.manifest, project.umgebung = raw, manifest, env
         if previous_kind != document.ml.get("art"):
             document.selected_indices.clear()
@@ -33,6 +37,8 @@ class Change(QUndoCommand):
         document.normalize_env_selection()
         if document.env_only:
             document.env_revision += 1
+        elif document.bild_only:
+            document.bild_revision += 1
         else:
             document.revision += 1
         document.changed.emit()
@@ -59,6 +65,9 @@ class Document(QObject):
         # Umgebung: Zählung und Auswahl (Kennungen) der Umgebungsobjekte; ``env_only``: letzte Änderung betraf nur sie
         self.env_revision = 0
         self.env_only = False
+        # Bildvorlage: Zählung der Änderungen, die nur ``manifest["bildvorlage"]`` betrafen
+        self.bild_revision = 0
+        self.bild_only = False
         self.env_selected = set()
         self.env_primary = None
         self.terrain_selected = None   # Kennung des gewählten Hügels/Bergs (Einzelauswahl)
@@ -116,6 +125,14 @@ class Document(QObject):
             self.undo.push(Change(self, text, before, after))
             return True
         return False
+
+    def edit_bild(self, text, operation):
+        """Eine Änderung der Bildvorlage als ein Undo-Schritt: ``operation(vorlage)`` ändert das Wörterbuch
+        ``manifest["bildvorlage"]`` (muss bestehen)."""
+        def change(raw, meta):
+            if isinstance(meta.get("bildvorlage"), dict):
+                operation(meta["bildvorlage"])
+        return self.edit(text, change)
 
     def replace_content(self, text, operation):
         """Rohdefinition und Umgebung ersetzen (Wiederherstellung): ``operation(raw, manifest, umgebung)`` ändert
@@ -656,3 +673,18 @@ class Document(QObject):
         verschiebung = len(weg) if vorne else 0
         self.select_many([i - verschiebung for i in rest], None)
         return len(weg)
+
+    # ------------------------------------------------------------------ Skalieren
+    def scale_track(self, faktor):
+        """Ganze Strecke um ``faktor`` um ihre Mitte skalieren (ein Undo-Schritt, Umgebung inklusive)."""
+        from . import skalieren
+        if self.project.readonly:
+            raise ValueError(tr("Unbekannte Projektfassung: nur lesend."))
+        geometrie = input_geometry(self)
+        if geometrie["error"] or len(geometrie["pos"]) < 2:
+            raise ValueError(geometrie["error"] or tr("Keine Strecke zum Skalieren."))
+        faktor = skalieren.faktor_pruefen(faktor)
+        def operation(raw, meta, env):
+            skalieren.anwenden(raw, env, geometrie["pos"], faktor)
+        self._edit(tr("Strecke skalieren"), operation)
+        return faktor

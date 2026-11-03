@@ -1,17 +1,16 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
-## New in 0.2.2
+## New in 0.3.0
 
-- **Combine tracks:** copy and paste track points with Ctrl+C / Ctrl+X / Ctrl+V, also between two editor windows (issue #2). A pasted piece joins an open end of an open track with its fitting end; red rings show where it overlaps the track. New commands: Open lap here, Cut overlap, Reverse order of selection
-- **White lines without holes:** the tarmac now lies under the painted lines as on the original tracks
-- **Pit lane speed limit 60 or 80 km/h** and the time a pit stop costs, worked out from the track
-- **Leaderboard minimum lap time** from the track, so laps on short tracks count
+- **Trace a track from an image:** load a map picture or paste a screenshot, measure the scale on its scale bar, click a few support points in driving direction, and the editor finds the track between them. It only takes over a lap that is complete, does not cross itself and drives no part twice
+- **Scale track:** make the whole track larger or smaller by a factor, or bring it to a target length in metres (Edit menu, or the button under Properties → Road)
+- **Combine tracks** (since 0.2.2): copy and paste track points between editor windows
 
 **Unofficial fan project, not affiliated with EA, Codemasters, Formula One Group or the FIA. Contains no game files.**
 
 ## Download
 
-`Mapeditor-0.2.2-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.0-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need
@@ -47,4 +46,4 @@ Use offline and at your own risk. Back up your save data and game database first
 
 ## Licence
 
-GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.2.2`.
+GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.3.0`.

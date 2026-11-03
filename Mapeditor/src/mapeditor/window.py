@@ -10,10 +10,10 @@ import math
 import re
 from pathlib import Path
 
-from PySide6.QtCore import QDateTime, QEvent, QSize, Qt, QTimer, Slot, QItemSelection, QItemSelectionModel
+from PySide6.QtCore import QDateTime, QEvent, QRectF, QSize, Qt, QTimer, Slot, QItemSelection, QItemSelectionModel
 from PySide6.QtGui import QAction, QActionGroup, QCloseEvent, QKeySequence, QPalette, QColor
 from PySide6.QtWidgets import (
-    QApplication, QAbstractItemView, QComboBox, QDialog, QFileDialog, QFrame, QHBoxLayout, QHeaderView,
+    QApplication, QAbstractItemView, QComboBox, QDialog, QDockWidget, QFileDialog, QFrame, QHBoxLayout, QHeaderView,
     QInputDialog, QLabel, QListWidget, QListWidgetItem, QMainWindow, QMenuBar, QMessageBox,
     QPushButton, QScrollArea, QSizePolicy, QSplitter, QStatusBar, QTabWidget, QTableWidget, QTableWidgetItem, QToolBar,
     QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget, QLineEdit,
@@ -30,6 +30,7 @@ from .views import CrossSection, MapView, ProfileView, SpeedView
 from .paths import writable_path
 from . import ansicht, neigung, querschnitt, umgebung
 from .neigung import BankPanel
+from .bildvorlage import Nachzeichner, NachzeichnenPanel
 from .querschnitt import CrossPanel
 from .umgebung_ui import EnvironmentPanel
 from .ux import (BOOL_WORDS, CHOICES, ChoiceDelegate, HelpDialog, Section, WelcomePanel, choice_text, choice_value, edit_text,
@@ -348,6 +349,10 @@ class MainWindow(QMainWindow):
         self.env_check_timer.setSingleShot(True)
         self.env_check_timer.setInterval(700)
         self.env_check_timer.timeout.connect(self.request_env_check)
+        # Bildvorlage (Werkzeug Nachzeichnen): bleibt beim Sprachwechsel bestehen, Karte und Seitenleiste werden neu verbunden
+        self.werkzeug_bild = Nachzeichner(self.document, self)
+        self.werkzeug_bild.geaendert.connect(lambda: self.map.viewport().update())
+        self.werkzeug_bild.massstab_gemessen.connect(self._massstab_gemessen)
         self.resize(1440, 940)
         self.setMinimumSize(1100, 720)
         self._build_ui()
@@ -365,6 +370,7 @@ class MainWindow(QMainWindow):
 
     def _after_build(self):
         """Frisch aufgebaute Bedienelemente mit dem Dokument und den Ansichtsschaltern füllen."""
+        self.werkzeug_bild.sync()       # Bild der Vorlage laden (Start mit Projekt: sonst erst nach der ersten Änderung)
         self._refresh_objects()
         self._refresh_properties()
         self.set_theme(self.document.project.manifest.get("thema", "dunkel"))
@@ -391,6 +397,8 @@ class MainWindow(QMainWindow):
         self.action(file_menu, tr("Neu"), self.new_project, "Ctrl+N")
         self.action(file_menu, tr("Neu aus Vorlage …"), self.new_from_template)
         self.action(file_menu, tr("Vorschlag erzeugen …"), self.new_from_suggestion)
+        self.action(file_menu, tr("Bildvorlage laden …"), self.load_bildvorlage)
+        self.action(file_menu, tr("Bildvorlage aus Zwischenablage"), self.paste_bildvorlage)
         self.action(file_menu, tr("Definition / Manifest öffnen …"), self.open_dialog, "Ctrl+O")
         self.action(file_menu, tr("Projektordner öffnen …"), self.open_folder_dialog)
         self.action(file_menu, tr("Speichern"), self.save_project, "Ctrl+S")
@@ -420,6 +428,8 @@ class MainWindow(QMainWindow):
         self.action(edit_menu, tr("Runde hier öffnen"), self.open_here)
         self.action(edit_menu, tr("Reihenfolge der Auswahl umkehren"), self.reverse_selection)
         self.action(edit_menu, tr("Überstand abschneiden"), self.cut_overhang)
+        edit_menu.addSeparator()
+        self.action(edit_menu, tr("Strecke skalieren …"), self.scale_track)
         edit_menu.addSeparator()
         self.action(edit_menu, tr("Querneigung: alle Kurven automatisch"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
         self.action(edit_menu, tr("Querneigung: ganze Strecke flach"), self.flatten_bank)
@@ -487,7 +497,9 @@ class MainWindow(QMainWindow):
                                             (tr("Umgebung"), "umgebung", "umgebung",
                                              tr("Bäume, Gebäude … aus dem Katalog platzieren, wählen und verschieben"), "U"),
                                             (tr("Bepflanzen"), "streuen", "streuen",
-                                             tr("Eine Fläche (Rechteck oder Pinsel) mit Bäumen und Büschen bepflanzen"), "B")):
+                                             tr("Eine Fläche (Rechteck oder Pinsel) mit Bäumen und Büschen bepflanzen"), "B"),
+                                            (tr("Nachzeichnen"), "nachzeichnen", "bild",
+                                             tr("Strecke auf einer Bildvorlage (Kartenausschnitt) nachzeichnen"), "N")):
             action = QAction(icon(glyph), name, self)
             action.setCheckable(True)
             action.setChecked(mode == "auswahl")
@@ -603,6 +615,16 @@ class MainWindow(QMainWindow):
         self.left_layout = left_layout
 
         self.map = MapView(self.document)
+        self.map.trace = self.werkzeug_bild
+        self.bild_panel = NachzeichnenPanel(self.werkzeug_bild)
+        self.bild_panel.uebernehmen.connect(self.bildvorlage_uebernehmen)
+        self.bild_panel.entfernen.connect(self.remove_bildvorlage)
+        self.bild_dock = QDockWidget(tr("Bildvorlage · Nachzeichnen"), self)
+        self.bild_dock.setObjectName("bildvorlage")
+        self.bild_dock.setWidget(self.bild_panel)
+        self.bild_dock.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.bild_dock)
+        self.bild_dock.hide()
         for action in self.clip_actions:
             action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
             self.map.addAction(action)
@@ -839,6 +861,11 @@ class MainWindow(QMainWindow):
         section_actions.addWidget(self.add_section_button)
         section_actions.addWidget(self.remove_section_button)
         right_layout.addLayout(section_actions)
+        # Fahrbahn (ganze Strecke): derselbe Befehl wie Bearbeiten → Strecke skalieren …
+        self.scale_button = QPushButton(tr("Strecke skalieren …"))
+        self.scale_button.setToolTip(tr("Ganze Strecke um einen Faktor oder auf eine Länge in Metern skalieren. Strg+Z macht rückgängig."))
+        self.scale_button.clicked.connect(self.scale_track)
+        right_layout.addWidget(self.scale_button)
         self.right_layout, self.right_stretch = right_layout, right_layout.count()
         right_layout.addStretch(0)                  # hält alles oben, solange die Tabelle ausgeblendet ist
         horizontal = QSplitter()
@@ -958,8 +985,8 @@ class MainWindow(QMainWindow):
         if not hasattr(self, "welcome"):
             return
         empty = self.document.ml.get("art", "kontrollpunkte") == "kontrollpunkte" and not self.document.points
-        show = (empty and self.map.mode != "punkte" and not self.document.project.readonly
-                and getattr(self, "welcome_feature", True))
+        show = (empty and self.map.mode not in ("punkte", "nachzeichnen") and not self.document.project.readonly
+                and getattr(self, "welcome_feature", True) and not self.document.project.manifest.get("bildvorlage"))
         if show:
             self.welcome.set_recent(ansicht.recent_projects())
         if show:
@@ -976,6 +1003,8 @@ class MainWindow(QMainWindow):
             self.new_from_template()
         elif key == "vorschlag":
             self.new_from_suggestion()
+        elif key == "bild":
+            self.load_bildvorlage()
         elif key == "oeffnen":
             self.open_folder_dialog()
         elif key == "beispiel":
@@ -1021,6 +1050,10 @@ class MainWindow(QMainWindow):
     def _changed(self):
         if self.document.env_only:
             self._env_changed()
+            return
+        self.werkzeug_bild.sync()
+        if self.document.bild_only:
+            self._bild_changed()
             return
         theme = self.document.project.manifest.get("thema", "dunkel")
         if self.map.dark != (theme != "hell"):
@@ -1139,6 +1172,7 @@ class MainWindow(QMainWindow):
         self.mode_actions["punkte"].setToolTip(tr("Klick fügt einen Kontrollpunkt ein.") if editable else reason)
         if art != "kontrollpunkte" and hasattr(self, "map") and self.map.mode == "punkte":
             self.set_mode("auswahl", focus=False)
+        self._update_bild_action()
         self._group_status()
         self._update_welcome()
 
@@ -1270,6 +1304,8 @@ class MainWindow(QMainWindow):
         self.properties.populate(entries, self.document.project.readonly)
         listed = category in LISTS
         self.section_choice.setVisible(listed)
+        self.scale_button.setVisible(category == "fahrbahn")
+        self.scale_button.setEnabled(not self.document.project.readonly)
         for button in (self.add_section_button, self.remove_section_button):
             button.setVisible(listed)
             button.setEnabled(not self.document.project.readonly)
@@ -1875,6 +1911,14 @@ class MainWindow(QMainWindow):
     def set_mode(self, mode, focus=True):
         if mode == "punkte" and self.document.ml.get("art") != "kontrollpunkte":
             mode = "auswahl"
+        if mode == "nachzeichnen" and (self.werkzeug_bild.vorlage is None or self.document.project.readonly):
+            if focus and self.werkzeug_bild.vorlage is None and not self.document.project.readonly:
+                self.status_label.setText(tr("Nachzeichnen braucht eine Bildvorlage: Projekt → „Bildvorlage laden …“ "
+                                             "oder ein Bildschirmfoto mit Strg+V einfügen."))
+            mode = "auswahl"
+        self.werkzeug_bild.aktiv = mode == "nachzeichnen"
+        if mode == "nachzeichnen":
+            self.bild_dock.show()
         self.map.mode = mode
         self.mode_actions[mode].setChecked(True)
         self.map.viewport().update()
@@ -1882,7 +1926,8 @@ class MainWindow(QMainWindow):
             self.map.setFocus()
         self._point_section_update(self.objects.count())
         self.mode_hint.setText({"punkte": tr("Werkzeug: Punkte (EINFÜGEN)"), "umgebung": tr("Werkzeug: Umgebung (U)"),
-                                "streuen": tr("Werkzeug: Bepflanzen (B)")}.get(mode, tr("Werkzeug: Auswahl")))
+                                "streuen": tr("Werkzeug: Bepflanzen (B)"),
+                                "nachzeichnen": tr("Werkzeug: Nachzeichnen (N)")}.get(mode, tr("Werkzeug: Auswahl")))
         self.env_panel.selection_box.setVisible(mode in ("umgebung", "streuen"))
         self.env_panel.terrain_box.setVisible(mode in ("umgebung", "streuen"))
         self._refresh_bank_panel()
@@ -2842,6 +2887,7 @@ class MainWindow(QMainWindow):
         self.document.env_selected.clear()
         self.document.env_primary = None
         self.document.env_only = False
+        self.document.bild_only = False
         self.document.revision += 1
         self.env_check_timer.stop()
         self._stop_env_check()
@@ -2999,9 +3045,130 @@ class MainWindow(QMainWindow):
         self.document.delete()
         self.status_label.setText(tr("{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.", anzahl=anzahl))
 
+    # ------------------------------------------------------------------ Bildvorlage (Nachzeichnen)
+    def _update_bild_action(self):
+        vorhanden = self.werkzeug_bild.vorlage is not None
+        action = self.mode_actions.get("nachzeichnen")
+        if action is not None:
+            action.setEnabled(not self.document.project.readonly)
+            action.setToolTip(tr("Strecke auf der Bildvorlage nachzeichnen  (N)") if vorhanden else
+                              tr("Erst eine Bildvorlage laden: Projekt → „Bildvorlage laden …“ oder Strg+V mit einem "
+                                 "Bildschirmfoto"))
+        if hasattr(self, "bild_dock"):
+            if not vorhanden:
+                self.bild_dock.hide()
+            if not vorhanden and self.map.mode == "nachzeichnen":
+                self.set_mode("auswahl", focus=False)
+
+    def _bild_changed(self):
+        """Nur die Bildvorlage wurde geändert (Stützpunkte, Maßstab …): Vorschau und Fahrlinie bleiben gültig."""
+        self._title()
+        self._update_bild_action()
+        self._update_welcome()
+        self.map.viewport().update()
+
+    def load_bildvorlage(self):
+        if self.document.project.readonly:
+            return
+        path, _ = QFileDialog.getOpenFileName(self, tr("Bildvorlage laden"), "",
+                                              tr("Bilder (*.png *.jpg *.jpeg *.bmp *.webp);;Alle Dateien (*)"))
+        if not path:
+            return
+        try:
+            daten = Path(path).read_bytes()
+        except OSError as error:
+            self.error(tr("Bild nicht lesbar: {error}", error=error))
+            return
+        self._bildvorlage_setzen(daten, Path(path).name)
+
+    def paste_bildvorlage(self):
+        image = QApplication.clipboard().image()
+        if image.isNull():
+            self.error(tr("Die Zwischenablage enthält kein Bild. Ausschnitt mit Win+Umschalt+S aufnehmen, dann einfügen."))
+            return
+        from .bildvorlage import qimage_png
+        self._bildvorlage_setzen(qimage_png(image), tr("Zwischenablage"))
+
+    def _bildvorlage_setzen(self, daten, quelle):
+        from .bildvorlage import SCHLUESSEL, bild_png, neue_vorlage
+        if self.document.project.readonly:
+            return
+        try:
+            png, (breite, hoehe) = bild_png(daten)
+        except ValueError as error:
+            self.error(str(error))
+            return
+        alt = self.document.project.manifest.get(SCHLUESSEL)
+        if isinstance(alt, dict) and alt.get("punkte"):
+            answer = QMessageBox.question(self, tr("Bildvorlage ersetzen"),
+                                          tr("Die bisherige Bildvorlage und ihre Stützpunkte werden ersetzt. Fortfahren?"),
+                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if answer != QMessageBox.Yes:
+                return
+        self.document.project.bildvorlage_daten = png
+        vorlage = neue_vorlage(breite, hoehe)
+        vorlage["quelle"] = quelle
+        self.document.edit(tr("Bildvorlage laden"), lambda raw, meta: meta.__setitem__(SCHLUESSEL, vorlage))
+        self.set_mode("nachzeichnen")
+        self.map.fitInView(QRectF(vorlage["x"], vorlage["z"], breite, hoehe).adjusted(-40, -40, 40, 40), Qt.KeepAspectRatio)
+        self.status_label.setText(tr("Bildvorlage {quelle} geladen ({breite} × {hoehe} Pixel) · zuerst rechts „Maßstab "
+                                     "messen“, dann auf die Start-Ziel-Linie klicken", quelle=quelle, breite=breite, hoehe=hoehe))
+
+    def remove_bildvorlage(self):
+        from .bildvorlage import SCHLUESSEL
+        self.document.edit(tr("Bildvorlage entfernen"), lambda raw, meta: meta.pop(SCHLUESSEL, None))
+        self.set_mode("auswahl", focus=False)
+
+    def _massstab_gemessen(self, pixel):
+        meter, ok = QInputDialog.getDouble(self, tr("Maßstab"), tr("Wie viele Meter zeigt die gemessene Maßstabsleiste?"),
+                                           100.0, 0.1, 100000.0, 1)
+        if ok and meter > 0:
+            self.werkzeug_bild.massstab(meter / pixel, True)
+            self.status_label.setText(tr("Maßstab gemessen: {wert} je Pixel", wert=zahl(meter / pixel, 3, "m")))
+
+    def bildvorlage_uebernehmen(self):
+        """Gültige Runde der Bildvorlage als Kontrollpunkt-Strecke (ein Undo-Schritt, Runde geschlossen)."""
+        werkzeug = self.werkzeug_bild
+        if not werkzeug.gueltig() or self.document.project.readonly:
+            return
+        vorlage = werkzeug.vorlage
+        hinweise = []
+        if not vorlage.get("massstab_geprueft"):
+            hinweise.append(tr("Der Maßstab ist nicht an der Maßstabsleiste gemessen; Länge und Größe können falsch sein."))
+        if not (vorlage.get("massstab_geprueft") and vorlage.get("laenge_soll_m")):
+            hinweise.append(tr("Ob die Runde vollständig ist, wurde nicht geprüft (dazu Maßstab messen und Soll-Länge eintragen)."))
+        if self.document.points or self.document.ml.get("art") != "kontrollpunkte":
+            hinweise.append(tr("Die bisherige Strecke wird ersetzt (Strg+Z macht es rückgängig)."))
+        if hinweise:
+            answer = QMessageBox.question(self, tr("Als Strecke übernehmen"), "\n\n".join(hinweise + [tr("Trotzdem übernehmen?")]),
+                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+            if answer != QMessageBox.Yes:
+                return
+        punkte = werkzeug.kontrollpunkte()
+
+        def uebernehmen(raw, meta):
+            raw["mittellinie"] = {"art": "kontrollpunkte", "punkte": punkte, "approximation_m": 6.0}
+            fahrbahn = raw.setdefault("fahrbahn", {})
+            if not any(k in fahrbahn for k in ("breite", "breite_links", "breite_rechts")):
+                fahrbahn["breite"] = 14.0
+            meta["runde_geschlossen"] = True
+        self.document.edit(tr("Bildvorlage als Strecke übernehmen"), uebernehmen)
+        self.set_mode("auswahl", focus=False)
+        self.map.fit_track()
+        weit = max(max(abs(p["x"]), abs(p["z"])) for p in punkte) + 7.0
+        text = tr("Strecke übernommen: {anzahl} Punkte, {laenge}", anzahl=len(punkte),
+                  laenge=zahl(werkzeug.befund["laenge_m"], 0, "m"))
+        if weit > 1024:
+            text += tr(" · reicht bis {weite} vom Ursprung, Spielbereich ±1.024 m: Maßstab prüfen oder Strecke verschieben",
+                       weite=zahl(weit, 0, "m"))
+        self.status_label.setText(text)
+
     def paste_points(self):
         from . import kopieren
         mime = QApplication.clipboard().mimeData()
+        if mime is not None and mime.hasImage() and not mime.hasFormat(kopieren.MIME) and not (mime.text() or "").strip():
+            self.paste_bildvorlage()               # Bildschirmfoto (Win+Umschalt+S) als Bildvorlage
+            return
         roh = bytes(mime.data(kopieren.MIME)).decode("utf-8") if mime is not None and mime.hasFormat(kopieren.MIME) else             (mime.text() if mime is not None else "")
         try:
             plan = self.document.paste_points(kopieren.aus_text(roh))
@@ -3027,6 +3194,32 @@ class MainWindow(QMainWindow):
                             anzahl=len(marken)))
         teile.append(tr("Strg+Z: rückgängig"))
         self.status_label.setText(" · ".join(teile))
+
+    def track_length(self):
+        """Länge der Strecke: aus der aktuellen Vorschau (berechnete Linie), sonst aus der Eingabelinie."""
+        if self.preview is not None and not self.map.stale and self.preview.get("length"):
+            return float(self.preview["length"]), True
+        return float(input_geometry(self.document)["length"]), False
+
+    def scale_track(self):
+        from .skalieren import SkalierenDialog
+        laenge, aus_vorschau = self.track_length()
+        if laenge < 1:
+            self.status_label.setText(tr("Keine Strecke zum Skalieren."))
+            return
+        dialog = SkalierenDialog(laenge, self)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        try:
+            faktor = self.document.scale_track(dialog.wert())
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.set_mode("auswahl")
+        self.map.fit_track()
+        self.status_label.setText(tr("Strecke um Faktor {faktor} skaliert, neue Länge etwa {laenge} m{hinweis} · Strg+Z: rückgängig.",
+                                     faktor=f"{faktor:.3f}", laenge=f"{laenge * faktor:,.0f}".replace(",", "."),
+                                     hinweis="" if aus_vorschau else " " + tr("(Eingabelinie, die Vorschau zeigt die genaue Länge)")))
 
     def open_here(self):
         try:
@@ -3410,6 +3603,8 @@ class MainWindow(QMainWindow):
         self.view_dialog = self.help_dialog = None
         self.removeToolBar(self.toolbar)
         self.toolbar.deleteLater()
+        self.removeDockWidget(self.bild_dock)
+        self.bild_dock.deleteLater()
         self.setMenuBar(QMenuBar(self))                # Qt löscht die alte Leiste
         self.setStatusBar(QStatusBar(self))
         for child in old:
@@ -3511,6 +3706,8 @@ class MainWindow(QMainWindow):
                 job.process.kill()
                 job.process.waitForFinished(500)
         self.env_job = self.env_preview_job = None
+        if not getattr(self, "_rebuilding", False):
+            self.werkzeug_bild.beenden()
         if self.document.undo.isClean():
             self._drop_recovery()
         self._save_layout()

@@ -57,6 +57,27 @@ class Project:
         self.umgebung_fehler = None
         self._umgebung_geschrieben = set()
         self._load_umgebung()
+        # Bildvorlage (Nachzeichnen): Bilddaten (PNG-Bytes) neben der Definition; Lage, Maßstab und Stützpunkte stehen
+        # im Manifest unter ``bildvorlage`` (Teil des Rückgängig-Verlaufs), die Bytes nicht.
+        self.bildvorlage_daten = None
+        self._load_bildvorlage()
+
+    def bildvorlage_path(self, folder=None):
+        """Pfad des Bilds der Bildvorlage im Projektordner oder None (keine Vorlage oder ungültiger Name)."""
+        vorlage = self.manifest.get("bildvorlage")
+        if not isinstance(vorlage, dict):
+            return None
+        folder = Path(folder or self.folder or "")
+        relative = Path(str(vorlage.get("datei") or "bildvorlage.png"))
+        target = (folder / relative).resolve()
+        if relative.is_absolute() or folder.resolve() not in target.parents or target.suffix.lower() != ".png":
+            return None
+        return target
+
+    def _load_bildvorlage(self):
+        path = self.bildvorlage_path() if self.folder else None
+        if path is not None and path.is_file():
+            self.bildvorlage_daten = path.read_bytes()
 
     def umgebung_path(self, folder=None):
         """Pfad der Umgebungsdatei (``projekt.json`` → ``umgebung``, sonst ``umgebung.json``) im Projektordner."""
@@ -143,9 +164,14 @@ class Project:
         write_umgebung = self.umgebung is not None and not self.umgebung_fehler
         # Eine selbst geschriebene Umgebungsdatei, die inzwischen rückgängig gemacht wurde, nicht stehen lassen.
         remove_umgebung = self.umgebung is None and umgebung_datei in self._umgebung_geschrieben
+        bild_datei = self.bildvorlage_path(target) if self.bildvorlage_daten else None
+        if bild_datei in (definition, manifest_path, target / "spieltests.json", umgebung_datei):
+            bild_datei = None
         old = {p: p.read_bytes() if p.exists() else None
-               for p in (definition, manifest_path, target / "spieltests.json", umgebung_datei)}
+               for p in (definition, manifest_path, target / "spieltests.json", umgebung_datei, bild_datei) if p}
         try:
+            if bild_datei is not None and old.get(bild_datei) != self.bildvorlage_daten:
+                atomic_write(bild_datei, self.bildvorlage_daten)
             atomic_write(definition, new_definition)
             atomic_write(manifest_path, new_manifest)
             if self.playtests or (target / "spieltests.json").exists():

@@ -48,6 +48,20 @@ is active, and the piece can be moved and rotated. When it is added at the start
 the lap there. Red rings show where a pasted piece overlaps the track; <b>Cut overlap</b> shortens the selected piece at an open
 end from the first overlap on. <b>Reverse order of selection</b> turns a piece round. Finally <b>Close lap</b> and
 <b>Fill gaps</b>. The check rejects crossings and bridges (GE-01).</p>
+<h3>Trace a track on an image</h3>
+<p><b>Project → Load reference image …</b>, or a screenshot via <b>Reference image from clipboard</b>, puts a map picture under
+the map as a template; it is saved as <i>bildvorlage.png</i> in the project folder. In the <b>Trace</b> tool (N), first
+<b>Measure scale</b> on the right (two clicks on the image's scale bar) and if possible enter the <b>Target length</b>.
+Then click the start on the finish line and set further support points in driving direction; the editor finds the road in
+between. It only takes over a lap that is complete, does not cross itself and drives no part twice. Red rings show where it is
+wrong, an orange "B" offers a second possible way. <b>Use as track</b> turns it into a control point track. Map views
+(drawn line) work with few points, aerial images need more.</p>
+<h3>Scale track</h3>
+<p><b>Edit → Scale track …</b> (also a button under <i>Properties → Road (whole track)</i>) makes the whole track larger or smaller by a <b>factor</b>, or brings it to a <b>length</b> in
+metres (starting value: length of the current preview). It scales around the track's centre: points or segment lengths and
+radii, cross-section sections, finish line, DRS and Straight Mode zones, pit entry and exit, and the position of environment
+objects and hills. Heights in metres, widths and the size of objects stay, so a longer track becomes flatter. One step,
+Ctrl+Z undoes it.</p>
 <h3>Find and recover</h3>
 <p><b>Go to</b> (field above the list): metres from the finish (e.g. 1250), corner (T4) or object (#12). The list
 shows station and corner for each point. <i>Project → Recently opened</i> and the start screen offer the last projects.

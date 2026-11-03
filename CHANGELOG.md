@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- Trace a track from an image: load a map picture or paste a screenshot (Ctrl+V), measure the scale on its scale bar, click a few support points in driving direction, and the editor finds the track between them. It only takes over a lap that is complete, does not cross itself and drives no part twice; red rings show where the lap is wrong, an orange "B" offers a second possible way
+- Scale track: Edit → Scale track … makes the whole track larger or smaller by a factor or brings it to a target length in metres; sections, zones and the environment move along, heights and widths stay
+
 ## 0.2.2
 
 - Combine tracks (issue #2): copy and paste track points with Ctrl+C / Ctrl+X / Ctrl+V, also between two editor windows. A pasted piece joins the open end of an open track with its fitting end, red rings show where it overlaps the track, and new commands open a lap at the selection, cut an overlap and reverse a piece

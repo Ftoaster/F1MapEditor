@@ -140,6 +140,9 @@ class MapView(QGraphicsView):
         self.terrain_armed = None
         self.terrain_radius = 200.0
         self.terrain_drag = None       # {"id", "press": Ansichtspunkt, "origin": Szenenpunkt, "active": bool}
+        # Bildvorlage (Werkzeug Nachzeichnen, ``bildvorlage.Nachzeichner``; vom Fenster gesetzt) und ihre Sichtbarkeit
+        self.trace = None
+        self.show_bild = True
         self.setMouseTracking(True)
         self.document.selection_changed.connect(self._selection)
         self.scale(0.5, 0.5)
@@ -329,6 +332,8 @@ class MapView(QGraphicsView):
             painter.setPen(cosmetic("#D4AA61", 1.5, Qt.DashLine))
             painter.setBrush(Qt.NoBrush)
             painter.drawRect(QRectF(-1024 - shift[0], -1024 - shift[2], 2048, 2048))
+        if self.trace is not None and self.show_bild:
+            self.trace.zeichne_bild(painter)
         pixmap = self._preview_pixmap()
         if pixmap is not None:
             painter.save()
@@ -347,6 +352,8 @@ class MapView(QGraphicsView):
         to_view = self._to_view()
         width, height = self.viewport().width(), self.viewport().height()
         self._draw_env(painter, to_view, width, height)
+        if self.trace is not None and self.mode == "nachzeichnen":
+            self.trace.zeichne(painter, to_view)
         selected_set = self.document.selected_indices
         chosen, plain = [], []
         for i, point in enumerate(self.object_positions()):
@@ -408,7 +415,8 @@ class MapView(QGraphicsView):
         # Oben links eine Zeile für das Wichtige: Werkzeug und aktuelle Vorschau stehen schon in Leiste und Statuszeile
         top = 12
         if (self.show_hints or gesture) and (note or state != tr("Vorschau aktuell") or self.mode != "auswahl"):
-            names = {"punkte": tr("Punkte setzen"), "umgebung": tr("Umgebung"), "streuen": tr("Fläche bepflanzen")}
+            names = {"punkte": tr("Punkte setzen"), "umgebung": tr("Umgebung"), "streuen": tr("Fläche bepflanzen"),
+                     "nachzeichnen": tr("Nachzeichnen")}
             self._chip(painter, 12, top, f"{names.get(self.mode, tr('Auswahl'))}  ·  {state}{note}",
                        "#D6A94A" if self.stale and not gesture else None)
             top += 30
@@ -418,6 +426,8 @@ class MapView(QGraphicsView):
                       raster=SNAP_DEG)
         elif self.mode in ENV_MODES:
             hint = self._env_hint()
+        elif self.mode == "nachzeichnen" and self.trace is not None:
+            hint = self.trace.hinweis()
         elif self.mode == "punkte":
             hint = (tr("Klick setzt einen Punkt · ab 4 Punkten „Runde schließen“ · V oder Esc: zurück zur Auswahl")
                     if not self.document.project.closed else
@@ -993,6 +1003,10 @@ class MapView(QGraphicsView):
         if self.mode in ENV_MODES:
             self._env_press(event, scene_point)
             return
+        if self.mode == "nachzeichnen":
+            if self.trace is not None and not self.document.project.readonly:
+                self.trace.druecken(scene_point.x(), scene_point.y(), event.position(), self._to_view())
+            return
         if self.mode == "punkte" and self.document.ml.get("art") == "kontrollpunkte":
             self.document.insert(scene_point.x(), scene_point.y())
             return
@@ -1287,6 +1301,11 @@ class MapView(QGraphicsView):
         if self.mode in ENV_MODES and self.pan_origin is None:
             self._env_move(event)
             return
+        if self.mode == "nachzeichnen" and self.pan_origin is None:
+            if self.trace is not None:
+                point = self.mapToScene(event.position().toPoint())
+                self.trace.bewegen(point.x(), point.y(), event.position())
+            return
         if self.pan_origin is not None:
             delta = event.position() - self.pan_origin
             self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - int(delta.x()))
@@ -1347,6 +1366,10 @@ class MapView(QGraphicsView):
             self.unsetCursor()
         elif self.mode in ENV_MODES:
             self._env_release(event)
+        elif self.mode == "nachzeichnen":
+            if self.trace is not None:
+                point = self.mapToScene(event.position().toPoint())
+                self.trace.loslassen(point.x(), point.y(), event.position())
         elif self.zone_drag is not None:
             art, index, feld = self.zone_drag
             self.zone_drag = None
@@ -1392,7 +1415,14 @@ class MapView(QGraphicsView):
                 self.click_single = None
             super().mouseReleaseEvent(event)
 
+    def leaveEvent(self, event):
+        if self.trace is not None and self.mode == "nachzeichnen":
+            self.trace.verlassen()
+        super().leaveEvent(event)
+
     def mouseDoubleClickEvent(self, event):
+        if self.mode == "nachzeichnen":
+            return
         if self.mode in ENV_MODES:
             hit = self.env_nearest(event.position()) if self.mode == "umgebung" else None
             gruppe = (self.document.env_object(hit) or {}).get("gruppe") if hit else None
@@ -1418,6 +1448,8 @@ class MapView(QGraphicsView):
     def keyPressEvent(self, event):
         key = event.key()
         if self.mode in ENV_MODES and key != Qt.Key_Space and self._env_key(event):
+            return
+        if self.mode == "nachzeichnen" and key != Qt.Key_Space and self.trace is not None and self.trace.taste(key):
             return
         if key == Qt.Key_Space:
             self.space = True
@@ -1450,8 +1482,9 @@ class MapView(QGraphicsView):
             if frame is not None:
                 step = -1.0 if event.modifiers() & Qt.ShiftModifier else 1.0
                 self.document.rotate_selection(math.radians(step), (frame[0] + frame[2]) / 2, (frame[1] + frame[3]) / 2)
-        elif key in (Qt.Key_V, Qt.Key_P, Qt.Key_U, Qt.Key_B):
-            self.mode_changed.emit({Qt.Key_P: "punkte", Qt.Key_U: "umgebung", Qt.Key_B: "streuen"}.get(key, "auswahl"))
+        elif key in (Qt.Key_V, Qt.Key_P, Qt.Key_U, Qt.Key_B, Qt.Key_N):
+            self.mode_changed.emit({Qt.Key_P: "punkte", Qt.Key_U: "umgebung", Qt.Key_B: "streuen",
+                                    Qt.Key_N: "nachzeichnen"}.get(key, "auswahl"))
         elif key == Qt.Key_A and event.modifiers() & Qt.ControlModifier:
             self.document.select_many(range(self.document.object_count))
         elif key in (Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down) and self.document.selected_indices:

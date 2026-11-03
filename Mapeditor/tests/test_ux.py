@@ -49,7 +49,7 @@ def test_welcome_panel_for_empty_project(app):
     QTest.qWait(30)
     try:
         assert w.welcome.isVisible()
-        assert set(w.welcome.buttons) == {"zeichnen", "vorlage", "vorschlag", "oeffnen", "beispiel"}
+        assert set(w.welcome.buttons) == {"zeichnen", "vorlage", "vorschlag", "bild", "oeffnen", "beispiel"}
         doc_screenshot(w, "startbildschirm.png")
         QTest.mouseClick(w.welcome.buttons["zeichnen"], Qt.LeftButton)
         assert w.map.mode == "punkte" and w.mode_actions["punkte"].isChecked()

@@ -105,7 +105,7 @@ GLYPHS = {
     "zoom_in": "", "zoom_out": "", "runde": "", "pruefen": "", "bauen": "",
     "spieltest": "", "abbrechen": "", "neu": "", "oeffnen": "", "vorlage": "",
     "vorschlag": "", "hilfe": "", "speichern": "",
-    "umgebung": "", "streuen": "",
+    "umgebung": "", "streuen": "", "bild": "",
 }
 
 
@@ -240,7 +240,7 @@ class ChoiceDelegate(QStyledItemDelegate):
 
 # ------------------------------------------------------------------ Startbildschirm
 class WelcomePanel(QFrame):
-    """Einstieg bei leerem Projekt: Zeichnen, Vorlage, Vorschlag, Öffnen, Beispiel."""
+    """Einstieg bei leerem Projekt: Zeichnen, Vorlage, Vorschlag, Bild, Öffnen, Beispiel."""
 
     chosen = Signal(str)
 
@@ -264,6 +264,8 @@ class WelcomePanel(QFrame):
                 ("zeichnen", "punkte", tr("Strecke zeichnen"), tr("Punkte in die Karte klicken, dann „Runde schließen“")),
                 ("vorlage", "vorlage", tr("Aus Vorlage …"), tr("Echte Strecke (TUM-CSV), GPX-Spur oder Spielstrecke")),
                 ("vorschlag", "vorschlag", tr("Vorschlag erzeugen …"), tr("Zufällige, gültige Strecke mit Länge und Kurvenzahl")),
+                ("bild", "bild", tr("Aus Bild nachzeichnen …"),
+                 tr("Kartenausschnitt (Bildschirmfoto) als Vorlage, Strecke mit Klicks nachziehen")),
                 ("oeffnen", "oeffnen", tr("Projekt öffnen …"), tr("Vorhandenen Projektordner laden")),
                 ("beispiel", "auswahl", tr("Beispiel ansehen"), tr("Teststrecke aus dem Werkzeugkasten (fahrbar im Spiel)")))):
             button = QPushButton(icon(glyph), "  " + text)
