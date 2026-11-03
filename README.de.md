@@ -46,8 +46,7 @@ Version 1.0.0 der Mod kann mit AMD-Grafikkarten abstürzen, die Version 1.0.2 be
 
 ## Bekannte Grenzen
 
-- **Boxengasse nur rechts.** Liegt sie links der Strecke, stehen Autos und Boxencrews bis zur Ausfahrt auf der Mauerseite.
-  Die Daten entsprechen den originalen Linksstrecken, die Ursache ist unbekannt. Rechts funktioniert alles.
+- Boxengasse links der Strecke ist über den Swofty Launcher getestet, noch nicht über den EGO-Installer.
 - Licht und Garagen-Lichtkarten stammen von der Trägerstrecke.
 - Sehr lange Strecken funktionieren, überschreiten aber die Größen aller Originale; die Prüfung zeigt dann Warnungen.
 - Am besten getestet sind Zeitfahren und Grand Prix, andere Modi weniger.

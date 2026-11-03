@@ -55,6 +55,13 @@ def test_launcher_befehle(tmp_path):
     assert swofty_installieren(programm, addon) == [[str(programm), "addons", "install", str(addon)],
                                                     [str(programm), "addons", "enable", "mapeditor.longer"]]
     assert swofty_starten(programm) == [[str(programm), "run", "--apply"]]
+    traeger = tmp_path / "t.zip"
+    with zipfile.ZipFile(traeger, "w") as z:
+        z.writestr("swofty.json", json.dumps({"id": "mapeditor.traeger_1234abcd"}))
+    schritte = swofty_installieren(programm, addon, traeger, set())
+    assert schritte[0] == [str(programm), "addons", "install", str(traeger)] and len(schritte) == 4
+    schritte = swofty_installieren(programm, addon, traeger, {"mapeditor.traeger_1234abcd"})
+    assert schritte[0] == [str(programm), "addons", "enable", "mapeditor.traeger_1234abcd"] and len(schritte) == 3
     assert swofty_auswerten(programm) == [str(programm), "logs"]
 
 
@@ -62,6 +69,8 @@ def test_optionen_renndaten_und_raster():
     root = ROOT / "ego-werkzeuge"
     befehl = build_command(root, root, root / "b", root / "p", "x", options={"renndaten": False, "raster": 26})
     assert "--no-renndaten" in befehl and befehl[befehl.index("--raster") + 1] == "26"
+    assert "--traeger-teilen" not in befehl
+    assert "--traeger-teilen" in build_command(root, root, root / "b", root / "p", "x", options={"ziel": "swofty", "traeger_teilen": True})
     assert "--raster" not in build_command(root, root, root / "b", root / "p", "x", options={"renndaten": True, "raster": 0})
     with pytest.raises(ValueError):
         build_command(root, root, root / "b", root / "p", "x", options={"raster": 30})
@@ -124,6 +133,7 @@ def test_dialog_ziel_swofty(window, tmp_path):
     dialog = BuildDialog(window)
     dialog.target.setCurrentIndex(dialog.target.findData("swofty"))
     assert dialog.options()["ziel"] == "swofty" and dialog.code.isHidden() and "Addon" in dialog.code_info.text()
+    assert not dialog.shared_carrier.isHidden() and dialog.options()["traeger_teilen"]
     assert dialog.main_form.getWidgetPosition(dialog.track_name)[0] >= 0 and not dialog.track_name.isHidden()
     assert dialog.advanced_form.getWidgetPosition(dialog.track_name)[0] < 0
     assert dialog.install_button.isHidden() and not dialog.diagnosis_button.isHidden()   # noch kein Addon gebaut
@@ -139,7 +149,7 @@ def test_dialog_ziel_swofty(window, tmp_path):
     assert "kein Absturz" in dialog.phase.text()
     dialog.target.setCurrentIndex(dialog.target.findData("ego"))
     assert not dialog.code.isHidden()
-    assert dialog.install_button.isHidden() and dialog.diagnosis_button.isHidden()
+    assert dialog.install_button.isHidden() and dialog.diagnosis_button.isHidden() and dialog.shared_carrier.isHidden()
     assert dialog.advanced_form.getWidgetPosition(dialog.track_name)[0] == 0
     assert dialog.main_form.getWidgetPosition(dialog.track_name)[0] < 0
     dialog.close()

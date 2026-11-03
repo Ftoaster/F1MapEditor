@@ -1229,9 +1229,12 @@ def boxenlinie_verlaengern(lg, vor_m=BOXEN_VERLAENGERUNG_VOR_M, nach_m=BOXEN_VER
     pit["position"] = neu.tolist()
     pit["progress"] = (cn / L).tolist()
     pit["laenge_m"] = float(L)
+    spur = float((lg.get("boxengasse") or {}).get("ausfahrt_spur_m") or 0.0)
     for z in sp["TM"]["markup"]:
         if z["SplineName"] == pit["name"]:
             z["Start"], z["End"] = um(z["Start"]), um(z["End"])
+            if z["Type"] == "pitlane_exit_zone" and spur:   # Ausfahrtszone über die Ausfahrtsspur (Originale ≈ 250 m)
+                z["End"] = min((b + min(spur, nach_m - 10.0)) / L, 1.0)
     box = lg.get("boxengasse") or {}
     for k in ("einfahrt_pit_progress", "ausfahrt_pit_progress"):
         if k in box:
@@ -1457,7 +1460,9 @@ def logik_vorbereiten(logik, zustand, logik_dy=0.0, plaetze_dy=0.0, boxen_korrek
     einfahrt = next(z.start for z in orig.zonen if z.typ == "pit_lane_entry_zone")
     protokoll["vorlage_boxeneinfahrt_main"] = orig.hauptlinie.fortschritt_von(pit_alt.punkt(einfahrt)[0])[0]
     lg = logik_platzieren(logik, logik_dy, plaetze_dy)
-    protokoll["boxenlinie_verlaengert"] = boxenlinie_verlaengern(lg, stetig=boxen_korrektur_an)
+    spur = float((lg.get("boxengasse") or {}).get("ausfahrt_spur_m") or 0.0)
+    protokoll["boxenlinie_verlaengert"] = boxenlinie_verlaengern(lg, nach_m=max(BOXEN_VERLAENGERUNG_NACH_M, spur + 50.0),
+                                                                 stetig=boxen_korrektur_an)
     sp = lg["spielformate"]
     namen_alt = {s.name for s in orig.splines.values()}
     if {s["name"] for s in sp["TrackSpace"]["splines"]} != namen_alt:

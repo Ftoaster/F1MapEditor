@@ -180,6 +180,9 @@ STANDARD = {
         "abstand_fahrbahn": 20.0,    # Grünfläche zwischen Fahrbahn und Boxengasse (bis 27.10.2026: 12)
         "anlauf_m": 50.0,            # Breite der Boxengasse läuft am Fahrbahnrand an
         "uebergang_m": 120.0,        # seitliches Abwandern auf den vollen Abstand
+        # KI-Boxenroute nach dem Ende der Boxengasse (3.11.2026): Bei allen Spielstrecken läuft sie nach dem Tempolimit noch
+        # 380–660 m weiter und fädelt langsam ein; ohne diese Spur zog die KI sofort quer zur Ideallinie (bei Boxen links aufs Gras)
+        "ausfahrt_spur_m": 250.0,
         "hinter_box_m": 4.0,         # Fläche zwischen Boxengasse und Garagenwand
         "boxen": 11,
         "box_abstand_m": 14.0,

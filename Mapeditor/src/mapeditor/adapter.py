@@ -78,9 +78,27 @@ def swofty_addon_id(paket):
         return json.loads(z.read("swofty.json"))["id"]
 
 
-def swofty_installieren(programm, paket):
-    """Befehle zum Installieren und Einschalten; wie alle Schritte des Launchers über ``swofty.exe``."""
-    return [[str(programm), "addons", "install", str(paket)], [str(programm), "addons", "enable", swofty_addon_id(paket)]]
+def swofty_installieren(programm, paket, traeger=None, installiert=()):
+    """Befehle zum Installieren und Einschalten; wie alle Schritte des Launchers über ``swofty.exe``. Ein gemeinsames
+    Träger-Addon kommt nur dazu, wenn der Launcher es noch nicht hat; eingeschaltet wird es immer."""
+    schritte = []
+    if traeger:
+        kennung = swofty_addon_id(traeger)
+        if kennung not in installiert:
+            schritte.append([str(programm), "addons", "install", str(traeger)])
+        schritte.append([str(programm), "addons", "enable", kennung])
+    return schritte + [[str(programm), "addons", "install", str(paket)],
+                       [str(programm), "addons", "enable", swofty_addon_id(paket)]]
+
+
+def swofty_installierte(programm):
+    """Ids der installierten Addons (``swofty addons list``); leer, wenn der Launcher nicht antwortet."""
+    try:
+        lauf = subprocess.run([str(programm), "addons", "list"], capture_output=True, text=True, timeout=60,
+                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    return {zeile.split()[0] for zeile in lauf.stdout.splitlines() if zeile.strip()}
 
 
 def swofty_starten(programm):
@@ -146,6 +164,8 @@ def _option_args(options):
         if pvs not in BUILD_PVS:
             raise ValueError(tr("PVS-Variante {pvs!r} unbekannt.", pvs=pvs))
         args += ["--pvs-variante", pvs]
+    if options.get("traeger_teilen") and ziel == "swofty":
+        args.append("--traeger-teilen")
     if "renndaten" in options:
         args.append("--renndaten" if options["renndaten"] else "--no-renndaten")
     raster = options.get("raster")

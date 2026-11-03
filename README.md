@@ -46,8 +46,7 @@ Version 1.0.0 of the mod can crash on AMD graphics cards, which its version 1.0.
 
 ## Known limitations
 
-- **Pit lane on the right only.** With the pit lane on the left of the track, the cars and pit crews stand on the wall side
-  until the car leaves. The data matches the original left-side tracks, the cause is unknown. On the right everything works.
+- Pit lane on the left of the track is tested through Swofty Launcher, not yet through the EGO installer.
 - Lighting and garage light maps come from the carrier track.
 - Very long tracks work, but exceed the size of any original (gates, visibility cells), so the checks show warnings.
 - Time Trial and Grand Prix are tested most. Other modes are less tested.

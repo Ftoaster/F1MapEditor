@@ -36,9 +36,11 @@ import copy
 import heapq
 import json
 import os
+import hashlib
 import re
 import shutil
 import struct
+import tempfile
 import time
 import unicodedata
 import zipfile
@@ -128,7 +130,68 @@ def swofty_namen(code: str, name: str) -> Tuple[list, list]:
     return ops, [(feld, schluessel[k]) for feld, k in felder.items()]
 
 
-def swofty_addon_bauen(quelle: str, ziel: str, name: Optional[str] = None, protokoll=print) -> dict:
+#: Gemeinsamer Träger: Die Mip-Dateien des Trägers sind in jeder Strecke byte-gleich (1.141 Dateien, 2,6 GB, geprüft
+#: 3.11.2026). Ein Träger-Addon legt sie einmal ab, Strecken-Addons verweisen nur darauf. Der Launcher biegt nur Pfade von
+#: Dateien um, die ein Addon mitbringt (activation/place.rs ``repoint_mips``), fremde Pfade bleiben stehen.
+TRAEGER_ORDNER = "environment_package/tracks/%s/mipmaps/"
+
+
+def _mip_eintraege(z: zipfile.ZipFile) -> List[zipfile.ZipInfo]:
+    return [i for i in z.infolist() if i.filename.endswith(".mipmaps") and "mipmaps/" in i.filename]
+
+
+def traeger_kennung(z: zipfile.ZipFile) -> str:
+    """Name des gemeinsamen Trägers aus Namen und Größen seiner Mip-Dateien (je Mod-Version verschieden)."""
+    h = hashlib.sha1()
+    for i in sorted(_mip_eintraege(z), key=lambda i: i.filename.rsplit("/", 1)[1]):
+        h.update(("%s:%d;" % (i.filename.rsplit("/", 1)[1], i.file_size)).encode())
+    return "mapeditor_traeger_" + h.hexdigest()[:8]
+
+
+def traeger_id(code: str) -> str:
+    return "mapeditor.traeger_" + code[-8:]
+
+
+def swofty_traeger_addon(quelle: str, ziel: str, protokoll=print) -> dict:
+    """Träger-Addon aus einem Paket (Träger oder eigener Bau): alle Mip-Dateien unter ``TRAEGER_ORDNER``, einmal je Mod-Version."""
+    with zipfile.ZipFile(quelle) as z:
+        code = traeger_kennung(z)
+        eintraege = _mip_eintraege(z)
+        ordner = TRAEGER_ORDNER % code
+        addon = {"schema_version": 1, "id": traeger_id(code), "name": "Mapeditor carrier textures " + code[-8:],
+                 "version": "1.0.0", "author": "Mapeditor", "category": "tracks", "kind": ["files"], "compat": {"game": "f1_25"},
+                 "description": "Textures of the Portimão mod shared by Mapeditor tracks. Built from your own copy of the mod.",
+                 "operations": {"files": [{"source": "mipmaps/" + i.filename.rsplit("/", 1)[1],
+                                           "target": ordner + i.filename.rsplit("/", 1)[1]} for i in eintraege]}}
+        protokoll("Träger-Addon %s: %d Dateien …" % (addon["id"], len(eintraege)))
+        with zipfile.ZipFile(ziel, "w", zipfile.ZIP_STORED, allowZip64=True) as a:
+            a.writestr("swofty.json", json.dumps(addon, ensure_ascii=False, indent=2))
+            for i in eintraege:
+                with z.open(i) as e, a.open("mipmaps/" + i.filename.rsplit("/", 1)[1], "w", force_zip64=True) as d:
+                    shutil.copyfileobj(e, d, 1 << 24)
+    return {"id": addon["id"], "code": code, "dateien": len(eintraege), "groesse": os.path.getsize(ziel)}
+
+
+def _erp_auf_traeger(roh_pfad: str, ziel_pfad: str, code: str) -> int:
+    """Mip-Pfade aller Texturen auf den gemeinsamen Träger umstellen; Zahl der umgestellten Texturen."""
+    ordner = TRAEGER_ORDNER % code
+    paare, geaendert = [], []
+    with erp.open_erp(roh_pfad) as a:
+        for r in a:
+            if r.resource_type != "GfxSurfaceRes" or len(r.fragments) < 3:
+                continue
+            neu = mip_umbenennen(r.fragments[2].read(), lambda alt: ordner + alt.rsplit("/", 1)[1] if "/mipmaps/" in alt else alt)
+            if neu is not None:
+                paare.append((r.fragments[2], neu))
+                geaendert.append(r)
+        erp.fragmente_setzen(paare)
+        for r in geaendert:
+            r.update_hash()
+        a.write(ziel_pfad, overwrite=True)
+    return len(geaendert)
+
+
+def swofty_addon_bauen(quelle: str, ziel: str, name: Optional[str] = None, protokoll=print, geteilt: bool = False) -> dict:
     """Geprüftes Paket (ZIP) als Swofty-Addon (ZIP) schreiben: ``swofty.json``, ``assets/track.json``, Paket unter ``track/``.
     Ein Addon statt eines Strecken-ZIPs, weil nur so eigene Menütexte möglich sind; die Id kollidiert nicht mit dem Katalog."""
     with zipfile.ZipFile(quelle) as z:
@@ -141,21 +204,37 @@ def swofty_addon_bauen(quelle: str, ziel: str, name: Optional[str] = None, proto
                            "overrides": (akt.get("overrides") or []) + [{"path": "TrackNameData_0." + f, "value": s} for f, s in felder],
                            "track_overrides": (akt.get("track_overrides") or []) + [{"path": f, "value": s} for f, s in felder]}
         m["author_name"], m["version"] = "Mapeditor", "1.0.0"
+        traeger = traeger_kennung(z) if geteilt else None
+        if traeger:   # ohne Mip-Dateien, die liefert das Träger-Addon
+            m.pop("copy_directories", None)
         addon = {"schema_version": 1, "id": "mapeditor." + code, "name": name, "version": "1.0.0", "author": "Mapeditor",
                  "description": "Custom track built with Mapeditor on the Portimão mod as carrier.",
                  "category": "tracks", "kind": ["database", "erp"],
                  "compat": {"game": "f1_25"}, "operations": {"assets": ["assets/track.json"]}}
+        if traeger:
+            addon["requires"] = [{"id": traeger_id(traeger)}]
         spur = {"schema_version": 1, "ops": [{"op": "track.add", "source": "track"}] + ops}
         protokoll("Swofty-Addon %s …" % addon["id"])
         with zipfile.ZipFile(ziel, "w", zipfile.ZIP_STORED, allowZip64=True) as a:
             a.writestr("swofty.json", json.dumps(addon, ensure_ascii=False, indent=2))
             a.writestr("assets/track.json", json.dumps(spur, ensure_ascii=False, indent=2))
             a.writestr("track/manifest.json", json.dumps(m, ensure_ascii=False, indent=2))
+            texturen = None
             for i in z.infolist():
-                if i.filename != "manifest.json" and not i.is_dir():
-                    with z.open(i) as e, a.open("track/" + i.filename, "w", force_zip64=True) as d:
-                        shutil.copyfileobj(e, d, 1 << 24)
-    return {"id": addon["id"], "code": code, "name": name, "groesse": os.path.getsize(ziel)}
+                if i.filename == "manifest.json" or i.is_dir() or (traeger and i in _mip_eintraege(z)):
+                    continue
+                if traeger and i.filename == m["erp"]:
+                    with tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.abspath(ziel))) as tmp:
+                        roh = os.path.join(tmp, "roh.erp")
+                        with z.open(i) as e, open(roh, "wb") as d:
+                            shutil.copyfileobj(e, d, 1 << 24)
+                        texturen = _erp_auf_traeger(roh, os.path.join(tmp, "neu.erp"), traeger)
+                        a.write(os.path.join(tmp, "neu.erp"), "track/" + i.filename)
+                    continue
+                with z.open(i) as e, a.open("track/" + i.filename, "w", force_zip64=True) as d:
+                    shutil.copyfileobj(e, d, 1 << 24)
+    return {"id": addon["id"], "code": code, "name": name, "groesse": os.path.getsize(ziel), "traeger": traeger,
+            "texturen_umgestellt": texturen}
 
 
 def swofty_raster_addon(ziel: str) -> dict:
@@ -738,7 +817,32 @@ def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str]
 
 #: Streckenmetadaten im Manifest (``activation.track_overrides``), Schlüssel wie im Sepang-Manifest – nur
 #: diese drei sind im Installer belegt (docs/streckenname.md). Werte schreibt der Installer als Text.
-METADATEN_SCHLUESSEL = ("length_metres", "numberOfCorners", "allow_night_start")
+METADATEN_SCHLUESSEL = ("length_metres", "numberOfCorners", "allow_night_start", "pitMirrored", "trackMirrored",
+                        "PoleOnRight", "MirrorSafetyCarOnGrid", "direction")
+
+
+def seitenwerte(logik: dict) -> dict:
+    """Seiten der Strecke wie in ``tracks.Track`` der Spieldatenbank (3.11.2026). ``pitMirrored`` ist bei genau den acht
+    Strecken mit Boxengasse links ``True`` (Jeddah, Monaco, Montreal, Baku, Singapur, Texas, Brasilien, Las Vegas);
+    ``trackMirrored`` gleich, außer Monaco. ``PoleOnRight`` trifft 6 von 7 vermessenen Strecken, ``MirrorSafetyCarOnGrid``
+    folgt ihm außer bei Jeddah. Vorzeichen geprüft an Portimão (Boxen rechts, im Uhrzeigersinn) und Texas."""
+    sp = logik.get("spielformate", logik)
+    haupt = next(s for s in sp["TrackSpace"]["splines"] if s.get("closed"))
+    m = [(p[0], p[2]) for p in haupt["position"]]
+    flaeche = sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(m, m[1:] + m[:1]))
+    plaetze = {p["name"].rsplit("$", 1)[-1]: p for p in sp["vehicles_layer"]["placements"]}
+
+    def rechts(name):
+        p = plaetze[name]
+        p = p["position"] if "position" in p else p["matrix"][12:15]
+        i = min(range(len(m)), key=lambda k: (m[k][0] - p[0]) ** 2 + (m[k][1] - p[2]) ** 2)
+        t = (m[(i + 1) % len(m)][0] - m[i - 1][0], m[(i + 1) % len(m)][1] - m[i - 1][1])
+        return t[0] * (p[2] - m[i][1]) - t[1] * (p[0] - m[i][0]) > 0
+
+    links = not rechts("PitBox1")
+    pole = rechts("GridSlot1")
+    return {"pitMirrored": links, "trackMirrored": links, "PoleOnRight": pole, "MirrorSafetyCarOnGrid": pole,
+            "direction": "lng_direction_cw" if flaeche > 0 else "lng_direction_ccw"}
 
 
 def metadaten_aus_logik(logik: dict, kurven_im_spiel: Optional[int] = None) -> dict:
@@ -749,9 +853,12 @@ def metadaten_aus_logik(logik: dict, kurven_im_spiel: Optional[int] = None) -> d
     (``spiel_welt.kurven_begrenzen``, Portimão höchstens 15). Die Datenbank soll nicht mehr Kurven nennen, als die
     Spieldaten haben (LongBoy 27.10.2026: 25 erkannt, 15 im Spiel); ohne Angabe die erkannten Kurven."""
     n = len(logik.get("kurven") or []) if kurven_im_spiel is None else int(kurven_im_spiel)
-    return {"length_metres": str(int(round(float(logik["laenge_m"])))),
-            "numberOfCorners": str(n),
-            "allow_night_start": "False"}
+    werte = {"length_metres": str(int(round(float(logik["laenge_m"])))),
+             "numberOfCorners": str(n),
+             "allow_night_start": "False"}
+    if "spielformate" in logik:
+        werte.update({k: ("True" if v is True else "False" if v is False else v) for k, v in seitenwerte(logik).items()})
+    return werte
 
 
 def metadaten_setzen(manifest: dict, werte: dict) -> dict:

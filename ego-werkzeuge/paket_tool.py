@@ -258,6 +258,9 @@ def cmd_swofty_addon(args):
     """Paket aus dem eigenen Bau als Swofty-Addon mit neuem Code; die Renndaten bleiben erhalten."""
     from strecke import streckencode
     _ziel_pruefen(args.ziel)
+    if args.geteilt and args.code is None:
+        print(streckencode.swofty_addon_bauen(args.quelle, args.ziel, args.name, geteilt=True))
+        return 0
     ok, hinweis = streckencode.code_bewerten(args.code, streckencode.ZIEL_SWOFTY)
     print("Code %s: %s" % (args.code, hinweis))
     if not ok:
@@ -266,7 +269,7 @@ def cmd_swofty_addon(args):
     streckencode.paket_umbenennen(args.quelle, zwischen, args.code, name=args.name, aktivierung_vorlage=streckencode.SWOFTY_VORLAGE,
                                   aktivierung_behalten=True, ueberschreiben=True)
     try:
-        print(streckencode.swofty_addon_bauen(zwischen, args.ziel, args.name))
+        print(streckencode.swofty_addon_bauen(zwischen, args.ziel, args.name, geteilt=args.geteilt))
     finally:
         os.remove(zwischen)
     return 0
@@ -344,9 +347,14 @@ def main(argv=None):
     s = sub.add_parser("swofty-addon", help="Paket als Swofty-Addon mit eigenem Code schreiben")
     s.add_argument("quelle")
     s.add_argument("ziel")
-    s.add_argument("--code", required=True)
+    s.add_argument("--code", default=None, help="neuer Code; ohne Angabe bleibt der Code des Pakets")
     s.add_argument("--name", required=True)
+    s.add_argument("--geteilt", action="store_true", help="ohne Mip-Dateien, verweist auf das Träger-Addon (swofty-traeger)")
     s.set_defaults(func=cmd_swofty_addon)
+    s = sub.add_parser("swofty-traeger", help="Träger-Addon mit den gemeinsamen Mip-Dateien schreiben")
+    s.add_argument("quelle")
+    s.add_argument("ziel")
+    s.set_defaults(func=lambda a: print(__import__("strecke.streckencode", fromlist=["x"]).swofty_traeger_addon(a.quelle, a.ziel)) or 0)
     s = sub.add_parser("swofty-raster", help="Test-Addon für 26 Autos schreiben")
     s.add_argument("ziel")
     s.set_defaults(func=cmd_swofty_raster)

@@ -31,6 +31,7 @@ Sicherheit: Spielordner und Downloads werden nur gelesen; Ausgaben dort werden v
 """
 
 import argparse
+import zipfile
 import contextlib
 import datetime
 import subprocess
@@ -899,10 +900,22 @@ def cmd_bauen(args):
                     z = _meldungen_senden(pruefregeln.bericht(m, geprueft, ["paket"]), "paket", regel_meldungen, gesehen)
                 if args.ziel == streckencode.ZIEL_SWOFTY and (z["ok"] or args.fehlerhafte_behalten):
                     _phase("swofty")
-                    addon = streckencode.swofty_addon_bauen(ziel, ziel + ".addon", args.streckenname, protokoll=_log)
+                    traeger_zip = None
+                    if args.traeger_teilen:   # Texturen einmal im Träger-Addon neben den Paketen (docs/boxen_links_und_traeger.md)
+                        with zipfile.ZipFile(ziel) as zz:
+                            kennung = streckencode.traeger_kennung(zz)
+                        traeger_zip = os.path.join(paket_ordner, kennung + ".zip")
+                        if not os.path.exists(traeger_zip):
+                            os.makedirs(paket_ordner, exist_ok=True)
+                            streckencode.swofty_traeger_addon(ziel, traeger_zip + ".tmp", protokoll=_log)
+                            os.replace(traeger_zip + ".tmp", traeger_zip)
+                        else:
+                            _log("Träger-Addon vorhanden: %s" % traeger_zip)
+                    addon = streckencode.swofty_addon_bauen(ziel, ziel + ".addon", args.streckenname, protokoll=_log,
+                                                            geteilt=args.traeger_teilen)
                     os.replace(ziel + ".addon", ziel)
                     groesse = addon["groesse"]
-                    bericht["pakete"][name].update(groesse=groesse, swofty=addon)
+                    bericht["pakete"][name].update(groesse=groesse, swofty=addon, traeger=traeger_zip)
                 if args.atomar:
                     if z["ok"] or args.fehlerhafte_behalten:
                         _abbruch_pruefen()
@@ -916,7 +929,8 @@ def cmd_bauen(args):
                         _log("Paket %s verworfen (Prüffehler; --fehlerhafte-behalten zum Behalten)" % name)
                         continue
                 fertige.append({"name": name, "pfad": os.path.abspath(endziel), "groesse": groesse,
-                                "pruefung_ok": z["ok"], "ziel": args.ziel})
+                                "pruefung_ok": z["ok"], "ziel": args.ziel,
+                                "traeger": (bericht["pakete"][name].get("traeger") or None)})
         finally:
             quelle.close()
             if args.atomar and os.path.isdir(tmp):
@@ -1447,6 +1461,8 @@ def argumente(argv):
                         "Namen im Menü (docs/swofty_launcher.md)")
     s.add_argument("--renndaten", action=argparse.BooleanOptionalAction, default=False,
                    help="Runden, Kraftstoff, Reifen und KI-Zeiten aus der Strecke berechnen (strecke/renndaten.py)")
+    s.add_argument("--traeger-teilen", action="store_true",
+                   help="nur mit --ziel swofty: Strecke ohne Träger-Texturen (0,45 statt 3 GB), Träger-Addon einmal im Paketordner")
     s.add_argument("--raster", type=int, choices=(26,), default=None,
                    help="Plätze, Garagen und Boxen für so viele Autos in der Welt anlegen (Standard: 24 wie der Träger)")
     s.add_argument("--streckenname", default=None, help="track_name im Manifest (nur mit --streckencode)")

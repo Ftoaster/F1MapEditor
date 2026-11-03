@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Pit lane on the left works: the build sets the track's mirror flags (`pitMirrored` and friends) like the original left-side tracks
+- Shared carrier for Swofty Launcher: the Portimão textures sit once in a carrier addon, each track is 0.45 GB instead of 3 GB
+- AI cars leave the pit lane on an exit lane and join the racing line before the next corner, instead of cutting across the track
+
 ## 0.2.0
 
 - New build target Swofty Launcher: an addon with its own track code and its own track name in the game's menus, no installer slots

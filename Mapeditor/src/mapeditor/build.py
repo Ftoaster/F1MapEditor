@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from .adapter import (BUILD_PVS, TRACK_CODES, BuildJob, ProcessJob, build_command, swofty_auswerten,
-                      swofty_installieren, swofty_programm, swofty_starten, check_key, default_carrier,
+                      swofty_installieren, swofty_installierte, swofty_programm, swofty_starten, check_key, default_carrier,
                       game_status_command, injector_command, parse_game_status, toolkit_path, worker_command)
 from .i18n import N_, meldung, tr
 from .paths import writable_path
@@ -232,6 +232,11 @@ class BuildDialog(QDialog):
         self.target.setToolTip(tr("Swofty Launcher: Addon mit eigenem Streckencode und eigenem Namen im Menü, beliebig viele "
                                   "Strecken. Start nur über den Launcher, offline und ohne EA AntiCheat."))
         form.addRow(tr("Bauen für"), self.target)
+        self.shared_carrier = QCheckBox(tr("Gemeinsamen Träger nutzen (0,45 statt 3 GB je Strecke)"))
+        self.shared_carrier.setChecked(bool(settings.get("traeger_teilen", True)))
+        self.shared_carrier.setToolTip(tr("Die Texturen der Portimão-Mod liegen einmal in einem Träger-Addon neben den Paketen, und jede "
+                                          "Strecke verweist nur darauf. Der Launcher braucht das Träger-Addon zusätzlich."))
+        form.addRow("", self.shared_carrier)
         self.grid_size = QComboBox()
         self.grid_size.addItem(tr("24 Autos (Standard)"), 0)
         self.grid_size.addItem(tr("26 Autos"), 26)
@@ -424,6 +429,8 @@ class BuildDialog(QDialog):
 
     def _update_code_info(self, *args):
         self._place_track_name()
+        if hasattr(self, "shared_carrier"):
+            self.shared_carrier.setVisible(self.swofty())
         self._update_buttons()
         self.code.setVisible(not self.swofty())
         self.code_label.setVisible(not self.swofty())
@@ -473,7 +480,8 @@ class BuildDialog(QDialog):
         self.advanced_toggle.setText(tr("Erweiterte Bauoptionen ▾") if on else tr("Erweiterte Bauoptionen ▸"))
 
     def options(self):
-        return {"ziel": self.target.currentData(), "streckencode": self.code.currentData(),
+        return {"ziel": self.target.currentData(), "traeger_teilen": self.shared_carrier.isChecked(),
+                "streckencode": self.code.currentData(),
                 "renndaten": self.race_data.isChecked(), "raster": self.grid_size.currentData(),
                 "streckenname": self.track_name.text().strip(),
                 "pvs_variante": self.pvs.currentData(), "weltkarten": self.world_maps.isChecked(),
@@ -775,7 +783,11 @@ class BuildDialog(QDialog):
         if program is None or self.launcher_record is None:
             return
         try:
-            steps = swofty_installieren(program, self.launcher_record["paket"])
+            carrier = next((p.get("traeger") for p in self.launcher_record.get("pakete") or [] if p.get("traeger")), None)
+            if carrier and not Path(carrier).is_file():
+                raise ValueError(tr("Träger-Addon fehlt: {pfad}", pfad=carrier))
+            steps = swofty_installieren(program, self.launcher_record["paket"], carrier,
+                                        swofty_installierte(program) if carrier else ())
         except (OSError, KeyError, ValueError, zipfile.BadZipFile) as error:
             self.phase.setText(meldung(error))
             return

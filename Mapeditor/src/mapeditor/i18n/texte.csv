@@ -148,6 +148,7 @@ Datenbank nicht aktiviert und noch nicht gemerkt: einmal im EGO-Editor „Activa
 Datenträger oder Ordner nicht erreichbar: {path};Drive or folder not reachable: {path};build.py
 Datum;Date;build.py
 "Der Schnellaustausch ersetzt Strecken-ERP, Mipmaps, ERS- und Minimap-Werte des schon installierten Streckencodes und aktiviert bei deaktiviertem Mod die Spieldatenbank aus der gemerkten Aktivierung. Vorher werden die betroffenen Spieldateien gesichert; das Spiel muss beendet sein. Details: „Details anzeigen“.";"The quick swap replaces track ERP, mipmaps, ERS and minimap values of the already installed track code and, if the mod is deactivated, activates the game database from the remembered activation. The affected game files are backed up first; the game must be closed. Details: “Show Details”.";build.py
+Die Texturen der Portimão-Mod liegen einmal in einem Träger-Addon neben den Paketen, und jede Strecke verweist nur darauf. Der Launcher braucht das Träger-Addon zusätzlich.;The Portimão mod's textures sit once in a carrier addon next to the packages, and every track only points to it. The launcher needs the carrier addon as well.;build.py
 Dieses Paket ist bereits im Spiel · nichts übertragen.;This package is already in the game · nothing transferred.;build.py
 Eigene Boden- und Umlandkarten;Own ground and surroundings maps;build.py
 Eigenen Ausgabeordner wählen;Choose your own output folder;build.py
@@ -165,6 +166,7 @@ Farbton;Colour tone;build.py
 fehlgeschlagen;failed;build.py
 Fest im Profil: Boxengassen-Korrektur, Aktivierungsvorlage portimao, nur Hauptvariante.;Fixed in the profile: pit lane correction, activation template portimao, main variant only.;build.py
 "Fortlaufend vorgeschlagen (letzter Bau + 1); eine Beschreibung mit Unterstrich anhängen, z. B. „_tafeln50“.";"Suggested consecutively (last build + 1); append a description with an underscore, e.g. “_tafeln50”.";build.py
+Gemeinsamen Träger nutzen (0,45 statt 3 GB je Strecke);Use a shared carrier (0.45 instead of 3 GB per track);build.py
 Gras (Standard);Grass (default);build.py
 Größe;Size;build.py
 Herbst;Autumn;build.py
@@ -240,6 +242,7 @@ Technisches Protokoll anzeigen;Show technical log;build.py
 Teststrecke;Test track;build.py
 Track Installer (EGO-Editor);Track Installer (EGO Editor);build.py
 Trocken;Dry;build.py
+Träger-Addon fehlt: {pfad};Carrier addon missing: {pfad};build.py
 Trägerpaket (ZIP);Carrier package (ZIP);build.py
 Trägerpaket fehlt: {carrier};Carrier package missing: {carrier};build.py
 Trägerpaket wählen;Choose carrier package;build.py

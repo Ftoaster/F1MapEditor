@@ -308,9 +308,26 @@ def logik_berechnen(ml, qp, rl, param, kurven):
     links += [{'id': i, 'from_gate': i-1, 'to_gate': i} for i in range(1, ng)]
     routes = [{'id': 0, 'type': 'track', 'from_link': 0, 'to_link': ng-1,
                'from_route': 'track', 'to_route': 'track'}]
+    ausfahrt_spur_ist = 0.0
     if box is not None:
         nbg = max(2, int(round(box['laenge']/pl['gate_schritt_m']))+1)
         sbg = np.linspace(0, box['laenge'], nbg)
+        pb = param['boxengasse']
+        spur = float(pb.get('ausfahrt_spur_m', 0.0))
+        seite = 1.0 if pb['seite'] == 'links' else -1.0
+        s_aus = float(box['main_s'][-1])
+        if spur > 0:
+            # Boxenroute endet, wo die Gasse die Spur am Fahrbahnrand erreicht; ab dort übernimmt die Ausfahrtsspur
+            ms = _offen_an(box, sbg, 'main_s')
+            mitte = _punkt(ml, ms % L, np.zeros(nbg))
+            links1 = _punkt(ml, ms % L, np.ones(nbg)) - mitte
+            quer = np.einsum('ij,ij->i', _offen_an(box, sbg, 'position') - mitte, links1)
+            rand = np.where(seite > 0, ml.stationen(ms % L).wl, ml.stationen(ms % L).wr) - 3.0
+            drin = np.flatnonzero((np.arange(nbg) > nbg // 2) & (seite*quer < rand))
+            if len(drin):
+                nbg = max(2, int(drin[0]))
+                sbg = sbg[:nbg]
+                s_aus = float(ms[nbg-1])
         bpos = _offen_an(box, sbg, 'position')
         bnorm = _einheit(_offen_an(box, sbg, 'normal'))
         bw = _offen_an(box, sbg, 'spur_halb')
@@ -326,9 +343,51 @@ def logik_berechnen(ml, qp, rl, param, kurven):
             gates.append({'id': ng+i, 'name': 'ai_gate_track_pit_%03d' % i,
                           'position': bpos[i].tolist(), 'normal': bnorm[i].tolist(),
                           'progress': float(pitfort.an(sbg[i])), 'waypoints': weg})
+        # Ausfahrtsspur auf der Strecke: erst am Rand der Boxenseite, dann weich auf die Ideallinie (definition.ausfahrt_spur_m)
+        s0 = s_aus
+        if spur > 0 and kurven:
+            # Die Spur endet 30 m vor dem Bremspunkt der nächsten Kurve: Auf ihr gelten die Fahrdaten der Boxenroute, die keine
+            # Kurve kennen (Spieltest 3.11.2026, „Kurz Links“: KI mit Ausfahrtstempo durch T1 in den Kies)
+            bremsen = []
+            for kv in kurven:
+                a = kv['i_anfang']*ml.ds
+                dist = np.mod(a-rl.s_ml, L)
+                kand = np.flatnonzero((dist < 250) & (rl.a_laengs < -0.5))
+                b = float(rl.s_ml[kand[np.argmax(dist[kand])]]) if len(kand) else a
+                # Das Fahrzeugmodell bremst später als die KI im Spiel (T1 „Kurz Links“: 38 m), daher auch 120 m vor dem Einlenken
+                bremsen.append((min(b - 30.0, a - 120.0) - s0) % L)
+            frei = min(0.0 if d > L - 300.0 else d for d in bremsen)   # Grenze knapp hinter s0: keine Spur
+            spur = max(0.0, min(spur, frei))
+        n_ext = int(round(spur/pl['gate_schritt_m'])) if spur >= 2*pl['gate_schritt_m'] else 0
+        spur = spur if n_ext else 0.0
+        ausfahrt_spur_ist = spur
+        for k in range(1, n_ext+1):
+            ss = (s0 + k*spur/n_ext) % L
+            stp = ml.stationen(np.array([ss]))
+            wl, wr = float(stp.wl[0]), float(stp.wr[0])
+            a_rl = float(periodisch_interp(np.array([ss]), ml.s, rl.alpha_ml, L)[0])
+            d_pit = seite*((wl if seite > 0 else wr) - 3.0)
+            t = k/n_ext
+            w = 0.0 if t < 0.4 else 0.5-0.5*np.cos(np.pi*(t-0.4)/0.6)
+            d = (1-w)*d_pit + w*a_rl
+            p = _punkt(ml, np.array([ss]), np.array([d]))[0]
+            tt = periodisch_interp(np.array([ss]), rl.s_ml, rl.t, L)[0]
+            nrm = _einheit(np.array([[-tt[1], 0.0, tt[0]]]))[0]
+            lt, rt = -(wl-d), wr+d
+            werte = {'left_racing_limit': min(lt+sicher, 0.0), 'right_racing_limit': max(rt-sicher, 0.0),
+                     'left_track_limit': lt, 'right_track_limit': rt, 'racing_line': 0.0,
+                     'left_white_line': lt+weiss, 'right_white_line': rt-weiss}
+            weg = [{'id': j, 'type': typ, 'length': float(werte[typ])} for j, typ in enumerate(typen[:7])]
+            gates.append({'id': ng+nbg+k-1, 'name': 'ai_gate_track_pit_%03d' % (nbg+k-1), 'position': p.tolist(),
+                          'normal': nrm.tolist(), 'progress': float(pitfort.an(sbg[-1])) + k*spur/n_ext/box['laenge'],
+                          'waypoints': weg})
         ein = int(round((box['main_s'][0] % L)/L*ng)) % ng
-        aus = int(round((box['main_s'][-1] % L)/L*ng)) % ng
-        kanten = [(ein, ng)] + [(ng+i, ng+i+1) for i in range(nbg-1)] + [(ng+nbg-1, aus)]
+        if n_ext:   # nicht auf ein Haupttor am selben Ort: eine fast leere Verbindung ließ die KI dort bremsen (Spieltest 3.11.2026)
+            aus = int(np.ceil(((s0 + spur) % L + 0.5*pl['gate_schritt_m'])/L*ng)) % ng
+        else:
+            aus = int(round(((s0 + spur) % L)/L*ng)) % ng
+        nb = nbg + n_ext
+        kanten = [(ein, ng)] + [(ng+i, ng+i+1) for i in range(nb-1)] + [(ng+nb-1, aus)]
         links += [{'id': ng+i, 'from_gate': a, 'to_gate': b} for i, (a,b) in enumerate(kanten)]
         routes.append({'id': 1, 'type': 'pit', 'from_link': ng, 'to_link': len(links)-1,
                        'from_route': 'track', 'to_route': 'track'})
@@ -460,6 +519,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
                    'mitte_position': box['mitte'].tolist(),
                    # Garagen (spiel_welt.plaetze_berechnen): Seite, Tor = Außenrand der Gasse ab Boxenplatz
                    'seite': param['boxengasse']['seite'],
+                   'ausfahrt_spur_m': float(ausfahrt_spur_ist),
                    'gebaeude': qp.box.get('garagen_u') is not None,
                    'tor_abstand_m': 0.25*param['boxengasse']['breite'],
                    'gebaeude_tiefe_m': float(param['boxengasse'].get('gebaeude_tiefe_m', 0.0)),
