@@ -2,6 +2,8 @@
 
 Windows desktop editor for designing your own race tracks for **F1 25** and building them into installable track packages.
 
+Video Trailer: https://www.youtube.com/watch?v=3HI1Zp3Srls
+
 > Unofficial fan project. Not affiliated with, endorsed by or connected to Electronic Arts, Codemasters, Formula One
 > Group or the FIA. "F1" and related names are trademarks of their owners. This project contains no game files.
 
