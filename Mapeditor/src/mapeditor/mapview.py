@@ -1073,9 +1073,27 @@ class MapView(QGraphicsView):
 
     # ------------------------------------------------------------------ Eingaben
     def wheelEvent(self, event):
-        factor = 1.2 if event.angleDelta().y() > 0 else 1 / 1.2
-        if 0.02 <= self.transform().m11() * factor <= 50:
-            self.scale(factor, factor)
+        # Stufenlos nach Raddrehung (120 = eine Raste = Faktor 1,2): Touchpads und feine Räder melden viele kleine
+        # Schritte, die früher je 1,2 zoomten (eine Raste ≈ Faktor 4). Untergrenze: Szene füllt das Fenster, sonst
+        # zentriert Qt sie und der Punkt unter der Maus springt weg.
+        delta = event.angleDelta().y() or event.pixelDelta().y()
+        if delta:
+            r = self.sceneRect()
+            vp = self.viewport()
+            minimum = max(0.02, vp.width() / r.width(), vp.height() / r.height())
+            scale = self.transform().m11()
+            target = min(50.0, max(minimum, scale * 1.2 ** (delta / 120.0)))
+            if abs(target - scale) > 1e-9:
+                # Anker selbst setzen: AnchorUnderMouse nimmt die letzte Mausbewegung, nicht die Radposition
+                pos = event.position().toPoint()
+                vorher = self.mapToScene(pos)
+                anker = self.transformationAnchor()
+                self.setTransformationAnchor(QGraphicsView.NoAnchor)
+                self.scale(target / scale, target / scale)
+                self.setTransformationAnchor(anker)
+                nachher = self.mapToScene(pos)
+                mitte = self.mapToScene(self.viewport().rect().center())
+                self.centerOn(mitte + (vorher - nachher))
         event.accept()
 
     def nearest_object(self, point):

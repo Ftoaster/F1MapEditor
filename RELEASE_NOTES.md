@@ -1,5 +1,9 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.3.4
+
+- **Smoother zoom:** the mouse wheel zooms around the point under the cursor, at the same pace on every wheel and touchpad
+
 ## New in 0.3.3
 
 - **Clean asphalt:** tracks built with world maps no longer show brown-green dirt patches on the road, kerbs and pit lane. Rebuild your track to get the fix
@@ -25,7 +29,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.3-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.4-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4
+
+- Smoother mouse wheel zoom on the map: zooms around the point under the cursor, one wheel notch is always the same step
+  (touchpads and fine-step wheels zoomed far too fast), no jump at the zoom limits
+
 ## 0.3.3
 
 - World maps: the ground blend map no longer puts dirt patches on asphalt, kerbs and the pit lane (tracks built with
