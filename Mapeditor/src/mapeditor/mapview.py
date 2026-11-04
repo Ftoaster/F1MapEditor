@@ -1069,7 +1069,7 @@ class MapView(QGraphicsView):
         painter.setBrush(QColor("#101820"))
         painter.drawEllipse(point, 7, 7)
         painter.setPen(text_color)
-        painter.drawText(point + QPointF(12, 5), "drehen")
+        painter.drawText(point + QPointF(12, 5), tr("rotate"))
 
     # ------------------------------------------------------------------ Eingaben
     def wheelEvent(self, event):

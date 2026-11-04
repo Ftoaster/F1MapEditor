@@ -482,6 +482,7 @@ class MainWindow(QMainWindow):
         self.action(tools, tr("Open generator output read-only …"), self.open_output)
         self.action(tools, tr("Check current draft"), self.request_check, "Ctrl+Return")
         self.action(tools, tr("Build / package …"), self.open_build)
+        self.action(tools, tr("Set up carrier package …"), self.setup_carrier)
         self.action(tools, tr("Playtest log …"), self.open_playtests)
         self.action(tools, tr("Clean up old builds …"), self.open_cleanup)
         help_menu = self.menuBar().addMenu(tr("&Help"))
@@ -2954,6 +2955,14 @@ class MainWindow(QMainWindow):
                 "#F07878" if errors else "#D6A94A" if warnings else "#5BD08A"))
             self.results.setTabText(self.issue_tab, tr("Check ({anzahl})", anzahl=errors + warnings) if errors + warnings
                                     else tr("Check · ok"))
+
+    def setup_carrier(self):
+        """Portimão-Mod als Träger einrichten (Datei suchen, Download öffnen, prüfen, ablegen)."""
+        from .ansicht import settings
+        from .traeger_ui import CarrierDialog
+        path = CarrierDialog.ask(self, None, settings())
+        if path:
+            self.status_label.setText(tr("Carrier package set up: {path}", path=path))
 
     def open_build(self):
         from .build import BuildDialog

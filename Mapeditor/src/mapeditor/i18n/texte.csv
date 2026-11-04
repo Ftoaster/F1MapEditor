@@ -4,6 +4,7 @@ Project could not be opened;Projekt konnte nicht geöffnet werden;__main__.py
 Build name already exists. Suggestion: {name}_neu;Bauname bereits vorhanden. Vorschlag: {name}_neu;adapter.py
 Build name: 1–80 letters/digits, hyphen or underscore.;Bauname: 1–80 Buchstaben/Ziffern, Bindestrich oder Unterstrich.;adapter.py
 Cancel timeout: process tree killed;Abbruch-Zeitlimit: Prozessbaum hart beendet;adapter.py
+Carrier addon missing: {pfad};Träger-Addon fehlt: {pfad};adapter.py
 "Code of the Portimão mod (carrier); a transfer replaces Portimão";"Code des Portimão-Mods (Träger); eine Übertragung ersetzt Portimão";adapter.py
 "Code of the Sepang mod; a transfer replaces Sepang";"Code des Sepang-Mods; eine Übertragung ersetzt Sepang";adapter.py
 Event after the end of the build;Ereignis nach dem Bauende;adapter.py
@@ -207,7 +208,6 @@ cancelled;abgebrochen;build.py
 Cancelled;Abgebrochen;build.py
 Cancelling …;Wird abgebrochen …;build.py
 Cancelling … next phase boundary, ends after 120 s at the latest.;Wird abgebrochen … nächste Phasengrenze, spätestens nach 120 s beenden.;build.py
-Carrier addon missing: {pfad};Träger-Addon fehlt: {pfad};build.py
 Carrier package (ZIP);Trägerpaket (ZIP);build.py
 Carrier package missing: {carrier};Trägerpaket fehlt: {carrier};build.py
 Change build settings;Baueinstellungen ändern;build.py
@@ -316,6 +316,7 @@ Replaces Portimão's aerial photos: ground from the track surfaces, racing line 
 Report: ;Bericht: ;build.py
 running;läuft;build.py
 Save playtest;Spieltest speichern;build.py
+Set up carrier package …;Trägerpaket einrichten …;build.py
 Show in Explorer;Im Explorer zeigen;build.py
 Show technical log;Technisches Protokoll anzeigen;build.py
 Shows the summary of the last session in Swofty Launcher, with crash data.;Zeigt die Zusammenfassung der letzten Sitzung im Swofty Launcher mit Absturzdaten.;build.py
@@ -330,6 +331,7 @@ Swofty Launcher: an addon with its own track code and its own name in the menus,
 Swofty Launcher: error · {text};Swofty Launcher: Fehler · {text};build.py
 Swofty Launcher: {schritt};Swofty Launcher: {schritt};build.py
 Test track;Teststrecke;build.py
+The carrier package (Portimão mod) is missing. Builds need it.;Das Trägerpaket (Portimão-Mod) fehlt. Bauten brauchen es.;build.py
 The Portimão mod's textures sit once in a carrier addon next to the packages, and every track only points to it. The launcher needs the carrier addon as well.;Die Texturen der Portimão-Mod liegen einmal in einem Träger-Addon neben den Paketen, und jede Strecke verweist nur darauf. Der Launcher braucht das Träger-Addon zusätzlich.;build.py
 "The quick swap replaces track ERP, mipmaps, ERS and minimap values of the already installed track code and, if the mod is deactivated, activates the game database from the remembered activation. The affected game files are backed up first; the game must be closed. Details: “Show Details”.";"Der Schnellaustausch ersetzt Strecken-ERP, Mipmaps, ERS- und Minimap-Werte des schon installierten Streckencodes und aktiviert bei deaktiviertem Mod die Spieldatenbank aus der gemerkten Aktivierung. Vorher werden die betroffenen Spieldateien gesichert; das Spiel muss beendet sein. Details: „Details anzeigen“.";build.py
 This package is already in the game · nothing transferred.;Dieses Paket ist bereits im Spiel · nichts übertragen.;build.py
@@ -464,6 +466,7 @@ Preview outdated – being recalculated;Vorschau veraltet – wird neu berechnet
 Preview pending;Vorschau ausstehend;mapview.py
 Preview up to date;Vorschau aktuell;mapview.py
 Release applies · Esc cancels;Loslassen übernimmt · Esc bricht ab;mapview.py
+rotate;drehen;mapview.py
 Rotate {winkel:+.1f}° · Shift: {raster:.0f}° steps · Esc: cancel;Drehen {winkel:+.1f}° · Umschalt: {raster:.0f}°-Schritte · Esc: abbrechen;mapview.py
 Select;Auswahl;mapview.py
 Set points;Punkte setzen;mapview.py
@@ -606,6 +609,33 @@ Track length;Streckenlänge;templates.py
 "TUM CSV (*.csv);;All files (*)";"TUM-CSV (*.csv);;Alle Dateien (*)";templates.py
 TUM database (LGPL-3.0): centreline and widths, without heights. Axes: z = −y, right/left widths are kept.;TUM-Datenbank (LGPL-3.0): Mittellinie und Breiten, ohne Höhen. Achsen: z = −y, Breiten rechts/links bleiben.;templates.py
 TUM race track (CSV: x_m, y_m, w_tr_right_m, w_tr_left_m);TUM-Rennstrecke (CSV: x_m, y_m, w_tr_right_m, w_tr_left_m);templates.py
+Mod version {version} is not supported. Supported: {liste}.;Mod-Version {version} wird nicht unterstützt. Unterstützt: {liste}.;traeger.py
+The file is much smaller than the Portimão mod (about 2.9 GB): the download is probably not complete.;Die Datei ist viel kleiner als der Portimão-Mod (etwa 2,9 GB): der Download ist wahrscheinlich nicht vollständig.;traeger.py
+The mod is incomplete: the track file {erp} is missing.;Der Mod ist unvollständig: die Streckendatei {erp} fehlt.;traeger.py
+This file is not a readable ZIP (still downloading, or damaged).;Diese Datei ist keine lesbare ZIP (Download läuft noch oder Datei beschädigt).;traeger.py
+This mod contains the track “{code}”, but the Portimão mod is needed.;Dieser Mod enthält die Strecke „{code}“, gebraucht wird aber der Portimão-Mod.;traeger.py
+This ZIP has no manifest.json, so it is not a track mod.;Diese ZIP hat keine manifest.json, ist also kein Streckenmod.;traeger.py
+Cancel copy;Kopie abbrechen;traeger_ui.py
+Carrier package (Portimão mod);Trägerpaket (Portimão-Mod);traeger_ui.py
+Copy cancelled · nothing changed.;Kopie abgebrochen · nichts geändert.;traeger_ui.py
+Copy failed: {error};Kopieren fehlgeschlagen: {error};traeger_ui.py
+Copy to the carrier folder and use;In den Trägerordner kopieren und verwenden;traeger_ui.py
+"Copying keeps the carrier for all projects at {target}; the original stays untouched. “Use where it is” needs no extra space.";"Beim Kopieren bleibt der Träger für alle Projekte unter {target} erhalten; das Original bleibt unberührt. „Dort belassen“ braucht keinen zusätzlichen Platz.";traeger_ui.py
+Copying … %p %;Kopiere … %p %;traeger_ui.py
+Current carrier package: {path};Aktuelles Trägerpaket: {path};traeger_ui.py
+Did you save it somewhere else, or have you not downloaded it yet?;Hast du es an anderer Stelle gespeichert, oder noch nicht heruntergeladen?;traeger_ui.py
+Download from Overtake …;Von Overtake herunterladen …;traeger_ui.py
+Every track is built on top of the Portimão mod for F1 25 (about 2.9 GB, version {recommended} recommended). It is free, but the download needs an Overtake account. The editor never asks for your login and never downloads the mod itself.;Jede Strecke wird auf dem Portimão-Mod für F1 25 aufgebaut (etwa 2,9 GB, Version {recommended} empfohlen). Er ist kostenlos, der Download braucht aber ein Overtake-Konto. Der Editor fragt nie nach deinen Zugangsdaten und lädt den Mod nie selbst herunter.;traeger_ui.py
+Found: {name} · version {version} · {groesse};Gefunden: {name} · Version {version} · {groesse};traeger_ui.py
+I have it – choose file …;Ich habe ihn – Datei wählen …;traeger_ui.py
+Mod by {author};Mod von {author};traeger_ui.py
+No carrier package set up yet.;Noch kein Trägerpaket eingerichtet.;traeger_ui.py
+Opens the download page in your browser. If you are logged in there, one click is enough.;Öffnet die Download-Seite im Browser. Wer dort angemeldet ist, braucht nur einen Klick.;traeger_ui.py
+The carrier package was not found at {path}.;Das Trägerpaket wurde nicht gefunden unter {path}.;traeger_ui.py
+This file cannot be used as carrier package.;Diese Datei kann nicht als Trägerpaket dienen.;traeger_ui.py
+Use where it is;Dort belassen;traeger_ui.py
+Version {recommended} is recommended (it fixes the AMD crash).;Version {recommended} wird empfohlen (sie behebt den AMD-Absturz).;traeger_ui.py
+Waiting for the download … the editor watches your Downloads folder ({folder}) read-only and offers the file as soon as it is complete. You can also drag the ZIP onto this window.;Warte auf den Download … der Editor beobachtet deinen Downloads-Ordner ({folder}) nur lesend und bietet die Datei an, sobald sie komplett ist. Du kannst die ZIP auch auf dieses Fenster ziehen.;traeger_ui.py
 Buildings;Gebäude;umgebung.py
 Bushes;Büsche;umgebung.py
 Centre inside the track area: only hills work here;Mitte im Streckenbereich: hier wirken nur Hügel;umgebung.py
@@ -856,6 +886,7 @@ Cancel preview;Vorschau abbrechen;window.py
 "Cancel the running preview; your input is kept.";"Laufende Vorschau abbrechen; deine Eingabe bleibt erhalten.";window.py
 Car length · m;Fahrzeuglänge · m;window.py
 Car used for evaluation;Fahrzeug der Bewertung;window.py
+Carrier package set up: {path};Trägerpaket eingerichtet: {path};window.py
 Catalogue not available: {error};Katalog nicht verfügbar: {error};window.py
 Centreline;Mittellinie;window.py
 "Centreline objects; selection synchronised with map and profile";"Mittellinienobjekte; Auswahl synchron mit Karte und Profil";window.py

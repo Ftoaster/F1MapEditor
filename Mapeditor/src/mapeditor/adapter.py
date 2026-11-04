@@ -254,7 +254,15 @@ def parse_game_status(text):
 
 
 def default_carrier(toolkit):
-    return Path(toolkit) / "testausgabe" / "pakete" / "portimao_original_wiederhergestellt.zip"
+    """Träger ohne Projektangabe: der eingerichtete des Nutzers (Menü „Trägerpaket einrichten“), sonst die Ablage des
+    Werkzeugkastens (Entwicklung), sonst der Soll-Ort in der Nutzerablage (dort fehlt er dann noch)."""
+    from . import traeger
+    from .ansicht import settings
+    saved = traeger.saved_carrier(settings())
+    if saved:
+        return saved
+    dev = Path(toolkit) / "testausgabe" / "pakete" / "portimao_original_wiederhergestellt.zip"
+    return dev if dev.is_file() else traeger.carrier_target()
 
 
 def run_tool_cli(root, script, arguments):

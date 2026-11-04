@@ -233,6 +233,18 @@ class BuildDialog(QDialog):
         self.content.installEventFilter(self)          # Höhe folgt dem Inhalt, begrenzt auf den Bildschirm
         title = QLabel(tr("BUILD / PACKAGE   ·   recommended profile"))
         layout.addWidget(title)
+        self.carrier_banner = QFrame()                  # Träger fehlt: gleich beim Öffnen sagen, nicht erst beim Bauen
+        self.carrier_banner.setStyleSheet("QFrame {border: 1px solid #D6A94A; border-radius: 4px;}")
+        banner = QHBoxLayout(self.carrier_banner)
+        banner_text = QLabel(tr("The carrier package (Portimão mod) is missing. Builds need it."))
+        banner_text.setStyleSheet("border: none;")
+        banner_text.setWordWrap(True)
+        banner.addWidget(banner_text, 1)
+        banner_button = QPushButton(tr("Set up carrier package …"))
+        banner_button.clicked.connect(lambda: self.setup_carrier())
+        banner.addWidget(banner_button)
+        self.carrier_banner.hide()
+        layout.addWidget(self.carrier_banner)
         self.profile_hint = hint = QLabel()
         hint.setWordWrap(True)
         layout.addWidget(hint)
@@ -261,7 +273,8 @@ class BuildDialog(QDialog):
             carrier = str(default_carrier(root))
         except ValueError:
             carrier = ""
-        self.carrier = QLineEdit(settings.get("traeger", carrier))
+        stored = settings.get("traeger")
+        self.carrier = QLineEdit(stored if stored and Path(stored).is_file() else carrier or stored or "")
         # Ordner und Träger ändert man selten: eingeklappt mit Einzeiler, klappen bei einem Fehler von selbst auf
         self.paths_box = QWidget()
         paths_form = QFormLayout(self.paths_box)
@@ -555,7 +568,10 @@ class BuildDialog(QDialog):
     def _fit_height(self):
         """Dialog so hoch wie der Inhalt, höchstens Bildschirmhöhe ohne Taskleiste; darüber scrollt der Inhalt."""
         self._fit_pending = False
-        screen = self.screen() or QApplication.primaryScreen()
+        try:
+            screen = self.screen() or QApplication.primaryScreen()
+        except RuntimeError:                           # Dialog schon gelöscht (verzögerter Aufruf)
+            return
         if screen is None or not self.isVisible():
             return
         available = screen.availableGeometry()
@@ -670,6 +686,7 @@ class BuildDialog(QDialog):
             problems[self.carrier] = tr("Please enter a value.")
         elif not Path(carrier).expanduser().is_file():
             problems[self.carrier] = tr("Carrier package missing: {carrier}", carrier=carrier)
+        self.carrier_banner.setVisible(self.carrier in problems)
         for field in (self.name, self.output, self.packages, self.carrier):
             field.setStyleSheet("border: 1px solid #F07878;" if field in problems else "")
             if field in problems:
@@ -870,6 +887,10 @@ class BuildDialog(QDialog):
                 raise ValueError(tr("A build needs a closed lap and a known project version."))
             if self.main.properties.pending():
                 raise ValueError(tr("Correct the invalid field input first."))
+            carrier_text = self.carrier.text().strip()
+            if not (carrier_text and Path(carrier_text).expanduser().is_file()) and not self._ensure_carrier():
+                self.paths_toggle.setChecked(True)
+                raise ValueError(tr("Carrier package missing: {carrier}", carrier=carrier_text))
             self.validate()
             if not self.valid:
                 if self.path_problem:
@@ -925,6 +946,21 @@ class BuildDialog(QDialog):
         except (ValueError, OSError) as error:
             self.phase.setText(meldung(error))
             self.set_state("error")
+
+    def setup_carrier(self, missing=False):
+        """Dialog „Trägerpaket einrichten“; bei Erfolg steht der Pfad im Feld."""
+        from .ansicht import settings
+        from .traeger_ui import CarrierDialog
+        text = self.carrier.text().strip()
+        path = CarrierDialog.ask(self, text if missing and text else None, settings())
+        if path:
+            self.carrier.setText(str(path))
+            self.validate()
+        return bool(path)
+
+    def _ensure_carrier(self):
+        """Träger fehlt beim Bauen: Nutzer fragen (nur im echten Editor; Tests und Skripte fragen nie)."""
+        return getattr(self.main, "interactive", False) and self.setup_carrier(missing=True)
 
     def umgebung_datei(self):
         """Gespeicherte ``umgebung.json`` des Projekts für den Bau (Schalter ``--umgebung``); None ohne Umgebung."""

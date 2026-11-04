@@ -1,10 +1,27 @@
 # Changelog
 
+## 0.3.6
+
+- Carrier package setup: if the Portimão mod is missing, Check and build asks whether you saved it elsewhere or still need
+  to download it (also under Tools → Set up carrier package …, and as a note when the Build window opens). The download
+  button opens the Overtake page in your browser (the download needs a free Overtake account; the editor never asks for
+  your login), then watches your Downloads folder read-only and offers the finished file. You can also drop the ZIP on the
+  window or choose it. The editor checks the mod (right track, supported version 1.0.0 or 1.0.2) and copies it once to
+  %LOCALAPPDATA%\Mapeditor\traeger for all projects; the original stays untouched
+
 ## 0.3.5
 
 - Install in launcher: the shared carrier addon is found from the track addon itself and installed along with it when
   Swofty does not have it yet (if Swofty already has it, it is only switched on)
 - The chosen swofty.exe is remembered for all projects, not only the one it was picked in
+- Build window redesigned: a status card with state, phase chain with times and result (size, SHA-256 copy), the next step
+  as the main button (Transfer to game / Install in launcher and start), messages sorted by severity with counts and a
+  filter, one-line summary of the build settings
+- Build window is more compact: folders and carrier are collapsed (they open by themselves when a build finds a problem),
+  Build for / Grid / Track code and the options sit side by side, and the window never grows beyond the screen (it scrolls
+  instead). The installation hint appears only for the Track Installer and only while the code is not in the game yet
+- Input fields in the Build window are checked while typing (red border with reason); the window can be hidden during a
+  build while it continues in the background, with progress in the main window's status bar
 
 ## 0.3.4
 
@@ -35,6 +52,7 @@
   for your own use only
 - Templates that do not fit into the game world are rotated first and only scaled down if rotating is not enough; the game
   world offset is set when a track only fits shifted into the hole of the outer terrain
+- The rotation handle on the map is labelled in the selected language (it always said "drehen")
 - Tight hairpins of imported tracks no longer fold the track edge (Bahrain, Shanghai, Austin)
 
 ## 0.3.0

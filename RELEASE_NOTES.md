@@ -1,9 +1,15 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.3.6
+
+- **Carrier package setup:** if the Portimão mod is missing, the editor asks and guides you: it opens the Overtake download page (a free account is needed; the editor never asks for your login), watches your Downloads folder read-only, checks the finished ZIP and keeps one copy for all projects. Also under Tools → Set up carrier package …
+
 ## New in 0.3.5
 
 - **Easier Swofty install:** "Install in launcher" installs the shared carrier (shown as "type: files" in Swofty) together with your track if it is missing. The carrier holds only textures; your track is the other ZIP and needs it
 - **swofty.exe remembered** for all projects
+- **Clearer Build window:** status card with phase chain and times, the next step as the main button, messages sorted by severity, fields checked while typing, and a compact layout that scrolls instead of growing beyond the screen
+- **Build in the background:** hide the Build window while it builds; progress shows in the main window
 
 ## New in 0.3.4
 
@@ -34,7 +40,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.5-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.6-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need
