@@ -689,6 +689,13 @@ def cmd_bauen(args):
         g = spiel_welt.garagen_versetzen(a, zustand, lg, protokoll)
         _log("Garagen des Trägers versetzt: %s (gespiegelt: %s)" % (
             ", ".join("%s %d" % (k, v.get("versetzt", 0)) for k, v in g["layer"].items()), g["spiegeln"]))
+    # 4.11.2026: Kameras für Wiederholungen/TV an die neue Strecke (docs/mapeditor/kameras_wiederholung.md)
+    from strecke import definition as _dfn, spiel_kameras
+    kam = _dfn.laden(args.definition).param.get("kameras") or {}
+    kb = spiel_kameras.kameras_versetzen(a, zustand, lg, kam, protokoll)
+    if kb.get("mitgefuehrt"):
+        _log("Kameras versetzt: %s, %d Kamerafahrten%s" % (", ".join("%s %d" % kv for kv in kb["layer"].items()),
+                                                          kb["splines"], (", aus: " + ", ".join(kb["aus"])) if kb["aus"] else ""))
     protokoll["schreiber"] = {k: v for k, v in zustand.schreiber.protokoll.items() if k != "gate_abbildung"}
     protokoll["ressourcen"] = geschrieben
     protokoll["weitere_plaetze_gesetzt"] = n_platz

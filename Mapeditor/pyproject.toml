@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mapeditor"
-version = "0.3.1"
+version = "0.3.2"
 description = "Desktop-Editor für EGO-Streckendefinitionen"
 license = {text = "GPL-3.0-only"}
 requires-python = ">=3.10"

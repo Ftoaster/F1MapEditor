@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
     QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget, QLineEdit,
 )
 
-from .adapter import (ProcessJob, check_key, env_cache_folder, import_template, spielstrecken, suggest_track, toolkit_path,
+from .adapter import (ProcessJob, camera_auto, camera_plan, camera_station, carrier_path, check_key, env_cache_folder, import_template, spielstrecken,
+                      suggest_track, toolkit_path,
                       worker_command)
 from .appearance import ensure_fonts
 from .document import Document
@@ -49,7 +50,9 @@ LABELS = {
     "hoehen_glaettung_m": N_("Height smoothing · m"), "schliessen": N_("Closing rule (verteilen/fehler)"),
     "max_schliessfehler_m": N_("Max. closing error · m"), "umkehren": N_("Reverse direction"),
     "s": N_("Start/finish from input origin · m"), "punkt": N_("Start/finish at point [X,Z]"), "linienbreite": N_("Finish line width · m"),
-    "aktiv": N_("Active"), "seite": N_("Side in driving direction"), "einfahrt_vor_start_m": N_("Entry before finish · m"),
+    "aktiv": N_("Active"), "mitfuehren": N_("Move carrier cameras to this track"),
+    "verschiebung_m": N_("Shift along the track · m"), "seitlich_m": N_("Cameras further out · m"),
+    "hoehe_m": N_("Cameras higher · m"), "seite": N_("Side in driving direction"), "einfahrt_vor_start_m": N_("Entry before finish · m"),
     "ausfahrt_nach_start_m": N_("Exit after finish · m"), "abstand_fahrbahn": N_("Distance to track · m"),
     "anlauf_m": N_("Run-up · m"), "hinter_box_m": N_("Behind pit boxes · m"), "boxen": N_("Number of pit boxes"),
     "box_abstand_m": N_("Pit box spacing · m"), "tempolimit_kmh": N_("Speed limit · km/h"),
@@ -347,6 +350,9 @@ class MainWindow(QMainWindow):
         self.env_catalog = None
         self.env_issues = []
         self.env_job = self.env_preview_job = self.env_check_job = None
+        # Kameras des Trägers (spiel_kameras.lage_aus_traeger, einmal je Träger im Arbeitsprozess geladen)
+        self.camera_lage, self.camera_lage_path, self.camera_job, self.camera_error = None, None, None, None
+        self.camera_groups = []
         self.env_preview_wanted = None
         self.env_preview_paths = {}
         self.env_check_timer = QTimer(self)
@@ -504,7 +510,10 @@ class MainWindow(QMainWindow):
                                             (tr("Plant"), "streuen", "streuen",
                                              tr("Plant an area (rectangle or brush) with trees and bushes"), "B"),
                                             (tr("Trace"), "nachzeichnen", "bild",
-                                             tr("Trace the track on a reference image (map screenshot)"), "N")):
+                                             tr("Trace the track on a reference image (map screenshot)"), "N"),
+                                            (tr("Cameras"), "kameras", "kamera",
+                                             tr("Replay cameras and their trigger zones: show, drag, calculate "
+                                                "automatically"), "K")):
             action = QAction(icon(glyph), name, self)
             action.setCheckable(True)
             action.setChecked(mode == "auswahl")
@@ -560,10 +569,10 @@ class MainWindow(QMainWindow):
         self.display_section.toggled.connect(lambda on: self._section_saved("anzeige", on))
         left_layout.addWidget(self.display_section)
         from PySide6.QtWidgets import QCheckBox
-        for key in ("raster", "raender", "richtung", "spielbereich", "zonen", "ideallinie", "rennbetrieb",
+        for key in ("raster", "raender", "richtung", "spielbereich", "zonen", "kameras", "ideallinie", "rennbetrieb",
                     "kurvennummern", "umgebung", "eingabepunkte", "fahrlinie_auto"):
             checkbox = QCheckBox(tr(ansicht.LABELS[key]))
-            checkbox.setChecked(self.view_state.get(key, True))
+            checkbox.setChecked(self.view_state.get(key, key != "kameras"))
             checkbox.setToolTip(tr(ansicht.TIPS[key]) + tr(" · All switches: View → Customise view (Ctrl+Shift+A)"))
             checkbox.toggled.connect(lambda checked, key=key: self.apply_feature(key, checked))
             checkbox.toggled.connect(lambda *_: self._display_summary())
@@ -838,7 +847,8 @@ class MainWindow(QMainWindow):
                        (tr("Barrier"), "barriere"), (tr("Distance boards (braking points)"), "bremsmarker")),
                       ((tr("Pit lane"), "boxengasse"), (tr("Starting grid"), "startaufstellung"),
                        (tr("Sectors (automatic)"), "sektoren"), (tr("DRS (automatic)"), "drs"), (tr("DRS: own zones"), "drs_zonen"),
-                       (tr("Straight Mode: zones"), "xmode_zonen"), (tr("Corner detection"), "kurven"),
+                       (tr("Straight Mode: zones"), "xmode_zonen"), (tr("Cameras (replays)"), "kameras"),
+                       (tr("Corner detection"), "kurven"),
                        (tr("Racing line"), "ideallinie"))):
             if self.category.count():
                 self.category.insertSeparator(self.category.count())
@@ -874,6 +884,16 @@ class MainWindow(QMainWindow):
                                          "it.")))
         self.scale_button.clicked.connect(self.scale_track)
         right_layout.addWidget(self.scale_button)
+        self.camera_auto_button = QPushButton(tr("Calculate cameras automatically"))
+        self.camera_auto_button.setToolTip(tr("New layout for the current track: trigger zones before the corners, "
+                                              "their cameras behind them on the outside of the corner. Ctrl+Z undoes it."))
+        self.camera_auto_button.clicked.connect(self.camera_auto)
+        right_layout.addWidget(self.camera_auto_button)
+        self.camera_reset_button = QPushButton(tr("Discard camera changes"))
+        self.camera_reset_button.setToolTip(tr("Back to the carrier's cameras moved to this track (no automatic and "
+                                               "no manual positions)."))
+        self.camera_reset_button.clicked.connect(self.camera_reset)
+        right_layout.addWidget(self.camera_reset_button)
         self.right_layout, self.right_stretch = right_layout, right_layout.count()
         right_layout.addStretch(0)                  # hält alles oben, solange die Tabelle ausgeblendet ist
         horizontal = QSplitter()
@@ -926,6 +946,8 @@ class MainWindow(QMainWindow):
         self.map.group_move_blocked.connect(lambda: self._group_status(force=True))
         self.map.zone_moved.connect(self._zone_moved)
         self.map.zone_clicked.connect(self._zone_clicked)
+        self.map.camera_clicked.connect(self._camera_clicked)
+        self.map.camera_moved.connect(self._camera_moved)
         self.map.zone_restore.connect(self._update_zone_overlay)
         self.map.turn_clicked.connect(self.show_turn)
         self.curve_table.cellDoubleClicked.connect(lambda row, column: self._curve_clicked(row, column, zoom=True))
@@ -1290,6 +1312,8 @@ class MainWindow(QMainWindow):
             keys = ["x", "z", "hoehe", "richtung_grad"] if ml.get("art") == "segmente" else []
             values = ml.get("start", {})
             defaults = {key: 0.0 for key in keys}
+        elif category == "kameras":
+            keys, values, defaults = self._camera_properties(raw)
         elif category in LISTS:
             spec = LISTS[category]
             items = self._list_items(raw, category)
@@ -1315,8 +1339,11 @@ class MainWindow(QMainWindow):
             entries.append((key, values.get(key), defaults.get(key), LABELS.get(key, key)))
         self.properties.populate(entries, self.document.project.readonly)
         listed = category in LISTS
-        self.section_choice.setVisible(listed)
+        self.section_choice.setVisible(listed or category == "kameras")
         self.scale_button.setVisible(category == "fahrbahn")
+        for button in (self.camera_auto_button, self.camera_reset_button):
+            button.setVisible(category == "kameras")
+            button.setEnabled(not self.document.project.readonly and self.camera_lage is not None and bool(self.preview))
         self.scale_button.setEnabled(not self.document.project.readonly)
         for button in (self.add_section_button, self.remove_section_button):
             button.setVisible(listed)
@@ -1354,6 +1381,8 @@ class MainWindow(QMainWindow):
         if category == "drs_zonen":
             text = (tr("Custom DRS zones replace the automatic ones. Metres from the finish line in driving direction. "
                        "A new zone is created at the station cursor; drag the squares on the map."))
+        if category == "kameras":
+            text = self._camera_hint()
         if category == "xmode_zonen":
             text = (tr("Straight Mode (2026 aero) – custom zones replace the carrier zones. Metres from the finish; "
                        "crossing the finish line is allowed. Partial zone as in the originals (default 60 m after the "
@@ -1364,6 +1393,7 @@ class MainWindow(QMainWindow):
         self.right_layout.setStretch(self.right_stretch, 0 if filled else 1)
         self._refresh_bank_panel()
         self._update_zone_overlay()
+        self._update_camera_overlay()
         highlight = {"start_ziel": "start", "startaufstellung": "grid", "sektoren": "sektoren"}.get(category)
         if hasattr(self, "map") and self.map.highlight != highlight:
             self.map.highlight = highlight
@@ -1705,6 +1735,8 @@ class MainWindow(QMainWindow):
                         self.update_fields(ml["segmente"][index], fields)
                         if "asymmetrisch" in changes:
                             self._set_asymmetric(raw, ml["segmente"][index], bool(changes["asymmetrisch"]), halves)
+                elif category == "kameras":
+                    self._apply_camera_changes(raw, section, changes)
                 elif category in LISTS:
                     self.update_fields(self._list_items(raw, category, create=True)[section], changes)
                 elif category == "start":
@@ -1840,6 +1872,200 @@ class MainWindow(QMainWindow):
                            lambda raw, meta: self._list_items(raw, category)[index].__setitem__(field, station))
         self._refresh_properties()
 
+    # ------------------------------------------------------------------ Kameras (Wiederholungen)
+    def _camera_settings(self, raw=None):
+        raw = self.document.project.raw if raw is None else raw
+        k = raw.get("kameras")
+        return k if isinstance(k, dict) else {}
+
+    def _ensure_camera_layout(self):
+        """Kameras des Trägers einmal im Arbeitsprozess laden (Träger aus den Baueinstellungen)."""
+        manifest = self.document.project.manifest
+        try:
+            path = str(carrier_path(manifest))
+        except ValueError as error:
+            self.camera_error = str(error)
+            return
+        if self.camera_lage is not None and self.camera_lage_path == path:
+            return
+        if self.camera_job is not None or not Path(path).is_file():
+            if not Path(path).is_file():
+                self.camera_error = tr("Carrier package missing: {carrier}", carrier=path)
+            return
+        self.camera_error = None
+        self.camera_job = ProcessJob(self)
+        self.camera_job.done.connect(lambda code, text, path=path: self._camera_layout_done(code, text, path))
+        self.camera_job.start(worker_command(), {"task": "kameras_lage", "traeger": path,
+                                                 "toolkit": str(toolkit_path(manifest.get("werkzeugkasten")))})
+
+    def _camera_layout_done(self, code, text, path):
+        job, self.camera_job = self.camera_job, None
+        if job:
+            job.deleteLater()
+        try:
+            result = json.loads(text)
+            if code != 0 or "error" in result:
+                raise ValueError(result.get("error", text))
+            self.camera_lage, self.camera_lage_path = result["lage"], path
+        except (ValueError, TypeError, KeyError) as error:
+            self.camera_error = meldung(str(error))[:300]
+        self._update_camera_overlay()
+        if self.category.currentData() == "kameras":
+            self._refresh_properties()
+
+    def set_camera_layout(self, lage, path=None):
+        """Kameralage direkt setzen (Tests, ohne Arbeitsprozess)."""
+        self.camera_lage, self.camera_lage_path, self.camera_error = lage, path, None
+        self._update_camera_overlay()
+
+    def _update_camera_overlay(self):
+        if not hasattr(self, "map"):
+            return
+        wanted = self.map.show_cameras or self.category.currentData() == "kameras" or self.map.mode == "kameras"
+        if wanted and self.camera_lage is None:
+            self._ensure_camera_layout()
+        items, groups = (None, None)
+        if self.camera_lage is not None and self.preview:
+            try:
+                items, groups = camera_plan(self.camera_lage, self.preview, self._camera_settings(),
+                                            self.document.project.manifest.get("werkzeugkasten"))
+            except (ValueError, KeyError, TypeError, IndexError) as error:
+                self.camera_error = str(error)
+        self.camera_groups = groups or []
+        mitfuehren = self._camera_settings().get("mitfuehren", True) is not False
+        self.map.cameras = (items or []) if mitfuehren else []
+        self.map.camera_group = self._selected_camera_group() if self.category.currentData() == "kameras" else None
+        self.map.viewport().update()
+
+    def _selected_camera_group(self):
+        i = self.section_choice.currentIndex() - 1
+        return self.camera_groups[i]["gruppe"] if 0 <= i < len(self.camera_groups) else None
+
+    def _camera_properties(self, raw):
+        """(Schlüssel, Werte, Standard) für die Kategorie Kameras: Eintrag 0 = alle, danach je Gruppe."""
+        settings = self._camera_settings(raw)
+        self._update_camera_overlay()                      # Gruppen passend zu Strecke und Einstellungen
+        titles = [tr("All cameras")] + [
+            f"{g['gruppe']} · {g['s']:.0f} m" + (tr(" · off") if g["aus"] else "") if g["s"] is not None else g["gruppe"]
+            for g in self.camera_groups]
+        previous = self.section_choice.currentIndex()
+        if [self.section_choice.itemText(i) for i in range(self.section_choice.count())] != titles:
+            self.section_choice.blockSignals(True)
+            self.section_choice.clear()
+            self.section_choice.addItems(titles)
+            self.section_choice.setCurrentIndex(max(0, min(previous, len(titles) - 1)))
+            self.section_choice.blockSignals(False)
+        i = self.section_choice.currentIndex()
+        if i <= 0:
+            return ["mitfuehren"], {"mitfuehren": settings.get("mitfuehren")}, {"mitfuehren": True}
+        gruppe = self.camera_groups[i - 1]["gruppe"]
+        g = (settings.get("gruppen") or {}).get(gruppe) or {}
+        values = {"aktiv": False if g.get("aus") else None, "verschiebung_m": g.get("verschiebung_m"),
+                  "seitlich_m": g.get("seitlich_m"), "hoehe_m": g.get("hoehe_m")}
+        defaults = {"aktiv": True, "verschiebung_m": 0.0, "seitlich_m": 0.0, "hoehe_m": 0.0}
+        return ["aktiv", "verschiebung_m", "seitlich_m", "hoehe_m"], values, defaults
+
+    def _apply_camera_changes(self, raw, section, changes):
+        k = raw.setdefault("kameras", {})
+        if section <= 0:
+            self.update_fields(k, {key: value for key, value in changes.items() if key == "mitfuehren"})
+        else:
+            gruppe = self.camera_groups[section - 1]["gruppe"]
+            gruppen = k.setdefault("gruppen", {})
+            g = dict(gruppen.get(gruppe) or {})
+            if "aktiv" in changes:
+                if changes["aktiv"] is False:
+                    g["aus"] = True
+                else:
+                    g.pop("aus", None)
+            for key in ("verschiebung_m", "seitlich_m", "hoehe_m"):
+                if key in changes:
+                    if changes[key] in (None, 0, 0.0):
+                        g.pop(key, None)
+                    else:
+                        g[key] = float(changes[key])
+            if g:
+                gruppen[gruppe] = g
+            else:
+                gruppen.pop(gruppe, None)
+            if not gruppen:
+                k.pop("gruppen", None)
+        if not k:
+            raw.pop("kameras", None)
+
+    def _camera_hint(self):
+        if self.camera_error:
+            return tr("Cameras not available: {error}", error=self.camera_error)
+        if self.camera_lage is None:
+            return tr("Loading the carrier's cameras …")
+        return tr("Trigger zones (bars across the track) switch the replay to the cameras (diamonds) linked by dotted "
+                  "lines. Tool “Cameras” (K): drag a diamond to move that camera, drag a bar to move its zone along the "
+                  "track. “Calculate cameras automatically” lays them out anew for this track. Per group: switch off, "
+                  "shift, further out, higher. Pit lane cameras follow the pit lane automatically.")
+
+    def camera_auto(self):
+        """„Kameras automatisch berechnen“: neue Lage für die aktuelle Strecke, ein Schritt im Verlauf."""
+        if self.camera_lage is None or not self.preview:
+            self.status_label.setText(tr("Cameras need the preview and the carrier's cameras first."))
+            return
+        objekte = camera_auto(self.camera_lage, self.preview, self.document.project.manifest.get("werkzeugkasten"))
+        if not objekte:
+            self.status_label.setText(tr("No cameras to calculate."))
+            return
+
+        def operation(raw, meta):
+            k = raw.setdefault("kameras", {})
+            k["objekte"] = objekte
+            k.pop("gruppen", None)                       # alte Verschiebungen gelten nicht mehr
+        self.document.edit(tr("Calculate cameras automatically"), operation)
+        zonen = sum(1 for v in objekte.values() if "quer" not in v)
+        self.status_label.setText(tr("Cameras calculated: {zonen} trigger zones, {kameras} cameras · Ctrl+Z: undo",
+                                     zonen=zonen, kameras=len(objekte) - zonen))
+        self._update_camera_overlay()
+        self._refresh_properties()
+
+    def camera_reset(self):
+        k = self._camera_settings()
+        if not k.get("objekte") and not k.get("gruppen"):
+            self.status_label.setText(tr("No camera changes to discard."))
+            return
+
+        def operation(raw, meta):
+            kam = raw.get("kameras") or {}
+            kam.pop("objekte", None)
+            kam.pop("gruppen", None)
+            if not kam:
+                raw.pop("kameras", None)
+        self.document.edit(tr("Discard camera changes"), operation)
+        self._update_camera_overlay()
+        self._refresh_properties()
+
+    def _camera_moved(self, name, template, x, z):
+        """Gezogene Kamera (frei) oder Zone (entlang der Strecke) als Station/Querabstand speichern."""
+        lage = camera_station(self.preview, x, z, self.document.project.manifest.get("werkzeugkasten"))
+        if lage is None:
+            return
+        s, quer = lage
+        eintrag = {"s": round(s, 1)} if template.startswith("TriggerZone") else {"s": round(s, 1), "quer": round(quer, 1)}
+
+        def operation(raw, meta):
+            raw.setdefault("kameras", {}).setdefault("objekte", {})[name] = eintrag
+        self.document.edit(tr("Move camera") if "quer" in eintrag else tr("Move trigger zone"), operation)
+        kurz = name.split("$", 1)[-1]
+        self.status_label.setText(tr("{name} at {s} m from the finish · Ctrl+Z: undo", name=kurz, s=round(s)))
+        self._update_camera_overlay()
+
+    def _camera_clicked(self, gruppe):
+        self.category.setCurrentIndex(self.category.findData("kameras"))
+        self._refresh_properties()
+        names = [g["gruppe"] for g in self.camera_groups]
+        if gruppe in names:
+            self.section_choice.setCurrentIndex(names.index(gruppe) + 1)
+            self._refresh_properties()
+            self.status_label.setText(tr("Camera group {gruppe} selected: change it on the right.", gruppe=gruppe))
+        else:
+            self.status_label.setText(tr("Camera group {gruppe} follows the track automatically.", gruppe=gruppe))
+
     def _zone_clicked(self, art, index):
         if art == "box":
             self.category.setCurrentIndex(self.category.findData("boxengasse"))
@@ -1951,8 +2177,11 @@ class MainWindow(QMainWindow):
             self.map.setFocus()
         self._point_section_update(self.objects.count())
         self.mode_hint.setText({"punkte": tr("Tool: points (INSERT)"), "umgebung": tr("Tool: Environment (U)"),
-                                "streuen": tr("Tool: Plant (B)"),
-                                "nachzeichnen": tr("Tool: Trace (N)")}.get(mode, tr("Tool: select")))
+                                "streuen": tr("Tool: Plant (B)"), "nachzeichnen": tr("Tool: Trace (N)"),
+                                "kameras": tr("Tool: Cameras (K)")}.get(mode, tr("Tool: select")))
+        if mode == "kameras":
+            self.category.setCurrentIndex(self.category.findData("kameras"))
+            self._refresh_properties()
         self.env_panel.selection_box.setVisible(mode in ("umgebung", "streuen"))
         self.env_panel.terrain_box.setVisible(mode in ("umgebung", "streuen"))
         self._refresh_bank_panel()
@@ -2303,7 +2532,7 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ Ein-/Ausblenden (Menü Ansicht)
     MAP_FEATURES = {"raster": "grid", "raender": "bands", "richtung": "direction", "spielbereich": "show_frame",
-                    "zonen": "show_zones", "ideallinie": "show_line", "rennbetrieb": "show_race",
+                    "zonen": "show_zones", "kameras": "show_cameras", "ideallinie": "show_line", "rennbetrieb": "show_race",
                     "kurvennummern": "show_turns", "eingabepunkte": "show_points", "beschriftungen": "show_labels",
                     "massstab": "show_scale", "kartenhinweise": "show_hints", "umgebung": "show_env"}
 
@@ -2594,6 +2823,7 @@ class MainWindow(QMainWindow):
         self.map.stale = False
         self.map.rebuild(preview)
         self._update_zone_overlay()
+        self._update_camera_overlay()
         for widget in (self.height, self.bank, self.cross):
             widget.preview = preview
             widget.stale = False
@@ -2727,9 +2957,10 @@ class MainWindow(QMainWindow):
 
     def open_build(self):
         from .build import BuildDialog
-        if self.build_dialog and self.build_dialog.job:
-            self.build_dialog.show()
-            self.build_dialog.raise_()
+        d = self.build_dialog
+        if d and (d.job or (d.background_hidden and d.project is self.document.project)):
+            d.show()                                   # ausgeblendeter Bau bzw. sein Ergebnis wieder anzeigen
+            d.raise_()
             return
         if self.build_dialog:
             self.build_dialog.deleteLater()
@@ -3751,6 +3982,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent):
         if self.build_dialog and self.build_dialog.job:
+            self.build_dialog.show()
             self.build_dialog.raise_()
             self.build_dialog.phase.setText(tr("Build running · choose Cancel first and wait for the build to end."))
             event.ignore()

@@ -826,6 +826,75 @@ def _umgebung_modul(toolkit=None, im_prozess=False):
     return umgebung
 
 
+# ------------------------------------------------------------------ Kameras (Wiederholungen, 4.11.2026)
+def calculate_camera_layout(request):
+    """Kameras des Trägers relativ zu seiner Strecke (``strecke.spiel_kameras.lage_aus_traeger``, zwischengespeichert)."""
+    root = toolkit_path(request.get("toolkit"))
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, str(root))
+    from strecke import spiel_kameras
+    return {"lage": spiel_kameras.lage_aus_traeger(request["traeger"])}
+
+
+def carrier_path(manifest, toolkit=None):
+    """Trägerpaket des Projekts (Baueinstellung) oder der Standardträger des Werkzeugkastens."""
+    gespeichert = (manifest.get("bauen") or {}).get("traeger")
+    return Path(gespeichert) if gespeichert else default_carrier(toolkit_path(toolkit or manifest.get("werkzeugkasten")))
+
+
+def kameras_modul(toolkit=None):
+    """``strecke.spiel_kameras`` im Editorprozess (nur NumPy beim Import) oder None."""
+    try:
+        root = toolkit_path(toolkit)
+        sys.dont_write_bytecode = True
+        if str(root) not in sys.path:
+            sys.path.insert(0, str(root))
+        from strecke import spiel_kameras
+    except Exception:                                  # fehlendes oder defektes Modul darf den Editor nicht stören
+        return None
+    return spiel_kameras
+
+
+def camera_plan(lage, preview, einstellungen=None, toolkit=None):
+    """Zonen und Kameras der Hauptstrecke auf der Vorschau-Mittellinie: (Einträge, Gruppen) oder (None, None).
+
+    Gleiche Rechnung wie der Bau (``spiel_kameras.plan``); Kameras der Boxengasse folgen im Bau der Boxenlinie und
+    erscheinen hier nicht."""
+    modul = kameras_modul(toolkit)
+    if modul is None or not lage or not preview or not preview.get("pos"):
+        return None, None
+    haupt = modul.Linie(preview["pos"], True)
+    items = [e for e in modul.plan(lage, haupt, None, einstellungen) if e["bezug"] == "haupt"]
+    gruppen_ein = (einstellungen or {}).get("gruppen") or {}
+    groups = []
+    for g in modul.gruppen_uebersicht(lage):
+        zone = next((e for e in items if e["gruppe"] == g["gruppe"] and e["template"] in modul.ZONEN), None)
+        groups.append({"gruppe": g["gruppe"], "s": zone["s"] if zone else None, "zonen": g["zonen"],
+                       "kameras": g["kameras"], "aus": bool((gruppen_ein.get(g["gruppe"]) or {}).get("aus"))})
+    groups.sort(key=lambda g: g["s"] if g["s"] is not None else 1e9)
+    return items, groups
+
+
+def camera_auto(lage, preview, toolkit=None):
+    """„Kameras automatisch berechnen“: neue Lage aller Zonen mit Kameras für die aktuelle Strecke
+    (``spiel_kameras.automatisch``) als ``kameras.objekte``; None ohne Werkzeugkasten."""
+    modul = kameras_modul(toolkit)
+    if modul is None or not lage or not preview or not preview.get("pos"):
+        return None
+    return modul.automatisch(lage, modul.Linie(preview["pos"], True))
+
+
+def camera_station(preview, x, z, toolkit=None):
+    """(Station ab Ziel, Querabstand rechts positiv) eines Kartenpunkts zur Vorschau-Mittellinie."""
+    modul = kameras_modul(toolkit)
+    if modul is None or not preview or not preview.get("pos"):
+        return None
+    linie = modul.Linie(preview["pos"], True)
+    f, _d = linie.naechster([x, 0.0, z])
+    _f, lokal = modul._relativ(linie, [x, linie.punkt(f)[0][1], z], f)
+    return f * linie.laenge, lokal[0]
+
+
 def umgebung_laden(pfad, toolkit=None):
     """``umgebung.json`` lesen und normalisieren (Werkzeugkasten, sonst lokale Fassung). ``ValueError`` bei Fehlern."""
     from . import umgebung as lokal
@@ -934,6 +1003,7 @@ def worker_main():
                   calculate_env_preview(request) if task == "umgebung_vorschau" else
                   calculate_env_check(request) if task == "umgebung_pruefen" else
                   calculate_game_tracks(request) if task == "spielstrecken" else
+                  calculate_camera_layout(request) if task == "kameras_lage" else
                   calculate_template(request) if task else calculate_preview(request))
         sys.stdout.buffer.write(json.dumps(result, ensure_ascii=False, allow_nan=False).encode("utf-8"))
         return 0

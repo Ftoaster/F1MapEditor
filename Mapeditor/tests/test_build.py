@@ -112,7 +112,7 @@ def test_build_journey_progress_result_snapshot_and_playtest(builder, tmp_path):
     w.cancel_preview()
     QTest.mouseClick(d.start_button, Qt.LeftButton)
     wait_until(lambda: isinstance(d.job, BuildJob) and d.progress.value() == 250)
-    assert not d.fields.isEnabled() and not d.close_button.isEnabled()
+    assert not d.fields.isEnabled() and d.close_button.text() == __import__("mapeditor.i18n", fromlist=["tr"]).tr("Hide") and d.state == "building"
     assert "Generator läuft" in d.phase.text()
     assert "Attrappe" in d.issue_list.item(0).text()
     d.issue_list.setCurrentRow(0)
@@ -345,8 +345,11 @@ def test_build_start_failure_records_failure(builder, tmp_path):
 def test_output_guard_in_click_journey(builder, tmp_path):
     w, d, mode = builder
     d.output.setText(r"Q:\steamapps\common\F1 25\bau")
+    assert not d.valid and d.paths_box.isHidden()                  # Feldprüfung beim Tippen, Ordner noch zu
+    assert "write-protected" in d.field_error.text() or "schreibgeschützt" in d.field_error.text()
     QTest.mouseClick(d.start_button, Qt.LeftButton)
-    assert d.job is None and "schreibgeschützt" in d.phase.text()
+    assert d.job is None and not d.paths_box.isHidden()             # Klick öffnet den Ordnerbereich
+    assert d.state == "error"
     assert not w.document.project.playtests
     assert not (tmp_path / "bauten").exists()
 

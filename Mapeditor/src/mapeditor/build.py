@@ -11,18 +11,18 @@ import subprocess
 import uuid
 import zipfile
 
-from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtCore import QElapsedTimer, QEvent, Qt, QTimer, QUrl
+from PySide6.QtGui import QBrush, QColor, QDesktopServices, QPainter
 from PySide6.QtWidgets import (
-    QAbstractItemView, QComboBox, QDialog, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-    QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QTableWidget, QTableWidgetItem,
+    QAbstractItemView, QApplication, QComboBox, QDialog, QFrame, QGridLayout, QScrollArea, QSizePolicy, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+    QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QTableWidget, QTableWidgetItem,
     QVBoxLayout, QWidget,
 )
 
 from .adapter import (BUILD_PVS, TRACK_CODES, BuildJob, ProcessJob, build_command, swofty_auswerten,
                       swofty_installieren, swofty_installierte, swofty_programm, swofty_starten, check_key, default_carrier,
                       game_status_command, injector_command, parse_game_status, toolkit_path, worker_command)
-from .i18n import N_, meldung, tr
+from .i18n import N_, meldung, tr, trn
 from .paths import writable_path
 from .ux import zahl
 
@@ -32,6 +32,14 @@ BUILD_STATES = [N_("läuft"), N_("abgebrochen"), N_("fehlgeschlagen"), N_("mit_t
 
 #: Bau erfolgreich (Paket geprüft)
 GOOD_BUILDS = {"ok", "mit_traegerabweichung"}
+
+#: Zustände der Statuskarte: Kennung → (Text, Farbe, Symbol)
+BUILD_STATES_UI = {"ready": (N_("Ready"), "#5BD08A", "●"), "checking": (N_("Checking"), "#D6A94A", "◐"),
+                   "building": (N_("Building"), "#5AA9E6", "◐"), "working": (N_("Working"), "#5AA9E6", "◐"),
+                   "done": (N_("Done"), "#5BD08A", "✔"), "error": (N_("Failed"), "#F07878", "✖"),
+                   "cancelled": (N_("Cancelled"), "#9AA3AD", "○")}
+#: Meldungsstufen: Rang (Fehler zuerst), Farbe, Symbol
+ISSUE_LEVELS = {"Fehler": (0, "#F07878", "✖"), "Warnung": (1, "#D6A94A", "▲"), "Hinweis": (2, "#9AA3AD", "ⓘ")}
 
 
 def code_label(code, rating, state=None):
@@ -163,6 +171,29 @@ def dir_size(path):
     return total
 
 
+class ElidedLabel(QLabel):
+    """Einzeiler, der in der Mitte kürzt, statt das Layout zu verbreitern (voller Text als Tooltip)."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self.full = ""
+
+    def set_full(self, text):
+        self.full = text
+        self.setToolTip(text)
+        self.update()
+
+    def minimumSizeHint(self):
+        return super().minimumSizeHint().boundedTo(self.fontMetrics().boundingRect("x").size() * 4)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(self.palette().placeholderText().color())
+        painter.drawText(self.rect(), Qt.AlignVCenter | Qt.AlignLeft,
+                         self.fontMetrics().elidedText(self.full, Qt.ElideMiddle, self.width()))
+
+
 class BuildDialog(QDialog):
     def __init__(self, main):
         super().__init__(main)
@@ -174,9 +205,32 @@ class BuildDialog(QDialog):
         self.command = None
         self.messages = []
         self.setWindowTitle(tr("Build / package"))
-        self.setWindowModality(Qt.WindowModal)
-        self.resize(900, 790)
-        layout = QVBoxLayout(self)
+        self.setWindowModality(Qt.NonModal)     # Weiterarbeiten während des Baus (der Bau arbeitet auf einem Schnappschuss)
+        self.background_hidden = False           # während eines Baus ausgeblendet: das Fenster bleibt erhalten
+        self.state = "ready"
+        self.valid = True
+        self.path_problem = False
+        self.steps_log = []
+        self.clock = QElapsedTimer()
+        self.tick = QTimer(self)
+        self.tick.setInterval(1000)
+        self.tick.timeout.connect(self._show_elapsed)
+        self.setStyleSheet('QPushButton[primary="true"] {background: #2F7DD1; color: white; font-weight: 600; '
+                           'padding: 5px 16px; border-radius: 4px;} '
+                           'QPushButton[primary="true"]:disabled {background: #55657a; color: #cfd6de;}')
+        self.resize(900, 520)
+        outer = QVBoxLayout(self)
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QFrame.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.content = QWidget()
+        self.scroll.setWidget(self.content)
+        outer.addWidget(self.scroll, 1)
+        layout = QVBoxLayout(self.content)
+        layout.setContentsMargins(0, 0, 6, 0)
+        self._fit_pending = False
+        self.content.installEventFilter(self)          # Höhe folgt dem Inhalt, begrenzt auf den Bildschirm
         title = QLabel(tr("BUILD / PACKAGE   ·   recommended profile"))
         layout.addWidget(title)
         self.profile_hint = hint = QLabel()
@@ -185,7 +239,10 @@ class BuildDialog(QDialog):
         settings = self.project.manifest.get("bauen", {})
         base = self.project.folder or (Path.home() / "Documents" / "Mapeditor")
         self.fields = QWidget()
-        form = self.main_form = QFormLayout(self.fields)
+        fields_layout = QVBoxLayout(self.fields)
+        fields_layout.setContentsMargins(0, 0, 0, 0)
+        form = self.main_form = QFormLayout()
+        fields_layout.addLayout(form)
         self.output = QLineEdit(settings.get("ausgabe", str(base / "bauten")))
         self.packages = QLineEdit(settings.get("pakete", str(base / "pakete")))
         try:
@@ -205,6 +262,10 @@ class BuildDialog(QDialog):
         except ValueError:
             carrier = ""
         self.carrier = QLineEdit(settings.get("traeger", carrier))
+        # Ordner und Träger ändert man selten: eingeklappt mit Einzeiler, klappen bei einem Fehler von selbst auf
+        self.paths_box = QWidget()
+        paths_form = QFormLayout(self.paths_box)
+        paths_form.setContentsMargins(0, 0, 0, 0)
         for label, field, file in ((tr("Working folder"), self.output, False), (tr("Package folder"), self.packages, False),
                                    (tr("Carrier package (ZIP)"), self.carrier, True)):
             row = QHBoxLayout()
@@ -212,22 +273,32 @@ class BuildDialog(QDialog):
             button = QPushButton(tr("Choose …"))
             button.clicked.connect(lambda checked=False, field=field, file=file: self.choose(field, file))
             row.addWidget(button)
-            form.addRow(label, row)
+            paths_form.addRow(label, row)
+        self.paths_toggle = QPushButton(tr("Folders ▸"))
+        self.paths_toggle.setCheckable(True)
+        self.paths_toggle.setFlat(True)
+        self.paths_toggle.setStyleSheet("text-align: left;")
+        self.paths_summary = ElidedLabel()
+        form.addRow(self.paths_toggle, self.paths_summary)
+        form.addRow(self.paths_box)
+        self.paths_box.hide()
+        self.paths_toggle.toggled.connect(self._toggle_paths)
+        options_grid = QGridLayout()                   # zwei Spalten: Ziel/Raster, Code/Zustand, Optionen
+        options_grid.setColumnStretch(1, 1)
+        options_grid.setColumnStretch(3, 1)
+        fields_layout.addLayout(options_grid)
         from PySide6.QtWidgets import QCheckBox
-        self.ki_profil = QCheckBox(tr(("Adapt AI driving data to the track (braking points of the driving assist and "
-                                       "AI pace)")))
+        self.ki_profil = QCheckBox(tr("Adapt AI driving data to the track"))
         self.ki_profil.setChecked(bool(settings.get("ki_profil", True)))
-        self.ki_profil.setToolTip(tr("Generates the AI time/speed curve (VPTimes) from the track's own profile instead "
+        self.ki_profil.setToolTip(tr("Braking points of the driving assist and AI pace.") + " " + tr("Generates the AI time/speed curve (VPTimes) from the track's own profile instead "
                                      "of taking over Portimão's data. Without this option braking zones have no "
                                      "relation to the corners (25.10.2026). New, not yet confirmed in game."))
-        form.addRow("", self.ki_profil)
-        self.race_data = QCheckBox(tr("Work out race data from the track (laps, fuel, tyres, AI, pit lane)"))
+        self.race_data = QCheckBox(tr("Race data from the track"))
         self.race_data.setChecked(bool(settings.get("renndaten", True)))
-        self.race_data.setToolTip(tr("Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come "
+        self.race_data.setToolTip(tr("Laps, fuel, tyres, AI, pit lane.") + " " + tr("Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come "
                                      "from the estimated lap time, plus the pit lane speed limit and the time a pit "
                                      "stop costs, and the minimum lap time for leaderboards. The tyre choice is an "
                                      "estimate."))
-        form.addRow("", self.race_data)
         self.target = QComboBox()
         self.target.addItem(tr("Track Installer (EGO Editor)"), "ego")
         self.target.addItem(tr("Swofty Launcher"), "swofty")
@@ -235,20 +306,22 @@ class BuildDialog(QDialog):
         self.target.setToolTip(tr("Swofty Launcher: an addon with its own track code and its own name in the menus, "
                                   "for as many tracks as you like. Starts only from the launcher, offline and without "
                                   "EA AntiCheat."))
-        form.addRow(tr("Build for"), self.target)
+        options_grid.addWidget(QLabel(tr("Build for")), 0, 0)
+        options_grid.addWidget(self.target, 0, 1)
         self.shared_carrier = QCheckBox(tr("Use a shared carrier (0.45 instead of 3 GB per track)"))
         self.shared_carrier.setChecked(bool(settings.get("traeger_teilen", True)))
         self.shared_carrier.setToolTip(tr("The Portimão mod's textures sit once in a carrier addon next to the "
                                           "packages, and every track only points to it. The launcher needs the carrier "
                                           "addon as well."))
-        form.addRow("", self.shared_carrier)
+        options_grid.addWidget(self.shared_carrier, 2, 0, 1, 4)
         self.grid_size = QComboBox()
         self.grid_size.addItem(tr("24 cars (default)"), 0)
         self.grid_size.addItem(tr("26 cars"), 26)
         self.grid_size.setCurrentIndex(max(0, self.grid_size.findData(settings.get("raster", 0))))
         self.grid_size.setToolTip(tr("Adds grid slots, garages and pit boxes for 26 cars. For 26 cars to actually "
                                      "race, the game also needs an addon such as Custom Grid Size."))
-        form.addRow(tr("Grid"), self.grid_size)
+        options_grid.addWidget(QLabel(tr("Grid")), 0, 2)
+        options_grid.addWidget(self.grid_size, 0, 3)
         # Streckencode: alle Codes, die die Spieldatenbank kennt; Zustand im Spiel darunter
         self.code = QComboBox()
         self.code.setMaxVisibleItems(len(TRACK_CODES))
@@ -260,11 +333,14 @@ class BuildDialog(QDialog):
         self._fill_codes()
         self.code.setCurrentIndex(max(0, self.code.findData(settings.get("streckencode", "sochi"))))
         self.code_label = QLabel(tr("Track code"))
-        form.addRow(self.code_label, self.code)
+        options_grid.addWidget(self.code_label, 1, 0)
+        options_grid.addWidget(self.code, 1, 1)
         self.code_info = QLabel()
         self.code_info.setWordWrap(True)
         self.code_info.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        form.addRow("", self.code_info)
+        options_grid.addWidget(self.code_info, 1, 2, 1, 2)
+        options_grid.addWidget(self.ki_profil, 3, 0, 1, 2)
+        options_grid.addWidget(self.race_data, 3, 2, 1, 2)
         self.code.currentIndexChanged.connect(self._update_code_info)
         self.target.currentIndexChanged.connect(self._update_code_info)
         # Erweiterte Bauoptionen (überschreiben das Profil); eingeklappt
@@ -312,8 +388,8 @@ class BuildDialog(QDialog):
         advanced.addRow("", fixed)
         self.advanced.setVisible(False)
         self.advanced_toggle.toggled.connect(self._toggle_advanced)
-        form.addRow("", self.advanced_toggle)
-        form.addRow("", self.advanced)
+        fields_layout.addWidget(self.advanced_toggle)
+        fields_layout.addWidget(self.advanced)
         self.pvs.currentIndexChanged.connect(self._update_profile_hint)
         self.track_name.textChanged.connect(self._update_profile_hint)
         self._update_profile_hint()
@@ -324,41 +400,95 @@ class BuildDialog(QDialog):
         for field in (self.output, self.packages):
             field.editingFinished.connect(self.update_space)
         self.update_space()
-        self.phase = QLabel(tr("Ready · progress shows phase boundaries."))
+        # Statuskarte: Zustand, Phase, Fortschritt, Bauphasen und Ergebnis
+        self.status_card = QFrame()
+        self.status_card.setObjectName("statuskarte")
+        card = QVBoxLayout(self.status_card)
+        top = QHBoxLayout()
+        self.state_badge = QLabel()
+        top.addWidget(self.state_badge)
+        self.phase = QLabel(tr("Ready to build."))
         self.phase.setWordWrap(True)
-        layout.addWidget(self.phase)
+        top.addWidget(self.phase, 1)
+        self.elapsed_label = QLabel()
+        top.addWidget(self.elapsed_label)
+        card.addLayout(top)
         self.progress = QProgressBar()
         self.progress.setRange(0, 1000)
         self.progress.setFormat(tr("%p % · phase progress"))
-        layout.addWidget(self.progress)
-        self.issue_list = QListWidget()
-        self.issue_list.setWordWrap(True)
-        self.issue_list.itemClicked.connect(self.jump_message)
-        layout.addWidget(self.issue_list, 1)
+        card.addWidget(self.progress)
+        self.steps = QLabel()
+        self.steps.setTextFormat(Qt.RichText)
+        self.steps.setWordWrap(True)
+        self.steps.hide()
+        card.addWidget(self.steps)
+        self.result_title = QLabel()
+        self.result_title.setStyleSheet("font-size: 15px; font-weight: 700;")
+        self.result_title.setWordWrap(True)
+        self.result_title.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.result_title.hide()
+        card.addWidget(self.result_title)
         self.result_text = QPlainTextEdit()
         self.result_text.setReadOnly(True)
-        self.result_text.setMaximumHeight(130)
+        self.result_text.setMaximumHeight(110)
         self.result_text.setPlaceholderText(tr("After the build: package path, size, SHA-256 and check report."))
-        layout.addWidget(self.result_text)
+        self.result_text.hide()                          # erst sichtbar, wenn es ein Ergebnis gibt
+        self.result_text.textChanged.connect(lambda: self.result_text.setVisible(bool(self.result_text.toPlainText())))
+        card.addWidget(self.result_text)
+        self.copy_button = QPushButton(tr("Copy SHA-256"))
+        self.copy_button.hide()
+        self.copy_button.clicked.connect(self.copy_hash)
+        card.addWidget(self.copy_button, 0, Qt.AlignLeft)
+        layout.addWidget(self.status_card)
+        # Meldungen: erst sichtbar, wenn es welche gibt; Fehler zuerst, Zähler und Filter
+        self.issue_box = QWidget()
+        issue_layout = QVBoxLayout(self.issue_box)
+        issue_layout.setContentsMargins(0, 0, 0, 0)
+        issue_head = QHBoxLayout()
+        self.issue_summary = QLabel()
+        issue_head.addWidget(self.issue_summary, 1)
+        self.issue_show = QComboBox()
+        self.issue_show.addItem(tr("All"), "alle")
+        self.issue_show.addItem(tr("Errors and warnings"), "probleme")
+        self.issue_show.addItem(tr("Errors only"), "fehler")
+        self.issue_show.currentIndexChanged.connect(self._apply_issue_filter)
+        issue_head.addWidget(self.issue_show)
+        issue_layout.addLayout(issue_head)
+        self.issue_list = QListWidget()
+        self.issue_list.setWordWrap(True)
+        self.issue_list.setMinimumHeight(70)
+        self.issue_list.setMaximumHeight(170)
+        self.issue_list.itemClicked.connect(self.jump_message)
+        issue_layout.addWidget(self.issue_list, 1)
+        self.issue_box.hide()
+        layout.addWidget(self.issue_box)
+        self.field_error = QLabel()
+        self.field_error.setWordWrap(True)
+        self.field_error.setStyleSheet("color: #F07878;")
+        self.field_error.hide()
+        layout.addWidget(self.field_error)
         self.log_toggle = QPushButton(tr("Show technical log"))
         self.log_toggle.setCheckable(True)
+        self.log_toggle.setFlat(True)
+        top.addWidget(self.log_toggle)                   # neben dem Zustand statt in einer eigenen Zeile
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(3000)
         self.log.setMaximumHeight(150)
         self.log.hide()
         self.log_toggle.toggled.connect(self.log.setVisible)
-        layout.addWidget(self.log_toggle)
         layout.addWidget(self.log)
         install = QLabel(tr("First installation of a track code: install the ZIP once with the Track Installer and "
                             "activate it in the EGO editor. After that, every new version with “Transfer to game” – "
                             "without the EGO editor, even with the mod deactivated (backs up the affected game files, "
                             "writes to the game after your confirmation; quit the game first)."))
         install.setWordWrap(True)
+        self.install_hint = install
         layout.addWidget(install)
         buttons = QHBoxLayout()
         self.start_button = QPushButton(tr("Check and build"))
         self.start_button.clicked.connect(self.start_build)
+        self.start_button.setShortcut("Ctrl+Return")
         self.cancel_button = QPushButton(tr("Cancel"))
         self.cancel_button.setEnabled(False)
         self.cancel_button.clicked.connect(self.cancel_build)
@@ -382,13 +512,14 @@ class BuildDialog(QDialog):
                                              "data.")))
         self.diagnosis_button.clicked.connect(self.launcher_diagnosis)
         self.close_button = QPushButton(tr("Close"))
+        self.close_button.setToolTip(tr("During a build the window hides and the build continues."))
         self.close_button.clicked.connect(self.close)
-        for button in (self.start_button, self.cancel_button, self.inject_button, self.install_button, self.play_button,
-                       self.diagnosis_button, self.explorer_button, self.report_button):
-            buttons.addWidget(button)
+        for button in (self.explorer_button, self.report_button, self.diagnosis_button, self.install_button):
+            buttons.addWidget(button)                  # Nebenaktionen links, die nächste Hauptaktion rechts
         buttons.addStretch(1)
-        buttons.addWidget(self.close_button)
-        layout.addLayout(buttons)
+        for button in (self.cancel_button, self.start_button, self.inject_button, self.play_button, self.close_button):
+            buttons.addWidget(button)
+        outer.addLayout(buttons)
         # Schnellaustausch: zuletzt erfolgreich gebautes Paket des Projekts (auch nach erneutem Öffnen des Dialogs)
         self.inject_record = None
         self.inject_job = None
@@ -402,8 +533,155 @@ class BuildDialog(QDialog):
                 break
         self.status_command = game_status_command
         self.read_game = getattr(main, "interactive", False)     # Tests lesen den Spielordner nicht
+        for field in (self.name, self.output, self.packages, self.carrier):
+            field.textChanged.connect(self.validate)
+        self.set_state("ready")
+        self.validate()
         self._update_code_info()
         self.refresh_game_status()
+
+    # ------------------------------------------------------------------ Größe
+    def eventFilter(self, obj, event):
+        if obj is self.content and event.type() == QEvent.LayoutRequest and not self._fit_pending:
+            self._fit_pending = True
+            QTimer.singleShot(0, self._fit_height)
+        return super().eventFilter(obj, event)
+
+    def showEvent(self, event):
+        self.background_hidden = False
+        super().showEvent(event)
+        QTimer.singleShot(0, self._fit_height)
+
+    def _fit_height(self):
+        """Dialog so hoch wie der Inhalt, höchstens Bildschirmhöhe ohne Taskleiste; darüber scrollt der Inhalt."""
+        self._fit_pending = False
+        screen = self.screen() or QApplication.primaryScreen()
+        if screen is None or not self.isVisible():
+            return
+        available = screen.availableGeometry()
+        layout = self.content.layout()
+        width = self.scroll.viewport().width()
+        needed = layout.heightForWidth(width) if layout.hasHeightForWidth() else layout.sizeHint().height()
+        needed = max(needed, layout.minimumSize().height())
+        if self.content.minimumHeight() != needed:
+            self.content.setMinimumHeight(needed)
+        frame = max(0, self.frameGeometry().height() - self.height())
+        chrome = self.height() - self.scroll.height()
+        height = min(needed + chrome + 2, available.height() - frame)
+        if abs(height - self.height()) > 1:
+            self.resize(self.width(), height)
+            top = min(max(self.frameGeometry().top(), available.top()), available.bottom() - self.frameGeometry().height() + 1)
+            if top != self.frameGeometry().top():
+                self.move(self.frameGeometry().left(), top)
+
+    # ------------------------------------------------------------------ Zustand, Phasen, Ergebnis
+    def set_state(self, state):
+        self.state = state
+        self.progress.setVisible(state != "ready")          # im Leerlauf kein leerer Balken
+        text, color, symbol = BUILD_STATES_UI[state]
+        self.state_badge.setText(f"{symbol} {tr(text)}")
+        self.state_badge.setStyleSheet(f"color: {color}; font-weight: 700; font-size: 14px;")
+        self.status_card.setStyleSheet(f"QFrame#statuskarte {{border: 1px solid {color}; border-radius: 6px;}}")
+
+    def _show_elapsed(self):
+        if self.clock.isValid():
+            seconds = self.clock.elapsed() // 1000
+            self.elapsed_label.setText(f"{seconds // 60}:{seconds % 60:02d}")
+
+    def _begin_run(self):
+        self.steps_log = []
+        self.clock.start()
+        self.tick.start()
+        self.steps.show()
+        self.result_title.hide()
+        self.copy_button.hide()
+        self._step("vorab", tr("Pre-check"))
+        self._show_elapsed()
+
+    def _end_run(self):
+        if not self.tick.isActive():
+            return
+        self.tick.stop()
+        if self.steps_log and self.steps_log[-1][3] is None:
+            self.steps_log[-1][3] = self.clock.elapsed()
+        self._render_steps()
+        self._show_elapsed()
+
+    def _step(self, key, title):
+        if not self.clock.isValid() or (self.steps_log and self.steps_log[-1][0] == key):
+            return
+        now = self.clock.elapsed()
+        if self.steps_log and self.steps_log[-1][3] is None:
+            self.steps_log[-1][3] = now
+        self.steps_log.append([key, title, now, None])
+        self._render_steps()
+
+    def _render_steps(self):
+        """Letzte abgeschlossene Phasen mit Dauer, dazu die laufende Phase."""
+        from html import escape
+        done = [s for s in self.steps_log if s[3] is not None]
+        parts = []
+        if len(done) > 5:
+            parts.append(f"<span style='color:#9AA3AD'>… +{len(done) - 5}</span>")
+        for _, title, start, end in done[-5:]:
+            parts.append(f"<span style='color:#9AA3AD'>✔ {escape(title)} {(end - start) / 1000:.0f} s</span>")
+        for _, title, _, end in self.steps_log:
+            if end is None:
+                parts.append(f"<b style='color:#5AA9E6'>▶ {escape(title)}</b>")
+        self.steps.setText("  ›  ".join(parts))
+
+    def copy_hash(self):
+        packages = (self.result or {}).get("pakete") or []
+        if packages and packages[0].get("sha256"):
+            QApplication.clipboard().setText(packages[0]["sha256"])
+            self.copy_button.setText(tr("Copied"))
+            QTimer.singleShot(1500, lambda: self.copy_button.setText(tr("Copy SHA-256")))
+
+    def _style_primary(self, button, on):
+        if bool(button.property("primary")) != on:
+            button.setProperty("primary", on)
+            button.style().unpolish(button)
+            button.style().polish(button)
+        button.setDefault(on)
+
+    def validate(self, *args):
+        """Eingaben schon beim Tippen prüfen: rote Felder mit Grund, Bau-Knopf gesperrt."""
+        self._update_paths_summary()
+        problems = {}
+        name = self.name.text().strip()
+        if not name:
+            problems[self.name] = tr("Please enter a value.")
+        elif not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", name):
+            problems[self.name] = tr("Build name: 1–80 letters/digits, hyphen or underscore.")
+        paths = {}
+        for field in (self.output, self.packages):
+            try:
+                if not field.text().strip():
+                    problems[field] = tr("Please enter a value.")
+                else:
+                    paths[field] = writable_path(field.text())
+            except (ValueError, OSError) as error:
+                problems[field] = meldung(error)
+        if self.name not in problems and len(paths) == 2:
+            if (paths[self.packages] / (name + ".zip")).exists() or (paths[self.output] / name).exists():
+                problems[self.name] = tr("Build name already exists. Suggestion: {name}_neu", name=name)
+        carrier = self.carrier.text().strip()
+        if not carrier:
+            problems[self.carrier] = tr("Please enter a value.")
+        elif not Path(carrier).expanduser().is_file():
+            problems[self.carrier] = tr("Carrier package missing: {carrier}", carrier=carrier)
+        for field in (self.name, self.output, self.packages, self.carrier):
+            field.setStyleSheet("border: 1px solid #F07878;" if field in problems else "")
+            if field in problems:
+                field.setToolTip(problems[field])
+        self.name.setToolTip(problems.get(self.name) or tr("Suggested consecutively (last build + 1); append a "
+                                                           "description with an underscore, e.g. “_tafeln50”."))
+        self.valid = not problems
+        self.path_problem = any(f in problems for f in (self.output, self.packages, self.carrier))
+        self.field_error.setText("\n".join(problems.values()))
+        self.field_error.setVisible(bool(problems))
+        self.start_button.setToolTip(next(iter(problems.values()), ""))
+        self._update_buttons()
 
     # ------------------------------------------------------------------ Streckencode und Zustand im Spiel
     def _fill_codes(self):
@@ -428,7 +706,7 @@ class BuildDialog(QDialog):
         if source.getWidgetPosition(self.track_name)[0] < 0:
             return
         source.takeRow(self.track_name)
-        row = target.getWidgetPosition(self.target)[0] + 1 if self.swofty() else 0
+        row = 2 if self.swofty() else 0                  # unter „Was ist neu?“ bzw. oben in den Erweiterten Optionen
         target.insertRow(row, self.track_name_label, self.track_name)
         self.track_name_label.show()
         self.track_name.show()
@@ -440,6 +718,9 @@ class BuildDialog(QDialog):
         self._update_buttons()
         self.code.setVisible(not self.swofty())
         self.code_label.setVisible(not self.swofty())
+        installed = (self.status_read and self.game_state is not None and
+                     self.code.currentData() in (self.game_state.get("installiert") or {}))
+        self.install_hint.setVisible(not self.swofty() and not installed)    # nur der Track Installer, nur beim ersten Mal
         if self.swofty():
             self.code_info.setText(tr("Creates an addon: drag it onto the launcher's Addons page, then start the game "
                                       "from the launcher. The code comes from the track name, and the menus show that "
@@ -454,7 +735,8 @@ class BuildDialog(QDialog):
             state = code_status(code, self.game_state)
         else:
             state = ""
-        self.code_info.setText((hint + "\n" + state).strip())
+        self.code_info.setText(state.strip() or hint)
+        self.code.setToolTip(hint)
         self._update_profile_hint()
 
     def refresh_game_status(self):
@@ -482,6 +764,14 @@ class BuildDialog(QDialog):
         self._fill_codes()
         self._update_code_info()
 
+    def _toggle_paths(self, on):
+        self.paths_box.setVisible(on)
+        self.paths_toggle.setText(tr("Folders ▾") if on else tr("Folders ▸"))
+
+    def _update_paths_summary(self):
+        self.paths_summary.set_full(" · ".join((self.output.text(), self.packages.text(),
+                                                  Path(self.carrier.text()).name or "–")))
+
     def _toggle_advanced(self, on):
         self.advanced.setVisible(on)
         self.advanced_toggle.setText(tr("Advanced build options ▾") if on else tr("Advanced build options ▸"))
@@ -495,21 +785,29 @@ class BuildDialog(QDialog):
                 "biom": self.biome.currentData(), "farbton": self.tint.currentData()}
 
     def _update_profile_hint(self, *args):
+        """Eine Zeile Zusammenfassung vor dem Bau: Ziel, Code, Sichtbarkeit, Raster, Name, Größe."""
         if not hasattr(self, "pvs"):
             return
         o = self.options()
+        shared = self.swofty() and o["traeger_teilen"]
         self.profile_hint.setText(
-            tr("Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.\nBefore the "
-               "build the project is saved and checked (same state: result of the last check). The build creates a "
-               "snapshot; you can keep working during the build.",
+            tr("{ziel} · code {streckencode} · PVS {pvs} · {raster} · name “{name}” · {groesse}",
+               ziel=self.target.currentText(),
                streckencode=tr("from the name") if self.swofty() else o['streckencode'],
                pvs=tr("along the track") if o['pvs_variante'] == 'strecke' else tr("Original"),
-               name=o['streckenname'] or self.project.raw.get('name') or tr("Test track")))
+               raster=self.grid_size.currentText(),
+               name=o['streckenname'] or self.project.raw.get('name') or tr("Test track"),
+               groesse=tr("about 0.45 GB") if shared else tr("about 3 GB")))
+        self.profile_hint.setToolTip(tr("Before the build the project is saved and checked (same state: result of the "
+                                        "last check). The build works on a snapshot; you can keep working during the "
+                                        "build."))
 
     def update_space(self):
         try:
             output, packages = build_folders(self.project, self.output.text(), self.packages.text())
-            self.space.setText(space_text(output, packages))
+            text = space_text(output, packages)
+            self.space.setText(text)
+            self.space.setStyleSheet("color: #F07878;" if tr(" – not enough!") in text else "")
         except ValueError as error:
             self.space.setText(meldung(error))
 
@@ -523,20 +821,30 @@ class BuildDialog(QDialog):
 
     def busy(self, active):
         self.fields.setEnabled(not active)
-        self.start_button.setEnabled(not active)
         self.cancel_button.setEnabled(active and getattr(self, "inject_job", None) is None)
-        self.close_button.setEnabled(not active)
+        self.close_button.setText(tr("Hide") if active else tr("Close"))
         self.inject_button.setEnabled(not active and self.inject_record is not None)
         for button in (self.install_button, self.play_button):
             button.setEnabled(not active and self.launcher_job is None and self.launcher_record is not None)
         self.cancel_button.setText(tr("Cancel"))
+        if active and self.job is None and self.state not in ("checking", "building"):
+            self._state_before = self.state
+            self.set_state("working")
+        elif not active:
+            self._end_run()
+            if self.state == "working":
+                self.set_state(getattr(self, "_state_before", "ready"))
+        self.busy_now = active
         self._update_buttons()
 
     def _update_buttons(self):
-        """Die Leiste zeigt nur, was gerade geht: Abbrechen beim Bau, das Weitergeben zum Bauziel, Ergebnisse nach dem Bau."""
+        """Die Leiste zeigt nur, was gerade geht: Abbrechen beim Bau, das Weitergeben zum Bauziel, Ergebnisse nach dem Bau.
+        Hauptaktion (blau) ist immer der nächste sinnvolle Schritt."""
         if not hasattr(self, "launcher_job"):
             return
+        busy = getattr(self, "busy_now", False)
         swofty = self.swofty()
+        self.start_button.setEnabled(not busy)           # ungültige Eingaben meldet der Klick (Ordner springen auf)
         self.cancel_button.setVisible(self.cancel_button.isEnabled() or self.job is not None)
         self.inject_button.setVisible(self.inject_record is not None and not swofty)
         self.install_button.setVisible(self.launcher_record is not None and swofty)
@@ -544,6 +852,15 @@ class BuildDialog(QDialog):
         self.diagnosis_button.setVisible(swofty)
         self.explorer_button.setVisible(self.explorer_button.isEnabled())
         self.report_button.setVisible(self.report_button.isEnabled())
+        built = self.result is not None and self.job is None and self.state in ("done", "working")
+        primary = None
+        if built:
+            primary = self.play_button if swofty and self.launcher_record else \
+                self.inject_button if not swofty and self.inject_record else None
+        for button in (self.inject_button, self.play_button):
+            self._style_primary(button, button is primary)
+        self._style_primary(self.start_button, primary is None)
+        self.start_button.setText(tr("Rebuild") if built else tr("Check and build"))
 
     def start_build(self):
         if self.job:
@@ -553,6 +870,12 @@ class BuildDialog(QDialog):
                 raise ValueError(tr("A build needs a closed lap and a known project version."))
             if self.main.properties.pending():
                 raise ValueError(tr("Correct the invalid field input first."))
+            self.validate()
+            if not self.valid:
+                if self.path_problem:
+                    self.paths_toggle.setChecked(True)   # fehlerhafte Ordner/Träger sichtbar machen
+                    self.paths_box.setFocus()
+                raise ValueError(self.field_error.text().splitlines()[0])
             if not all(f.text().strip() for f in (self.name, self.output, self.packages, self.carrier)):
                 raise ValueError(tr("Please enter build name, both output folders and carrier package."))
             root = toolkit_path(self.project.manifest.get("werkzeugkasten"))
@@ -577,8 +900,11 @@ class BuildDialog(QDialog):
             self.record = None
             self.messages.clear()
             self.issue_list.clear()
+            self._update_issue_summary()
             self.log.clear()
             self.result_text.clear()
+            self._begin_run()
+            self.set_state("checking")
             self.explorer_button.setEnabled(False)
             self.report_button.setEnabled(False)
             self._update_buttons()
@@ -598,6 +924,7 @@ class BuildDialog(QDialog):
                                               "basis": str(self.project.folder), "toolkit": str(root), "shift": shift})
         except (ValueError, OSError) as error:
             self.phase.setText(meldung(error))
+            self.set_state("error")
 
     def umgebung_datei(self):
         """Gespeicherte ``umgebung.json`` des Projekts für den Bau (Schalter ``--umgebung``); None ohne Umgebung."""
@@ -613,6 +940,7 @@ class BuildDialog(QDialog):
         try:
             if code == -2:
                 self.phase.setText(tr("Pre-check cancelled · no build started"))
+                self.set_state("cancelled")
                 self.busy(False)
                 return
             response = json.loads(text)
@@ -622,6 +950,7 @@ class BuildDialog(QDialog):
                 self.main.store_analysis(self.check_key, response)
         except (ValueError, KeyError, OSError) as error:
             self.phase.setText(meldung(error))
+            self.set_state("error")
             self.busy(False)
             return
         self.use_check(response)
@@ -637,6 +966,7 @@ class BuildDialog(QDialog):
             self.launch()
         except (ValueError, KeyError, OSError) as error:
             self.phase.setText(meldung(error))
+            self.set_state("error")
             self.busy(False)
 
     def launch(self):
@@ -663,6 +993,7 @@ class BuildDialog(QDialog):
         self.job.output.connect(self.log.insertPlainText)
         self.job.done.connect(self.build_finished)
         self.busy(True)
+        self.set_state("building")
         self.phase.setText(tr("Build starting · the saved project is taken over as a snapshot"))
         self.job.start(self.command)
 
@@ -670,9 +1001,37 @@ class BuildDialog(QDialog):
         from .adapter import issue_from_message
         issue = issue_from_message(message)
         self.messages.append(issue)
-        self.issue_list.addItem(f"{tr(issue['level'])} · {issue.get('kurz', issue['id'])} · {meldung(issue['text'])}")
-        self.issue_list.item(self.issue_list.count() - 1).setData(Qt.UserRole, issue)
+        rank, color, symbol = ISSUE_LEVELS.get(issue["level"], ISSUE_LEVELS["Hinweis"])
+        item = QListWidgetItem(f"{symbol} {tr(issue['level'])} · {issue.get('kurz', issue['id'])} · "
+                               f"{meldung(issue['text'])}")
+        item.setData(Qt.UserRole, issue)
+        item.setData(Qt.UserRole + 1, rank)
+        if rank < 2:
+            item.setForeground(QBrush(QColor(color)))
+        row = self.issue_list.count()                  # Fehler vor Warnungen vor Hinweisen, sonst in Eingangsreihenfolge
+        while row > 0 and self.issue_list.item(row - 1).data(Qt.UserRole + 1) > rank:
+            row -= 1
+        self.issue_list.insertItem(row, item)
+        self._update_issue_summary()
         self.main.add_build_issue(issue, self.record["id"] if self.record else tr("Pre-check"))
+
+    def _update_issue_summary(self):
+        counts = [0, 0, 0]
+        for issue in self.messages:
+            counts[ISSUE_LEVELS.get(issue["level"], ISSUE_LEVELS["Hinweis"])[0]] += 1
+        self.issue_summary.setText(" · ".join((
+            trn(counts[0], "{n} error", "{n} errors"), trn(counts[1], "{n} warning", "{n} warnings"),
+            trn(counts[2], "{n} hint", "{n} hints"))))
+        self.issue_summary.setStyleSheet("color: #F07878; font-weight: 600;" if counts[0] else
+                                         "color: #D6A94A; font-weight: 600;" if counts[1] else "")
+        self.issue_box.setVisible(bool(self.messages))
+        self._apply_issue_filter()
+
+    def _apply_issue_filter(self, *args):
+        limit = {"alle": 2, "probleme": 1, "fehler": 0}[self.issue_show.currentData()]
+        for row in range(self.issue_list.count()):
+            item = self.issue_list.item(row)
+            item.setHidden(item.data(Qt.UserRole + 1) > limit)
 
     def jump_message(self, item):
         self.main.jump_issue(item)
@@ -684,8 +1043,14 @@ class BuildDialog(QDialog):
             self.record["eingabe"] = entry
             self.log.appendPlainText(tr("Snapshot: ") + json.dumps(entry, ensure_ascii=False))
         elif typ == "phase":
-            self.phase.setText(meldung(event.get("titel", event.get("phase", tr("Build run")))))
+            title = meldung(event.get("titel", event.get("phase", tr("Build run"))))
+            self.phase.setText(title)
             self.progress.setValue(round(float(event.get("fortschritt", 0)) * 1000))
+            self._step(event.get("phase") or title, title)
+            if not self.isVisible():                   # ausgeblendet: Fortschritt in der Statusleiste des Hauptfensters
+                label = getattr(self.main, "status_label", None)
+                if label is not None:
+                    label.setText(tr("Build: {phase} ({prozent} %)", phase=title, prozent=self.progress.value() // 10))
         elif typ == "meldung":
             self.add_message(event["meldung"])
         elif typ == "log":
@@ -710,10 +1075,17 @@ class BuildDialog(QDialog):
             label = tr("Package checked") if terminal["status"] == "ok" else tr("Checked with carrier deviation")
             self.phase.setText(label + tr(" · playtest open"))
             self.progress.setValue(1000)
+            self.set_state("done")
             packages = terminal["pakete"]
             self.record.update(pakete=packages, paket=packages[0]["pfad"], bau_status=terminal["status"],
                                pruefbericht=terminal.get("pruefbericht"), bericht_md=terminal.get("bericht_md"))
             lines = [label]
+            self._end_run()
+            self.result_title.setText(f"{Path(packages[0]['pfad']).name} · "
+                                      f"{zahl(packages[0].get('groesse', 0) / 1e9, 2, 'GB')} · "
+                                      f"{self.elapsed_label.text()}")
+            self.result_title.show()
+            self.copy_button.setVisible(bool(packages[0].get("sha256")))
             for package in packages:
                 lines += [package["pfad"], tr("{groesse:.3f} GB · SHA-256: {sha256}", groesse=package.get('groesse', 0) / 1e9,
                                                     sha256=package.get('sha256', tr("not available")))]
@@ -735,6 +1107,7 @@ class BuildDialog(QDialog):
                 3: tr("Build cancelled"), -1: text,
             }.get(code, "Bau fehlgeschlagen oder vollständiges Ergebnis fehlt")
             self.phase.setText(reason)
+            self.set_state("cancelled" if code in (3, -2) else "error")
             self.result_text.setPlainText(tr("{status} · exit code {code}\n{reason}", status=tr(status).capitalize(), code=code, reason=reason))
             self.record.update(bau_status=status, bau_fehler=reason)
         self.record["exitcode"] = code
@@ -744,6 +1117,12 @@ class BuildDialog(QDialog):
             self.phase.setText(self.phase.text() + tr(" · log not saved: {error}", error=error))
         self.busy(False)
         job.deleteLater()
+        if not self.isVisible():                       # im Hintergrund fertig: Hauptfenster melden
+            label = getattr(self.main, "status_label", None)
+            if label is not None:
+                label.setText(tr("Build finished: {name} · open Build / package to see the result.", name=self.name.text())
+                              if success else tr("Build failed or cancelled · open Build / package for details."))
+            QApplication.alert(self.main)
         if success:
             try:
                 output, packages = build_folders(self.project, self.output.text(), self.packages.text())
@@ -959,13 +1338,20 @@ class BuildDialog(QDialog):
         if self.result:
             QDesktopServices.openUrl(QUrl.fromLocalFile(self.result["pruefbericht"]))
 
+    def _running(self):
+        return bool(self.job or self.inject_job or self.launcher_job)
+
     def reject(self):
-        if not self.job and not self.inject_job and not self.launcher_job:
+        if self._running():
+            self.close()                               # Esc blendet nur aus
+        else:
             super().reject()
 
     def closeEvent(self, event):
-        if self.job or self.inject_job or self.launcher_job:
-            event.ignore()
+        if self._running():
+            event.ignore()                             # der Bau läuft im Hintergrund weiter
+            self.background_hidden = True
+            self.hide()
         else:
             event.accept()
 

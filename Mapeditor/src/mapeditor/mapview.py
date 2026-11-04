@@ -57,6 +57,8 @@ class MapView(QGraphicsView):
     zone_clicked = Signal(str, int)
     zone_restore = Signal()                       # Esc während eines Zonenzugs: Overlay aus der Definition
     turn_clicked = Signal(int)                    # Kurvennummer (Spiel) angeklickt
+    camera_clicked = Signal(str)                  # Kameragruppe (z. B. „s07a“) angeklickt
+    camera_moved = Signal(str, str, float, float)  # Instanzname, Vorlage, Kartenpunkt x, z (Werkzeug Kameras)
     env_place_requested = Signal(float, float)    # Klick mit gewähltem Modell: Definitionskoordinaten x, z
     env_scatter_requested = Signal(dict)          # Fläche bepflanzen: {"form": "rechteck"|"pinsel", …}
     env_disarm_requested = Signal()               # Esc: Modell der Platzierung abwählen
@@ -80,6 +82,12 @@ class MapView(QGraphicsView):
         self.preview = None
         self.dark = True
         self.grid = self.bands = self.direction = self.show_frame = self.show_zones = True
+        # Kameras des Trägers (spiel_kameras.plan): Zonen quer über der Strecke, Kameras daneben
+        self.show_cameras = False
+        self.cameras = []
+        self.camera_group = None                  # gewählte Gruppe (hervorgehoben)
+        self._camera_hits = []
+        self.camera_drag = None                   # {"name", "template", "punkt": QPointF (Ansicht), "start"}
         self.mode = "auswahl"
         self.pan_origin = None
         self.space = False
@@ -393,6 +401,7 @@ class MapView(QGraphicsView):
             if self.analysis:
                 self._draw_analysis_marks(painter, to_view, text_color)
             self._draw_zones(painter, to_view)
+        self._draw_cameras(painter, to_view)
         if self.drag_point and self.rotate_center is None:
             painter.setPen(QPen(QColor("#FFD184"), 2, Qt.DashLine))
             painter.setBrush(Qt.NoBrush)
@@ -416,7 +425,7 @@ class MapView(QGraphicsView):
         top = 12
         if (self.show_hints or gesture) and (note or state != tr("Preview up to date") or self.mode != "auswahl"):
             names = {"punkte": tr("Set points"), "umgebung": tr("Environment"), "streuen": tr("Plant area"),
-                     "nachzeichnen": tr("Trace")}
+                     "nachzeichnen": tr("Trace"), "kameras": tr("Cameras")}
             self._chip(painter, 12, top, f"{names.get(self.mode, tr('Select'))}  ·  {state}{note}",
                        "#D6A94A" if self.stale and not gesture else None)
             top += 30
@@ -428,6 +437,9 @@ class MapView(QGraphicsView):
             hint = self._env_hint()
         elif self.mode == "nachzeichnen" and self.trace is not None:
             hint = self.trace.hinweis()
+        elif self.mode == "kameras":
+            hint = tr("Drag a diamond: move the camera · drag a bar: move the trigger zone along the track · "
+                      "click: select · V or Esc: back to selection")
         elif self.mode == "punkte":
             hint = (tr("Click sets a point · from 4 points “Close lap” · V or Esc: back to selection")
                     if not self.document.project.closed else
@@ -943,6 +955,93 @@ class MapView(QGraphicsView):
                 painter.drawRect(QRectF(point.x() - 6, point.y() - 6, 12, 12))
         painter.restore()
 
+    CAMERA_FARBE = "#C4B5FD"
+
+    def _draw_cameras(self, painter, to_view):
+        """Auslösezonen als Balken quer über der Strecke, Kameras als Rauten; gepunktete Linien zeigen, welche Kameras
+        eine Zone laut EventGraph schaltet (oft zufällig eine von mehreren)."""
+        self._camera_hits = []
+        if not self.cameras or not (self.show_cameras or self.camera_group is not None or self.mode == "kameras"):
+            return
+        painter.save()
+        drag = self.camera_drag if self.camera_drag and self.camera_drag.get("aktiv") else None
+
+        def ansicht(e):
+            if drag is not None and e["name"] == drag["name"]:
+                if e["template"].startswith("TriggerZone"):
+                    return drag.get("ansicht_zone") or to_view(e["position"][0], e["position"][2])
+                return drag["punkt"].x(), drag["punkt"].y()
+            return to_view(e["position"][0], e["position"][2])
+        je_name = {e["name"]: e for e in self.cameras}
+        zonen = [e for e in self.cameras if e["template"].startswith("TriggerZone")]
+        gewaehlt_namen = set()
+        for z in zonen:
+            if z["gruppe"] == self.camera_group:
+                gewaehlt_namen.add(z["name"])
+                gewaehlt_namen.update(z.get("kameras") or [])
+        for z in zonen:                                   # Verknüpfungen zuerst (unter den Symbolen)
+            for name in z.get("kameras") or []:
+                k = je_name.get(name)
+                if k is None:
+                    continue
+                aktiv = z["name"] in gewaehlt_namen
+                farbe = QColor("#7C8796" if z["aus"] else ("#F1F5F9" if aktiv else self.CAMERA_FARBE))
+                farbe.setAlpha(230 if aktiv else 120)
+                painter.setPen(QPen(farbe, 1.5 if aktiv else 1, Qt.DotLine))
+                painter.drawLine(QPointF(*ansicht(z)), QPointF(*ansicht(k)))
+        for e in self.cameras:
+            gewaehlt = e["name"] in gewaehlt_namen
+            farbe = QColor("#7C8796" if e["aus"] else ("#F1F5F9" if gewaehlt else self.CAMERA_FARBE))
+            x, y = ansicht(e)
+            if e["template"].startswith("TriggerZone"):
+                q = e.get("quer") or [1.0, 0.0, 0.0]
+                skala = to_view(1.0, 0.0)[0] - to_view(0.0, 0.0)[0]
+                a = (x - 12 * q[0] * skala, y - 12 * q[2] * skala)
+                b = (x + 12 * q[0] * skala, y + 12 * q[2] * skala)
+                pen = QPen(farbe, 5 if gewaehlt else 3, Qt.DashLine if e["aus"] else Qt.SolidLine)
+                pen.setCapStyle(Qt.FlatCap)
+                painter.setPen(pen)
+                painter.drawLine(QPointF(*a), QPointF(*b))
+            elif e["template"] != "Spline":
+                r = 6 if gewaehlt else 4
+                painter.setPen(QPen(QColor("#101820"), 1))
+                painter.setBrush(farbe)
+                painter.drawPolygon(QPolygonF([QPointF(x, y - r), QPointF(x + r, y), QPointF(x, y + r), QPointF(x - r, y)]))
+            self._camera_hits.append((QPointF(x, y), e["gruppe"], e["name"], e["template"]))
+        if self.camera_group is not None and self.show_labels:
+            z = next((z for z in zonen if z["gruppe"] == self.camera_group), None)
+            if z is not None:
+                self._label(painter, QPointF(*to_view(z["position"][0], z["position"][2])) + QPointF(10, -14),
+                            self.camera_group, self.CAMERA_FARBE, force=True)
+        painter.restore()
+
+    def camera_at(self, position, radius=9.0):
+        """Kameragruppe unter dem Mauszeiger (Zone oder Kamera) oder None."""
+        treffer = self.camera_hit(position, radius)
+        return treffer[0] if treffer else None
+
+    def camera_hit(self, position, radius=9.0):
+        """(Gruppe, Instanzname, Vorlage) unter dem Mauszeiger oder None; Kameras vor Zonen."""
+        best, best_d = None, radius
+        for point, gruppe, name, template in self._camera_hits:
+            d = math.hypot(point.x() - position.x(), point.y() - position.y()) - (2.0 if "Zone" not in template else 0.0)
+            if d < best_d:
+                best, best_d = (gruppe, name, template), d
+        return best
+
+    def _zone_auf_strecke(self, position):
+        """Nächster Punkt der Vorschau-Mittellinie zu einem Ansichtspunkt (Ansichtskoordinaten) für das Ziehen einer Zone."""
+        if not self.preview or not self.preview.get("pos"):
+            return None
+        to_view = self._to_view()
+        best, best_d = None, float("inf")
+        for p in self.preview["pos"]:
+            x, y = to_view(p[0], p[2])
+            d = (x - position.x()) ** 2 + (y - position.y()) ** 2
+            if d < best_d:
+                best, best_d = (x, y), d
+        return best
+
     def _draw_rotation(self, painter, to_view, text_color):
         if self.rotate_center is not None:
             center = QPointF(*to_view(self.rotate_center.x(), self.rotate_center.y()))
@@ -1006,6 +1105,15 @@ class MapView(QGraphicsView):
         if self.mode in ENV_MODES:
             self._env_press(event, scene_point)
             return
+        if self.mode == "kameras":
+            treffer = self.camera_hit(event.position())
+            if treffer is not None:
+                gruppe, name, template = treffer
+                self.camera_clicked.emit(gruppe)
+                if not self.document.project.readonly:
+                    self.camera_drag = {"name": name, "template": template, "punkt": event.position(),
+                                        "start": event.position(), "aktiv": False}
+            return
         if self.mode == "nachzeichnen":
             if self.trace is not None and not self.document.project.readonly:
                 self.trace.druecken(scene_point.x(), scene_point.y(), event.position(), self._to_view())
@@ -1017,6 +1125,10 @@ class MapView(QGraphicsView):
             if box is not None and box.adjusted(-3, -3, 3, 3).contains(event.position()):
                 self.turn_clicked.emit(number)
                 return
+        gruppe = self.camera_at(event.position()) if (self.show_cameras or self.camera_group is not None) else None
+        if gruppe is not None:
+            self.camera_clicked.emit(gruppe)
+            return
         for feld, point in self.zone_handles():
             if (point - event.position()).manhattanLength() < 14:
                 self.zone_drag = (self.zone_selected[0], self.zone_selected[1], feld)
@@ -1301,6 +1413,17 @@ class MapView(QGraphicsView):
         return False
 
     def mouseMoveEvent(self, event):
+        if self.mode == "kameras" and self.camera_drag is not None and self.pan_origin is None:
+            d = self.camera_drag
+            if not d["aktiv"] and (event.position() - d["start"]).manhattanLength() > 4:
+                d["aktiv"] = True
+                self.setCursor(Qt.SizeAllCursor)
+            if d["aktiv"]:
+                d["punkt"] = event.position()
+                if d["template"].startswith("TriggerZone"):
+                    d["ansicht_zone"] = self._zone_auf_strecke(event.position())
+                self.viewport().update()
+            return
         if self.mode in ENV_MODES and self.pan_origin is None:
             self._env_move(event)
             return
@@ -1367,6 +1490,15 @@ class MapView(QGraphicsView):
         if self.pan_origin is not None:
             self.pan_origin = None
             self.unsetCursor()
+        elif self.mode == "kameras" and self.camera_drag is not None:
+            d, self.camera_drag = self.camera_drag, None
+            self.unsetCursor()
+            if d["aktiv"]:
+                punkt = self.mapToScene(event.position().toPoint())
+                if d["template"].startswith("TriggerZone") and d.get("ansicht_zone"):
+                    punkt = self.mapToScene(QPointF(*d["ansicht_zone"]).toPoint())
+                self.camera_moved.emit(d["name"], d["template"], punkt.x(), punkt.y())
+            self.viewport().update()
         elif self.mode in ENV_MODES:
             self._env_release(event)
         elif self.mode == "nachzeichnen":
@@ -1485,9 +1617,9 @@ class MapView(QGraphicsView):
             if frame is not None:
                 step = -1.0 if event.modifiers() & Qt.ShiftModifier else 1.0
                 self.document.rotate_selection(math.radians(step), (frame[0] + frame[2]) / 2, (frame[1] + frame[3]) / 2)
-        elif key in (Qt.Key_V, Qt.Key_P, Qt.Key_U, Qt.Key_B, Qt.Key_N):
+        elif key in (Qt.Key_V, Qt.Key_P, Qt.Key_U, Qt.Key_B, Qt.Key_N, Qt.Key_K):
             self.mode_changed.emit({Qt.Key_P: "punkte", Qt.Key_U: "umgebung", Qt.Key_B: "streuen",
-                                    Qt.Key_N: "nachzeichnen"}.get(key, "auswahl"))
+                                    Qt.Key_N: "nachzeichnen", Qt.Key_K: "kameras"}.get(key, "auswahl"))
         elif key == Qt.Key_A and event.modifiers() & Qt.ControlModifier:
             self.document.select_many(range(self.document.object_count))
         elif key in (Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down) and self.document.selected_indices:

@@ -49,6 +49,7 @@ Banking;Querneigung;ansicht.py
 Banking field;Querneigungsfeld;ansicht.py
 Buttons at the top;Knöpfe oben;ansicht.py
 Calculate racing line automatically;Fahrlinie automatisch berechnen;ansicht.py
+Cameras (replays);Kameras (Wiederholungen);ansicht.py
 Catalogue, planting and properties of the environment objects;Katalog, Bepflanzen und Eigenschaften der Umgebungsobjekte;ansicht.py
 Checks;Prüfung;ansicht.py
 Choice of Draw/Template/Suggestion;Auswahl Zeichnen/Vorlage/Vorschlag;ansicht.py
@@ -97,6 +98,7 @@ The track must lie completely inside this frame;Die Strecke muss vollständig in
 Toolbar;Werkzeugleiste;ansicht.py
 Track edges;Fahrbahnränder;ansicht.py
 "Trees, bushes, buildings … as circles at catalogue size (colour per category); edit with the “Environment” tool (U)";"Bäume, Büsche, Gebäude … als Kreise in Katalogröße (Farbe je Kategorie); bearbeiten mit Werkzeug „Umgebung“ (U)";ansicht.py
+"Trigger zones across the track and the carrier's replay cameras, as the build moves them to this track; settings under Properties → Cameras";"Auslösezonen quer über der Strecke und die Wiederholungskameras des Trägers, so wie der Bau sie an diese Strecke versetzt; Einstellungen unter Eigenschaften → Kameras";ansicht.py
 What the editor shows and does automatically. Changes take effect immediately and are remembered.;Was der Editor zeigt und automatisch tut. Änderungen wirken sofort und bleiben gespeichert.;ansicht.py
 Without an argument the editor starts with the last opened project;Ohne Angabe startet der Editor mit dem zuletzt geöffneten Projekt;ansicht.py
 Zone labels;Zonenbeschriftungen;ansicht.py
@@ -175,24 +177,34 @@ Was ist neu: {beschreibung}";build.py
 24 cars (default);24 Autos (Standard);build.py
 26 cars;26 Autos;build.py
 A build needs a closed lap and a known project version.;Bau braucht eine geschlossene Runde und eine bekannte Projektfassung.;build.py
-Adapt AI driving data to the track (braking points of the driving assist and AI pace);KI-Fahrdaten an die Strecke anpassen (Bremspunkte der Fahrhilfe und KI-Tempo);build.py
+about 0.45 GB;etwa 0,45 GB;build.py
+about 3 GB;etwa 3 GB;build.py
+Adapt AI driving data to the track;KI-Fahrdaten an die Strecke anpassen;build.py
 Adds grid slots, garages and pit boxes for 26 cars. For 26 cars to actually race, the game also needs an addon such as Custom Grid Size.;Legt Startplätze, Garagen und Boxen für 26 Autos an. Damit 26 Autos fahren, braucht das Spiel zusätzlich ein Addon wie Custom Grid Size.;build.py
 Advanced build options ▸;Erweiterte Bauoptionen ▸;build.py
 Advanced build options ▾;Erweiterte Bauoptionen ▾;build.py
 After the build: package path, size, SHA-256 and check report.;Nach dem Bau: Paketpfad, Größe, SHA-256 und Prüfbericht.;build.py
+All;Alle;build.py
 along the track;entlang der Strecke;build.py
 along the track (recommended);entlang der Strecke (empfohlen);build.py
 Autumn;Herbst;build.py
-Build run;Bau;build.py
+"Before the build the project is saved and checked (same state: result of the last check). The build works on a snapshot; you can keep working during the build.";"Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). Der Bau arbeitet auf einem Schnappschuss; währenddessen kann weitergearbeitet werden.";build.py
+Braking points of the driving assist and AI pace.;Bremspunkte der Fahrhilfe und KI-Tempo.;build.py
 Build / package;Bauen / Paket;build.py
 BUILD / PACKAGE   ·   recommended profile;BAUEN / PAKET   ·   Profil empfohlen;build.py
 Build cancelled;Bau abgebrochen;build.py
+Build failed or cancelled · open Build / package for details.;Bau fehlgeschlagen oder abgebrochen · Details unter Bauen / Paket.;build.py
+Build finished: {name} · open Build / package to see the result.;Bau fertig: {name} · Ergebnis unter Bauen / Paket.;build.py
 Build for;Bauen für;build.py
 Build name;Bauname;build.py
+Build run;Bau;build.py
 Build starting · the saved project is taken over as a snapshot;Bau startet · gespeichertes Projekt wird als Schnappschuss übernommen;build.py
 Build status;Bau-Status;build.py
+Build: {phase} ({prozent} %);Bau: {phase} ({prozent} %);build.py
+Building;Baut;build.py
 Cancel;Abbrechen;build.py
 cancelled;abgebrochen;build.py
+Cancelled;Abgebrochen;build.py
 Cancelling …;Wird abgebrochen …;build.py
 Cancelling … next phase boundary, ends after 120 s at the latest.;Wird abgebrochen … nächste Phasengrenze, spätestens nach 120 s beenden.;build.py
 Carrier addon missing: {pfad};Träger-Addon fehlt: {pfad};build.py
@@ -204,12 +216,15 @@ Check error · package discarded;Prüffehler · Paket verworfen;build.py
 Check report: ;Prüfbericht: ;build.py
 Check {stufe}: {zusammenfassung};Prüfung {stufe}: {zusammenfassung};build.py
 Checked with carrier deviation;Mit Trägerabweichung geprüft;build.py
+Checking;Prüft;build.py
 Choose carrier package;Trägerpaket wählen;build.py
 Choose swofty.exe (the launcher's bin folder);swofty.exe wählen (Ordner bin des Launchers);build.py
 Choose your own output folder;Eigenen Ausgabeordner wählen;build.py
 Choose …;Wählen …;build.py
 Clean up old builds;Alte Bauten aufräumen;build.py
 Colour tone;Farbton;build.py
+Copied;Kopiert;build.py
+Copy SHA-256;SHA-256 kopieren;build.py
 Correct the invalid field input first.;Ungültige Feldeingabe zuerst korrigieren.;build.py
 Could not create cancel file: {error};Abbruchdatei konnte nicht angelegt werden: {error};build.py
 Crash;Absturz;build.py
@@ -224,23 +239,32 @@ Delete;Löschen;build.py
 Delete builds?;Bauten löschen?;build.py
 Delete selected …;Ausgewählte löschen …;build.py
 Desert;Wüste;build.py
+Done;Fertig;build.py
 Drag it onto the Addons page of Swofty Launcher and start the game from the launcher.;Im Swofty Launcher auf die Seite Addons ziehen und über den Launcher starten.;build.py
 Drive or folder not reachable: {path};Datenträger oder Ordner nicht erreichbar: {path};build.py
 Dry;Trocken;build.py
+During a build the window hides and the build continues.;Während eines Baus blendet das Fenster nur aus, der Bau läuft weiter.;build.py
+Errors and warnings;Fehler und Warnungen;build.py
+Errors only;Nur Fehler;build.py
 Exit code {code};Exitcode {code};build.py
 failed;fehlgeschlagen;build.py
+Failed;Fehlgeschlagen;build.py
 "First installation of a track code: install the ZIP once with the Track Installer and activate it in the EGO editor. After that, every new version with “Transfer to game” – without the EGO editor, even with the mod deactivated (backs up the affected game files, writes to the game after your confirmation; quit the game first).";"Erstinstallation eines Streckencodes: ZIP einmalig im Track Installer installieren und im EGO-Editor aktivieren. Danach jede neue Version mit „Ins Spiel übertragen“ – ohne EGO-Editor, auch bei deaktiviertem Mod (sichert die betroffenen Spieldateien, schreibt nach deiner Bestätigung ins Spiel; Spiel vorher beenden).";build.py
 Fixed in the profile: pit lane correction, activation template portimao, main variant only.;Fest im Profil: Boxengassen-Korrektur, Aktivierungsvorlage portimao, nur Hauptvariante.;build.py
+Folders ▸;Ordner ▸;build.py
+Folders ▾;Ordner ▾;build.py
 from the definition: {name};aus der Definition: {name};build.py
 from the name;aus dem Namen;build.py
 Game code the track is installed under. Each code is a separate slot in the game: several custom tracks side by side need different codes (docs/streckencode.md).;Spielcode, unter dem die Strecke installiert wird. Jeder Code ist ein eigener Platz im Spiel: mehrere eigene Strecken nebeneinander brauchen verschiedene Codes (docs/streckencode.md).;build.py
 Generates the AI time/speed curve (VPTimes) from the track's own profile instead of taking over Portimão's data. Without this option braking zones have no relation to the corners (25.10.2026). New, not yet confirmed in game.;Erzeugt die Zeit-/Geschwindigkeitskurve der KI (VPTimes) aus dem eigenen Profil statt Portimãos Daten zu übernehmen. Ohne diese Option liegen Bremszonen ohne Bezug zu den Kurven (25.10.2026). Neu, noch nicht im Spiel bestätigt.;build.py
 Grass (default);Gras (Standard);build.py
+Hide;Ausblenden;build.py
 in game;im Spiel;build.py
 Install in launcher;Im Launcher installieren;build.py
 Install in launcher and start;Im Launcher installieren und starten;build.py
 Installed in the launcher. Start it there or from here.;Im Launcher installiert. Dort oder hier starten.;build.py
 Landscape;Landschaft;build.py
+Laps, fuel, tyres, AI, pit lane.;Runden, Sprit, Reifen, KI, Boxengasse.;build.py
 Last session read · no crash reported;Letzte Sitzung ausgewertet · kein Absturz gemeldet;build.py
 Log not saved: {error};Protokoll nicht gespeichert: {error};build.py
 Lush;Saftig;build.py
@@ -267,6 +291,7 @@ Playtest log;Spieltest-Protokoll;build.py
 Playtest log: {error};Spieltest-Protokoll: {error};build.py
 Playtest result: track, slot, observation …;Ergebnis des Spieltests: Strecke, Slot, Beobachtung …;build.py
 Playtest saved.;Spieltest gespeichert.;build.py
+Please enter a value.;Bitte einen Wert eingeben.;build.py
 Please enter build name, both output folders and carrier package.;Bitte Bauname, beide Ausgabeordner und Trägerpaket angeben.;build.py
 Pre-check;Vorabprüfung;build.py
 Pre-check cancelled · no build started;Vorabprüfung abgebrochen · kein Bau gestartet;build.py
@@ -280,10 +305,13 @@ Quick swap failed: ;Schnellaustausch fehlgeschlagen: ;build.py
 Quick swap not possible: ;Schnellaustausch nicht möglich: ;build.py
 Quick swap not possible: {error};Schnellaustausch nicht möglich: {error};build.py
 Quick swap: creating plan for {name} …;Schnellaustausch: Plan für {name} wird erstellt …;build.py
+Race data from the track;Renndaten aus der Strecke;build.py
 Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come from the estimated lap time, plus the pit lane speed limit and the time a pit stop costs, and the minimum lap time for leaderboards. The tyre choice is an estimate.;Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für Bestenlisten. Die Reifenwahl ist eine Schätzung.;build.py
 Read last session;Letzte Sitzung auswerten;build.py
 Reading state in the game …;Zustand im Spiel wird gelesen …;build.py
-Ready · progress shows phase boundaries.;Bereit · Fortschritt zeigt Phasengrenzen.;build.py
+Ready;Bereit;build.py
+Ready to build.;Bereit zum Bauen.;build.py
+Rebuild;Neu bauen;build.py
 Replaces Portimão's aerial photos: ground from the track surfaces, racing line on the asphalt, surroundings matching hills and mountains.;Ersetzt Portimãos Luftbilder: Boden aus den Flächen der Strecke, Ideallinie auf dem Asphalt, Umland passend zu Hügeln und Bergen.;build.py
 Report: ;Bericht: ;build.py
 running;läuft;build.py
@@ -307,9 +335,6 @@ The Portimão mod's textures sit once in a carrier addon next to the packages, a
 This package is already in the game · nothing transferred.;Dieses Paket ist bereits im Spiel · nichts übertragen.;build.py
 "Timeout while cancelling · process tree ended; temporary packages removed";"Zeitlimit beim Abbruch · Prozessbaum beendet; temporäre Pakete entfernt";build.py
 Track code;Streckencode;build.py
-"Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.
-Before the build the project is saved and checked (same state: result of the last check). The build creates a snapshot; you can keep working during the build.";"Streckencode {streckencode} · PVS {pvs} · Name „{name}“ · Boxenkorrektur · eine Hauptvariante.
-Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). Der Bau erzeugt einen Schnappschuss; während des Baus kann weitergearbeitet werden.";build.py
 Track Installer (EGO Editor);Track Installer (EGO-Editor);build.py
 Track name;Streckenname;build.py
 Transfer to game …;Ins Spiel übertragen …;build.py
@@ -319,7 +344,7 @@ Visibility (PVS);Sichtbarkeit (PVS);build.py
 What's new?;Was ist neu?;build.py
 What's new? (e.g. “Turn 11 apex, 50 m boards”) – appears in the playtest log;Was ist neu? (z. B. „Turn 11 Scheitel, 50-m-Tafeln“) – steht im Spieltest-Protokoll;build.py
 with carrier deviation;mit_traegerabweichung;build.py
-Work out race data from the track (laps, fuel, tyres, AI, pit lane);Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse);build.py
+Working;Arbeitet;build.py
 Working folder;Arbeitsordner;build.py
 "Working folder: {output}
 Package folder: {packages}
@@ -338,10 +363,14 @@ ZIP (*.zip);ZIP (*.zip);build.py
 {datum} · {name}{note} · build: {bau}{game} · playtest: {spieltest};{datum} · {name}{note} · Bau: {bau}{game} · Spieltest: {spieltest};build.py
 {groesse:.3f} GB · SHA-256: {sha256};{groesse:.3f} GB · SHA-256: {sha256};build.py
 {name} is in the game · record the playtest;{name} ist im Spiel · Spieltest eintragen;build.py
+{n} error|{n} errors;{n} Fehler|{n} Fehler;build.py
+{n} hint|{n} hints;{n} Hinweis|{n} Hinweise;build.py
+{n} warning|{n} warnings;{n} Warnung|{n} Warnungen;build.py
 "{status} · exit code {code}
 {reason}";"{status} · Exitcode {code}
 {reason}";build.py
 {target}: not directly inside the working or package folder;{target}: liegt nicht direkt im Arbeits- oder Paketordner;build.py
+{ziel} · code {streckencode} · PVS {pvs} · {raster} · name “{name}” · {groesse};{ziel} · Code {streckencode} · PVS {pvs} · {raster} · Name „{name}“ · {groesse};build.py
 At least four control points are needed to close the lap.;Zum Schließen sind mindestens vier Kontrollpunkte erforderlich.;document.py
 Change environment object;Umgebungsobjekt ändern;document.py
 Change environment objects;Umgebungsobjekte ändern;document.py
@@ -406,6 +435,7 @@ Too few points would be left after cutting.;Nach dem Abschneiden blieben zu weni
  · drag end; · Ende ziehen;mapview.py
 Asphalt;Asphalt;mapview.py
 Asphalt run-off;Asphalt-Auslauf;mapview.py
+Cameras;Kameras;mapview.py
 Choose a model in the catalogue and click to place · drag a frame to select several · Esc: back;Modell im Katalog wählen und klicken zum Platzieren · Rahmen ziehen wählt mehrere · Esc: zurück;mapview.py
 Click inserts a point at the nearest place on the track · V or Esc: back to selection;Klick fügt einen Punkt an der nächsten Stelle der Strecke ein · V oder Esc: zurück zur Auswahl;mapview.py
 Click places a hill (inside the track area, negative height = hollow) · Esc: back;Klick setzt einen Hügel (im Streckenbereich, negative Höhe = Senke) · Esc: zurück;mapview.py
@@ -415,6 +445,7 @@ Click selects a segment · Ctrl+A: move/rotate the whole track · F1: help;Klick
 Click selects · drag a box to select several · double-click on the line inserts a point · F1: help;Klick wählt · Rahmen ziehen wählt mehrere · Doppelklick auf die Linie fügt einen Punkt ein · F1: Hilfe;mapview.py
 Click sets a point · from 4 points “Close lap” · V or Esc: back to selection;Klick setzt einen Punkt · ab 4 Punkten „Runde schließen“ · V oder Esc: zurück zur Auswahl;mapview.py
 Close the lap for the preview;Runde schließen für die Vorschau;mapview.py
+Drag a diamond: move the camera · drag a bar: move the trigger zone along the track · click: select · V or Esc: back to selection;Raute ziehen: Kamera verschieben · Balken ziehen: Auslösezone entlang der Strecke verschieben · Klick: wählen · V oder Esc: zurück zur Auswahl;mapview.py
 Drag a rectangle: the area is planted · density in the “Environment” tab · Esc: back;Rechteck aufziehen: die Fläche wird bepflanzt · Dichte im Reiter „Umgebung“ · Esc: zurück;mapview.py
 Drag end: length/angle · yellow square: radius · right: change values;Ende ziehen: Länge/Winkel · gelbes Quadrat: Radius · rechts: Werte ändern;mapview.py
 Drag point: move · Del: delete · right: height and width;Punkt ziehen: verschieben · Entf: löschen · rechts: Höhe und Breite;mapview.py
@@ -658,6 +689,13 @@ Terrain;Gelände;umgebung_ui.py
 Not in the catalogue.";"{modell}
 Nicht im Katalog.";umgebung_ui.py
 {name} “{id}” · X {x} · Z {z};{name} „{id}“ · X {x} · Z {z};umgebung_ui.py
+Adapt AI driving data to the track (braking points of the driving assist and AI pace);KI-Fahrdaten an die Strecke anpassen (Bremspunkte der Fahrhilfe und KI-Tempo);unbenutzt
+Ready · progress shows phase boundaries.;Bereit · Fortschritt zeigt Phasengrenzen.;unbenutzt
+"Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.
+Before the build the project is saved and checked (same state: result of the last check). The build creates a snapshot; you can keep working during the build.";"Streckencode {streckencode} · PVS {pvs} · Name „{name}“ · Boxenkorrektur · eine Hauptvariante.
+Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). Der Bau erzeugt einen Schnappschuss; während des Baus kann weitergearbeitet werden.";unbenutzt
+Work out race data from the track (laps, fuel, tyres, AI, pit lane);Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse);unbenutzt
+{groesse:.2f} GB;{groesse:.2f} GB;unbenutzt
 arc;bogen;ux.py
 Click points into the map, then “Close lap”;Punkte in die Karte klicken, dann „Runde schließen“;ux.py
 clothoid;klothoide;ux.py
@@ -747,6 +785,7 @@ Stufe: ";window.py
  · merged; · zusammengelegt;window.py
  · new state follows automatically; · neuer Stand folgt automatisch;window.py
  · object {kennung}; · Objekt {kennung};window.py
+ · off; · aus;window.py
  · reaches {weite} from the origin, game area ±1,024 m: check the scale or move the track; · reicht bis {weite} vom Ursprung, Spielbereich ±1.024 m: Maßstab prüfen oder Strecke verschieben;window.py
  · target: ; · Soll: ;window.py
  · unsaved (Project → Save as …); · ungespeichert (Projekt → Speichern unter …);window.py
@@ -769,7 +808,7 @@ Active tool (V: select, P: points);Aktives Werkzeug (V: Auswahl, P: Punkte);wind
 added at the end;hinten angehängt;window.py
 added at the start;vorne angefügt;window.py
 AI corners and braking lines (AISplineData);KI-Kurven und Bremslinien (AISplineData);window.py
-All;Alle;window.py
+All cameras;Alle Kameras;window.py
 All selected points to their mean value;Alle gewählten Punkte auf ihren Mittelwert;window.py
 Angle;Winkel;window.py
 Angle · °;Winkel · °;window.py
@@ -783,6 +822,7 @@ Asymmetric width;Asymmetrische Breite;window.py
 Automatic zone: create your own zone with “+” to change it.;Automatik-Zone: mit „+“ eine eigene Zone anlegen, um sie zu verändern.;window.py
 A→B: {anzahl} points · {run} · banking {y}° → {y2}°;A→B: {anzahl} Punkte · {run} · Querneigung {y}° → {y2}°;window.py
 A→B: {anzahl} points · {run} · height {y} → {y2} m · Ø {grade} %;A→B: {anzahl} Punkte · {run} · Höhe {y} → {y2} m · Ø {grade} %;window.py
+Back to the carrier's cameras moved to this track (no automatic and no manual positions).;Zurück zu den Kameras des Trägers, an diese Strecke versetzt (ohne Automatik und ohne Handpositionen).;window.py
 Banking ({anzahl} objects);Querneigung ({anzahl} Objekte);window.py
 Banking in ° for {n} point (+ = left higher):|Banking in ° for {n} points (+ = left higher):;Querneigung in ° für {n} Punkt (+ = links höher):|Querneigung in ° für {n} Punkte (+ = links höher):;window.py
 Banking of {n} point changed · Ctrl+Z undoes.|Banking of {n} points changed · Ctrl+Z undoes.;Querneigung von {n} Punkt geändert · Strg+Z macht rückgängig.|Querneigung von {n} Punkten geändert · Strg+Z macht rückgängig.;window.py
@@ -796,13 +836,21 @@ Boards from speed loss · km/h;Tafeln ab Geschwindigkeitsabbau · km/h;window.py
 Boards · m before the corner;Tafeln · m vor der Kurve;window.py
 Braking distance;Bremsweg;window.py
 build;bau;window.py
+Build;Bauen;window.py
 Build / package …;Bauen / Paket …;window.py
 Build running · choose Cancel first and wait for the build to end.;Bau läuft · zuerst Abbrechen wählen und das Bauende abwarten.;window.py
 Build the package for the Track Installer;Paket für den Track Installer bauen;window.py
-Build;Bauen;window.py
+Calculate cameras automatically;Kameras automatisch berechnen;window.py
 Calculating preview …;Vorschau wird berechnet …;window.py
 Calculating racing line …;Fahrlinie wird berechnet …;window.py
 Calculating suggestion (seed {seed});Vorschlag (Seed {seed}) wird berechnet;window.py
+Camera group {gruppe} follows the track automatically.;Kameragruppe {gruppe} folgt der Strecke automatisch.;window.py
+Camera group {gruppe} selected: change it on the right.;Kameragruppe {gruppe} gewählt: rechts ändern.;window.py
+Cameras calculated: {zonen} trigger zones, {kameras} cameras · Ctrl+Z: undo;Kameras berechnet: {zonen} Auslösezonen, {kameras} Kameras · Strg+Z: rückgängig;window.py
+Cameras further out · m;Kameras weiter außen · m;window.py
+Cameras higher · m;Kameras höher · m;window.py
+Cameras need the preview and the carrier's cameras first.;Kameras brauchen zuerst die Vorschau und die Kameras des Trägers.;window.py
+Cameras not available: {error};Kameras nicht verfügbar: {error};window.py
 Cancel preview;Vorschau abbrechen;window.py
 "Cancel the running preview; input is kept. The next change starts the automation again.";"Laufende Vorschau abbrechen; Eingabe bleibt erhalten. Die nächste Änderung startet die Automatik wieder.";window.py
 "Cancel the running preview; your input is kept.";"Laufende Vorschau abbrechen; deine Eingabe bleibt erhalten.";window.py
@@ -873,6 +921,7 @@ Design;Entwerfen;window.py
 Detected corners;Erkannte Kurven;window.py
 Detection point · m from finish;Erkennungspunkt · m ab Ziel;window.py
 Direction;Richtung;window.py
+Discard camera changes;Kamera-Änderungen verwerfen;window.py
 DISPLAY;ANZEIGE;window.py
 Distance boards (50/100/150/200/250 m) before corners with heavy braking, on the side of the racing line. 50 and 100 m from the minimum speed loss, each further 50 m board for 50 km/h more speed loss. Appear in game after building.;Entfernungstafeln (50/100/150/200/250 m) vor Kurven mit starker Bremsung, auf der Seite der Ideallinie. 50 und 100 m ab dem Mindestabbau, je weitere 50 m Tafel 50 km/h mehr Abbau. Erscheinen beim Bauen im Spiel.;window.py
 Distance boards (braking points);Entfernungstafeln (Bremspunkte);window.py
@@ -983,6 +1032,7 @@ Load a reference image first: Project → “Load reference image …” or Ctrl
 Load reference image;Bildvorlage laden;window.py
 Load reference image …;Bildvorlage laden …;window.py
 Loading catalogue …;Katalog wird geladen …;window.py
+Loading the carrier's cameras …;Kameras des Trägers werden geladen …;window.py
 logic;logik;window.py
 Max. closing error · m;Max. Schließfehler · m;window.py
 Maximise / restore lower area;Unteren Bereich maximieren / zurück;window.py
@@ -992,15 +1042,21 @@ Minimum distance · m;Mindestabstand · m;window.py
 Minimum length · m;Mindestlänge · m;window.py
 Minimum-time refinement (apex search);Mindestzeit-Feinschliff (Scheitelsuche);window.py
 Mouse wheel;Mausrad;window.py
+Move camera;Kamera verschieben;window.py
+Move carrier cameras to this track;Kameras des Trägers an diese Strecke versetzen;window.py
 Move pit lane;Boxengasse verschieben;window.py
+Move trigger zone;Auslösezone verschieben;window.py
 Move {noun};{noun} verschieben;window.py
 moved to the open end ({abstand} m away);an das offene Ende verschoben ({abstand} m entfernt);window.py
 Name;Name;window.py
 New;Neu;window.py
 New from template …;Neu aus Vorlage …;window.py
+New layout for the current track: trigger zones before the corners, their cameras behind them on the outside of the corner. Ctrl+Z undoes it.;Neue Anordnung für die aktuelle Strecke: Auslösezonen vor die Kurven, ihre Kameras dahinter an die Kurvenaußenseite. Strg+Z macht es rückgängig.;window.py
 No analysis: the generator did not run for this state (messages under Check).;Keine Auswertung: der Generator lief für diesen Stand nicht (Meldungen unter Prüfung).;window.py
 No calculation running. The next change starts the automation.;Keine laufende Berechnung. Die nächste Änderung startet die Automatik.;window.py
 No calculation running. The preview starts 400 ms after a change.;Keine laufende Berechnung. Die Vorschau startet 400 ms nach einer Änderung.;window.py
+No camera changes to discard.;Keine Kamera-Änderungen zum Verwerfen.;window.py
+No cameras to calculate.;Keine Kameras zum Berechnen.;window.py
 No change to undo yet.;Noch keine Änderung zum Rückgängigmachen.;window.py
 No gap found. Select two neighbouring points or a gap > 4× the point spacing.;Keine Lücke gefunden. Zwei benachbarte Punkte wählen oder Lücke > 4× Punktabstand.;window.py
 No large gaps. Select two neighbouring points to fill exactly that gap.;Keine großen Lücken. Zwei benachbarte Punkte wählen füllt genau diese Lücke.;window.py
@@ -1088,6 +1144,7 @@ Reference image from clipboard;Bildvorlage aus Zwischenablage;window.py
 Reference image {quelle} loaded ({breite} × {hoehe} pixels) · first “Measure scale” on the right, then click the start/finish line;Bildvorlage {quelle} geladen ({breite} × {hoehe} Pixel) · zuerst rechts „Maßstab messen“, dann auf die Start-Ziel-Linie klicken;window.py
 Replace project;Projekt ersetzen;window.py
 Replace reference image;Bildvorlage ersetzen;window.py
+Replay cameras and their trigger zones: show, drag, calculate automatically;Wiederholungskameras und ihre Auslösezonen: zeigen, ziehen, automatisch berechnen;window.py
 "Request the generator preview again; changes also start it automatically.";"Generatorvorschau erneut anfordern; Änderungen starten sie auch automatisch.";window.py
 Restore?;Wiederherstellen?;window.py
 Reverse direction;Richtung umkehren;window.py
@@ -1129,6 +1186,7 @@ Select, drag, rotate;Wählen, ziehen, drehen;window.py
 Selected object;Ausgewähltes Objekt;window.py
 Set game world offset …;Spielweltversatz einstellen …;window.py
 "Set the height for all; — = mixed values. Rotate: round handle above the selection box.";"Höhe für alle setzen; — = gemischte Werte. Drehen: runder Griff über dem Auswahlkasten.";window.py
+Shift along the track · m;Entlang der Strecke verschieben · m;window.py
 Show check result (Check: Ctrl+Enter);Prüfergebnis anzeigen (Prüfen: Strg+Enter);window.py
 Show whole track;Ganze Strecke zeigen;window.py
 Side in driving direction;Seite in Fahrtrichtung;window.py
@@ -1184,6 +1242,7 @@ To input s · m;Bis Eingabe-s · m;window.py
 To move a group, first “Convert to control points”;Für Gruppenverschiebung erst ‚In Kontrollpunkte umwandeln‘;window.py
 To plant, first choose one or more models in the catalogue.;Zum Bepflanzen zuerst im Katalog ein oder mehrere Modelle wählen.;window.py
 Too many objects ({anzahl}, at most {maximum}): reduce the density or the area.;Zu viele Objekte ({anzahl}, höchstens {maximum}): Dichte oder Fläche verkleinern.;window.py
+Tool: Cameras (K);Werkzeug: Kameras (K);window.py
 Tool: Environment (U);Werkzeug: Umgebung (U);window.py
 Tool: Plant (B);Werkzeug: Bepflanzen (B);window.py
 Tool: points (INSERT);Werkzeug: Punkte (EINFÜGEN);window.py
@@ -1205,6 +1264,7 @@ Transition max. · m;Übergang max. · m;window.py
 Transition min. · m;Übergang min. · m;window.py
 Transition · m;Übergang · m;window.py
 "Transition: yes, no, length > 0 or {""anfang"": …, ""ende"": …}.";"Übergang: ja, nein, Länge > 0 oder {""anfang"": …, ""ende"": …}.";window.py
+Trigger zones (bars across the track) switch the replay to the cameras (diamonds) linked by dotted lines. Tool “Cameras” (K): drag a diamond to move that camera, drag a bar to move its zone along the track. “Calculate cameras automatically” lays them out anew for this track. Per group: switch off, shift, further out, higher. Pit lane cameras follow the pit lane automatically.;Auslösezonen (Balken quer über der Strecke) schalten die Wiederholung auf die Kameras (Rauten), die gepunktete Linien verbinden. Werkzeug „Kameras“ (K): Raute ziehen verschiebt diese Kamera, Balken ziehen verschiebt die Zone entlang der Strecke. „Kameras automatisch berechnen“ ordnet sie für diese Strecke neu an. Je Gruppe: abschalten, verschieben, weiter außen, höher. Kameras der Boxengasse folgen der Boxengasse automatisch.;window.py
 T{spiel} · ;T{spiel} · ;window.py
 umgebung.json is unreadable and stays unchanged: {error};umgebung.json ist nicht lesbar und bleibt unverändert: {error};window.py
 Undo;Rückgängig;window.py
@@ -1245,8 +1305,6 @@ Zoom out of the map;Herauszoomen;window.py
 {label} not possible: {error};{label} nicht möglich: {error};window.py
 {label}: {anzahl} points;{label}: {anzahl} Punkte;window.py
 {modell} placed at X {x} · Z {z} · Ctrl+Z undoes.;{modell} platziert bei X {x} · Z {z} · Strg+Z macht rückgängig.;window.py
+{name} at {s} m from the finish · Ctrl+Z: undo;{name} bei {s} m ab Ziel · Strg+Z: rückgängig;window.py
 {name} “{id}” placed ({hoehe} m, radius {radius} m) · Ctrl+Z undoes.;{name} „{id}“ gesetzt ({hoehe} m, Radius {radius} m) · Strg+Z macht rückgängig.;window.py
-{n} error|{n} errors;{n} Fehler|{n} Fehler;window.py
-{n} hint|{n} hints;{n} Hinweis|{n} Hinweise;window.py
 {n} object banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.|{n} objects banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.;{n} Objekt zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.|{n} Objekte zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.;window.py
-{n} warning|{n} warnings;{n} Warnung|{n} Warnungen;window.py

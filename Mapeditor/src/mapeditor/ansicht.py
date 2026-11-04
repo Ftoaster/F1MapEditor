@@ -18,6 +18,9 @@ FEATURES = [
     ("spielbereich", N_("Map layers"), N_("Play area ±1024 m"), N_(("The track must lie completely inside this "
                                                                          "frame")), True),
     ("zonen", N_("Map layers"), N_("DRS / Straight Mode"), N_("Zones on the track"), True),
+    ("kameras", N_("Map layers"), N_("Cameras (replays)"),
+     N_("Trigger zones across the track and the carrier's replay cameras, as the build moves them to this track; "
+        "settings under Properties → Cameras"), False),
     ("ideallinie", N_("Map layers"), N_("Racing line · braking points · boards"),
      N_("Racing line from the racing-line run: red braking, yellow coasting, green full throttle; red triangles = "
         "braking point, white squares = distance boards"), True),

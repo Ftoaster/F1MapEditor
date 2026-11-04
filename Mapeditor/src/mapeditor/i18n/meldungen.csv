@@ -229,6 +229,9 @@ Track reaches the edge of the outer terrain hole;Strecke reicht bis an den Rand 
 trn_flags: kanten or alle7;trn_flags: kanten oder alle7;spiel_geometrie.py
 TRN~ must have exactly one fragment;TRN~ muss genau ein Fragment haben;spiel_geometrie.py
 welt_uv: konstant or echt;welt_uv: konstant oder echt;spiel_geometrie.py
+Field {}/{} has an unexpected type {};Feld {}/{} hat einen unerwarteten Typ {};spiel_kameras.py
+Line needs at least 2 points;Linie braucht mindestens 2 Punkte;spiel_kameras.py
+No ERP in the carrier package;Keine ERP im Trägerpaket;spiel_kameras.py
 AI adapter needs metres, Y up and right-handed coordinates;KI-Adapter benötigt Meter, Y oben und rechtshändige Koordinaten;spiel_ki.py
 AI output fails the repeated round trip;KI-Ausgabe besteht erneuten Rundlauf nicht;spiel_ki.py
 AI template resource is missing: {};KI-Vorlagenressource fehlt: {};spiel_ki.py
@@ -411,7 +414,6 @@ Object {}: model must be a base ID eaid://… without extension ({});Objekt {}: 
 Object {}: model {} not in the catalogue;Objekt {}: Modell {} nicht im Katalog;umgebung.py
 Object {}: object ({}) expected;Objekt {}: Objekt ({}) erwartet;umgebung.py
 Object {}: scale {} outside {}–{};Objekt {}: skala {} außerhalb {}–{};umgebung.py
-on {};auf {};umgebung.py
 Outer terrain (TerrainRes *outer_terrain*) is missing in the carrier;Außenterrain (TerrainRes *outer_terrain*) fehlt im Träger;umgebung.py
 projekt.json names {}, the file is missing;projekt.json nennt {}, die Datei fehlt;umgebung.py
 umgebung.json cannot be read: {};umgebung.json nicht lesbar: {};umgebung.py
@@ -427,6 +429,7 @@ umgebung.json: schema {} is not supported (only {});umgebung.json: Schema {} wir
 {} {}: hoehe_m {} outside {}…{};{} {}: hoehe_m {} außerhalb {}…{};umgebung.py
 {} {}: radius_m {} outside {}…{};{} {}: radius_m {} außerhalb {}…{};umgebung.py
 Carrier contains no Portimão terrain or no TRN~;Träger enthält kein Portimão-Terrain bzw. keine TRN~;unbenutzt
+on {};auf {};unbenutzt
 Length {} m outside {}–{} m.;Länge {} m außerhalb {}–{} m.;vorschlag.py
 Minimum radius {} m outside {}–{} m.;Mindestradius {} m außerhalb {}–{} m.;vorschlag.py
 No valid track after {} attempts (reasons: {}). Reduce the minimum radius or change the length or number of corners.;Nach {} Versuchen keine gültige Strecke (Gründe: {}). Mindestradius verkleinern oder Länge/Kurvenzahl ändern.;vorschlag.py

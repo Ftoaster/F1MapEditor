@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2
+
+- Replays work on your own tracks: the build moves the carrier's replay, TV and pit stop cameras and their trigger zones
+  to the new track (before they stayed where the Portimão track runs). A new map layer shows them, and under
+  Properties → Cameras (replays) you can switch a camera group off, shift it along the track or move its cameras
+- New Cameras tool (K) in the top bar: drag cameras freely and trigger zones along the track, or let the editor
+  calculate them for the current track; lines show which cameras each zone switches to (read from the game's event graph)
+
 ## 0.3.1
 
 - English is now the default language: a first start opens in English, and texts without a German translation show in

@@ -62,6 +62,17 @@ metres (starting value: length of the current preview). It scales around the tra
 radii, cross-section sections, finish line, DRS and Straight Mode zones, pit entry and exit, and the position of environment
 objects and hills. Heights in metres, widths and the size of objects stay, so a longer track becomes flatter. One step,
 Ctrl+Z undoes it.</p>
+<h3>Cameras for replays</h3>
+<p>The build moves the carrier's replay, TV and pit stop cameras to the new track: every <b>trigger zone</b> (a bar across
+the track) switches the director to the cameras of its group as soon as a car drives through. The map layer
+<i>Cameras (replays)</i> shows zones and cameras (diamonds); dotted lines link every zone to the cameras it switches to (from
+the carrier's event graph), a click selects the group. The <b>Cameras</b> tool (K) in the top bar: drag a diamond to move
+that camera freely, drag a bar to move its zone along the track. <b>Calculate cameras automatically</b> lays out all zones
+and their cameras anew for the current track (zones before the corners, cameras behind them on the outside of the corner),
+<b>Discard camera changes</b> goes back to the moved carrier layout. Under <b>Properties → Cameras
+(replays)</b> you can switch a group off, shift it along the track or move its cameras further out or higher; “All cameras”
+turns moving them off. Adding new cameras is not possible yet, the number comes from the carrier. Pit lane cameras follow
+the pit lane automatically.</p>
 <h3>Load a track from the game</h3>
 <p><b>Project → New from template …</b>, source <i>Game track from F1 25</i>: the list shows all of the game's tracks
 (reverse layouts too); the editor only reads them and never writes to the game folder. It imports centre line, heights and

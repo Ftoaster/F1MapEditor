@@ -105,7 +105,7 @@ GLYPHS = {
     "zoom_in": "", "zoom_out": "", "runde": "", "pruefen": "", "bauen": "",
     "spieltest": "", "abbrechen": "", "neu": "", "oeffnen": "", "vorlage": "",
     "vorschlag": "", "hilfe": "", "speichern": "",
-    "umgebung": "", "streuen": "", "bild": "",
+    "umgebung": "", "streuen": "", "bild": "", "kamera": "",
 }
 
 

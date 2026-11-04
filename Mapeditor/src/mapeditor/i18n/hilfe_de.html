@@ -66,6 +66,17 @@ auf eine <b>Länge</b> in Metern (Ausgangswert: Länge der aktuellen Vorschau). 
 bzw. Segmentlängen und Radien, Querschnittsabschnitte, Ziellinie, DRS- und Straight-Mode-Zonen, Boxenein- und -ausfahrt sowie
 die Lage von Umgebungsobjekten und Hügeln. Höhen in Metern, Breiten und die Größe der Objekte bleiben; eine längere Strecke
 wird also flacher. Ein Schritt, Strg+Z macht ihn rückgängig.</p>
+<h3>Kameras für Wiederholungen</h3>
+<p>Der Bau versetzt die Wiederholungs-, TV- und Boxenstopp-Kameras des Trägers an die neue Strecke: Jede
+<b>Auslösezone</b> (Balken quer über der Strecke) schaltet die Regie auf die Kameras ihrer Gruppe, sobald ein Auto
+hindurchfährt. Die Kartenebene <i>Kameras (Wiederholungen)</i> zeigt Zonen und Kameras (Rauten); gepunktete Linien verbinden jede
+Zone mit den Kameras, auf die sie schaltet (laut EventGraph des Trägers), ein Klick wählt die Gruppe. Das Werkzeug
+<b>Kameras</b> (K) in der oberen Leiste: Raute ziehen verschiebt diese Kamera frei, Balken ziehen verschiebt die Zone
+entlang der Strecke. <b>Kameras automatisch berechnen</b> ordnet alle Zonen und ihre Kameras für die aktuelle Strecke neu
+an (Zonen vor die Kurven, Kameras dahinter an die Kurvenaußenseite), <b>Kamera-Änderungen verwerfen</b> kehrt zum
+übertragenen Stand zurück. Unter <b>Eigenschaften → Kameras (Wiederholungen)</b> lässt sich eine Gruppe abschalten, entlang der Strecke
+verschieben oder ihre Kameras weiter nach außen oder höher setzen; „Alle Kameras“ schaltet das Mitführen ab. Neue Kameras
+gibt es noch nicht, die Anzahl kommt vom Träger. Kameras der Boxengasse folgen der Boxengasse automatisch.</p>
 <h3>Strecke aus dem Spiel laden</h3>
 <p><b>Projekt → Neu aus Vorlage …</b>, Quelle <i>Spielstrecke aus F1 25</i>: Die Liste zeigt alle Strecken des Spiels
 (auch rückwärts); der Editor liest sie nur und schreibt nie in den Spielordner. Übernommen werden Mittellinie, Höhen und

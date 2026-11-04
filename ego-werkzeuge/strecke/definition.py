@@ -224,6 +224,9 @@ STANDARD = {
     # Meter ab Ziel; leer = Zonen des Trägers (strecke/zonen.py). Partial-Zone (Standard an, 60 m nach dem
     # Zonenbeginn bis zum Zonenende wie in den Originalen); partial=false oder Versatz null = ohne.
     "x_mode": {"zonen": []},
+    # Kameras des Trägers (Wiederholung, TV, Boxenstopp; strecke/spiel_kameras.py): mitfuehren = an die neue Strecke
+    # versetzen; gruppen = {Gruppe: {"aus", "verschiebung_m", "seitlich_m", "hoehe_m"}} (Gruppe z. B. "s07a")
+    "kameras": {"mitfuehren": True, "gruppen": {}},
     "kurven": {
         "kruemmung_schwelle": 1.0 / 500.0,
         "mindestwinkel_grad": 15.0,
