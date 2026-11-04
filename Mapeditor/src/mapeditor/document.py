@@ -108,7 +108,7 @@ class Document(QObject):
             for i in indices:
                 x, _, z = point_xyz(points[i])
                 points[i] = set_point(points[i], x=x + dx, y=y, z=z + dz)
-        self.edit(tr("Punktgruppe ändern") if len(indices) > 1 else tr("Punkt verschieben"), operation)
+        self.edit(tr("Change point group") if len(indices) > 1 else tr("Move point"), operation)
 
     def edit(self, text, operation):
         """Eine Änderung an Rohdefinition/Manifest als ein Undo-Schritt: ``operation(raw, manifest)``."""
@@ -227,7 +227,7 @@ class Document(QObject):
 
         def operation(env):
             env.setdefault("gelaende", {}).setdefault(art, []).append(copy.deepcopy(form))
-        if self.edit_env(tr("Hügel setzen") if art == "huegel" else tr("Berg setzen"), operation):
+        if self.edit_env(tr("Place hill") if art == "huegel" else tr("Place mountain"), operation):
             self.terrain_select(form["id"])
             return form
         return None
@@ -242,7 +242,7 @@ class Document(QObject):
     def terrain_move(self, kennung, dx, dz):
         if abs(dx) < 1e-9 and abs(dz) < 1e-9:
             return
-        self._terrain_edit(kennung, tr("Gelände verschieben"), lambda art, f: f.update(
+        self._terrain_edit(kennung, tr("Move terrain shape"), lambda art, f: f.update(
             x=round(f["x"] + dx, 1), z=round(f["z"] + dz, 1)))
 
     def terrain_set(self, kennung, **felder):
@@ -250,7 +250,7 @@ class Document(QObject):
         def change(art, f):
             for feld, wert in felder.items():
                 f[feld] = umgebung.form_wert(art, feld, wert) if feld in ("hoehe_m", "radius_m") else round(float(wert), 1)
-        self._terrain_edit(kennung, tr("Gelände ändern"), change)
+        self._terrain_edit(kennung, tr("Change terrain shape"), change)
 
     def terrain_delete(self, kennung=None):
         kennung = self.terrain_selected if kennung is None else kennung
@@ -262,14 +262,14 @@ class Document(QObject):
                 liste = (env.get("gelaende") or {}).get(art)
                 if liste is not None:
                     liste[:] = [f for f in liste if f["id"] != kennung]
-        self.edit_env(tr("Gelände löschen"), operation)
+        self.edit_env(tr("Delete terrain shape"), operation)
 
     def env_add(self, objekte, text=None, select=True):
         """Neue Objekte (fertige Einträge) in einem Undo-Schritt anlegen und wählen."""
         objekte = [umgebung.normalisiere_objekt(o) for o in objekte]
         if not objekte or not self.env_editable:
             return []
-        done = self.edit_env(text or (tr("Umgebungsobjekt platzieren") if len(objekte) == 1 else tr("Umgebung bepflanzen")),
+        done = self.edit_env(text or (tr("Place environment object") if len(objekte) == 1 else tr("Plant environment")),
                              lambda env: env["objekte"].extend(copy.deepcopy(objekte)))
         if done and select:
             self.env_select({o["id"] for o in objekte}, objekte[-1]["id"])
@@ -278,7 +278,7 @@ class Document(QObject):
     def env_place(self, modell, x, z, **werte):
         """Ein Objekt am Punkt (x, z) platzieren; Kennung und Rundung vergibt das Dokument."""
         objekt = umgebung.neues_objekt(umgebung.alle_ids(self.env), modell, x, z, **werte)
-        self.env_add([objekt], tr("Umgebungsobjekt platzieren"))
+        self.env_add([objekt], tr("Place environment object"))
         return objekt
 
     def env_move(self, kennungen, dx, dz):
@@ -290,14 +290,14 @@ class Document(QObject):
             for o in env["objekte"]:
                 if o["id"] in kennungen:
                     o["x"], o["z"] = round(o["x"] + dx, 2), round(o["z"] + dz, 2)
-        self.edit_env(tr("Umgebungsobjekte verschieben") if len(kennungen) > 1 else tr("Umgebungsobjekt verschieben"), operation)
+        self.edit_env(tr("Move environment objects") if len(kennungen) > 1 else tr("Move environment object"), operation)
 
     def env_delete(self, kennungen=None):
         """Objekte löschen (Standard: die Auswahl)."""
         kennungen = set(self.env_selected if kennungen is None else kennungen)
         if not kennungen:
             return
-        self.edit_env(tr("Umgebungsobjekte löschen") if len(kennungen) > 1 else tr("Umgebungsobjekt löschen"),
+        self.edit_env(tr("Delete environment objects") if len(kennungen) > 1 else tr("Delete environment object"),
                       lambda env: env.__setitem__("objekte", [o for o in env["objekte"] if o["id"] not in kennungen]))
 
     def env_set(self, kennungen, **felder):
@@ -315,10 +315,10 @@ class Document(QObject):
             for o in env["objekte"]:
                 if o["id"] in kennungen:
                     o.update(felder)
-        self.edit_env(tr("Umgebungsobjekt ändern") if len(kennungen) == 1 else tr("Umgebungsobjekte ändern"), operation)
+        self.edit_env(tr("Change environment object") if len(kennungen) == 1 else tr("Change environment objects"), operation)
 
     def env_set_ground_cover(self, an):
-        self.edit_env(tr("Bodenbewuchs ändern"), lambda env: env.__setitem__("bodenbewuchs", bool(an)))
+        self.edit_env(tr("Change ground cover"), lambda env: env.__setitem__("bodenbewuchs", bool(an)))
 
     def env_group(self, gruppe):
         """Kennungen aller Objekte einer Gruppe."""
@@ -327,7 +327,7 @@ class Document(QObject):
     def move(self, index, x=None, y=None, z=None):
         if not 0 <= index < len(self.points):
             return
-        self.edit(tr("Punkt verschieben"), lambda raw, meta: raw["mittellinie"]["punkte"].__setitem__(
+        self.edit(tr("Move point"), lambda raw, meta: raw["mittellinie"]["punkte"].__setitem__(
             index, set_point(raw["mittellinie"]["punkte"][index], x, y, z)))
 
     def insert(self, x=None, z=None):
@@ -348,7 +348,7 @@ class Document(QObject):
                 x, y, z = 0, 0, 0
         else:
             y = point_xyz(self.points[max(0, index - 1)])[1] if self.points else 0
-        self.edit(tr("Punkt einfügen"), lambda raw, meta: raw["mittellinie"]["punkte"].insert(index, [x, z, y]))
+        self.edit(tr("Insert point"), lambda raw, meta: raw["mittellinie"]["punkte"].insert(index, [x, z, y]))
         self.select(index)
 
     def delete(self):
@@ -361,12 +361,12 @@ class Document(QObject):
                     raw["mittellinie"][key].pop(i)
                 if key == "punkte" and len(raw["mittellinie"][key]) < 4:
                     meta["runde_geschlossen"] = False
-            self.edit(tr("Auswahl löschen"), operation)
+            self.edit(tr("Delete selection"), operation)
             self.select(min(indices[-1], self.object_count - 1))
             return
         if self.ml.get("art") == "segmente":
             if 0 <= index < len(self.ml.get("segmente", [])):
-                self.edit(tr("Segment löschen"), lambda raw, meta: raw["mittellinie"]["segmente"].pop(index))
+                self.edit(tr("Delete segment"), lambda raw, meta: raw["mittellinie"]["segmente"].pop(index))
                 self.select(min(index, len(self.ml["segmente"]) - 1))
             return
         if 0 <= index < len(self.points):
@@ -374,13 +374,13 @@ class Document(QObject):
                 raw["mittellinie"]["punkte"].pop(index)
                 if len(raw["mittellinie"]["punkte"]) < 4:
                     meta["runde_geschlossen"] = False
-            self.edit(tr("Punkt löschen"), operation)
+            self.edit(tr("Delete point"), operation)
             self.select(min(index, len(self.points) - 1))
 
     def insert_segment(self, kind="gerade"):
         index = self.selected + 1 if self.selected >= 0 else len(self.ml.get("segmente", []))
         segment = {"typ": "gerade", "laenge": 100.} if kind == "gerade" else {"typ": "bogen", "radius": 60., "winkel": 45., "richtung": "rechts"}
-        self.edit(tr("Segment einfügen"), lambda raw, meta: raw["mittellinie"]["segmente"].insert(index, segment))
+        self.edit(tr("Insert segment"), lambda raw, meta: raw["mittellinie"]["segmente"].insert(index, segment))
         self.select(index)
 
     @staticmethod
@@ -396,13 +396,13 @@ class Document(QObject):
         elif kind == "bogen":
             segment.update(radius=60., winkel=math.degrees(length / 60.), richtung=segment.get("richtung", "rechts"))
         else:
-            raise ValueError(tr("Bitte Gerade oder Bogen wählen."))
+            raise ValueError(tr("Please choose straight or arc."))
 
     def switch_segment(self):
         i = self.selected
         if self.ml.get("art") == "segmente" and 0 <= i < len(self.ml["segmente"]):
             kind = "bogen" if self.ml["segmente"][i]["typ"] == "gerade" else "gerade"
-            self.edit(tr("Segmentart wechseln"), lambda raw, meta: self.change_type(raw["mittellinie"]["segmente"][i], kind))
+            self.edit(tr("Change segment type"), lambda raw, meta: self.change_type(raw["mittellinie"]["segmente"][i], kind))
 
     def split_segment(self):
         i = self.selected
@@ -424,7 +424,7 @@ class Document(QObject):
             if "hoehe_ende" in a:
                 a["hoehe_ende"] = geometry["segments"][i]["middle"][1]
             segments[i:i + 1] = [a, b]
-        self.edit(tr("Segment teilen"), operation)
+        self.edit(tr("Split segment"), operation)
 
     def segment_drag_changes(self, index, point, handle="end", geometry=None):
         # Beim Ziehen reicht die Geometrie vom Gestenbeginn (das Dokument ändert sich erst beim Loslassen).
@@ -453,7 +453,7 @@ class Document(QObject):
         changes = self.segment_drag_changes(index, point, handle, geometry)
         if not changes:
             return
-        self.edit(tr("Segmentgriff ziehen"), lambda raw, meta: raw["mittellinie"]["segmente"][index].update(changes))
+        self.edit(tr("Drag segment handle"), lambda raw, meta: raw["mittellinie"]["segmente"][index].update(changes))
 
     def gaps(self, factor=4.0, minimum=20.0):
         """Lücken zwischen aufeinanderfolgenden Kontrollpunkten: [(i, Abstand)] mit Abstand > max(minimum,
@@ -507,7 +507,7 @@ class Document(QObject):
                             p[key] = vorlage[key]
                     neu.append(p)
                 punkte[i + 1:i + 1] = neu
-        self.edit(tr("Lücken füllen"), operation)
+        self.edit(tr("Fill gaps"), operation)
         return sum(len(v) for v in fills.values())
 
     def rotatable(self):
@@ -556,7 +556,7 @@ class Document(QObject):
             start = raw["mittellinie"].setdefault("start", {})
             start["x"] = round(float(start.get("x", 0)) + dx, 4)
             start["z"] = round(float(start.get("z", 0)) + dz, 4)
-        self.edit(tr("Strecke verschieben"), operation)
+        self.edit(tr("Move track"), operation)
 
     def rotate_selection(self, angle, cx, cz):
         kind = self.rotatable()
@@ -573,12 +573,12 @@ class Document(QObject):
                 start = target.setdefault("start", {})
                 for key in ("x", "z", "richtung_grad"):
                     start[key] = round(ml["start"][key], 4)
-        self.edit(tr("Strecke drehen") if kind == "strecke" else tr("Punktgruppe drehen"), operation)
+        self.edit(tr("Rotate track") if kind == "strecke" else tr("Rotate point group"), operation)
 
     def convert_to_points(self):
         geometry = input_geometry(self)
         if geometry["error"] or not geometry["segments"]:
-            raise ValueError(geometry["error"] or tr("Keine Segmentkette vorhanden."))
+            raise ValueError(geometry["error"] or tr("No segment chain available."))
         def operation(raw, meta):
             ml = raw["mittellinie"]
             ml["editor_segmentquelle"] = {"start": copy.deepcopy(ml.get("start", {})), "segmente": ml.pop("segmente")}
@@ -597,18 +597,18 @@ class Document(QObject):
             close_tolerance = min(1., math.dist(last, geometry["pos"][-2]) / 4) if self.project.closed else 0.
             if math.dist(last, geometry["pos"][0]) > max(.01, close_tolerance) or not self.project.closed:
                 ml["punkte"].append({"x": last[0], "y": last[1], "z": last[2]})
-        self.edit(tr("In Kontrollpunkte umwandeln"), operation)
+        self.edit(tr("Convert to control points"), operation)
         self.select(0)
 
     def close_round(self):
         if not self.project.closed and self.ml.get("art") == "kontrollpunkte" and len(self.points) < 4:
-            raise ValueError(tr("Zum Schließen sind mindestens vier Kontrollpunkte erforderlich."))
-        self.edit(tr("Rundenschluss ändern"), lambda raw, meta: meta.update(runde_geschlossen=not self.project.closed))
+            raise ValueError(tr("At least four control points are needed to close the lap."))
+        self.edit(tr("Change lap closure"), lambda raw, meta: meta.update(runde_geschlossen=not self.project.closed))
 
     # ------------------------------------------------------------------ Kopieren und Einfügen (Issue #2)
     def _nur_punkte(self, text):
         if self.project.readonly:
-            raise ValueError(tr("Unbekannte Projektfassung: nur lesend."))
+            raise ValueError(tr("Unknown project version: read-only."))
         if self.ml.get("art") != "kontrollpunkte":
             raise ValueError(text)
 
@@ -616,12 +616,12 @@ class Document(QObject):
         """Kopierte Punkte an das passende offene Ende binden (ein Undo-Schritt); danach sind sie gewählt.
         Rückgabe: Plan (``kopieren.einfuegen_plan``) samt ``ueberschneidungen`` (Indizes der neuen Punkte)."""
         from . import kopieren
-        self._nur_punkte(tr("Einfügen geht nur in Kontrollpunkt-Strecken: Segmente erst in Kontrollpunkte umwandeln."))
+        self._nur_punkte(tr("Pasting only works on control point tracks: convert segments to control points first."))
         plan = kopieren.einfuegen_plan(self.points, punkte, self.project.closed)
         def operation(raw, meta):
             raw["mittellinie"]["punkte"] = copy.deepcopy(plan["punkte"])
             kopieren.stationen_verschieben(raw, plan["versatz_m"])
-        self.edit(tr("Punkte einfügen"), operation)
+        self.edit(tr("Paste points"), operation)
         a, b = plan["neu"]
         self.select_many(range(a, b + 1), a if plan["hinten"] else b)
         plan["ueberschneidungen"] = kopieren.ueberschneidungen(
@@ -632,36 +632,36 @@ class Document(QObject):
         """Geschlossene Runde an der Auswahl öffnen: hinter einem Punkt bzw. gewählte Punkte entfernen und dort öffnen.
         Streckenmeter ab dem ersten Punkt wandern mit (fester Versatz modulo Rundenlänge)."""
         from . import kopieren
-        self._nur_punkte(tr("„Runde hier öffnen“ geht nur bei Kontrollpunkten."))
+        self._nur_punkte(tr("“Open lap here” only works with control points."))
         if not self.project.closed:
-            raise ValueError(tr("Die Runde ist schon offen."))
+            raise ValueError(tr("The lap is already open."))
         punkte, versatz, laenge = kopieren.oeffnen_plan(self.points, self.selected_indices)
         def operation(raw, meta):
             raw["mittellinie"]["punkte"] = copy.deepcopy(punkte)
             kopieren.stationen_verschieben(raw, -versatz, laenge)
             meta["runde_geschlossen"] = False
-        self.edit(tr("Runde hier öffnen"), operation)
+        self.edit(tr("Open lap here"), operation)
         self.select(len(punkte) - 1)
 
     def reverse_selection(self):
         """Reihenfolge eines zusammenhängenden Stücks umkehren (z. B. ein falsch herum angebundenes Stück)."""
         from . import kopieren
-        self._nur_punkte(tr("Umkehren geht nur bei Kontrollpunkten."))
+        self._nur_punkte(tr("Reversing only works with control points."))
         folge = kopieren.kette(self.selected_indices, len(self.points), self.project.closed)
         if folge is None or len(folge) < 2:
-            raise ValueError(tr("Zum Umkehren mindestens zwei zusammenhängende Punkte wählen."))
+            raise ValueError(tr("Select at least two connected points to reverse."))
         def operation(raw, meta):
             punkte = raw["mittellinie"]["punkte"]
             alt = [punkte[i] for i in folge]
             for i, p in zip(folge, reversed(alt)):
                 punkte[i] = p
-        self.edit(tr("Reihenfolge umkehren"), operation)
+        self.edit(tr("Reverse order"), operation)
 
     def cut_overhang(self):
         """Gewähltes Stück an einem offenen Ende ab der ersten Überschneidung mit der Strecke kürzen.
         Rückgabe: Anzahl entfernter Punkte."""
         from . import kopieren
-        self._nur_punkte(tr("„Überstand abschneiden“ geht nur bei Kontrollpunkten."))
+        self._nur_punkte(tr("“Cut overlap” only works with control points."))
         punkte, weg, versatz = kopieren.ueberstand_plan(self.points, self.selected_indices,
                                                          kopieren.mindestabstand(self.project.raw), self.project.closed)
         rest = sorted(set(self.selected_indices) - set(weg))
@@ -669,7 +669,7 @@ class Document(QObject):
         def operation(raw, meta):
             raw["mittellinie"]["punkte"] = copy.deepcopy(punkte)
             kopieren.stationen_verschieben(raw, versatz)
-        self.edit(tr("Überstand abschneiden"), operation)
+        self.edit(tr("Cut overlap"), operation)
         verschiebung = len(weg) if vorne else 0
         self.select_many([i - verschiebung for i in rest], None)
         return len(weg)
@@ -679,12 +679,12 @@ class Document(QObject):
         """Ganze Strecke um ``faktor`` um ihre Mitte skalieren (ein Undo-Schritt, Umgebung inklusive)."""
         from . import skalieren
         if self.project.readonly:
-            raise ValueError(tr("Unbekannte Projektfassung: nur lesend."))
+            raise ValueError(tr("Unknown project version: read-only."))
         geometrie = input_geometry(self)
         if geometrie["error"] or len(geometrie["pos"]) < 2:
-            raise ValueError(geometrie["error"] or tr("Keine Strecke zum Skalieren."))
+            raise ValueError(geometrie["error"] or tr("No track to scale."))
         faktor = skalieren.faktor_pruefen(faktor)
         def operation(raw, meta, env):
             skalieren.anwenden(raw, env, geometrie["pos"], faktor)
-        self._edit(tr("Strecke skalieren"), operation)
+        self._edit(tr("Scale track"), operation)
         return faktor

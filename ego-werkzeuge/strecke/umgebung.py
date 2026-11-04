@@ -45,6 +45,8 @@ KATALOG_SCHEMA = 1
 KATEGORIEN = ("baum", "busch", "palme", "gebaeude", "zelt", "moebel", "flagge", "licht", "sonstiges")
 #: Bäume, Büsche, Palmen → Layer ``speedtrees``, alles andere → ``dressing``
 LAYER_PFLANZEN = "speedtrees"
+#: Gleiche Ebene unter anderem Namen: Portimão-Mod 1.0.2 nennt ``speedtrees`` jetzt ``trees`` (docs/portimao_mod_102.md)
+LAYER_ALIAS = {"speedtrees": ("trees",)}
 LAYER_KULISSE = "dressing"
 PFLANZEN = ("baum", "busch", "palme")
 #: Loch des Außenterrains im Portimão-Träger (Welt), docs/neue_strecke.md „Grundfläche und Außenterrain“
@@ -87,49 +89,49 @@ class UmgebungFehler(ValueError):
 def _zahl(o, feld, standard=None, idx=None):
     w = o.get(feld, standard)
     if isinstance(w, bool) or not isinstance(w, (int, float)) or not math.isfinite(float(w)):
-        raise UmgebungFehler("Objekt %s: Feld %s muss eine endliche Zahl sein (%r)" % (idx, feld, w))
+        raise UmgebungFehler("Object %s: field %s must be a finite number (%r)" % (idx, feld, w))
     return float(w)
 
 
 def normalisieren(roh) -> dict:
     """Prüft und ergänzt Standardwerte; unbekannte Schlüssel bleiben erhalten. Wirft UmgebungFehler."""
     if not isinstance(roh, dict):
-        raise UmgebungFehler("umgebung.json: Objekt ({…}) erwartet, nicht %s" % type(roh).__name__)
+        raise UmgebungFehler("umgebung.json: object ({…}) expected, not %s" % type(roh).__name__)
     d = dict(roh)
     schema = d.get("schema", SCHEMA)
     if schema != SCHEMA:
-        raise UmgebungFehler("umgebung.json: Schema %r wird nicht unterstützt (nur %d)" % (schema, SCHEMA))
+        raise UmgebungFehler("umgebung.json: schema %r is not supported (only %d)" % (schema, SCHEMA))
     d["schema"] = SCHEMA
     bb = d.get("bodenbewuchs", False)
     if not isinstance(bb, bool):
-        raise UmgebungFehler("umgebung.json: bodenbewuchs muss true/false sein (%r)" % (bb,))
+        raise UmgebungFehler("umgebung.json: bodenbewuchs must be true/false (%r)" % (bb,))
     d["bodenbewuchs"] = bb
     objekte = d.get("objekte", [])
     if not isinstance(objekte, list):
-        raise UmgebungFehler("umgebung.json: objekte muss eine Liste sein")
+        raise UmgebungFehler("umgebung.json: objekte must be a list")
     neu, ids = [], set()
     for k, o in enumerate(objekte):
         if not isinstance(o, dict):
-            raise UmgebungFehler("Objekt %d: Objekt ({…}) erwartet" % (k + 1))
+            raise UmgebungFehler("Object %d: object ({…}) expected" % (k + 1))
         o = dict(o)
         oid = o.get("id")
         if not isinstance(oid, str) or not oid.strip():
-            raise UmgebungFehler("Objekt %d: id fehlt oder ist leer" % (k + 1))
+            raise UmgebungFehler("Object %d: id is missing or empty" % (k + 1))
         if oid in ids:
-            raise UmgebungFehler("Objekt-ID %r doppelt" % oid)
+            raise UmgebungFehler("Duplicate object ID %r" % oid)
         if len(("%s$umg_%s" % (LAYER_PFLANZEN, oid)).encode("utf-8")) > 255 or "\0" in oid:
-            raise UmgebungFehler("Objekt-ID %r zu lang oder mit Nullzeichen" % oid)
+            raise UmgebungFehler("Object ID %r too long or contains a null character" % oid)
         ids.add(oid)
         m = o.get("modell")
         if not isinstance(m, str) or not m.startswith("eaid://") or "?" in m or m.endswith((".idf", ".emb")):
-            raise UmgebungFehler("Objekt %s: modell muss eine Basis-Kennung eaid://… ohne Endung sein (%r)" % (oid, m))
+            raise UmgebungFehler("Object %s: model must be a base ID eaid://… without extension (%r)" % (oid, m))
         o["x"] = _zahl(o, "x", None, oid)
         o["z"] = _zahl(o, "z", None, oid)
         o["hoehe_m"] = _zahl(o, "hoehe_m", 0.0, oid)
         o["drehung_grad"] = _zahl(o, "drehung_grad", 0.0, oid)
         o["skala"] = _zahl(o, "skala", 1.0, oid)
         if not SKALA_MIN <= o["skala"] <= SKALA_MAX:
-            raise UmgebungFehler("Objekt %s: skala %.3g außerhalb %.1f–%.0f" % (oid, o["skala"], SKALA_MIN, SKALA_MAX))
+            raise UmgebungFehler("Object %s: scale %.3g outside %.1f–%.0f" % (oid, o["skala"], SKALA_MIN, SKALA_MAX))
         g = o.get("gruppe", "")
         o["gruppe"] = "" if g is None else str(g)
         neu.append(o)
@@ -141,29 +143,29 @@ def normalisieren(roh) -> dict:
 
 def _gelaende_normalisieren(g, ids) -> dict:
     if not isinstance(g, dict):
-        raise UmgebungFehler("umgebung.json: gelaende muss ein Objekt ({…}) sein")
+        raise UmgebungFehler("umgebung.json: gelaende must be an object ({…})")
     g = dict(g)
     for art, (hmin, hmax), (rmin, rmax) in (("huegel", HUEGEL_HOEHE, HUEGEL_RADIUS), ("berge", BERG_HOEHE, BERG_RADIUS)):
         liste = g.get(art, [])
         if not isinstance(liste, list):
-            raise UmgebungFehler("umgebung.json: gelaende.%s muss eine Liste sein" % art)
+            raise UmgebungFehler("umgebung.json: gelaende.%s must be a list" % art)
         neu = []
         for k, f in enumerate(liste):
             if not isinstance(f, dict):
-                raise UmgebungFehler("gelaende.%s %d: Objekt ({…}) erwartet" % (art, k + 1))
+                raise UmgebungFehler("gelaende.%s %d: object ({…}) expected" % (art, k + 1))
             f = dict(f)
             fid = f.get("id")
             if not isinstance(fid, str) or not fid.strip():
-                raise UmgebungFehler("gelaende.%s %d: id fehlt oder ist leer" % (art, k + 1))
+                raise UmgebungFehler("gelaende.%s %d: id is missing or empty" % (art, k + 1))
             if fid in ids:
-                raise UmgebungFehler("ID %r doppelt" % fid)
+                raise UmgebungFehler("Duplicate ID %r" % fid)
             ids.add(fid)
             for feld in ("x", "z", "hoehe_m", "radius_m"):
                 f[feld] = _zahl(f, feld, None, fid)
             if not hmin <= f["hoehe_m"] <= hmax:
-                raise UmgebungFehler("%s %s: hoehe_m %.0f außerhalb %.0f…%.0f" % (art, fid, f["hoehe_m"], hmin, hmax))
+                raise UmgebungFehler("%s %s: hoehe_m %.0f outside %.0f…%.0f" % (art, fid, f["hoehe_m"], hmin, hmax))
             if not rmin <= f["radius_m"] <= rmax:
-                raise UmgebungFehler("%s %s: radius_m %.0f außerhalb %.0f…%.0f" % (art, fid, f["radius_m"], rmin, rmax))
+                raise UmgebungFehler("%s %s: radius_m %.0f outside %.0f…%.0f" % (art, fid, f["radius_m"], rmin, rmax))
             neu.append(f)
         g[art] = neu
     return g
@@ -192,9 +194,9 @@ def laden(pfad) -> dict:
         with open(pfad, encoding="utf-8-sig") as f:
             roh = json.load(f)
     except OSError as e:
-        raise UmgebungFehler("umgebung.json nicht lesbar: %s" % e) from e
+        raise UmgebungFehler("umgebung.json cannot be read: %s" % e) from e
     except ValueError as e:
-        raise UmgebungFehler("umgebung.json ist kein gültiges JSON: %s" % e) from e
+        raise UmgebungFehler("umgebung.json is not valid JSON: %s" % e) from e
     return normalisieren(roh)
 
 
@@ -234,9 +236,9 @@ def aus_projekt(ordner) -> Optional[str]:
     if rel:
         pfad = os.path.abspath(os.path.join(basis, rel))
         if os.path.isabs(rel) or not pfad.startswith(basis + os.sep):
-            raise UmgebungFehler("Umgebungsdatei muss im Projektordner liegen: %s" % rel)
+            raise UmgebungFehler("Environment file must be in the project folder: %s" % rel)
         if not os.path.exists(pfad):
-            raise UmgebungFehler("projekt.json nennt %s, die Datei fehlt" % rel)
+            raise UmgebungFehler("projekt.json names %s, the file is missing" % rel)
         return pfad
     pfad = os.path.join(basis, "umgebung.json")
     return pfad if os.path.exists(pfad) else None
@@ -250,7 +252,7 @@ def spielordner_finden(spielordner=None) -> Optional[str]:
         if p and os.path.isdir(os.path.join(p, TRACKS_REL)):
             return os.path.abspath(p)
     if spielordner:
-        raise UmgebungFehler("Spielordner ohne %s: %s" % (TRACKS_REL, spielordner))
+        raise UmgebungFehler("Game folder without %s: %s" % (TRACKS_REL, spielordner))
     return None
 
 
@@ -323,7 +325,7 @@ def _erp_toc_im_zip(pfad: str):
     finally:
         z.close()
     if info.compress_type != zipfile.ZIP_STORED:
-        raise UmgebungFehler("ERP im Paket ist komprimiert gespeichert: %s" % pfad)
+        raise UmgebungFehler("ERP in the package is stored compressed: %s" % pfad)
     fh = open(pfad, "rb")
     fh.seek(info.header_offset)
     kopf = fh.read(30)
@@ -415,7 +417,7 @@ def katalog(spielordner=None, neu=False, traeger="standard", cache=None, protoko
     t0 = time.time()
     so = spielordner_finden(spielordner)
     if so is None:
-        raise UmgebungFehler("Spielordner nicht gefunden (Angabe oder Umgebungsvariable EGO_SPIELORDNER)")
+        raise UmgebungFehler("Game folder not found (specify it or set the environment variable EGO_SPIELORDNER)")
     if traeger == "standard":
         traeger = standard_traeger()
     tracks = os.path.join(so, TRACKS_REL)
@@ -512,7 +514,7 @@ def quelle_pfad(eintrag: dict, katalog_daten: dict) -> str:
     """Absoluter Pfad der Quell-ERP eines Katalogeintrags (``traeger`` = Träger aus dem Katalog)."""
     if eintrag["quelle"] == "traeger":
         if not katalog_daten.get("traeger"):
-            raise UmgebungFehler("Katalog ohne Träger, Modell %s nur im Träger" % eintrag["modell"])
+            raise UmgebungFehler("Catalogue has no carrier, model %s only exists in the carrier" % eintrag["modell"])
         return katalog_daten["traeger"]
     return os.path.join(katalog_daten["spielordner"], "2025_asset_groups", "environment_package",
                         *eintrag["quelle"].split("/"))
@@ -549,7 +551,7 @@ def vorschau(modell: str, pfad_png=None, groesse: int = 160, katalog_daten=None,
     kd = katalog_daten or katalog()
     e = katalog_index(kd).get(modell)
     if e is None:
-        raise UmgebungFehler("Modell nicht im Katalog: %s" % modell)
+        raise UmgebungFehler("Model not in the catalogue: %s" % modell)
     farbe = FARBEN.get(e["kategorie"], (170, 170, 170)) + (255,)
     lo, hi = np.asarray(e["aabb_min"], float), np.asarray(e["aabb_max"], float)
     achse = 0 if hi[0] - lo[0] >= hi[2] - lo[2] else 2       # Seitenansicht über die breitere Achse
@@ -682,6 +684,9 @@ def _netz_aus(quelle):
     if isinstance(quelle, dict) and "netz" in quelle:
         n = quelle["netz"]
         namen = list(n.get("oberflaechen_namen") or n.get("namen") or [])
+        if not namen:                    # Ergebnis von erzeugung.berechnen: Klassen nach definition.OBERFLAECHEN (4.11.2026)
+            from .definition import OBERFLAECHEN
+            namen = list(OBERFLAECHEN)
         return (np.asarray(n["vertices"], float), np.asarray(n["dreiecke"], np.int64),
                 np.asarray(n["oberflaeche"], np.int64), [str(x) for x in namen])
     if isinstance(quelle, (str, os.PathLike)):
@@ -744,7 +749,7 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
         return [o["x"] + v[0], v[1], o["z"] + v[2]]
     gp |= {"UMG_VIELE", "UMG_AUSSERHALB"}
     if len(obj) > VIELE_OBJEKTE:
-        m.append(meldung("UMG_VIELE", "%d Umgebungsobjekte (Richtwert ≤ %d; Portimão hat 1.274 Bäume)"
+        m.append(meldung("UMG_VIELE", "%d environment objects (guide value ≤ %d; Portimão has 1,274 trees)"
                          % (len(obj), VIELE_OBJEKTE), ist=len(obj), soll=VIELE_OBJEKTE))
     kd = katalog_daten
     if kd is None:
@@ -757,22 +762,22 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
         bekannt = katalog_index(kd)
         for o in obj:
             if o["modell"] not in bekannt:
-                m.append(meldung("UMG_MODELL_UNBEKANNT", "Objekt %s: Modell %s nicht im Katalog"
+                m.append(meldung("UMG_MODELL_UNBEKANNT", "Object %s: model %s not in the catalogue"
                                  % (o["id"], o["modell"].rsplit("/", 1)[-1]), ort(None, None, welt(o), o["id"])))
     x0, z0, kante = LOCH
     for o in obj:
         w = welt(o)
         if not (x0 < w[0] < x0 + kante and z0 < w[2] < z0 + kante):
-            m.append(meldung("UMG_AUSSERHALB", "Objekt %s bei Welt x %.0f, z %.0f liegt außerhalb des Streckenbereichs "
-                             "(x %.0f…%.0f, z %.0f…%.0f)" % (o["id"], w[0], w[2], x0, x0 + kante, z0, z0 + kante),
+            m.append(meldung("UMG_AUSSERHALB", "Object %s at world x %.0f, z %.0f is outside the track area (x "
+                                               "%.0f…%.0f, z %.0f…%.0f)" % (o["id"], w[0], w[2], x0, x0 + kante, z0, z0 + kante),
                              ort(None, None, w, o["id"])))
     gp |= {"UMG_HUEGEL_LAGE", "UMG_BERG_LAGE", "UMG_BERG_RAND"}
     gel = d.get("gelaende") or {}
     for f in gel.get("huegel", []):
         w = welt(f)
         if not (x0 < w[0] < x0 + kante and z0 < w[2] < z0 + kante):
-            m.append(meldung("UMG_HUEGEL_LAGE", "Hügel %s: Mitte bei Welt x %.0f, z %.0f liegt außerhalb des "
-                             "Streckenbereichs (Berge außerhalb gehören unter „berge“)" % (f["id"], w[0], w[2]),
+            m.append(meldung("UMG_HUEGEL_LAGE", "Hill %s: centre at world x %.0f, z %.0f is outside the track area "
+                                                "(mountains outside belong under “berge”)" % (f["id"], w[0], w[2]),
                              ort(None, None, w, f["id"])))
     mitte = (x0 + kante / 2.0, z0 + kante / 2.0)
     for f in gel.get("berge", []):
@@ -780,13 +785,14 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
         aussen = float(_lochrand_abstand(np.float64(w[0]), np.float64(w[2])))
         weit = math.hypot(w[0] - mitte[0], w[2] - mitte[1])
         if aussen <= 0.0 or weit > BERG_ENTFERNUNG_MAX:
-            grund = ("liegt im Streckenbereich (dort wirken nur Hügel)" if aussen <= 0.0
-                     else "ist %.1f km von der Mitte entfernt (höchstens %.0f km)" % (weit / 1000, BERG_ENTFERNUNG_MAX / 1000))
-            m.append(meldung("UMG_BERG_LAGE", "Berg %s bei Welt x %.0f, z %.0f %s" % (f["id"], w[0], w[2], grund),
+            grund = ("lies in the track area (only hills work there)" if aussen <= 0.0
+                     else "is %.1f km from the centre (at most %.0f km)" % (weit / 1000, BERG_ENTFERNUNG_MAX / 1000))
+            m.append(meldung("UMG_BERG_LAGE", "Mountain %s at world x %.0f, z %.0f %s" % (f["id"], w[0], w[2], grund),
                              ort(None, None, w, f["id"])))
         elif aussen < f["radius_m"] * 0.5 + RAND_FEST + RAND_UEBERGANG:
-            m.append(meldung("UMG_BERG_RAND", "Berg %s reicht bis an den Streckenbereich; am Rand bleibt das Gelände "
-                             "flach, der Berg wird dort abgeschnitten (Mitte %.0f m vor dem Rand, Radius %.0f m)"
+            m.append(meldung("UMG_BERG_RAND", "Mountain %s reaches the track area; the terrain stays flat at the edge "
+                                              "and the mountain is cut off there (centre %.0f m from the edge, radius "
+                                              "%.0f m)"
                              % (f["id"], aussen, f["radius_m"]), ort(None, None, w, f["id"]),
                              ist=round(aussen), soll="≥ %.0f m" % (f["radius_m"] * 0.5 + RAND_FEST + RAND_UEBERGANG)))
     netz = _netz_aus(definition_oder_generatorausgabe)
@@ -798,8 +804,8 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
             klassen = sorted({namen[int(fl.klasse[i])] for i, _ in fl.treffer(o["x"], o["z"])} & set(FAHRBAHN_KLASSEN))
             ab = kanten.abstand(o["x"], o["z"], MAUER_ABSTAND_M) if kanten is not None else math.inf
             if klassen or ab < MAUER_ABSTAND_M:
-                grund = ("auf %s" % "/".join(klassen)) if klassen else "%.1f m neben einer Mauer" % ab
-                m.append(meldung("UMG_AUF_FAHRBAHN", "Objekt %s steht %s" % (o["id"], grund),
+                grund = ("on %s" % "/".join(klassen)) if klassen else "%.1f m beside a wall" % ab
+                m.append(meldung("UMG_AUF_FAHRBAHN", "Object %s stands %s" % (o["id"], grund),
                                  ort(None, None, welt(o), o["id"]), ist=klassen or round(ab, 2),
                                  soll="Gras/Gelände, ≥ %.0f m von Mauern" % MAUER_ABSTAND_M))
     else:
@@ -814,8 +820,8 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
                 if ab < float(halb.max()):
                     i = int(np.argmin(np.linalg.norm(P - [o["x"], o["z"]], axis=1)))
                     if ab < halb[i]:
-                        m.append(meldung("UMG_AUF_FAHRBAHN", "Objekt %s steht auf der Fahrbahn (%.1f m von der "
-                                         "Mittellinie; Näherung ohne Generatornetz)" % (o["id"], ab),
+                        m.append(meldung("UMG_AUF_FAHRBAHN", "Object %s stands on the road (%.1f m from the "
+                                                             "centreline; approximation without generator mesh)" % (o["id"], ab),
                                          ort(None, None, welt(o), o["id"]), ist=round(ab, 2),
                                          soll="> %.1f m" % halb[i]))
     return m, gp
@@ -833,11 +839,13 @@ def pruefen(daten, definition_oder_generatorausgabe=None, versatz=None, katalog_
 
 # =============================================================================== Einsetzen (Bau)
 def _layer(archiv, kurz, code):
+    """WOInstances-Ressource der Ebene ``kurz`` und ihr Name im Träger (bei Mod 1.0.2 ``trees`` statt ``speedtrees``)."""
     from . import spiel_welt
-    r = spiel_welt.layer_ressourcen(archiv, code).get(kurz)
-    if r is None:
-        raise UmgebungFehler("Träger ohne Layer %s" % kurz)
-    return r
+    vorhanden = spiel_welt.layer_ressourcen(archiv, code)
+    for name in (kurz,) + LAYER_ALIAS.get(kurz, ()):
+        if name in vorhanden:
+            return vorhanden[name], name
+    raise UmgebungFehler("Carrier has no layer %s" % kurz)
 
 
 def _text_setzen(p, block, pfad, text):
@@ -863,7 +871,7 @@ def _vorlage(p, layer_kurz):
         if beste is None:
             beste = i.index
     if beste is None:
-        raise UmgebungFehler("Layer %s ohne Vorlage (RenderModel ohne Kollision)" % layer_kurz)
+        raise UmgebungFehler("Layer %s has no template (RenderModel without collision)" % layer_kurz)
     return beste
 
 
@@ -912,7 +920,7 @@ def ressourcen_kopieren(ziel, quellen, start, code, spielordner, praefix="umg_")
         neu.append((r.resource_type, k))
     for _, datei in mips:
         if not os.path.exists(datei):
-            raise UmgebungFehler("Mip-Datei fehlt im Spielordner: %s" % datei)
+            raise UmgebungFehler("Mip file is missing in the game folder: %s" % datei)
     return neu, mips, fehlt
 
 
@@ -921,7 +929,7 @@ def hoehenflaechen(archiv) -> Flaechen:
     from ego import trn
     r = [x for x in archiv if x.resource_type == "TRN~"]
     if len(r) != 1:
-        raise UmgebungFehler("Archiv ohne eindeutige TRN~")
+        raise UmgebungFehler("Archive has no unique TRN~")
     p, t, c = trn.mesh(trn.open_trn(r[0].fragments[0].read()).geometry())
     c = np.asarray([x.decode("ascii", "replace") if isinstance(x, bytes) else str(x) for x in c])
     flach = ~np.isin(c, MAUER_CODES)
@@ -957,7 +965,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
         index = katalog_index(kd)
     unbekannt = [m for m in fehlen if m not in index]
     if unbekannt:
-        raise UmgebungFehler("Modelle weder im Träger noch im Katalog: %s" % ", ".join(unbekannt[:5]))
+        raise UmgebungFehler("Models neither in the carrier nor in the catalogue: %s" % ", ".join(unbekannt[:5]))
     # --- fehlende Modelle samt Abhängigkeiten kopieren (je Quell-ERP ein Index)
     je_quelle: Dict[str, List[str]] = {}
     for m in fehlen:
@@ -981,7 +989,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
         for m in liste:
             for k in (m + ".idf?model", m + ".idf?render", m + ".emb?context=default"):
                 if archiv.find(k) is None:
-                    raise UmgebungFehler("Modell %s unvollständig kopiert: %s fehlt" % (m.rsplit("/", 1)[-1], k))
+                    raise UmgebungFehler("Model %s copied incompletely: %s is missing" % (m.rsplit("/", 1)[-1], k))
     bericht["ressourcen_neu"] = dict(Counter(t for t, _ in alle_neu).most_common())
     bericht["ressourcen_neu_summe"] = len(alle_neu)
     bericht["mipmaps"] = sorted(alle_mips.items())
@@ -996,10 +1004,10 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
         namen_kat[o["id"]] = kat
         layer = LAYER_PFLANZEN if kat in PFLANZEN else LAYER_KULISSE
         if layer not in pakete:
-            r = _layer(archiv, layer, code)
+            r, im_traeger = _layer(archiv, layer, code)
             p = pkg.lesen(r.fragments[0].read())
-            pakete[layer] = (r, p, _vorlage(p, layer))
-        r, p, vi = pakete[layer]
+            pakete[layer] = (r, p, _vorlage(p, im_traeger), im_traeger)
+        r, p, vi, im_traeger = pakete[layer]
         wx, wz = o["x"] + v[0], o["z"] + v[2]
         y = hoehen.hoehe_nahe(wx, wz)
         if y is None:
@@ -1007,7 +1015,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
                                              "welt": [round(wx, 2), round(wz, 2)]})
             continue
         y += o["hoehe_m"]
-        name = "%s$umg_%s" % (layer, o["id"])
+        name = "%s$umg_%s" % (im_traeger, o["id"])
         uid = uuid.uuid5(uuid.NAMESPACE_URL, "ego-strecke:umgebung:" + name).bytes
         inst = pkg.instanz_hinzufuegen(p, vi, [wx, y, wz], name, uid)
         _text_setzen(p, inst.block, ("overrides", "Model", "model"), o["modell"] + ".idf?context=render")
@@ -1019,7 +1027,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
         bericht["modelle"][o["modell"].rsplit("/", 1)[-1]] = bericht["modelle"].get(o["modell"].rsplit("/", 1)[-1], 0) + 1
         hb = bericht.setdefault("hoehen_m", [y, y])
         hb[0], hb[1] = min(hb[0], y), max(hb[1], y)
-    for layer, (r, p, _vi) in pakete.items():
+    for layer, (r, p, _vi, _name) in pakete.items():
         p.pruefen()
         r.set_fragment_data(0, pkg.schreiben(p))
     if "hoehen_m" in bericht:
@@ -1056,7 +1064,7 @@ def berge_einsetzen(archiv, daten, versatz=None, protokoll=None) -> dict:
     liste = [(f["id"], f["x"] + v[0], f["z"] + v[2], f["radius_m"], f["hoehe_m"]) for f in berge]
     kandidaten = [x for x in archiv if x.resource_type == "TerrainRes" and "outer_terrain" in x.identifier]
     if not kandidaten:
-        raise UmgebungFehler("Außenterrain (TerrainRes *outer_terrain*) fehlt im Träger")
+        raise UmgebungFehler("Outer terrain (TerrainRes *outer_terrain*) is missing in the carrier")
     r = kandidaten[0]
 
     def gewicht(p):
@@ -1094,7 +1102,7 @@ def berge_einsetzen(archiv, daten, versatz=None, protokoll=None) -> dict:
         nres = archiv.find(t.vb_kennungen[g["normalen"]])
         npuf = grafik.GfxPuffer.aus_ressource(nres)
         if npuf.stride != 8:
-            raise UmgebungFehler("Normalenpuffer des Außenterrains mit Stride %d (erwartet 8)" % npuf.stride)
+            raise UmgebungFehler("Normal buffer of the outer terrain has stride %d (expected 8)" % npuf.stride)
         nh = np.frombuffer(npuf.daten, "<f2").reshape(-1, 4).copy()
         nn = _vertexnormalen(p, np.concatenate(g["tri"]))
         nh[neu, :3] = nn[neu].astype(np.float16)

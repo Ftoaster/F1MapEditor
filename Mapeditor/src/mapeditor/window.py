@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget, QLineEdit,
 )
 
-from .adapter import (ProcessJob, check_key, env_cache_folder, import_template, suggest_track, toolkit_path,
+from .adapter import (ProcessJob, check_key, env_cache_folder, import_template, spielstrecken, suggest_track, toolkit_path,
                       worker_command)
 from .appearance import ensure_fonts
 from .document import Document
@@ -38,52 +38,56 @@ from .ux import (BOOL_WORDS, CHOICES, ChoiceDelegate, HelpDialog, Section, Welco
 
 
 LABELS = {
-    "x": N_("X · m"), "y": N_("Höhe Y · m"), "z": N_("Z · m"), "hoehe": N_("Höhe · m"),
-    "typ": N_("Segmentart"), "laenge": N_("Länge · m"), "radius": N_("Radius · m"), "winkel": N_("Winkel · °"),
-    "richtung": N_("Kurvenrichtung"), "radius_anfang": N_("Anfangsradius · m"), "radius_ende": N_("Endradius · m"),
-    "hoehe_ende": N_("Endhöhe · m"), "steigung_prozent": N_("Steigung · %"), "name": N_("Name"),
-    "breite": N_("Gesamtbreite · m"), "breite_links": N_("Halbbreite links · m"), "breite_rechts": N_("Halbbreite rechts · m"),
-    "asymmetrisch": N_("Asymmetrische Breite"),
-    "querneigung_grad": N_("Querneigung · ° (+ = links höher)"), "uebergang_m": N_("Übergang · m"),
-    "randlinie_breite": N_("Randlinie · m"), "abtastung_m": N_("Abtastung · m"), "glaettung_m": N_("Glättung · m"),
-    "hoehen_glaettung_m": N_("Höhenglättung · m"), "schliessen": N_("Schließregel (verteilen/fehler)"),
-    "max_schliessfehler_m": N_("Max. Schließfehler · m"), "umkehren": N_("Richtung umkehren"),
-    "s": N_("Start/Ziel ab Eingabeursprung · m"), "punkt": N_("Start/Ziel an Punkt [X,Z]"), "linienbreite": N_("Ziellinienbreite · m"),
-    "aktiv": N_("Aktiv"), "seite": N_("Seite in Fahrtrichtung"), "einfahrt_vor_start_m": N_("Einfahrt vor Ziel · m"),
-    "ausfahrt_nach_start_m": N_("Ausfahrt nach Ziel · m"), "abstand_fahrbahn": N_("Abstand Fahrbahn · m"),
-    "anlauf_m": N_("Anlauf · m"), "hinter_box_m": N_("Hinter Boxen · m"), "boxen": N_("Boxenzahl"),
-    "box_abstand_m": N_("Boxenabstand · m"), "tempolimit_kmh": N_("Tempolimit · km/h"),
-    "mauer_hoehe": N_("Boxenmauerhöhe · m"), "mauer_dicke": N_("Boxenmauerdicke · m"), "mauer_abstand_m": N_("Boxenmauerabstand · m"),
-    "linien": N_("Linien (Tempolimit, Ein-/Ausfahrt)"), "linie_breite_m": N_("Linienbreite · m"),
-    "gebaeude": N_("Garagengebäude"), "gebaeude_tiefe_m": N_("Garagentiefe · m"), "gebaeude_hoehe_m": N_("Garagenhöhe · m"),
-    "gebaeude_wand_m": N_("Garagenwand · m"),
-    "anzahl": N_("Anzahl"), "abstand_m": N_("Platzabstand · m"), "abstand_pole_m": N_("Pole hinter Ziel · m"),
-    "pole_seite": N_("Pole-Seite"), "seitenversatz_m": N_("Seitlicher Versatz · m"), "fahrzeuglaenge_m": N_("Fahrzeuglänge · m"),
-    "startboxen": N_("Startboxen auf dem Asphalt"),
-    "spur_versatz_m": N_("Boxenlinie zur Strecke versetzt · m"), "spur_halbbreite_m": N_("Boxenspur halbe Breite · m"),
-    "kruemmung_schwelle": N_("Krümmungsschwelle · 1/m"), "vorlauf_m": N_("Vorlauf · m"), "nachlauf_m": N_("Nachlauf · m"),
-    "aussen_nachlauf_m": N_("Außennachlauf · m"), "rampe_m": N_("Rampe · m"), "abstand": N_("Abstand ab Fahrbahnrand · m"),
-    "dicke": N_("Dicke · m"), "mindestabstand": N_("Mindestabstand · m"), "luecke_m": N_("Lücke · m"),
-    "von_s": N_("Von Eingabe-s · m"), "bis_s": N_("Bis Eingabe-s · m"), "richtung_grad": N_("Startrichtung · °"),
-    "suchbereich_anteil": N_("Sektor-Suchbereich · Anteil"), "kruemmung_gerade": N_("Geradenkrümmung · 1/m"),
-    "mindestlaenge_m": N_("Mindestlänge · m"), "erkennung_vor_m": N_("DRS-Erkennung vorher · m"),
-    "aktivierung_nach_m": N_("DRS-Aktivierung danach · m"), "ende_vor_m": N_("DRS-Ende vorher · m"),
-    "mindestwinkel_grad": N_("Mindestwinkel · °"), "zusammenfassen_m": N_("Zusammenfassen · m"),
-    "approximation_m": N_("Glättende Approximation · σ m (0 = aus, 6–8 empfohlen)"),
-    "erkennung_m": N_("Erkennungspunkt · m ab Ziel"), "aktivierung_m": N_("DRS offen ab · m ab Ziel"),
-    "ende_m": N_("DRS offen bis · m ab Ziel"), "von_m": N_("Straight Mode ab · m ab Ziel"), "bis_m": N_("Straight Mode bis · m ab Ziel"),
-    "partial": N_("Partial-Zone"), "partial_versatz_m": N_("Partial beginnt nach · m"),
-    "uebergang": N_("Klothoiden-Übergang (ja/nein/Länge m)"),
-    "min_abbau_kmh": N_("Tafeln ab Geschwindigkeitsabbau · km/h"), "abstaende_m": N_("Tafeln · m vor der Kurve"),
-    "rand_m": N_("Abstand vom Fahrbahnrand · m"),
-    "schritt_m": N_("Stützstellenabstand · m"), "sicherheitsabstand_m": N_("Abstand Fahrzeugmitte – Rand · m"),
-    "kruemmung_glaettung_m": N_("Krümmungsglättung · m"), "iterationen": N_("Iterationen (1 = einfach)"),
-    "iterationen_toleranz_m": N_("Abbruch bei Verschiebung < m"), "feine_rueckprojektion": N_("Feine Rückprojektion"),
-    "kruemmung_max": N_("Krümmungsgrenze · 1/m (leer = aus)"), "mindestzeit": N_("Mindestzeit-Feinschliff (Scheitelsuche)"),
-    "mindestzeit_fahrzeug": N_("Fahrzeug der Bewertung"),
-    "uebergaenge.aktiv": N_("Klothoiden-Übergänge"), "uebergaenge.laenge_m": N_("Übergang feste Länge · m"),
-    "uebergaenge.a_faktor": N_("Übergang A = Faktor · R"), "uebergaenge.min_laenge_m": N_("Übergang min. · m"),
-    "uebergaenge.max_laenge_m": N_("Übergang max. · m"), "uebergaenge.max_anteil": N_("Übergang max. Anteil Segment"),
+    "x": N_("X · m"), "y": N_("Height Y · m"), "z": N_("Z · m"), "hoehe": N_("Height · m"),
+    "typ": N_("Segment type"), "laenge": N_("Length · m"), "radius": N_("Radius · m"), "winkel": N_("Angle · °"),
+    "richtung": N_("Corner direction"), "radius_anfang": N_("Start radius · m"), "radius_ende": N_("End radius · m"),
+    "hoehe_ende": N_("End height · m"), "steigung_prozent": N_("Gradient · %"), "name": N_("Name"),
+    "breite": N_("Total width · m"), "breite_links": N_("Half-width left · m"), "breite_rechts": N_("Half-width right · m"),
+    "asymmetrisch": N_("Asymmetric width"),
+    "querneigung_grad": N_("Banking · ° (+ = left higher)"), "uebergang_m": N_("Transition · m"),
+    "randlinie_breite": N_("Edge line · m"), "abtastung_m": N_("Sampling · m"), "glaettung_m": N_("Smoothing · m"),
+    "hoehen_glaettung_m": N_("Height smoothing · m"), "schliessen": N_("Closing rule (verteilen/fehler)"),
+    "max_schliessfehler_m": N_("Max. closing error · m"), "umkehren": N_("Reverse direction"),
+    "s": N_("Start/finish from input origin · m"), "punkt": N_("Start/finish at point [X,Z]"), "linienbreite": N_("Finish line width · m"),
+    "aktiv": N_("Active"), "seite": N_("Side in driving direction"), "einfahrt_vor_start_m": N_("Entry before finish · m"),
+    "ausfahrt_nach_start_m": N_("Exit after finish · m"), "abstand_fahrbahn": N_("Distance to track · m"),
+    "anlauf_m": N_("Run-up · m"), "hinter_box_m": N_("Behind pit boxes · m"), "boxen": N_("Number of pit boxes"),
+    "box_abstand_m": N_("Pit box spacing · m"), "tempolimit_kmh": N_("Speed limit · km/h"),
+    "mauer_hoehe": N_("Pit wall height · m"), "mauer_dicke": N_("Pit wall thickness · m"), "mauer_abstand_m": N_("Pit wall distance · m"),
+    "linien": N_("Lines (speed limit, pit entry/exit)"), "linie_breite_m": N_("Line width · m"),
+    "gebaeude": N_("Garage building"), "gebaeude_tiefe_m": N_("Garage depth · m"), "gebaeude_hoehe_m": N_("Garage height · m"),
+    "gebaeude_wand_m": N_("Garage wall · m"),
+    "anzahl": N_("Count"), "abstand_m": N_("Slot spacing · m"), "abstand_pole_m": N_("Pole behind finish · m"),
+    "pole_seite": N_("Pole side"), "seitenversatz_m": N_("Lateral offset · m"), "fahrzeuglaenge_m": N_("Car length · m"),
+    "startboxen": N_("Grid boxes on the asphalt"),
+    "spur_versatz_m": N_("Pit line offset towards the track · m"), "spur_halbbreite_m": N_("Pit lane half width · m"),
+    "kruemmung_schwelle": N_("Curvature threshold · 1/m"), "vorlauf_m": N_("Lead-in · m"), "nachlauf_m": N_("Run-out · m"),
+    "aussen_nachlauf_m": N_("Outer run-out · m"), "rampe_m": N_("Ramp · m"), "abstand": N_(("Distance from the track "
+                                                                                             "edge · m")),
+    "dicke": N_("Thickness · m"), "mindestabstand": N_("Minimum distance · m"), "luecke_m": N_("Gap · m"),
+    "von_s": N_("From input s · m"), "bis_s": N_("To input s · m"), "richtung_grad": N_("Start direction · °"),
+    "suchbereich_anteil": N_("Sector search range · share"), "kruemmung_gerade": N_("Straight curvature · 1/m"),
+    "mindestlaenge_m": N_("Minimum length · m"), "erkennung_vor_m": N_("DRS detection before · m"),
+    "aktivierung_nach_m": N_("DRS activation after · m"), "ende_vor_m": N_("DRS end before · m"),
+    "mindestwinkel_grad": N_("Minimum angle · °"), "zusammenfassen_m": N_("Merge · m"),
+    "approximation_m": N_("Smoothing approximation · σ m (0 = off, 6–8 recommended)"),
+    "erkennung_m": N_("Detection point · m from finish"), "aktivierung_m": N_("DRS open from · m from finish"),
+    "ende_m": N_("DRS open until · m from finish"), "von_m": N_("Straight Mode from · m from finish"), "bis_m": N_(("Straight Mode until · m "
+                                                                                                         "from finish")),
+    "partial": N_("Partial zone"), "partial_versatz_m": N_("Partial starts after · m"),
+    "uebergang": N_("Clothoid transition (yes/no/length m)"),
+    "min_abbau_kmh": N_("Boards from speed loss · km/h"), "abstaende_m": N_("Boards · m before the corner"),
+    "rand_m": N_("Distance from the track edge · m"),
+    "schritt_m": N_("Sample spacing · m"), "sicherheitsabstand_m": N_("Distance car centre – edge · m"),
+    "kruemmung_glaettung_m": N_("Curvature smoothing · m"), "iterationen": N_("Iterations (1 = simple)"),
+    "iterationen_toleranz_m": N_("Stop when shift < m"), "feine_rueckprojektion": N_("Fine back-projection"),
+    "kruemmung_max": N_("Curvature limit · 1/m (empty = off)"), "mindestzeit": N_(("Minimum-time refinement (apex "
+                                                                                  "search)")),
+    "mindestzeit_fahrzeug": N_("Car used for evaluation"),
+    "uebergaenge.aktiv": N_("Clothoid transitions"), "uebergaenge.laenge_m": N_("Transition fixed length · m"),
+    "uebergaenge.a_faktor": N_("Transition A = factor · R"), "uebergaenge.min_laenge_m": N_("Transition min. · m"),
+    "uebergaenge.max_laenge_m": N_("Transition max. · m"), "uebergaenge.max_anteil": N_(("Transition max. share of "
+                                                                                       "segment")),
 }
 
 # Fahrbahnbreite (wie strecke.definition.STANDARD; gilt, solange keine Vorschau geladen ist)
@@ -97,13 +101,13 @@ LISTS = {
     "sections": {"path": ("fahrbahn", "abschnitte"),
                  "keys": ["von_s", "bis_s", "breite", "breite_links", "breite_rechts", "querneigung_grad"],
                  "title": lambda i, z: f"{i + 1} · {z.get('von_s', 0)}–{z.get('bis_s', 0)} m",
-                 "add": N_("Abschnitt +"), "remove": N_("Abschnitt −"), "noun": N_("Profilabschnitt")},
+                 "add": N_("Section +"), "remove": N_("Section −"), "noun": N_("section profile")},
     "drs_zonen": {"path": ("drs", "zonen"), "keys": ["erkennung_m", "aktivierung_m", "ende_m"],
                   "title": lambda i, z: f"DRS {i + 1} · {z.get('aktivierung_m', 0):.0f}–{z.get('ende_m', 0):.0f} m",
-                  "add": N_("DRS-Zone +"), "remove": N_("DRS-Zone −"), "noun": N_("DRS-Zone")},
+                  "add": N_("DRS zone +"), "remove": N_("DRS zone −"), "noun": N_("DRS zone")},
     "xmode_zonen": {"path": ("x_mode", "zonen"), "keys": ["von_m", "bis_m", "partial", "partial_versatz_m"],
                     "title": lambda i, z: f"Straight Mode {i + 1} · {z.get('von_m', 0):.0f}–{z.get('bis_m', 0):.0f} m",
-                    "add": N_("Straight Mode +"), "remove": N_("Straight Mode −"), "noun": N_("Straight-Mode-Zone")},
+                    "add": N_("Straight Mode +"), "remove": N_("Straight Mode −"), "noun": N_("Straight Mode zone")},
 }
 ZONE_CATEGORY = {"drs": "drs_zonen", "xmode": "xmode_zonen"}
 
@@ -160,7 +164,7 @@ def value_text(value):
 def parse_bool(text):
     word = text.strip().lower()
     if word not in BOOL_WORDS:
-        raise ValueError(tr("Bitte ja oder nein wählen."))
+        raise ValueError(tr("Please choose yes or no."))
     return BOOL_WORDS[word]
 
 
@@ -182,16 +186,16 @@ def parse_value(text, template, key):
             return json.loads(text)
         number = float(text.replace(",", "."))
         if not math.isfinite(number) or number <= 0:
-            raise ValueError(tr("Übergang: ja, nein, Länge > 0 oder {\"anfang\": …, \"ende\": …}."))
+            raise ValueError(tr("Transition: yes, no, length > 0 or {\"anfang\": …, \"ende\": …}."))
         return number
     if isinstance(template, bool) or key.endswith(".aktiv") or key in ("aktiv", "umkehren", "partial"):
         return parse_bool(text)
     number = float(text.replace(",", "."))
     if not math.isfinite(number):
-        raise ValueError(tr("Bitte einen endlichen Zahlenwert eingeben."))
+        raise ValueError(tr("Please enter a finite number."))
     if isinstance(template, int) and key in ("anzahl", "boxen"):
         if number != int(number):
-            raise ValueError(tr("Bitte eine ganze Zahl eingeben."))
+            raise ValueError(tr("Please enter a whole number."))
         return int(number)
     return number
 
@@ -242,7 +246,7 @@ class PropertyTable(QTableWidget):
     """Nur tatsächlich geänderte Felder schreiben; leeres Feld entfernt eine Vorgabe."""
     def __init__(self):
         super().__init__(0, 2)
-        self.setHorizontalHeaderLabels([tr("Eigenschaft"), tr("Wert")])
+        self.setHorizontalHeaderLabels([tr("Property"), tr("Value")])
         self.setItemDelegate(ChoiceDelegate(self))
         self.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed |
                              QAbstractItemView.AnyKeyPressed | QAbstractItemView.SelectedClicked)
@@ -262,20 +266,20 @@ class PropertyTable(QTableWidget):
             value = actual if actual is not None else fallback
             label_item = QTableWidgetItem(tr(label or LABELS.get(key, key)))
             label_item.setFlags(label_item.flags() & ~Qt.ItemIsEditable)
-            label_item.setToolTip((tr("Eigener Wert") if actual is not None else
-                                   tr("Standardwert (kursiv) – wird erst gespeichert, wenn du ihn änderst"))
-                                  + tr("\nFeld in der Definition: {key}", key=key))
+            label_item.setToolTip((tr("Custom value") if actual is not None else
+                                   tr("Default value (italic) – only saved once you change it"))
+                                  + tr("\nField in the definition: {key}", key=key))
             shown = choice_text(value) if key in CHOICES else value_text(value)
             item = QTableWidgetItem(shown)
             item.setData(Qt.UserRole, shown)
-            item.setToolTip(tr("Doppelklick oder Tippen zum Ändern, Enter übernimmt. Feld leeren = Standard wiederherstellen."))
+            item.setToolTip(tr("Double-click or type to change, Enter applies. Clear the field = restore the default."))
             if actual is None:
                 font = item.font()
                 font.setItalic(True)
                 item.setFont(font)
             if readonly:
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                item.setToolTip(tr("Unbekannte Projektfassung: nur lesend geöffnet."))
+                item.setToolTip(tr("Unknown project version: opened read-only."))
             self.setItem(row, 0, label_item)
             self.setItem(row, 1, item)
         self.resizeRowsToContents()
@@ -393,27 +397,27 @@ class MainWindow(QMainWindow):
         return action
 
     def _build_ui(self):
-        file_menu = self.menuBar().addMenu(tr("&Projekt"))
-        self.action(file_menu, tr("Neu"), self.new_project, "Ctrl+N")
-        self.action(file_menu, tr("Neu aus Vorlage …"), self.new_from_template)
-        self.action(file_menu, tr("Vorschlag erzeugen …"), self.new_from_suggestion)
-        self.action(file_menu, tr("Bildvorlage laden …"), self.load_bildvorlage)
-        self.action(file_menu, tr("Bildvorlage aus Zwischenablage"), self.paste_bildvorlage)
-        self.action(file_menu, tr("Definition / Manifest öffnen …"), self.open_dialog, "Ctrl+O")
-        self.action(file_menu, tr("Projektordner öffnen …"), self.open_folder_dialog)
-        self.action(file_menu, tr("Speichern"), self.save_project, "Ctrl+S")
-        self.action(file_menu, tr("Speichern unter …"), lambda: self.save_project(True), "Ctrl+Shift+S")
-        self.recent_menu = file_menu.addMenu(tr("Zuletzt geöffnet"))
+        file_menu = self.menuBar().addMenu(tr("&Project"))
+        self.action(file_menu, tr("New"), self.new_project, "Ctrl+N")
+        self.action(file_menu, tr("New from template …"), self.new_from_template)
+        self.action(file_menu, tr("Generate suggestion …"), self.new_from_suggestion)
+        self.action(file_menu, tr("Load reference image …"), self.load_bildvorlage)
+        self.action(file_menu, tr("Reference image from clipboard"), self.paste_bildvorlage)
+        self.action(file_menu, tr("Open definition / manifest …"), self.open_dialog, "Ctrl+O")
+        self.action(file_menu, tr("Open project folder …"), self.open_folder_dialog)
+        self.action(file_menu, tr("Save"), self.save_project, "Ctrl+S")
+        self.action(file_menu, tr("Save as …"), lambda: self.save_project(True), "Ctrl+Shift+S")
+        self.recent_menu = file_menu.addMenu(tr("Recently opened"))
         self.recent_menu.aboutToShow.connect(self._fill_recent_menu)
         file_menu.addSeparator()
-        self.action(file_menu, tr("Beenden"), self.close, "Alt+F4")
-        edit_menu = self.menuBar().addMenu(tr("&Bearbeiten"))
-        undo = self.document.undo.createUndoAction(self, tr("Rückgängig"))
+        self.action(file_menu, tr("Exit"), self.close, "Alt+F4")
+        edit_menu = self.menuBar().addMenu(tr("&Edit"))
+        undo = self.document.undo.createUndoAction(self, tr("Undo"))
         undo.setShortcut(QKeySequence("Ctrl+Z"))
-        redo = self.document.undo.createRedoAction(self, tr("Wiederholen"))
+        redo = self.document.undo.createRedoAction(self, tr("Redo"))
         redo.setShortcuts([QKeySequence("Ctrl+Y"), QKeySequence("Ctrl+Shift+Z")])
-        undo.setToolTip(tr("Noch keine Änderung zum Rückgängigmachen."))
-        redo.setToolTip(tr("Noch keine rückgängig gemachte Änderung zum Wiederholen."))
+        undo.setToolTip(tr("No change to undo yet."))
+        redo.setToolTip(tr("No undone change to redo yet."))
         self.undo_action, self.redo_action = undo, redo
         undo.changed.connect(self._history_status)
         redo.changed.connect(self._history_status)
@@ -421,21 +425,21 @@ class MainWindow(QMainWindow):
         edit_menu.addSeparator()
         # Kopieren/Einfügen von Streckenpunkten (Issue #2); Kürzel nur in der Karte, Textfelder kopieren wie gewohnt
         self.clip_actions = [
-            self.action(edit_menu, tr("Punkte kopieren"), self.copy_points, "Ctrl+C"),
-            self.action(edit_menu, tr("Punkte ausschneiden"), self.cut_points, "Ctrl+X"),
-            self.action(edit_menu, tr("Punkte einfügen"), self.paste_points, "Ctrl+V"),
+            self.action(edit_menu, tr("Copy points"), self.copy_points, "Ctrl+C"),
+            self.action(edit_menu, tr("Cut points"), self.cut_points, "Ctrl+X"),
+            self.action(edit_menu, tr("Paste points"), self.paste_points, "Ctrl+V"),
         ]
-        self.action(edit_menu, tr("Runde hier öffnen"), self.open_here)
-        self.action(edit_menu, tr("Reihenfolge der Auswahl umkehren"), self.reverse_selection)
-        self.action(edit_menu, tr("Überstand abschneiden"), self.cut_overhang)
+        self.action(edit_menu, tr("Open lap here"), self.open_here)
+        self.action(edit_menu, tr("Reverse order of selection"), self.reverse_selection)
+        self.action(edit_menu, tr("Cut overlap"), self.cut_overhang)
         edit_menu.addSeparator()
-        self.action(edit_menu, tr("Strecke skalieren …"), self.scale_track)
+        self.action(edit_menu, tr("Scale track …"), self.scale_track)
         edit_menu.addSeparator()
-        self.action(edit_menu, tr("Querneigung: alle Kurven automatisch"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
-        self.action(edit_menu, tr("Querneigung: ganze Strecke flach"), self.flatten_bank)
-        view_menu = self.menuBar().addMenu(tr("&Ansicht"))
-        self.action(view_menu, tr("Dunkles Thema"), lambda: self.change_theme("dunkel"))
-        self.action(view_menu, tr("Helles Thema"), lambda: self.change_theme("hell"))
+        self.action(edit_menu, tr("Banking: all corners automatically"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
+        self.action(edit_menu, tr("Banking: whole track flat"), self.flatten_bank)
+        view_menu = self.menuBar().addMenu(tr("&View"))
+        self.action(view_menu, tr("Dark theme"), lambda: self.change_theme("dunkel"))
+        self.action(view_menu, tr("Light theme"), lambda: self.change_theme("hell"))
         view_menu.addSeparator()
         for group in ansicht.GROUPS:
             submenu = view_menu.addMenu(tr(group))
@@ -450,9 +454,9 @@ class MainWindow(QMainWindow):
                 submenu.addAction(action)
                 self.feature_actions[key] = action
         view_menu.addSeparator()
-        self.action(view_menu, tr("Ansicht anpassen …"), self.open_view_dialog, "Ctrl+Shift+A")
-        self.action(view_menu, tr("Alles einblenden"), self.show_all_features)
-        self.action(view_menu, tr("Unteren Bereich maximieren / zurück"), self.toggle_results_maximized, "Ctrl+M")
+        self.action(view_menu, tr("Customise view …"), self.open_view_dialog, "Ctrl+Shift+A")
+        self.action(view_menu, tr("Show everything"), self.show_all_features)
+        self.action(view_menu, tr("Maximise / restore lower area"), self.toggle_results_maximized, "Ctrl+M")
         view_menu.addSeparator()
         self.language_menu = view_menu.addMenu(tr("Sprache / Language"))
         self.language_actions = {}
@@ -466,17 +470,17 @@ class MainWindow(QMainWindow):
             language_group.addAction(action)
             self.language_menu.addAction(action)
             self.language_actions[code] = action
-        tools = self.menuBar().addMenu(tr("&Werkzeuge"))
-        self.action(tools, tr("Werkzeugkasten wählen …"), self.choose_toolkit)
-        self.action(tools, tr("Spielweltversatz einstellen …"), self.choose_shift)
-        self.action(tools, tr("Generatorausgabe lesend öffnen …"), self.open_output)
-        self.action(tools, tr("Aktuellen Entwurf prüfen"), self.request_check, "Ctrl+Return")
-        self.action(tools, tr("Bauen / Paket …"), self.open_build)
-        self.action(tools, tr("Spieltest-Protokoll …"), self.open_playtests)
-        self.action(tools, tr("Alte Bauten aufräumen …"), self.open_cleanup)
-        help_menu = self.menuBar().addMenu(tr("&Hilfe"))
-        self.action(help_menu, tr("Bedienung"), self.show_help, "F1")
-        toolbar = QToolBar(tr("Entwerfen"), self)
+        tools = self.menuBar().addMenu(tr("&Tools"))
+        self.action(tools, tr("Choose toolkit …"), self.choose_toolkit)
+        self.action(tools, tr("Set game world offset …"), self.choose_shift)
+        self.action(tools, tr("Open generator output read-only …"), self.open_output)
+        self.action(tools, tr("Check current draft"), self.request_check, "Ctrl+Return")
+        self.action(tools, tr("Build / package …"), self.open_build)
+        self.action(tools, tr("Playtest log …"), self.open_playtests)
+        self.action(tools, tr("Clean up old builds …"), self.open_cleanup)
+        help_menu = self.menuBar().addMenu(tr("&Help"))
+        self.action(help_menu, tr("How to use"), self.show_help, "F1")
+        toolbar = QToolBar(tr("Design"), self)
         toolbar.setMovable(False)
         toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         toolbar.setIconSize(QSize(18, 18))
@@ -492,14 +496,15 @@ class MainWindow(QMainWindow):
         group = QActionGroup(self)
         group.setExclusive(True)
         self.mode_actions = {}
-        for name, mode, glyph, tip, key in ((tr("Auswahl"), "auswahl", "auswahl", tr("Wählen, ziehen, drehen"), "V"),
-                                            (tr("Punkte"), "punkte", "punkte", tr("Klick in die Karte setzt einen Kontrollpunkt"), "P"),
-                                            (tr("Umgebung"), "umgebung", "umgebung",
-                                             tr("Bäume, Gebäude … aus dem Katalog platzieren, wählen und verschieben"), "U"),
-                                            (tr("Bepflanzen"), "streuen", "streuen",
-                                             tr("Eine Fläche (Rechteck oder Pinsel) mit Bäumen und Büschen bepflanzen"), "B"),
-                                            (tr("Nachzeichnen"), "nachzeichnen", "bild",
-                                             tr("Strecke auf einer Bildvorlage (Kartenausschnitt) nachzeichnen"), "N")):
+        for name, mode, glyph, tip, key in ((tr("Select"), "auswahl", "auswahl", tr("Select, drag, rotate"), "V"),
+                                            (tr("Points"), "punkte", "punkte", tr(("Click into the map sets a control "
+                                                                                   "point")), "P"),
+                                            (tr("Environment"), "umgebung", "umgebung",
+                                             tr("Place, select and move trees, buildings … from the catalogue"), "U"),
+                                            (tr("Plant"), "streuen", "streuen",
+                                             tr("Plant an area (rectangle or brush) with trees and bushes"), "B"),
+                                            (tr("Trace"), "nachzeichnen", "bild",
+                                             tr("Trace the track on a reference image (map screenshot)"), "N")):
             action = QAction(icon(glyph), name, self)
             action.setCheckable(True)
             action.setChecked(mode == "auswahl")
@@ -509,7 +514,7 @@ class MainWindow(QMainWindow):
             self.mode_actions[mode] = action
             toolbar.addAction(action)
         toolbar.addSeparator()
-        self.close_action = tool(tr("Runde schließen"), "runde", self.toggle_closed, "")
+        self.close_action = tool(tr("Close lap"), "runde", self.toggle_closed, "")
         toolbar.widgetForAction(self.close_action).setObjectName("runde")
         toolbar.addSeparator()
         undo.setIcon(icon("undo"))
@@ -519,9 +524,9 @@ class MainWindow(QMainWindow):
         for action in (undo, redo):
             toolbar.widgetForAction(action).setToolButtonStyle(compact)
         toolbar.addSeparator()
-        fit = tool(tr("Einpassen"), "einpassen", lambda: self.map.fit_track(), tr("Ganze Strecke zeigen"), tr("Pos1"))
-        zoom_in = tool(tr("Vergrößern"), "zoom_in", lambda: self.map.scale(1.2, 1.2), tr("Hineinzoomen"), tr("Mausrad"))
-        zoom_out = tool(tr("Verkleinern"), "zoom_out", lambda: self.map.scale(1 / 1.2, 1 / 1.2), tr("Herauszoomen"), tr("Mausrad"))
+        fit = tool(tr("Fit"), "einpassen", lambda: self.map.fit_track(), tr("Show whole track"), tr("Home"))
+        zoom_in = tool(tr("Zoom in"), "zoom_in", lambda: self.map.scale(1.2, 1.2), tr("Zoom into the map"), tr("Mouse wheel"))
+        zoom_out = tool(tr("Zoom out"), "zoom_out", lambda: self.map.scale(1 / 1.2, 1 / 1.2), tr("Zoom out of the map"), tr("Mouse wheel"))
         # Zoomen geht mit dem Mausrad: im Menü statt in der Werkzeugleiste
         for action in (zoom_in, zoom_out):
             toolbar.removeAction(action)
@@ -533,25 +538,25 @@ class MainWindow(QMainWindow):
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         toolbar.addWidget(spacer)
-        self.check_action = tool(tr("Prüfen"), "pruefen", self.request_check,
-                                 tr("Strecke mit allen Regeln prüfen, Ergebnis unten unter „Prüfung“"), tr("Strg+Enter"))
-        self.build_action = tool(tr("Bauen"), "bauen", self.open_build, tr("Paket für den Track Installer bauen"))
+        self.check_action = tool(tr("Check"), "pruefen", self.request_check,
+                                 tr("Check the track against all rules; result below under “Check”"), tr("Ctrl+Enter"))
+        self.build_action = tool(tr("Build"), "bauen", self.open_build, tr("Build the package for the Track Installer"))
         toolbar.widgetForAction(self.build_action).setObjectName("primary")
-        self.playtest_action = tool(tr("Spieltest"), "spieltest", self.open_playtests,
-                                    tr("Ergebnisse deiner Spieltests notieren"))
+        self.playtest_action = tool(tr("Playtest"), "spieltest", self.open_playtests,
+                                    tr("Record the results of your playtests"))
         # Vorschau erneuern / abbrechen: im Menü und in der Statuszeile (läuft automatisch)
-        self.preview_action = QAction(icon("runde"), tr("Vorschau neu berechnen"), self)
+        self.preview_action = QAction(icon("runde"), tr("Recalculate preview"), self)
         self.preview_action.triggered.connect(self.request_preview)
-        self.cancel_action = QAction(icon("abbrechen"), tr("Vorschau abbrechen"), self)
+        self.cancel_action = QAction(icon("abbrechen"), tr("Cancel preview"), self)
         self.cancel_action.triggered.connect(self.cancel_preview)
         self.cancel_action.setEnabled(False)
-        self.cancel_action.setToolTip(tr("Keine laufende Berechnung. Die Vorschau startet 400 ms nach einer Änderung."))
+        self.cancel_action.setToolTip(tr("No calculation running. The preview starts 400 ms after a change."))
         tools.addSeparator()
         tools.addActions([self.preview_action, self.cancel_action])
 
         left = QWidget()
         left_layout = QVBoxLayout(left)
-        self.display_section = Section(tr("ANZEIGE"), self._section_open("anzeige", False))
+        self.display_section = Section(tr("DISPLAY"), self._section_open("anzeige", False))
         self.display_section.toggled.connect(lambda on: self._section_saved("anzeige", on))
         left_layout.addWidget(self.display_section)
         from PySide6.QtWidgets import QCheckBox
@@ -559,7 +564,7 @@ class MainWindow(QMainWindow):
                     "kurvennummern", "umgebung", "eingabepunkte", "fahrlinie_auto"):
             checkbox = QCheckBox(tr(ansicht.LABELS[key]))
             checkbox.setChecked(self.view_state.get(key, True))
-            checkbox.setToolTip(tr(ansicht.TIPS[key]) + tr(" · Alle Schalter: Ansicht → Ansicht anpassen (Strg+Umschalt+A)"))
+            checkbox.setToolTip(tr(ansicht.TIPS[key]) + tr(" · All switches: View → Customise view (Ctrl+Shift+A)"))
             checkbox.toggled.connect(lambda checked, key=key: self.apply_feature(key, checked))
             checkbox.toggled.connect(lambda *_: self._display_summary())
             self.display_section.layout_body.addWidget(checkbox)
@@ -567,17 +572,17 @@ class MainWindow(QMainWindow):
         self.auto_analysis_box = self.feature_checks["fahrlinie_auto"]
         self._display_summary()
         left_layout.addSpacing(6)
-        left_layout.addWidget(self._heading(tr("STRECKE")))
+        left_layout.addWidget(self._heading(tr("TRACK")))
         self.source_label = QLabel()
         self.source_label.setWordWrap(True)
         left_layout.addWidget(self.source_label)
         self.find_field = QLineEdit()
-        self.find_field.setPlaceholderText(tr("Gehe zu: Station (m), T4 oder Punkt #12 …"))
-        self.find_field.setToolTip(tr("Enter springt: Zahl = Meter ab Ziel, „T4“ = Kurve 4 (Spielnummer), "
-                                   "„#12“ = Objekt 12. Karte, Profile und Liste folgen."))
+        self.find_field.setPlaceholderText(tr("Go to: station (m), T4 or point #12 …"))
+        self.find_field.setToolTip(tr("Enter jumps: number = metres from the finish, “T4” = corner 4 (game number), "
+                                      "“#12” = object 12. Map, profiles and list follow."))
         self.find_field.returnPressed.connect(self.find_location)
         left_layout.addWidget(self.find_field)
-        self.point_section = Section(tr("PUNKTE"), True)
+        self.point_section = Section(tr("POINTS"), True)
         self.point_section.toggled.connect(self._point_section_toggled)
         self.point_section_user = self._section_open("punkte", None)     # None: je nach Streckengröße
         left_layout.addWidget(self.point_section, 1)
@@ -588,28 +593,28 @@ class MainWindow(QMainWindow):
         self.objects.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.objects.setWordWrap(True)
         self.objects.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.objects.setAccessibleName(tr("Mittellinienobjekte; Auswahl synchron mit Karte und Profil"))
+        self.objects.setAccessibleName(tr("Centreline objects; selection synchronised with map and profile"))
         self.objects.itemSelectionChanged.connect(self._list_selected)
         self.objects.currentRowChanged.connect(self._list_current_selected)
         section_layout.addWidget(self.objects, 1)
         row = QHBoxLayout()
-        self.add_button = add = QPushButton(tr("+ Punkt"))
+        self.add_button = add = QPushButton(tr("+ Point"))
         add.clicked.connect(self.add_object)
-        self.remove_button = remove = QPushButton(tr("Löschen"))
+        self.remove_button = remove = QPushButton(tr("Delete"))
         remove.clicked.connect(self.remove_object)
         row.addWidget(add)
         row.addWidget(remove)
         section_layout.addLayout(row)
         self.segment_buttons = []
-        for title, callback in ((tr("+ Bogen"), lambda: self.document.insert_segment("bogen")),
-                                (tr("Segment teilen"), self.document.split_segment),
-                                (tr("Gerade ↔ Bogen"), self.document.switch_segment),
-                                (tr("In Kontrollpunkte umwandeln"), self.convert_to_points)):
+        for title, callback in ((tr("+ Arc"), lambda: self.document.insert_segment("bogen")),
+                                (tr("Split segment"), self.document.split_segment),
+                                (tr("Straight ↔ arc"), self.document.switch_segment),
+                                (tr("Convert to control points"), self.convert_to_points)):
             button = QPushButton(title)
             button.clicked.connect(callback)
             section_layout.addWidget(button)
             self.segment_buttons.append(button)
-        self.gap_button = QPushButton(tr("Lücken füllen"))              # außerhalb: bleibt bei eingeklappter Liste sichtbar
+        self.gap_button = QPushButton(tr("Fill gaps"))              # außerhalb: bleibt bei eingeklappter Liste sichtbar
         self.gap_button.clicked.connect(self.fill_gaps)
         left_layout.addWidget(self.gap_button)
         self.left_layout = left_layout
@@ -619,7 +624,7 @@ class MainWindow(QMainWindow):
         self.bild_panel = NachzeichnenPanel(self.werkzeug_bild)
         self.bild_panel.uebernehmen.connect(self.bildvorlage_uebernehmen)
         self.bild_panel.entfernen.connect(self.remove_bildvorlage)
-        self.bild_dock = QDockWidget(tr("Bildvorlage · Nachzeichnen"), self)
+        self.bild_dock = QDockWidget(tr("Image reference · Trace"), self)
         self.bild_dock.setObjectName("bildvorlage")
         self.bild_dock.setWidget(self.bild_panel)
         self.bild_dock.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
@@ -662,47 +667,49 @@ class MainWindow(QMainWindow):
         page_layout.setContentsMargins(6, 4, 6, 0)
         page_layout.setSpacing(2)
         bar = QHBoxLayout()
-        self.height_info = QLabel(tr("Waagerecht ziehen wählt einen Bereich A→B."))
+        self.height_info = QLabel(tr("Drag horizontally to select a range A→B."))
         bar.addWidget(self.height_info, 1)
         self.height_buttons = {}
         for key, text, tip in (
-                ("uebergang", tr("Sanfter Übergang A→B"), tr("Höhen zwischen dem ersten (A) und letzten (B) gewählten Punkt als "
-                 "S-Kurve neu verteilen: Höhe von A und B bleibt, die Steigung schließt an beiden Enden ohne Knick an.")),
-                ("rampe", tr("Rampe"), tr("Gleichmäßige Steigung von A nach B")),
-                ("eben", tr("Gleiche Höhe"), tr("Alle gewählten Punkte auf ihren Mittelwert")),
-                ("glaetten", tr("Glätten"), tr("Unebenheiten in der Auswahl ausgleichen (A und B bleiben)"))):
+                ("uebergang", tr("Smooth transition A→B"), tr("Redistribute the heights between the first (A) and last "
+                                                             "(B) selected point as an S-curve: the heights of A and B "
+                                                             "stay, the gradient joins at both ends without a kink.")),
+                ("rampe", tr("Ramp"), tr("Even gradient from A to B")),
+                ("eben", tr("Same height"), tr("All selected points to their mean value")),
+                ("glaetten", tr("Smooth"), tr("Even out bumps in the selection (A and B stay)"))):
             button = QPushButton(text)
-            button.setToolTip(tip + tr(" · Strg+Z macht rückgängig."))
+            button.setToolTip(tip + tr(" · Ctrl+Z undoes."))
             button.clicked.connect(lambda checked=False, key=key: self.height_tool(key))
             bar.addWidget(button)
             self.height_buttons[key] = button
         page_layout.addLayout(bar)
         page_layout.addWidget(self.height, 1)
-        self.results.addTab(self.height_page, tr("Höhenprofil"))
+        self.results.addTab(self.height_page, tr("Height profile"))
         # Querneigungs-Reiter: gleiche Knopfleiste wie beim Höhenprofil
         self.bank_page = QWidget()
         bank_layout = QVBoxLayout(self.bank_page)
         bank_layout.setContentsMargins(6, 4, 6, 0)
         bank_layout.setSpacing(2)
         bank_bar = QHBoxLayout()
-        self.bank_info = QLabel(tr("Waagerecht ziehen wählt einen Bereich A→B · senkrecht ziehen ändert die Querneigung."))
+        self.bank_info = QLabel(tr("Drag horizontally to select a range A→B · drag vertically to change the banking."))
         self.bank_info.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)   # langer Text weitet das Fenster nicht
         bank_bar.addWidget(self.bank_info, 1)
         self.bank_buttons = {}
         for key, text, tip in (
-                ("uebergang", tr("Sanfter Übergang A→B"), tr("Querneigung zwischen dem ersten (A) und letzten (B) gewählten "
-                 "Punkt als S-Kurve neu verteilen: Werte von A und B bleiben, ohne Knick an beiden Enden.")),
-                ("rampe", tr("Rampe"), tr("Gleichmäßiger Übergang der Querneigung von A nach B")),
-                ("eben", tr("Gleicher Wert"), tr("Alle gewählten Punkte auf ihren Mittelwert")),
-                ("glaetten", tr("Glätten"), tr("Sprünge in der Auswahl ausgleichen (A und B bleiben)"))):
+                ("uebergang", tr("Smooth transition A→B"), tr("Redistribute the banking between the first (A) and last "
+                                                             "(B) selected point as an S-curve: the values of A and B "
+                                                             "stay, without a kink at either end.")),
+                ("rampe", tr("Ramp"), tr("Even banking transition from A to B")),
+                ("eben", tr("Same value"), tr("All selected points to their mean value")),
+                ("glaetten", tr("Smooth"), tr("Even out jumps in the selection (A and B stay)"))):
             button = QPushButton(text)
-            button.setToolTip(tip + tr(" · Strg+Z macht rückgängig."))
+            button.setToolTip(tip + tr(" · Ctrl+Z undoes."))
             button.clicked.connect(lambda checked=False, key=key: self.bank_tool(key))
             bank_bar.addWidget(button)
             self.bank_buttons[key] = button
         bank_layout.addLayout(bank_bar)
         bank_layout.addWidget(self.bank, 1)
-        self.results.addTab(self.bank_page, tr("Querneigung"))
+        self.results.addTab(self.bank_page, tr("Banking"))
         # Querschnitt-Reiter: Ansicht + Bearbeiten je Bereich (Fahrbahn, Randstein, Grünstreifen, Auslauf, Barriere)
         self.cross_page = QWidget()
         cross_layout = QHBoxLayout(self.cross_page)
@@ -727,10 +734,10 @@ class MainWindow(QMainWindow):
         cross_scroll.setMinimumWidth(570)           # zwei Spalten samt Rollbalken; Stile wirken erst nach dem Messen
         cross_layout.addWidget(cross_scroll)
         self._update_cross_panel()
-        self.results.addTab(self.cross_page, tr("Querschnitt"))
+        self.results.addTab(self.cross_page, tr("Cross-section"))
         self.speed = SpeedView()
         self.speed.station_changed.connect(self.set_station)
-        self.results.addTab(self.speed, tr("Geschwindigkeit"))
+        self.results.addTab(self.speed, tr("Speed"))
         self.issues = QListWidget()
         self.issues.setWordWrap(True)
         self.issues.itemClicked.connect(self.jump_issue)
@@ -742,44 +749,44 @@ class MainWindow(QMainWindow):
         for level in ISSUE_LEVELS:
             self.issue_filter.addItem(tr(level), level)
         self.issue_search = QLineEdit()
-        self.issue_search.setPlaceholderText(tr("Meldung, Regel-ID oder Bau-ID suchen …"))
+        self.issue_search.setPlaceholderText(tr("Search message, rule ID or build ID …"))
         self.issue_filter.currentTextChanged.connect(self.render_issues)
         self.issue_search.textChanged.connect(self.render_issues)
         filter_row.addWidget(self.issue_filter)
         filter_row.addWidget(self.issue_search, 1)
-        self.issue_summary = QLabel(tr("Noch nicht geprüft"))
+        self.issue_summary = QLabel(tr("Not checked yet"))
         issue_layout.addLayout(filter_row)
         issue_layout.addWidget(self.issue_summary)
         issue_layout.addWidget(self.issues)
-        self.issue_tab = self.results.addTab(self.issue_panel, tr("Prüfung"))
+        self.issue_tab = self.results.addTab(self.issue_panel, tr("Checks"))
         self.analysis_page = QWidget()
         analysis_layout = QVBoxLayout(self.analysis_page)
         analysis_layout.setContentsMargins(6, 4, 6, 4)
-        self.analysis_info = QLabel(tr("Auswertung erscheint nach dem Fahrlinienlauf (automatisch nach einer Änderung "
-                                    "oder mit „Prüfen“ / Strg+Enter)."))
+        self.analysis_info = QLabel(tr("The analysis appears after the racing-line run (automatically after a change "
+                                       "or with “Check” / Ctrl+Enter)."))
         self.analysis_info.setWordWrap(True)
         self.analysis_info.setTextInteractionFlags(Qt.TextSelectableByMouse)
         analysis_layout.addWidget(self.analysis_info)
         self.curve_table = QTableWidget(0, 10)
-        self.curve_table.setHorizontalHeaderLabels([tr("Kurve"), tr("Richtung"), tr("Winkel"), tr("R min"), tr("Scheitel bei"),
-                                                    tr("v vor Bremsen"), "v min", tr("Bremsweg"), tr("Tafeln"), tr("Generator")])
+        self.curve_table.setHorizontalHeaderLabels([tr("Corner"), tr("Direction"), tr("Angle"), tr("R min"), tr("Apex at"),
+                                                    tr("v before braking"), "v min", tr("Braking distance"), tr("Boards"), tr("Generator")])
         self.curve_table.verticalHeader().hide()
         self.curve_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.curve_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.curve_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.curve_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.curve_table.horizontalHeader().setStretchLastSection(True)
-        self.curve_table.setToolTip(tr("Zeile anklicken: Karte und Profile springen zum Scheitel der Kurve"))
+        self.curve_table.setToolTip(tr("Click a row: map and profiles jump to the apex of the corner"))
         self.curve_table.cellClicked.connect(self._curve_clicked)
         analysis_layout.addWidget(self.curve_table, 1)
         self.output_tree = QTreeWidget()
-        self.output_tree.setHeaderLabels([tr("Generatorausgabe · lesend"), tr("Wert")])
+        self.output_tree.setHeaderLabels([tr("Generator output · read-only"), tr("Value")])
         self.output_tree.hide()
         analysis_layout.addWidget(self.output_tree, 1)
-        self.results.addTab(self.analysis_page, tr("Auswertung"))
+        self.results.addTab(self.analysis_page, tr("Analysis"))
         self.results.setTabToolTip(self.results.indexOf(self.analysis_page),
-                                   tr("Rundenzeit, Geschwindigkeiten und Kurventabelle aus dem Fahrlinienlauf; "
-                                   "Rohdaten einer Generatorausgabe über Werkzeuge → Generatorausgabe lesend öffnen"))
+                                   tr("Lap time, speeds and corner table from the racing-line run; raw data of a "
+                                      "generator output via Tools → Open generator output read-only"))
         # Umgebung-Reiter: Katalog, Bepflanzen, Eigenschaften der gewählten Objekte (zuletzt, damit die Reiterindizes bleiben)
         self.env_panel = EnvironmentPanel()
         self.env_panel.model_chosen.connect(self._env_model_chosen)
@@ -794,8 +801,8 @@ class MainWindow(QMainWindow):
         self.env_panel.terrain_armed.connect(self._terrain_armed)
         self.env_panel.terrain_values_changed.connect(self._terrain_values)
         self.env_panel.terrain_delete_requested.connect(lambda: self.document.terrain_delete())
-        self.env_tab = self.results.addTab(self.env_panel, tr("Umgebung"))
-        self.results.setTabToolTip(self.env_tab, tr("Bäume, Büsche, Gebäude und Zelte aus dem Spiel platzieren und bepflanzen"))
+        self.env_tab = self.results.addTab(self.env_panel, tr("Environment"))
+        self.results.setTabToolTip(self.env_tab, tr("Place and plant trees, bushes, buildings and tents from the game"))
         self.results.currentChanged.connect(self._results_tab_changed)
         self.map.env_place_requested.connect(self._env_place)
         self.map.env_scatter_requested.connect(self._env_scatter)
@@ -807,7 +814,7 @@ class MainWindow(QMainWindow):
         center.setSizes([540, 300])          # unten genug Höhe für die Profile (E12)
         self.vertical_split = center
         self.results.tabBarDoubleClicked.connect(lambda index: self.toggle_results_maximized())
-        self.results.setTabToolTip(0, tr("Doppelklick auf einen Reiter: unteren Bereich maximieren / zurück (Strg+M)"))
+        self.results.setTabToolTip(0, tr("Double-click a tab: maximise / restore the lower area (Ctrl+M)"))
         self.tab_features = {"reiter_hoehe": self.height_page, "reiter_neigung": self.bank_page, "reiter_querschnitt": self.cross_page,
                              "reiter_geschwindigkeit": self.speed, "reiter_pruefung": self.issue_panel,
                              "reiter_auswertung": self.analysis_page, "reiter_umgebung": self.env_panel}
@@ -818,28 +825,28 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.env_panel.terrain_box)
         for box in (self.env_panel.selection_box, self.env_panel.terrain_box):   # nicht stauchen; Eigenschaften weichen
             box.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.inspector_title = self._heading(tr("EIGENSCHAFTEN"))
+        self.inspector_title = self._heading(tr("PROPERTIES"))
         right_layout.addWidget(self.inspector_title)
         self.category = QComboBox()
-        self.category.setToolTip(tr("Welche Einstellungen angezeigt werden"))
+        self.category.setToolTip(tr("Which settings are shown"))
         self.category.setMaxVisibleItems(24)
-        for group in (((tr("Ausgewähltes Objekt"), "object"),),
-                      ((tr("Fahrbahn (ganze Strecke)"), "fahrbahn"), (tr("Abschnitte: Breite / Querneigung"), "sections"),
-                       (tr("Mittellinie: Glättung, Übergänge"), "mittellinie"), (tr("Segmentstart"), "start"),
-                       (tr("Start / Ziel"), "start_ziel")),
-                      ((tr("Randstein"), "randstein"), (tr("Grünstreifen"), "gruenstreifen"), (tr("Kiesbett"), "kiesbett"),
-                       (tr("Barriere"), "barriere"), (tr("Entfernungstafeln (Bremspunkte)"), "bremsmarker")),
-                      ((tr("Boxengasse"), "boxengasse"), (tr("Startaufstellung"), "startaufstellung"),
-                       (tr("Sektoren (Automatik)"), "sektoren"), (tr("DRS (Automatik)"), "drs"), (tr("DRS: eigene Zonen"), "drs_zonen"),
-                       (tr("Straight Mode: Zonen"), "xmode_zonen"), (tr("Kurvenerkennung"), "kurven"),
-                       (tr("Ideallinie"), "ideallinie"))):
+        for group in (((tr("Selected object"), "object"),),
+                      ((tr("Road (whole track)"), "fahrbahn"), (tr("Sections: width / banking"), "sections"),
+                       (tr("Centreline: smoothing, transitions"), "mittellinie"), (tr("Segment start"), "start"),
+                       (tr("Start / finish"), "start_ziel")),
+                      ((tr("Kerb"), "randstein"), (tr("Grass strip"), "gruenstreifen"), (tr("Gravel bed"), "kiesbett"),
+                       (tr("Barrier"), "barriere"), (tr("Distance boards (braking points)"), "bremsmarker")),
+                      ((tr("Pit lane"), "boxengasse"), (tr("Starting grid"), "startaufstellung"),
+                       (tr("Sectors (automatic)"), "sektoren"), (tr("DRS (automatic)"), "drs"), (tr("DRS: own zones"), "drs_zonen"),
+                       (tr("Straight Mode: zones"), "xmode_zonen"), (tr("Corner detection"), "kurven"),
+                       (tr("Racing line"), "ideallinie"))):
             if self.category.count():
                 self.category.insertSeparator(self.category.count())
             for title, key in group:
                 self.category.addItem(title, key)
         self.category.currentIndexChanged.connect(self._refresh_properties)
         right_layout.addWidget(self.category)
-        self.scope_hint = QLabel(tr("Kursiv: Standard/geerbt. Leeres Feld entfernt Vorgabe."))
+        self.scope_hint = QLabel(tr("Italic: default/inherited. An empty field removes the setting."))
         self.scope_hint.setWordWrap(True)
         right_layout.addWidget(self.scope_hint)
         self.section_choice = QComboBox()
@@ -854,16 +861,17 @@ class MainWindow(QMainWindow):
         self.properties.cellChanged.connect(lambda row, col: self.apply_properties() if col == 1 else None)
         right_layout.addWidget(self.properties, 1)
         section_actions = QHBoxLayout()
-        self.add_section_button = QPushButton(tr("Abschnitt +"))
-        self.remove_section_button = QPushButton(tr("Abschnitt −"))
+        self.add_section_button = QPushButton(tr("Section +"))
+        self.remove_section_button = QPushButton(tr("Section −"))
         self.add_section_button.clicked.connect(self.add_section)
         self.remove_section_button.clicked.connect(self.remove_section)
         section_actions.addWidget(self.add_section_button)
         section_actions.addWidget(self.remove_section_button)
         right_layout.addLayout(section_actions)
         # Fahrbahn (ganze Strecke): derselbe Befehl wie Bearbeiten → Strecke skalieren …
-        self.scale_button = QPushButton(tr("Strecke skalieren …"))
-        self.scale_button.setToolTip(tr("Ganze Strecke um einen Faktor oder auf eine Länge in Metern skalieren. Strg+Z macht rückgängig."))
+        self.scale_button = QPushButton(tr("Scale track …"))
+        self.scale_button.setToolTip(tr(("Scale the whole track by a factor or to a length in metres. Ctrl+Z undoes "
+                                         "it.")))
         self.scale_button.clicked.connect(self.scale_track)
         right_layout.addWidget(self.scale_button)
         self.right_layout, self.right_stretch = right_layout, right_layout.count()
@@ -894,23 +902,23 @@ class MainWindow(QMainWindow):
         self.status_label.setWordWrap(True)
         self.status_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.statusBar().addWidget(self.status_label, 1)
-        self.busy_label = QLabel(tr("Vorschau wird berechnet …"))
+        self.busy_label = QLabel(tr("Calculating preview …"))
         self.busy_label.hide()
         self.statusBar().addPermanentWidget(self.busy_label)
-        self.cancel_button = QPushButton(icon("abbrechen"), tr("Abbrechen"))
-        self.cancel_button.setToolTip(tr("Laufende Vorschau abbrechen; deine Eingabe bleibt erhalten."))
+        self.cancel_button = QPushButton(icon("abbrechen"), tr("Cancel"))
+        self.cancel_button.setToolTip(tr("Cancel the running preview; your input is kept."))
         self.cancel_button.clicked.connect(self.cancel_preview)
         self.cancel_button.hide()
         self.statusBar().addPermanentWidget(self.cancel_button)
-        self.issue_badge = QPushButton(tr("Noch nicht geprüft"))
+        self.issue_badge = QPushButton(tr("Not checked yet"))
         self.issue_badge.setFlat(True)
-        self.issue_badge.setToolTip(tr("Prüfergebnis anzeigen (Prüfen: Strg+Enter)"))
+        self.issue_badge.setToolTip(tr("Show check result (Check: Ctrl+Enter)"))
         self.issue_badge.clicked.connect(lambda: self.results.setCurrentWidget(self.issue_panel))
         self.statusBar().addPermanentWidget(self.issue_badge)
-        self.group_hint = QLabel(tr("Für Gruppenverschiebung erst ‚In Kontrollpunkte umwandeln‘"))
+        self.group_hint = QLabel(tr("To move a group, first “Convert to control points”"))
         self.group_hint.setWordWrap(True)
         self.statusBar().addWidget(self.group_hint, 1)
-        self.group_convert_button = QPushButton(tr("In Kontrollpunkte umwandeln"))
+        self.group_convert_button = QPushButton(tr("Convert to control points"))
         self.group_convert_button.clicked.connect(self.convert_to_points)
         self.statusBar().addPermanentWidget(self.group_convert_button)
         self.group_hint.hide()
@@ -922,7 +930,7 @@ class MainWindow(QMainWindow):
         self.map.turn_clicked.connect(self.show_turn)
         self.curve_table.cellDoubleClicked.connect(lambda row, column: self._curve_clicked(row, column, zoom=True))
         self.mode_hint = QLabel()
-        self.mode_hint.setToolTip(tr("Aktives Werkzeug (V: Auswahl, P: Punkte)"))
+        self.mode_hint.setToolTip(tr("Active tool (V: select, P: points)"))
         self.statusBar().addPermanentWidget(self.mode_hint)
         self.statusBar().setFixedHeight(40)
 
@@ -940,7 +948,7 @@ class MainWindow(QMainWindow):
 
     def _display_summary(self):
         on = sum(box.isChecked() for box in self.feature_checks.values())
-        self.display_section.set_summary(tr("{an} von {alle} an", an=on, alle=len(self.feature_checks)))
+        self.display_section.set_summary(tr("{an} of {alle} on", an=on, alle=len(self.feature_checks)))
 
     def _point_section_toggled(self, on):
         if not getattr(self, "_point_section_auto", False):
@@ -1012,13 +1020,14 @@ class MainWindow(QMainWindow):
                 root = toolkit_path(self.document.project.manifest.get("werkzeugkasten"))
                 self.load_project(root / "strecke" / "beispiele" / "teststrecke.json")
             except (ValueError, OSError) as error:
-                self.error(tr("Beispiel nicht gefunden: {error}", error=error))
+                self.error(tr("Example not found: {error}", error=error))
 
     def _group_status(self, force=False):
         show = self.document.ml.get("art") == "segmente" and (force or len(self.document.selected_indices) > 1)
         whole = self.document.rotatable() == "strecke" and not force
-        self.group_hint.setText(tr("Ganze Strecke gewählt: ziehen verschiebt, runder Griff dreht · Teilgruppen erst ‚In Kontrollpunkte umwandeln‘")
-                                if whole else tr("Für Gruppenverschiebung erst ‚In Kontrollpunkte umwandeln‘"))
+        self.group_hint.setText(tr(("Whole track selected: drag moves, round handle rotates · for partial groups "
+                                    "first “Convert to control points”"))
+                                if whole else tr("To move a group, first “Convert to control points”"))
         self.group_hint.setVisible(show)
         self.group_convert_button.setVisible(show)
         self.group_convert_button.setEnabled(not self.document.project.readonly)
@@ -1029,23 +1038,24 @@ class MainWindow(QMainWindow):
     def _history_status(self):
         action = self.sender()
         if action is self.undo_action:
-            action.setToolTip(tr("Letzte abgeschlossene Eingabe rückgängig machen.") if action.isEnabled() else tr("Noch keine Änderung zum Rückgängigmachen."))
+            action.setToolTip(tr("Undo the last completed input.") if action.isEnabled() else tr("No change to undo yet."))
         elif action is self.redo_action:
-            action.setToolTip(tr("Änderung wiederholen.") if action.isEnabled() else tr("Noch keine rückgängig gemachte Änderung zum Wiederholen."))
+            action.setToolTip(tr("Redo the change.") if action.isEnabled() else tr(("No undone change to redo "
+                                                                                         "yet.")))
 
     def _title(self, *args):
         p = self.document.project
         unsaved = not self.document.undo.isClean() or not p.folder
-        name = p.raw.get("name", tr("Strecke"))
-        self.setWindowTitle(f"{name}{' *' if unsaved else ''} – Mapeditor" + (tr(" (nur lesend)") if p.readonly else ""))
-        state = ("<span style='color:#D6A94A'>● " + tr("ungespeicherte Änderungen") + "</span>" if unsaved and p.folder else
-                 "<span style='color:#D6A94A'>● " + tr("noch nicht gespeichert") + "</span>" if unsaved else
-                 "<span style='color:#5BD08A'>● " + tr("gespeichert") + "</span>")
+        name = p.raw.get("name", tr("Track"))
+        self.setWindowTitle(f"{name}{' *' if unsaved else ''} – Mapeditor" + (tr(" (read-only)") if p.readonly else ""))
+        state = ("<span style='color:#D6A94A'>● " + tr("unsaved changes") + "</span>" if unsaved and p.folder else
+                 "<span style='color:#D6A94A'>● " + tr("not saved yet") + "</span>" if unsaved else
+                 "<span style='color:#5BD08A'>● " + tr("saved") + "</span>")
         where = f"<span style='color:#8D9BA9'>&nbsp;&nbsp;{p.folder}</span>" if p.folder else ""
-        readonly = ("&nbsp;&nbsp;<span style='color:#F07878'>" + tr("nur lesend: unbekannte Projektfassung") + "</span>"
+        readonly = ("&nbsp;&nbsp;<span style='color:#F07878'>" + tr("read-only: unknown project version") + "</span>"
                     if p.readonly else "")
         self.project_heading.setText(f"<b style='font-size:15px'>{name}</b>&nbsp;&nbsp;&nbsp;{state}{where}{readonly}")
-        self.project_heading.setToolTip(tr("Entwurfsstand E{revision}", revision=self.document.revision))
+        self.project_heading.setToolTip(tr("Draft state E{revision}", revision=self.document.revision))
 
     def _changed(self):
         if self.document.env_only:
@@ -1068,12 +1078,12 @@ class MainWindow(QMainWindow):
         self.cross.update()
         self.analysis_timer.stop()
         self._mark_analysis_stale()
-        self.status_label.setText(tr("Geändert · Vorschau veraltet, wird gleich neu berechnet"))
+        self.status_label.setText(tr("Changed · preview outdated, will be recalculated shortly"))
         if self.map.input["error"]:
-            self.status_label.setText(tr("Eingabefehler: {error} · Eingabe bleibt bearbeitbar.", error=self.map.input['error']))
+            self.status_label.setText(tr("Input error: {error} · input stays editable.", error=self.map.input['error']))
         self.set_issues([], {})
-        self.issue_summary.setText(tr("Entwurf geändert · Prüfung folgt"))
-        self.issue_badge.setText(tr("Prüfung folgt …"))
+        self.issue_summary.setText(tr("Draft changed · check follows"))
+        self.issue_badge.setText(tr("Check follows …"))
         self._title()
         if self.job:
             self.job.cancel()
@@ -1121,11 +1131,11 @@ class MainWindow(QMainWindow):
                 tilt = f"  ·  ∠ {zahl(abs(bank), 1)}°" if isinstance(bank, (int, float)) and abs(bank) >= .05 else ""
                 where = self._object_place(i)
                 item = QListWidgetItem(f"{i + 1:>4}   {where}X {x:.0f}  Z {z:.0f}  ·  {zahl(y, 1)} m{tilt}")
-                item.setToolTip(tr("Kontrollpunkt {i}: X {x} m, Z {z} m, Höhe {y} m", i=i + 1, x=zahl(x, 2), z=zahl(z, 2), y=zahl(y, 2))
+                item.setToolTip(tr("Control point {i}: X {x} m, Z {z} m, height {y} m", i=i + 1, x=zahl(x, 2), z=zahl(z, 2), y=zahl(y, 2))
                                 + (f" · {where.strip(' ·')}" if where else ""))
                 self.objects.addItem(item)
         elif art == "segmente":
-            kinds = {"gerade": tr("Gerade"), "bogen": tr("Bogen"), "klothoide": tr("Klothoide")}
+            kinds = {"gerade": tr("Straight"), "bogen": tr("Arc"), "klothoide": tr("Clothoid")}
             for i, segment in enumerate(ml.get("segmente", [])):
                 def num(value, unit, decimals=0):
                     if not isinstance(value, (float, int)):
@@ -1139,7 +1149,7 @@ class MainWindow(QMainWindow):
                 else:
                     measure = num(segment.get("laenge"), "m")
                 if isinstance(segment.get("hoehe_ende"), (int, float)):
-                    measure += tr(" · Höhe {hoehe_ende}", hoehe_ende=zahl(segment['hoehe_ende'], 1))
+                    measure += tr(" · height {hoehe_ende}", hoehe_ende=zahl(segment['hoehe_ende'], 1))
                 if isinstance(segment.get("querneigung_grad"), (int, float)) and abs(segment["querneigung_grad"]) >= .05:
                     measure += f" · ∠ {zahl(abs(segment['querneigung_grad']), 1)}°"
                 title = segment.get("name") or kinds.get(kind, kind)
@@ -1147,29 +1157,31 @@ class MainWindow(QMainWindow):
                 self.objects.addItem(f"{i + 1:02}  {title}{'  ·  ' + where if where else ''}\n      "
                                      f"{kinds.get(kind, kind) + ' · ' if segment.get('name') else ''}{measure}")
         self._sync_list_selection()
-        state = tr("Runde geschlossen") if self.document.project.closed else tr("Runde offen")
-        what = {"kontrollpunkte": tr("Kontrollpunkte"), "segmente": tr("Segmente")}.get(art, art)
+        state = tr("Lap closed") if self.document.project.closed else tr("Lap open")
+        what = {"kontrollpunkte": tr("Control points"), "segmente": tr("Segments")}.get(art, art)
         self.source_label.setText(f"{zahl(self.objects.count(), 0)} {what} · {state}")
         self.point_section.title = what.upper()
         self._point_section_update(self.objects.count())
         self.loading_list = False
         readonly = self.document.project.readonly
         editable = art in ("segmente", "kontrollpunkte") and not readonly
-        reason = tr("Unbekannte Projektfassung: nur lesend.") if readonly else tr("CSV-Geometrie ist nur lesend.")
-        self.add_button.setText(tr("+ Gerade") if art == "segmente" else tr("+ Punkt"))
+        reason = tr("Unknown project version: read-only.") if readonly else tr("CSV geometry is read-only.")
+        self.add_button.setText(tr("+ Straight") if art == "segmente" else tr("+ Point"))
         if hasattr(self, "close_action"):
             self._update_close_action(art, editable, reason)
         for button in (self.add_button, self.remove_button):
             button.setEnabled(editable and (button is self.add_button or self.document.selected >= 0))
-            button.setToolTip(reason if not editable else tr("Zuerst ein Objekt wählen.") if not button.isEnabled() else tr("Wirkt sofort; Strg+Z macht rückgängig."))
+            button.setToolTip(reason if not editable else tr("Select an object first.") if not button.isEnabled() else tr(("Takes effect immediately; "
+                                                                                                                             "Ctrl+Z undoes.")))
         for i, button in enumerate(self.segment_buttons):
             button.setVisible(art == "segmente")
             button.setEnabled(editable and (i in (0, 3) or self.document.selected >= 0))
-            button.setToolTip(reason if readonly else tr("Zuerst ein Segment wählen.") if not button.isEnabled() else tr("Wirkt sofort; Strg+Z macht rückgängig."))
+            button.setToolTip(reason if readonly else tr("Select a segment first.") if not button.isEnabled() else tr(("Takes effect immediately; "
+                                                                                                                          "Ctrl+Z undoes.")))
         self._update_gap_button()
         self.mode_actions["punkte"].setVisible(art == "kontrollpunkte")
         self.mode_actions["punkte"].setEnabled(editable and art == "kontrollpunkte")
-        self.mode_actions["punkte"].setToolTip(tr("Klick fügt einen Kontrollpunkt ein.") if editable else reason)
+        self.mode_actions["punkte"].setToolTip(tr("Click inserts a control point.") if editable else reason)
         if art != "kontrollpunkte" and hasattr(self, "map") and self.map.mode == "punkte":
             self.set_mode("auswahl", focus=False)
         self._update_bild_action()
@@ -1215,11 +1227,11 @@ class MainWindow(QMainWindow):
             self.loading_list = False
         editable = not self.document.project.readonly and self.document.ml.get("art") in ("segmente", "kontrollpunkte")
         self.remove_button.setEnabled(editable and index >= 0)
-        self.remove_button.setToolTip(tr("Wirkt sofort; Strg+Z macht rückgängig.") if self.remove_button.isEnabled() else tr("Zuerst ein Objekt wählen."))
+        self.remove_button.setToolTip(tr("Takes effect immediately; Ctrl+Z undoes.") if self.remove_button.isEnabled() else tr("Select an object first."))
         for i in (1, 2):
             button = self.segment_buttons[i]
             button.setEnabled(editable and index >= 0)
-            button.setToolTip(tr("Wirkt sofort; Strg+Z macht rückgängig.") if button.isEnabled() else tr("Zuerst ein Segment wählen."))
+            button.setToolTip(tr("Takes effect immediately; Ctrl+Z undoes.") if button.isEnabled() else tr("Select a segment first."))
         self._group_status()
         self._refresh_properties()
         self._cross_follow_selection()
@@ -1309,39 +1321,43 @@ class MainWindow(QMainWindow):
         for button in (self.add_section_button, self.remove_section_button):
             button.setVisible(listed)
             button.setEnabled(not self.document.project.readonly)
-            button.setToolTip(tr("Unbekannte Projektfassung: nur lesend.") if self.document.project.readonly else tr("Wirkt sofort; Strg+Z macht rückgängig."))
+            button.setToolTip(tr("Unknown project version: read-only.") if self.document.project.readonly else tr(("Takes effect immediately; "
+                                                                                                                      "Ctrl+Z undoes.")))
         if listed:
             self.add_section_button.setText(tr(LISTS[category]["add"]))
             self.remove_section_button.setText(tr(LISTS[category]["remove"]))
         self.remove_section_button.setEnabled(not self.document.project.readonly and self.section_choice.count() > 0)
         if self.section_choice.count() == 0:
-            self.remove_section_button.setToolTip(tr("Zuerst eine(n) {noun} anlegen.", noun=tr(LISTS.get(category, LISTS['sections'])['noun'])))
-        text = tr("Doppelklick zum Ändern, Enter übernimmt. Kursiv = Standardwert.")
+            self.remove_section_button.setToolTip(tr("Create a {noun} first.", noun=tr(LISTS.get(category, LISTS['sections'])['noun'])))
+        text = tr("Double-click to change, Enter applies. Italic = default value.")
         if category == "object":
             if len(self.document.selected_indices) > 1:
-                text = tr("{anzahl} Objekte gewählt. ", anzahl=len(self.document.selected_indices)) + (tr("Höhe für alle setzen; — = gemischte Werte. Drehen: runder Griff über dem Auswahlkasten.") if self.document.points
-                    else tr("Ganze Strecke: auf der Karte ziehen = verschieben, runder Griff = drehen.") if self.document.rotatable() == "strecke"
-                    else tr("Gruppenverschiebung: erst in Kontrollpunkte umwandeln."))
+                text = tr("{anzahl} objects selected. ", anzahl=len(self.document.selected_indices)) + (tr(("Set the height for all; — = "
+                                                                                                           "mixed values. Rotate: round "
+                                                                                                           "handle above the selection "
+                                                                                                           "box.")) if self.document.points
+                    else tr("Whole track: drag on the map = move, round handle = rotate.") if self.document.rotatable() == "strecke"
+                    else tr("Group move: first convert to control points."))
             elif self.document.selected < 0:
-                text = tr("Nichts gewählt – Objekt in der Karte oder Liste anklicken.")
+                text = tr("Nothing selected – click an object in the map or list.")
         if category == "sections":
-            text += tr(" Meter ab Eingabeursprung; bei Überlappung gilt der spätere Abschnitt.")
+            text += tr(" Metres from the input origin; where sections overlap, the later one wins.")
         if category == "boxengasse":
-            text += tr(" Links/rechts gelten in Fahrtrichtung.")
+            text += tr(" Left/right apply in driving direction.")
         if category == "ideallinie":
-            text = (tr("Ideallinie des Generators (Fahrlinie, Bremslinien, KI-Profil). Standard seit 25.10.2026: iterativ "
-                    "mit feiner Rückprojektion und Mindestzeit-Feinschliff. Kursiv = Standard."))
+            text = (tr("Racing line of the generator (driving line, braking lines, AI profile). Default since "
+                       "25.10.2026: iterative with fine back-projection and minimum-time refinement. Italic = default."))
         if category == "bremsmarker":
-            text = (tr("Entfernungstafeln (50/100/150/200/250 m) vor Kurven mit starker Bremsung, auf der Seite der "
-                    "Ideallinie. 50 und 100 m ab dem Mindestabbau, je weitere 50 m Tafel 50 km/h mehr Abbau. Erscheinen "
-                    "beim Bauen im Spiel."))
+            text = (tr("Distance boards (50/100/150/200/250 m) before corners with heavy braking, on the side of the "
+                       "racing line. 50 and 100 m from the minimum speed loss, each further 50 m board for 50 km/h "
+                       "more speed loss. Appear in game after building."))
         if category == "drs_zonen":
-            text = (tr("Eigene DRS-Zonen ersetzen die Automatik. Meter ab Ziellinie in Fahrtrichtung. "
-                    "Neue Zone entsteht am Stationscursor; auf der Karte die Quadrate ziehen."))
+            text = (tr("Custom DRS zones replace the automatic ones. Metres from the finish line in driving direction. "
+                       "A new zone is created at the station cursor; drag the squares on the map."))
         if category == "xmode_zonen":
-            text = (tr("Straight Mode (2026er Aero) – eigene Zonen ersetzen die Träger-Zonen. Meter ab Ziel; über die "
-                    "Ziellinie erlaubt. Partial-Zone wie in den Originalen (Standard 60 m nach Beginn). "
-                    "Neue Zone am Stationscursor; auf der Karte die Quadrate ziehen."))
+            text = (tr("Straight Mode (2026 aero) – custom zones replace the carrier zones. Metres from the finish; "
+                       "crossing the finish line is allowed. Partial zone as in the originals (default 60 m after the "
+                       "start). New zone at the station cursor; drag the squares on the map."))
         self.scope_hint.setText(text)
         filled = self.properties.rowCount() > 0                         # leere Tabelle zeigt nichts Nützliches
         self.properties.setVisible(filled)
@@ -1396,14 +1412,15 @@ class MainWindow(QMainWindow):
         for key, button in self.height_buttons.items():
             button.setEnabled(editable and len(chosen) >= need[key])
         if not nodes:
-            self.height_info.setText(tr("Höhen bearbeiten: geschlossene Runde mit Vorschau nötig."))
+            self.height_info.setText(tr("Editing heights: needs a closed lap with a preview."))
         elif len(chosen) < 2:
-            self.height_info.setText(tr("Waagerecht ziehen wählt einen Bereich A→B · senkrecht ziehen ändert die Höhe."))
+            self.height_info.setText(tr(("Drag horizontally to select a range A→B · drag vertically to change the "
+                                         "height.")))
         else:
             a, b = nodes[chosen[0]], nodes[chosen[-1]]
             run = b["s"] - a["s"]
             grade = (b["y"] - a["y"]) / run * 100 if run > 1e-6 else 0.0
-            self.height_info.setText(tr("A→B: {anzahl} Punkte · {run} · Höhe {y} → {y2} m · Ø {grade} %", anzahl=len(chosen), run=zahl(run, 0, 'm'), y=zahl(a['y'], 1), y2=zahl(b['y'], 1), grade=zahl(grade, 1)))
+            self.height_info.setText(tr("A→B: {anzahl} points · {run} · height {y} → {y2} m · Ø {grade} %", anzahl=len(chosen), run=zahl(run, 0, 'm'), y=zahl(a['y'], 1), y2=zahl(b['y'], 1), grade=zahl(grade, 1)))
 
     def _bank_nodes(self, data):
         """Griffe für das Querneigungsprofil: Kontrollpunkte an ihrer Station, Segmente in ihrer Mitte; Wert = wirksame
@@ -1444,12 +1461,13 @@ class MainWindow(QMainWindow):
         for key, button in self.bank_buttons.items():
             button.setEnabled(editable and len(chosen) >= need[key])
         if not nodes:
-            self.bank_info.setText(tr("Querneigung bearbeiten: geschlossene Runde mit Vorschau nötig."))
+            self.bank_info.setText(tr("Editing banking needs a closed lap with a preview."))
         elif len(chosen) < 2:
-            self.bank_info.setText(tr("Waagerecht ziehen wählt einen Bereich A→B · senkrecht ziehen ändert die Querneigung."))
+            self.bank_info.setText(tr(("Drag horizontally to select a range A→B · drag vertically to change the "
+                                       "banking.")))
         else:
             a, b = nodes[chosen[0]], nodes[chosen[-1]]
-            self.bank_info.setText(tr("A→B: {anzahl} Punkte · {run} · Querneigung {y}° → {y2}°", anzahl=len(chosen),
+            self.bank_info.setText(tr("A→B: {anzahl} points · {run} · banking {y}° → {y2}°", anzahl=len(chosen),
                                       run=zahl(b["s"] - a["s"], 0, "m"), y=zahl(a["y"], 1), y2=zahl(b["y"], 1)))
 
     def set_banks(self, changes):
@@ -1460,10 +1478,10 @@ class MainWindow(QMainWindow):
         closed = self.document.project.closed
         target = {i: max(-BANK_LIMIT, min(BANK_LIMIT, round(float(v), 2))) for i, v in changes.items()}
         count = len(target)
-        self.document.edit(tr("Querneigung ändern") if count == 1 else tr("Querneigung ändern ({count} Punkte)", count=count),
+        self.document.edit(tr("Change banking") if count == 1 else tr("Change banking ({count} points)", count=count),
                            lambda raw, meta: neigung.set_values(raw, target, closed))
-        self.status_label.setText(trn(count, "Querneigung von {n} Punkt geändert · Strg+Z macht rückgängig.",
-                                      "Querneigung von {n} Punkten geändert · Strg+Z macht rückgängig."))
+        self.status_label.setText(trn(count, "Banking of {n} point changed · Ctrl+Z undoes.",
+                                      "Banking of {n} points changed · Ctrl+Z undoes."))
 
     def set_heights(self, changes):
         """Neue Eingabehöhen {Objektindex: m} in einem Undo-Schritt. Segmente: alle Endhöhen werden fest
@@ -1488,9 +1506,9 @@ class MainWindow(QMainWindow):
                 for i, y in changes.items():
                     segments[i]["hoehe_ende"] = round(float(y), 3)
         count = len(changes)
-        self.document.edit(tr("Höhe ändern") if count == 1 else tr("Höhe ändern ({count} Punkte)", count=count), operation)
-        self.status_label.setText(trn(count, "Höhe von {n} Punkt geändert · Strg+Z macht rückgängig.",
-                                      "Höhe von {n} Punkten geändert · Strg+Z macht rückgängig."))
+        self.document.edit(tr("Change height") if count == 1 else tr("Change height ({count} points)", count=count), operation)
+        self.status_label.setText(trn(count, "Height of {n} point changed · Ctrl+Z undoes.",
+                                      "Height of {n} points changed · Ctrl+Z undoes."))
 
     def height_tool(self, tool):
         self._profile_tool(self.height, self.set_heights, tool)
@@ -1533,14 +1551,14 @@ class MainWindow(QMainWindow):
             from PySide6.QtWidgets import QInputDialog
             first = nodes[chosen[0]]["y"]
             if view.kind == "height":
-                value, ok = QInputDialog.getDouble(self, tr("Höhe eingeben"),
-                                                   trn(len(chosen), "Höhe in m für {n} Punkt:", "Höhe in m für {n} Punkte:"),
+                value, ok = QInputDialog.getDouble(self, tr("Enter height"),
+                                                   trn(len(chosen), "Height in m for {n} point:", "Height in m for {n} points:"),
                                                    round(first, 2), -500.0, 1500.0, 2)
             else:
                 value, ok = QInputDialog.getDouble(
-                    self, tr("Querneigung eingeben"),
-                    trn(len(chosen), "Querneigung in ° für {n} Punkt (+ = links höher):",
-                        "Querneigung in ° für {n} Punkte (+ = links höher):"),
+                    self, tr("Enter banking"),
+                    trn(len(chosen), "Banking in ° for {n} point (+ = left higher):",
+                        "Banking in ° for {n} points (+ = left higher):"),
                     round(first, 1), -BANK_LIMIT, BANK_LIMIT, 1)
             if ok:
                 apply({i: value for i in chosen})
@@ -1575,15 +1593,14 @@ class MainWindow(QMainWindow):
         if not chosen:
             return
         if side in ("innen", "aussen") and magnitude and not any(turns[i][0] for i in chosen):
-            self.status_label.setText(tr("Geraden haben keine Kurveninnenseite – Seite „links höher“ oder "
-                                      "„rechts höher“ wählen."))
+            self.status_label.setText(tr("Straights have no corner inside – choose “left higher” or “right higher”."))
             return
         target = {i: neigung.signed(magnitude, side, turns[i][0]) for i in chosen}
         if all(abs(values[i] - v) < 1e-6 for i, v in target.items()):
             return
         closed = self.document.project.closed
-        noun = tr("Querneigung") if len(chosen) == 1 else tr("Querneigung ({anzahl} Objekte)", anzahl=len(chosen))
-        what = tr("flach") if not magnitude else f"{zahl(magnitude, 1)}° {tr(neigung.SIDES[side])}"
+        noun = tr("Banking") if len(chosen) == 1 else tr("Banking ({anzahl} objects)", anzahl=len(chosen))
+        what = tr("flat") if not magnitude else f"{zahl(magnitude, 1)}° {tr(neigung.SIDES[side])}"
         self.document.edit(f"{noun}: {what}", lambda raw, meta: neigung.set_values(raw, target, closed))
 
     def auto_bank(self, maximum):
@@ -1591,15 +1608,17 @@ class MainWindow(QMainWindow):
             return
         closed = self.document.project.closed
         values = neigung.auto_values(self.document.project.raw, closed, maximum)
-        self.document.edit(tr("Querneigung: alle Kurven automatisch (bis {maximum}°)", maximum=zahl(maximum, 1)),
+        self.document.edit(tr("Banking: all corners automatically (up to {maximum}°)", maximum=zahl(maximum, 1)),
                            lambda raw, meta: neigung.set_values(raw, values, closed))
         banked = sum(1 for v in values.values() if abs(v) >= .05)
-        self.status_label.setText(trn(banked, "{n} Objekt zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.",
-                                      "{n} Objekte zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.",
+        self.status_label.setText(trn(banked, ("{n} object banked towards the corner inside (up to {maximum}°) · "
+                                               "Ctrl+Z undoes."),
+                                      ("{n} objects banked towards the corner inside (up to {maximum}°) · Ctrl+Z "
+                                       "undoes."),
                                       maximum=zahl(maximum, 1)))
 
     def flatten_bank(self):
-        self.document.edit(tr("Querneigung: ganze Strecke flach"), lambda raw, meta: neigung.flatten(raw))
+        self.document.edit(tr("Banking: whole track flat"), lambda raw, meta: neigung.flatten(raw))
 
     @staticmethod
     def _width_keys(values):
@@ -1655,7 +1674,7 @@ class MainWindow(QMainWindow):
             if category == "object" and len(self.document.selected_indices) > 1:
                 if "y" in changes:
                     if changes["y"] is None:
-                        raise ValueError(tr("Koordinaten dürfen nicht leer sein."))
+                        raise ValueError(tr("Coordinates must not be empty."))
                     self.document.move_selection(y=changes["y"])
                     QTimer.singleShot(0, self._refresh_properties)
                 return
@@ -1669,7 +1688,7 @@ class MainWindow(QMainWindow):
                         point = ml["punkte"][index]
                         coords = {key: fields[key] for key in ("x", "y", "z") if key in fields}
                         if any(value is None for value in coords.values()):
-                            raise ValueError(tr("Koordinaten dürfen nicht leer sein."))
+                            raise ValueError(tr("Coordinates must not be empty."))
                         updated = set_point(point, **coords)
                         attrs = {key: value for key, value in fields.items() if key not in coords}
                         if (attrs or "asymmetrisch" in changes) and not isinstance(updated, dict):
@@ -1704,7 +1723,7 @@ class MainWindow(QMainWindow):
                 else:
                     self.update_fields(raw.setdefault(category, {}), changes)
             if changes:
-                self.document.edit(tr("Eigenschaft ändern"), operation)
+                self.document.edit(tr("Change property"), operation)
                 # Während Qt den Zell-Editor schließt, dessen Widgets nicht ersetzen.
                 self.properties.blockSignals(True)
                 for row, (key, actual, fallback, label) in enumerate(self.properties.entries):
@@ -1714,7 +1733,7 @@ class MainWindow(QMainWindow):
                 self.properties.blockSignals(False)
                 QTimer.singleShot(0, self._refresh_after_edit)
         except (ValueError, TypeError, KeyError, IndexError) as error:
-            self.status_label.setText(tr("Ungültige Eingabe: {error} · Feld korrigieren; Eingabe bleibt erhalten.", error=error))
+            self.status_label.setText(tr("Invalid input: {error} · correct the field; your input is kept.", error=error))
 
     def _refresh_after_edit(self):
         if self.properties.state() != QAbstractItemView.EditingState and not self.properties.pending():
@@ -1746,7 +1765,7 @@ class MainWindow(QMainWindow):
         if category not in LISTS:
             return
         item = self._new_list_item(category)
-        self.document.edit(tr("{noun} anlegen", noun=tr(LISTS[category]['noun'])), lambda raw, meta: self._list_items(raw, category, create=True).append(item))
+        self.document.edit(tr("Create {noun}", noun=tr(LISTS[category]['noun'])), lambda raw, meta: self._list_items(raw, category, create=True).append(item))
         self._refresh_properties()
         self.section_choice.setCurrentIndex(self.section_choice.count() - 1)
 
@@ -1754,7 +1773,7 @@ class MainWindow(QMainWindow):
         category = self.category.currentData()
         index = self.section_choice.currentIndex()
         if category in LISTS and index >= 0:
-            self.document.edit(tr("{noun} löschen", noun=tr(LISTS[category]['noun'])), lambda raw, meta: self._list_items(raw, category).pop(index))
+            self.document.edit(tr("Delete {noun}", noun=tr(LISTS[category]['noun'])), lambda raw, meta: self._list_items(raw, category).pop(index))
 
     # ------------------------------------------------------------------ DRS / Straight Mode auf der Karte
     def _update_zone_overlay(self):
@@ -1787,7 +1806,7 @@ class MainWindow(QMainWindow):
                 length = float(self.preview["length"])
                 zones.append({"art": "box", "index": 0, "a": (length - float(box["einfahrt_vor_start_m"])) % length,
                               "b": float(box["ausfahrt_nach_start_m"]) % length, "auto": False,
-                              "label": tr("Boxengasse"), "seite": box.get("seite", "rechts")})
+                              "label": tr("Pit lane"), "seite": box.get("seite", "rechts")})
         except (KeyError, TypeError, ValueError):
             pass
         self.map.zones = zones
@@ -1809,7 +1828,7 @@ class MainWindow(QMainWindow):
             if length <= 0:
                 return
             value = round((length - station) % length if field == "einfahrt_vor_start_m" else station % length, 1)
-            self.document.edit(tr("Boxengasse verschieben"),
+            self.document.edit(tr("Move pit lane"),
                                lambda raw, meta: raw.setdefault("boxengasse", {}).__setitem__(field, value))
             self._refresh_properties()
             return
@@ -1817,15 +1836,15 @@ class MainWindow(QMainWindow):
         items = self._list_items(self.document.project.raw, category)
         if not 0 <= index < len(items):
             return
-        self.document.edit(tr("{noun} verschieben", noun=tr(LISTS[category]['noun'])),
+        self.document.edit(tr("Move {noun}", noun=tr(LISTS[category]['noun'])),
                            lambda raw, meta: self._list_items(raw, category)[index].__setitem__(field, station))
         self._refresh_properties()
 
     def _zone_clicked(self, art, index):
         if art == "box":
             self.category.setCurrentIndex(self.category.findData("boxengasse"))
-            self.status_label.setText(tr("Boxengasse gewählt: Quadrate an Ein- und Ausfahrt auf der Karte ziehen oder "
-                                      "Werte rechts ändern."))
+            self.status_label.setText(tr("Pit lane selected: drag the squares at entry and exit on the map or change "
+                                         "the values on the right."))
             self._refresh_properties()
             return
         category = ZONE_CATEGORY[art]
@@ -1833,8 +1852,9 @@ class MainWindow(QMainWindow):
         self.category.setCurrentIndex(self.category.findData(category))
         if own and 0 <= index < len(own):
             self.section_choice.setCurrentIndex(index)
-        self.status_label.setText(tr("Automatik-Zone: mit „+“ eine eigene Zone anlegen, um sie zu verändern.")
-                                  if not own else tr("Zone gewählt: Quadrate auf der Karte ziehen oder Werte rechts ändern."))
+        self.status_label.setText(tr("Automatic zone: create your own zone with “+” to change it.")
+                                  if not own else tr(("Zone selected: drag the squares on the map or change the "
+                                                      "values on the right.")))
         self._refresh_properties()
 
     def add_object(self):
@@ -1851,15 +1871,16 @@ class MainWindow(QMainWindow):
         doc = self.document
         points = doc.ml.get("art", "kontrollpunkte") == "kontrollpunkte"
         targets = doc.gap_targets() if points else {}
-        reason = (tr("Unbekannte Projektfassung: nur lesend.") if doc.project.readonly else
-                  tr("Erst die Runde schließen: Gefüllt wird entlang der berechneten Strecke.") if not doc.project.closed else
-                  tr("Bei umgekehrter Fahrtrichtung nicht möglich.") if doc.project.raw["mittellinie"].get("umkehren") else
-                  tr("Keine großen Lücken. Zwei benachbarte Punkte wählen füllt genau diese Lücke.") if not targets else "")
+        reason = (tr("Unknown project version: read-only.") if doc.project.readonly else
+                  tr("Close the lap first: gaps are filled along the computed track.") if not doc.project.closed else
+                  tr("Not possible with the driving direction reversed.") if doc.project.raw["mittellinie"].get("umkehren") else
+                  tr("No large gaps. Select two neighbouring points to fill exactly that gap.") if not targets else "")
         self.gap_button.setVisible(points)
         self.gap_button.setEnabled(points and not reason)
-        self.gap_button.setText(tr("Lücken füllen ({anzahl})", anzahl=len(targets)) if targets else tr("Lücken füllen"))
-        self.gap_button.setToolTip(reason or tr("Füllt Lücken entlang der sichtbaren Strecke (Generatorvorschau) mit Punkten im "
-                                                "üblichen Abstand. Zwei benachbarte Punkte gewählt: nur diese Lücke. Strg+Z: rückgängig."))
+        self.gap_button.setText(tr("Fill gaps ({anzahl})", anzahl=len(targets)) if targets else tr("Fill gaps"))
+        self.gap_button.setToolTip(reason or tr("Fills gaps along the visible track (generator preview) with points at "
+                                                "the usual spacing. Two neighbouring points selected: only this gap. "
+                                                "Ctrl+Z: undo."))
 
     def fill_gaps(self):
         """Lücken zwischen Kontrollpunkten entlang der sichtbaren (Generator-)Strecke füllen."""
@@ -1867,17 +1888,20 @@ class MainWindow(QMainWindow):
         gaps = doc.gap_targets()
         n = len(doc.points)
         if not gaps:
-            self.status_label.setText(tr("Keine Lücke gefunden. Zwei benachbarte Punkte wählen oder Lücke > 4× Punktabstand."))
+            self.status_label.setText(tr(("No gap found. Select two neighbouring points or a gap > 4× the point "
+                                          "spacing.")))
             return
         if self.preview is None or self.map.stale or doc.project.raw["mittellinie"].get("umkehren"):
-            self.status_label.setText(tr("Lücken füllen braucht eine aktuelle Vorschau (Strg+Enter) und keine umgekehrte Richtung."))
+            self.status_label.setText(tr(("Filling gaps needs an up-to-date preview (Ctrl+Enter) and no reversed "
+                                          "direction.")))
             self.request_preview()
             return
         stations, pos = self.preview["s"], self.preview["pos"]
         L = float(self.preview["length"])
         source = self.preview["object_s"]
         if len(source) != n:
-            self.status_label.setText(tr("Vorschau passt nicht zu den Kontrollpunkten – Vorschau erneuern (Strg+Enter)."))
+            self.status_label.setText(tr(("Preview does not match the control points – refresh the preview "
+                                          "(Ctrl+Enter).")))
             return
         pts = [point_xyz(p) for p in doc.points]
         step = doc.gap_step()
@@ -1900,7 +1924,8 @@ class MainWindow(QMainWindow):
                 neu.append((x, y, z))
             fills[i] = neu
         added = doc.fill_gaps(fills)
-        self.status_label.setText(tr("{anzahl} Lücke(n) mit {added} Punkten entlang der sichtbaren Strecke gefüllt · Strg+Z: rückgängig.", anzahl=len(fills), added=added))
+        self.status_label.setText(tr(("Filled {anzahl} gap(s) with {added} points along the visible track · Ctrl+Z: "
+                                      "undo."), anzahl=len(fills), added=added))
 
     def convert_to_points(self):
         try:
@@ -1913,8 +1938,8 @@ class MainWindow(QMainWindow):
             mode = "auswahl"
         if mode == "nachzeichnen" and (self.werkzeug_bild.vorlage is None or self.document.project.readonly):
             if focus and self.werkzeug_bild.vorlage is None and not self.document.project.readonly:
-                self.status_label.setText(tr("Nachzeichnen braucht eine Bildvorlage: Projekt → „Bildvorlage laden …“ "
-                                             "oder ein Bildschirmfoto mit Strg+V einfügen."))
+                self.status_label.setText(tr("Tracing needs a reference image: Project → “Load reference image …” or "
+                                             "paste a screenshot with Ctrl+V."))
             mode = "auswahl"
         self.werkzeug_bild.aktiv = mode == "nachzeichnen"
         if mode == "nachzeichnen":
@@ -1925,9 +1950,9 @@ class MainWindow(QMainWindow):
         if focus:
             self.map.setFocus()
         self._point_section_update(self.objects.count())
-        self.mode_hint.setText({"punkte": tr("Werkzeug: Punkte (EINFÜGEN)"), "umgebung": tr("Werkzeug: Umgebung (U)"),
-                                "streuen": tr("Werkzeug: Bepflanzen (B)"),
-                                "nachzeichnen": tr("Werkzeug: Nachzeichnen (N)")}.get(mode, tr("Werkzeug: Auswahl")))
+        self.mode_hint.setText({"punkte": tr("Tool: points (INSERT)"), "umgebung": tr("Tool: Environment (U)"),
+                                "streuen": tr("Tool: Plant (B)"),
+                                "nachzeichnen": tr("Tool: Trace (N)")}.get(mode, tr("Tool: select")))
         self.env_panel.selection_box.setVisible(mode in ("umgebung", "streuen"))
         self.env_panel.terrain_box.setVisible(mode in ("umgebung", "streuen"))
         self._refresh_bank_panel()
@@ -1963,8 +1988,8 @@ class MainWindow(QMainWindow):
         frame = self._cross_frame()
         readonly = self.document.project.readonly
         if frame is None or readonly:
-            self.cross_panel.set_enabled(False, tr("Unbekannte Projektfassung: nur lesend.") if readonly else
-                                         tr("Querschnitt bearbeiten: geschlossene Runde mit Vorschau nötig."))
+            self.cross_panel.set_enabled(False, tr("Unknown project version: read-only.") if readonly else
+                                         tr("Editing the cross-section needs a closed lap with a preview."))
             return
         self.cross_panel.set_enabled(True)
         length, s_start = frame
@@ -1993,7 +2018,7 @@ class MainWindow(QMainWindow):
             saved = [querschnitt.effective(self.document.project.raw, s_in, name).get("rand_neigung") for name in names]
             if inside and any(v != value for v in saved):
                 wanted = {"wert": value, "seite": side}
-            hint = tr("Der Cursor liegt außerhalb des Bereichs: Die Ansicht zeigt den Randwinkel nur innerhalb.")
+            hint = tr("The cursor is outside the range: the view shows the edge angle only inside it.")
             shown = panel.info.text().replace("\n" + hint, "")
             panel.info.setText(shown + "\n" + hint if not inside and value is not None else shown)
         if wanted != self.cross.edge_input:
@@ -2055,10 +2080,10 @@ class MainWindow(QMainWindow):
         von = querschnitt.to_input_s(self.cross_panel.von.value(), s_start, length)
         bis = querschnitt.to_input_s(self.cross_panel.bis.value(), s_start, length)
         side, fields, half = self.cross_panel.side.currentData(), self.cross_panel.fields(), self.cross_panel.road_half()
-        self.document.edit(tr("Querschnitt ändern"),
+        self.document.edit(tr("Change cross-section"),
                            lambda raw, meta: querschnitt.apply_section(raw, von, bis, side, fields, half))
         self._cross_loaded = fields
-        self.status_label.setText(tr("Querschnitt {von}–{bis} geändert · Strg+Z macht rückgängig.",
+        self.status_label.setText(tr("Cross-section {von}–{bis} changed · Ctrl+Z undoes.",
                                      von=zahl(self.cross_panel.von.value(), 0, "m"), bis=zahl(self.cross_panel.bis.value(), 0, "m")))
         self._update_cross_panel()
 
@@ -2072,9 +2097,9 @@ class MainWindow(QMainWindow):
         side = self.cross_panel.side.currentData()
         probe = copy.deepcopy(self.document.project.raw)
         if not querschnitt.clear_range(probe, von, bis, side):
-            self.status_label.setText(tr("Im Bereich gibt es keine eigenen Querschnitt-Abschnitte."))
+            self.status_label.setText(tr("There are no own cross-section sections in the range."))
             return
-        self.document.edit(tr("Querschnitt: Automatik"), lambda raw, meta: querschnitt.clear_range(raw, von, bis, side))
+        self.document.edit(tr("Cross-section: automatic"), lambda raw, meta: querschnitt.clear_range(raw, von, bis, side))
         self.cross_panel.load({})
         self._cross_loaded = self.cross_panel.fields()
         self._update_cross_panel()
@@ -2118,7 +2143,7 @@ class MainWindow(QMainWindow):
         try:
             root = toolkit_path(self.document.project.manifest.get("werkzeugkasten"))
         except ValueError as error:
-            self.map.analysis_note = tr("Fahrlinie nicht verfügbar: {error}", error=error)
+            self.map.analysis_note = tr("Racing line not available: {error}", error=error)
             return
         payload = {"task": "analyse", "raw": copy.deepcopy(self.document.project.raw),
                    "basis": str(self.document.project.basis), "toolkit": str(root),
@@ -2126,7 +2151,7 @@ class MainWindow(QMainWindow):
         self.analysis_job, self.analysis_job_key = ProcessJob(self), key
         self.analysis_job.done.connect(lambda code, text, key=key: self._analysis_done(code, text, key))
         self.analysis_job.start(worker_command(), payload)
-        self._set_analysis_note(tr("Fahrlinie wird berechnet …"))
+        self._set_analysis_note(tr("Calculating racing line …"))
 
     def _stop_analysis(self):
         self.analysis_timer.stop()
@@ -2154,8 +2179,8 @@ class MainWindow(QMainWindow):
             if code != 0 or "error" in result:
                 raise ValueError(result.get("error", text))
         except (ValueError, TypeError) as error:
-            self._set_analysis_note(tr("Fahrlinie: Fehler im Generator"))
-            self.status_label.setText(tr("Fahrlinienlauf fehlgeschlagen: {error}", error=error))
+            self._set_analysis_note(tr("Racing line: error in the generator"))
+            self.status_label.setText(tr("Racing-line run failed: {error}", error=error))
             return
         self.store_analysis(key, result)
 
@@ -2181,31 +2206,34 @@ class MainWindow(QMainWindow):
         self._update_summary()
         self._refresh_objects()
         if self.analysis:
-            self._set_analysis_note(tr("Fahrlinie aktuell · Runde {zeit}", zeit=lap_text(self.analysis["rundenzeit_s"])))
+            self._set_analysis_note(tr("Racing line up to date · lap {zeit}", zeit=lap_text(self.analysis["rundenzeit_s"])))
         else:
-            self._set_analysis_note(tr("Fahrlinie: Generator lief nicht (siehe Prüfung)"))
+            self._set_analysis_note(tr("Racing line: generator did not run (see Check)"))
 
     def _mark_analysis_stale(self):
         if self.analysis is not None:
             self.map.analysis_stale = self.speed.stale = True
             self.speed.update()
-            self._set_analysis_note(tr("Fahrlinie veraltet"))
+            self._set_analysis_note(tr("Racing line outdated"))
 
     def _update_summary(self):
         a = self.analysis
         self.curve_table.setRowCount(0)
         if not a:
-            self.analysis_info.setText(tr("Keine Auswertung: der Generator lief für diesen Stand nicht (Meldungen unter Prüfung)."))
+            self.analysis_info.setText(tr(("No analysis: the generator did not run for this state (messages under "
+                                           "Check).")))
             return
         def kmh(v):
             return "–" if v is None else zahl(v, 0, "km/h")
         self.analysis_info.setText(
-            tr("<b>Runde {rundenzeit_s}</b> (Generator-Fahrzeug) · Länge {laenge_m} · Ideallinie {ideallinie_m} · {v_min_kmh} … {v_max_kmh} · Vollgas {vollgas} · {bremszonen} Bremszonen · {tafeln} Entfernungstafeln · {kurven} Kurven im Spiel",
+            tr(("<b>Lap {rundenzeit_s}</b> (generator car) · length {laenge_m} · racing line {ideallinie_m} · "
+                "{v_min_kmh} … {v_max_kmh} · full throttle {vollgas} · {bremszonen} braking zones · {tafeln} distance "
+                "boards · {kurven} corners in game"),
                rundenzeit_s=lap_text(a['rundenzeit_s']), laenge_m=zahl(a['laenge_m'], 0, 'm'),
                ideallinie_m=zahl(a['ideallinie_m'], 0, 'm'), v_min_kmh=kmh(a['v_min_kmh']), v_max_kmh=kmh(a['v_max_kmh']),
                vollgas=zahl(100 * a['vollgas_anteil'], 0, '%'), bremszonen=len(a['bremszonen']), tafeln=len(a['tafeln']),
                kurven=len({k['spiel'] for k in a['kurven']}))
-            + ("" if not a.get("berechnung_s") else tr(" · gerechnet in {berechnung_s}", berechnung_s=zahl(a['berechnung_s'], 0, 's'))))
+            + ("" if not a.get("berechnung_s") else tr(" · computed in {berechnung_s}", berechnung_s=zahl(a['berechnung_s'], 0, 's'))))
         rows = a["kurven"]
         self.curve_table.setRowCount(len(rows))
         for r, k in enumerate(rows):
@@ -2214,7 +2242,7 @@ class MainWindow(QMainWindow):
                       zahl(k["s_scheitel"], 0, "m"), kmh(k["v_vor"]), kmh(k["v_min"]),
                       "–" if k["bremsweg_m"] is None else zahl(k["bremsweg_m"], 0, "m"),
                       " / ".join(str(m) for m in k["tafeln"]) or "–",
-                      tr("Kurve {nr}", nr=k["nr"]) + (tr(" · zusammengelegt") if merged else "")]
+                      tr("Corner {nr}", nr=k["nr"]) + (tr(" · merged") if merged else "")]
             for c, value in enumerate(values):
                 item = QTableWidgetItem(value)
                 item.setData(Qt.UserRole, k["s_scheitel"])
@@ -2262,8 +2290,8 @@ class MainWindow(QMainWindow):
         info = (f"T{curve['spiel']} · {choice_text(curve['richtung'])} {sum(k['winkel'] for k in group):.0f}° · "
                 f"R {curve['r_min']:.0f} m · {kmh(curve['v_vor'])} → "
                 f"{kmh(min((k['v_min'] for k in group if k['v_min'] is not None), default=None))} km/h"
-                + (tr(" · Bremsweg {bremsweg_m:.0f} m", bremsweg_m=curve['bremsweg_m']) if curve.get("bremsweg_m") else "")
-                + (tr(" · Tafeln {tafeln}", tafeln='/'.join(str(m) for m in curve['tafeln'])) if curve.get("tafeln") else ""))
+                + (tr(" · braking distance {bremsweg_m:.0f} m", bremsweg_m=curve['bremsweg_m']) if curve.get("bremsweg_m") else "")
+                + (tr(" · boards {tafeln}", tafeln='/'.join(str(m) for m in curve['tafeln'])) if curve.get("tafeln") else ""))
         self.map.focus_curve = dict(curve, info=info if sprache() == "en" else info.replace(".", ","))
         self.set_station(curve["s_scheitel"])
         for row in range(self.curve_table.rowCount()):
@@ -2370,7 +2398,7 @@ class MainWindow(QMainWindow):
             action = self.recent_menu.addAction(str(path))
             action.triggered.connect(lambda checked=False, path=path: self.load_project(path))
         if not paths:
-            action = self.recent_menu.addAction(tr("(noch keine)"))
+            action = self.recent_menu.addAction(tr("(none yet)"))
             action.setEnabled(False)
 
     def recovery_path(self):
@@ -2391,7 +2419,7 @@ class MainWindow(QMainWindow):
             tmp = path.with_suffix(".tmp")
             tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
             tmp.replace(path)
-            self.statusBar().showMessage(tr("Automatisch gesichert (Wiederherstellungsdatei)"), 3000)
+            self.statusBar().showMessage(tr("Saved automatically (recovery file)"), 3000)
             return True
         except (OSError, ValueError, TypeError):
             return False
@@ -2417,9 +2445,9 @@ class MainWindow(QMainWindow):
             self._drop_recovery()
             return False
         ask = ask or (lambda text: QMessageBox.question(
-            self, tr("Wiederherstellen?"), text, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes)
-        if not ask(tr("Für dieses Projekt gibt es ungespeicherte Änderungen vom {zeit}. Übernehmen? "
-                      "(Rückgängig: Strg+Z; „Nein“ verwirft die Sicherung.)", zeit=data.get('zeit', '?'))):
+            self, tr("Restore?"), text, QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes) == QMessageBox.Yes)
+        if not ask(tr("There are unsaved changes for this project from {zeit}. Restore them? (Undo: Ctrl+Z; “No” "
+                      "discards the backup.)", zeit=data.get('zeit', '?'))):
             self._drop_recovery()
             return False
         raw, env = data["raw"], data.get("umgebung", self.document.project.umgebung)
@@ -2427,7 +2455,7 @@ class MainWindow(QMainWindow):
             target.clear()
             target.update(copy.deepcopy(raw))
             return copy.deepcopy(env)
-        self.document.replace_content(tr("Wiederherstellung übernehmen"), operation)
+        self.document.replace_content(tr("Apply recovery"), operation)
         return True
 
     # ------------------------------------------------------------------ Gehe zu
@@ -2456,7 +2484,8 @@ class MainWindow(QMainWindow):
         match = re.fullmatch(r"[tT]\s*(\d+)", text)
         if match:
             if not self.analysis:
-                self.status_label.setText(tr("Kurvennummern gibt es nach dem Fahrlinienlauf (Prüfen: Strg+Enter)."))
+                self.status_label.setText(tr(("Corner numbers are available after the racing-line run (Check: "
+                                              "Ctrl+Enter).")))
                 return
             self.show_turn(int(match.group(1)))
             return
@@ -2471,7 +2500,7 @@ class MainWindow(QMainWindow):
         try:
             station = float(text.rstrip("m ").strip()) % float(self.preview["length"])
         except ValueError:
-            self.status_label.setText(tr("Gehe zu: Meter (z. B. 1250), Kurve (T4) oder Objekt (#12)."))
+            self.status_label.setText(tr("Go to: metres (e.g. 1250), corner (T4) or object (#12)."))
             return
         stations = self.preview.get("object_s") or []
         if stations:                           # nächstes Objekt wählen, Cursor danach genau auf die Station
@@ -2493,8 +2522,8 @@ class MainWindow(QMainWindow):
             self.cross.preview = None
             self.cross.update()
             self.issues.clear()
-            self.issues.addItem(tr("Fehler · Runde ist offen; mindestens vier Punkte anlegen und schließen."))
-            self.status_label.setText(tr("Offener Entwurf · Eingabepunkte bearbeitbar · keine Generatorvorschau"))
+            self.issues.addItem(tr("Error · lap is open; create at least four points and close the lap."))
+            self.status_label.setText(tr("Open draft · input points editable · no generator preview"))
         try:
             root = toolkit_path(self.document.project.manifest.get("werkzeugkasten"))
             revision = self.document.revision
@@ -2506,16 +2535,18 @@ class MainWindow(QMainWindow):
             self.job = ProcessJob(self)
             self.job.done.connect(lambda code, text: self._preview_done(code, text, revision))
             self.preview_action.setEnabled(False)
-            self.preview_action.setToolTip(tr("Eine Vorschau läuft bereits. Änderungen ersetzen die Berechnung automatisch; mit Abbrechen stoppen."))
+            self.preview_action.setToolTip(tr(("A preview is already running. Changes replace the calculation "
+                                               "automatically; stop it with Cancel.")))
             self.cancel_action.setEnabled(True)
-            self.cancel_action.setToolTip(tr("Laufende Vorschau abbrechen; Eingabe bleibt erhalten. Die nächste Änderung startet die Automatik wieder."))
+            self.cancel_action.setToolTip(tr(("Cancel the running preview; input is kept. The next change starts the "
+                                              "automation again.")))
             self._busy(True)
-            self.status_label.setText(tr("Vorschau wird berechnet …"))
+            self.status_label.setText(tr("Calculating preview …"))
             self.job.start(worker_command(), payload)
         except (ValueError, OSError) as error:
             self.issues.clear()
-            self.issues.addItem(tr("Fehler · Vorschau: {error}", error=error))
-            self.status_label.setText(tr("Vorschau nicht verfügbar: {error} · Eingabe bleibt bearbeitbar.", error=error))
+            self.issues.addItem(tr("Error · preview: {error}", error=error))
+            self.status_label.setText(tr("Preview not available: {error} · input stays editable.", error=error))
 
     def _preview_done(self, code, text, revision):
         job = self.job
@@ -2523,18 +2554,19 @@ class MainWindow(QMainWindow):
         if job:
             job.deleteLater()
         self.preview_action.setEnabled(True)
-        self.preview_action.setToolTip(tr("Generatorvorschau erneut anfordern; Änderungen starten sie auch automatisch."))
+        self.preview_action.setToolTip(tr("Request the generator preview again; changes also start it automatically."))
         self.cancel_action.setEnabled(False)
         self._busy(False)
-        self.cancel_action.setToolTip(tr("Keine laufende Berechnung. Die nächste Änderung startet die Automatik."))
+        self.cancel_action.setToolTip(tr("No calculation running. The next change starts the automation."))
         if self.preview_pending and not self.preview_timer.isActive():
             self.preview_timer.start(0)
         if code == -2:
-            self.status_label.setText(tr("Vorschau abgebrochen · Karte zeigt deine Eingabe, die berechnete Fahrbahn ist veraltet")
-                                      + (tr(" · neuer Stand folgt automatisch") if self.preview_pending else ""))
+            self.status_label.setText(tr("Preview cancelled · the map shows your input, the computed road is outdated")
+                                      + (tr(" · new state follows automatically") if self.preview_pending else ""))
             return
         if revision != self.document.revision:
-            self.status_label.setText(tr("Berechnung gehört zu einem älteren Entwurf; neuer Stand folgt automatisch."))
+            self.status_label.setText(tr(("The calculation belongs to an older draft; the new state follows "
+                                          "automatically.")))
             return
         try:
             result = json.loads(text)
@@ -2543,17 +2575,18 @@ class MainWindow(QMainWindow):
             if result.get("draft"):
                 self.defaults = result["defaults"]
                 self._refresh_after_edit()
-                self.status_label.setText(tr("Offener Entwurf · Eingabe bearbeitbar · Generatorstandards geladen · keine berechnete Runde"))
+                self.status_label.setText(tr(("Open draft · input editable · generator defaults loaded · no computed "
+                                              "lap")))
                 return
             if result.get("validation_only"):
                 self.set_issues(result["issues"], result["report"])
-                self.status_label.setText(" · ".join(m["text"] for m in result["issues"]) + tr(" · Eingabe bleibt bearbeitbar"))
+                self.status_label.setText(" · ".join(meldung(m["text"]) for m in result["issues"]) + tr(" · input stays editable"))
                 return
             self.install_preview(result, revision)
         except (ValueError, TypeError) as error:
             self.issues.clear()
-            self.issues.addItem(tr("Fehler · Werkzeugkasten: {error}", error=error))
-            self.status_label.setText(tr("Vorschau fehlgeschlagen: {error} · Entwurf kann gespeichert werden", error=error))
+            self.issues.addItem(tr("Error · toolkit: {error}", error=error))
+            self.status_label.setText(tr("Preview failed: {error} · the draft can be saved", error=error))
 
     def install_preview(self, preview, revision=None):
         self.preview, self.preview_revision = preview, self.document.revision if revision is None else revision
@@ -2578,11 +2611,13 @@ class MainWindow(QMainWindow):
             self.request_analysis(force=True)
         elif self.auto_analysis:
             self.analysis_timer.start()
-        direction = {"im_uhrzeigersinn": tr("im Uhrzeigersinn"), "gegen_uhrzeigersinn": tr("gegen den Uhrzeigersinn")}.get(
+        direction = {"im_uhrzeigersinn": tr("clockwise"), "gegen_uhrzeigersinn": tr("anticlockwise")}.get(
             preview["direction"], preview["direction"].replace("_", " "))
-        self.status_label.setText(tr("Vorschau aktuell · Länge {length} · kleinster Radius {min_radius} · {direction}", length=zahl(preview['length'], 0, 'm'), min_radius=zahl(preview['min_radius'], 1, 'm'), direction=direction))
+        self.status_label.setText(tr(("Preview up to date · length {length} · smallest radius {min_radius} · "
+                                      "{direction}"), length=zahl(preview['length'], 0, 'm'), min_radius=zahl(preview['min_radius'], 1, 'm'), direction=direction))
         if self.properties.pending():
-            self.status_label.setText(self.status_label.text() + tr(" · Ungültige Feldeingabe korrigieren; Text bleibt erhalten."))
+            self.status_label.setText(self.status_label.text() + tr((" · Correct the invalid field input; the text is "
+                                                                     "kept.")))
         if self.fit_after_preview:
             self.map.fit_track()
             QTimer.singleShot(0, self.map, self.map.fit_track)      # verfällt mit der Karte (Sprachwechsel)
@@ -2642,17 +2677,17 @@ class MainWindow(QMainWindow):
         issues += self._env_issue_list(issues)
         for rule in self.validation_report.get("nicht_geprueft", []):
             issues.append({"id": rule, "level": "Nicht geprüft",
-                           "text": tr("Diese Regel wurde in dieser Prüfung noch nicht geprüft.")})
+                           "text": tr("This rule has not been checked yet in this check.")})
         level, search = self.issue_filter.currentData() or "Alle", self.issue_search.text().casefold()
         for issue in sorted(issues, key=issue_order):
-            origin = tr(" · Bau {bau_id}", bau_id=issue['bau_id']) if issue.get("bau_id") else ""
+            origin = tr(" · build {bau_id}", bau_id=issue['bau_id']) if issue.get("bau_id") else ""
             location = issue.get("ort") or {}
             station = location.get("station_m", issue.get("s"))
-            spline = {"mittellinie": tr("Mittellinie"), "maintrack": tr("Strecke"), "pitlane": tr("Boxengasse")}.get(
+            spline = {"mittellinie": tr("Centreline"), "maintrack": tr("Track"), "pitlane": tr("Pit lane")}.get(
                 location.get("spline", "mittellinie"), location.get("spline", "Mittellinie"))
             where = f" · {spline} {zahl(station, 0, 'm')}" if station is not None else ""
             if location.get("objekt"):
-                where += tr(" · Objekt {kennung}", kennung=location["objekt"])
+                where += tr(" · object {kennung}", kennung=location["objekt"])
             short, message = issue_texts(issue)
             text = f"{tr(issue['level'])} · {short}{where}{origin} · {german_numbers(message)}"
             if level == "Alle" and issue["level"] == "Nicht geprüft":
@@ -2661,33 +2696,34 @@ class MainWindow(QMainWindow):
                 continue
             item = QListWidgetItem(text)
             item.setData(Qt.UserRole, issue)
-            item.setToolTip(issue["id"] + tr("\nStufe: ") + tr(issue.get("stufe", "Eingabe")) +
-                            tr("\nIst: ") + str(issue.get("ist", "–")) + tr(" · Soll: ") + str(issue.get("soll", "–")) +
+            item.setToolTip(issue["id"] + tr("\nStage: ") + tr(issue.get("stufe", "Eingabe")) +
+                            tr("\nActual: ") + str(issue.get("ist", "–")) + tr(" · target: ") + str(issue.get("soll", "–")) +
                             "\n" + str(issue.get("quelle", "")))
             item.setForeground(QColor({"Fehler": "#F07878", "Warnung": "#D6A94A", "Hinweis": "#63BFCF"}.get(issue["level"], "#8D9BA9")))
             self.issues.addItem(item)
         errors = sum(issue["level"] == "Fehler" for issue in issues)
         warnings = sum(issue["level"] == "Warnung" for issue in issues)
-        stages = ", ".join(tr(s) for s in self.validation_report.get("stufen", [])) or tr("ausstehend")
+        stages = ", ".join(tr(s) for s in self.validation_report.get("stufen", [])) or tr("pending")
         hints = sum(issue["level"] == "Hinweis" for issue in issues)
-        self.issue_summary.setText(tr("{errors} Fehler · {warnings} Warnungen · {unchecked} nicht geprüft · Stufen: {stages}",
+        self.issue_summary.setText(tr(("Errors: {errors} · warnings: {warnings} · not checked: {unchecked} · stages: "
+                                       "{stages}"),
                                       errors=errors, warnings=warnings, stages=stages,
                                       unchecked=len(self.validation_report.get('nicht_geprueft', []))))
         self.issue_summary.setWordWrap(True)
         checked = bool(self.validation_report.get("stufen")) or bool(issues)
         if not checked:
-            self.issue_badge.setText(tr("Noch nicht geprüft"))
+            self.issue_badge.setText(tr("Not checked yet"))
             self.issue_badge.setStyleSheet("")
-            self.results.setTabText(self.issue_tab, tr("Prüfung"))
+            self.results.setTabText(self.issue_tab, tr("Checks"))
         else:
-            self.issue_badge.setText(" · ".join((trn(errors, "{n} Fehler", "{n} Fehler"),
-                                                trn(warnings, "{n} Warnung", "{n} Warnungen"),
-                                                trn(hints, "{n} Hinweis", "{n} Hinweise"))) if errors or warnings or hints
-                                     else tr("Keine Probleme gefunden"))
+            self.issue_badge.setText(" · ".join((trn(errors, "{n} error", "{n} errors"),
+                                                trn(warnings, "{n} warning", "{n} warnings"),
+                                                trn(hints, "{n} hint", "{n} hints"))) if errors or warnings or hints
+                                     else tr("No problems found"))
             self.issue_badge.setStyleSheet("color: %s; font-weight: 600;" % (
                 "#F07878" if errors else "#D6A94A" if warnings else "#5BD08A"))
-            self.results.setTabText(self.issue_tab, tr("Prüfung ({anzahl})", anzahl=errors + warnings) if errors + warnings
-                                    else tr("Prüfung · ok"))
+            self.results.setTabText(self.issue_tab, tr("Check ({anzahl})", anzahl=errors + warnings) if errors + warnings
+                                    else tr("Check · ok"))
 
     def open_build(self):
         from .build import BuildDialog
@@ -2720,10 +2756,11 @@ class MainWindow(QMainWindow):
         """Solange die Runde offen ist, ist Schließen der nächste Schritt: Der Knopf fällt dann auf (Regel ``QToolButton#runde``)."""
         closed = self.document.project.closed
         ready = closed or art != "kontrollpunkte" or len(self.document.points) >= 4
-        self.close_action.setText(tr("Runde öffnen") if closed else tr("Runde schließen"))
+        self.close_action.setText(tr("Open lap") if closed else tr("Close lap"))
         self.close_action.setEnabled(editable and ready)
-        self.close_action.setToolTip(reason if not editable else tr("Zum Schließen sind mindestens vier Kontrollpunkte erforderlich.")
-                                     if not ready else tr("Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen"))
+        self.close_action.setToolTip(reason if not editable else tr(("At least four control points are needed to "
+                                                                     "close the lap."))
+                                     if not ready else tr("Connect the first and last point, or open the lap again"))
         button = self.toolbar.widgetForAction(self.close_action)
         if button is not None and button.property("offen") != (not closed):
             button.setProperty("offen", not closed)
@@ -2738,7 +2775,7 @@ class MainWindow(QMainWindow):
 
     def change_theme(self, theme):
         if not self.document.project.readonly:
-            self.document.edit(tr("Thema ändern"), lambda raw, meta: meta.update(thema=theme))
+            self.document.edit(tr("Change theme"), lambda raw, meta: meta.update(thema=theme))
         self.set_theme(theme)
 
     def set_theme(self, theme):
@@ -2782,28 +2819,29 @@ class MainWindow(QMainWindow):
             widget.update()
 
     def choose_toolkit(self):
-        folder = QFileDialog.getExistingDirectory(self, tr("Ordner mit strecke/definition.py wählen"))
+        folder = QFileDialog.getExistingDirectory(self, tr("Choose the folder containing strecke/definition.py"))
         if folder:
             try:
                 toolkit_path(folder)
-                self.document.edit(tr("Werkzeugkasten zuordnen"), lambda raw, meta: meta.update(werkzeugkasten=folder))
+                self.document.edit(tr("Assign toolkit"), lambda raw, meta: meta.update(werkzeugkasten=folder))
             except ValueError as error:
                 self.error(meldung(error))
 
     def choose_shift(self):
         current = self.document.project.manifest.get("versatz", [0, 0, 0])
-        text, ok = QInputDialog.getText(self, tr("Spielweltversatz"), tr("[dx, dy, dz] in Metern · Teststrecke bisher [-591, 0, -473]"), text=json.dumps(current))
+        text, ok = QInputDialog.getText(self, tr("Game world offset"), tr(("[dx, dy, dz] in metres · test track so far "
+                                                                          "[-591, 0, -473]")), text=json.dumps(current))
         if ok:
             try:
                 value = json.loads(text)
                 if not isinstance(value, list) or len(value) != 3 or any(not isinstance(v, (int, float)) or not math.isfinite(v) for v in value):
-                    raise ValueError(tr("Drei endliche Zahlen als JSON-Liste erwartet."))
-                self.document.edit(tr("Spielweltversatz ändern"), lambda raw, meta: meta.update(versatz=value))
+                    raise ValueError(tr("Three finite numbers expected as a JSON list."))
+                self.document.edit(tr("Change game world offset"), lambda raw, meta: meta.update(versatz=value))
             except ValueError as error:
                 self.error(meldung(error))
 
     def open_output(self):
-        filename, _ = QFileDialog.getOpenFileName(self, tr("Vorhandene strecke_logik.json lesen"), filter=tr("JSON (*.json)"))
+        filename, _ = QFileDialog.getOpenFileName(self, tr("Read an existing strecke_logik.json"), filter=tr("JSON (*.json)"))
         if filename:
             try:
                 self.load_output(filename)
@@ -2814,23 +2852,24 @@ class MainWindow(QMainWindow):
         data = read_json(filename)
         self.output_file = filename
         self.output_tree.clear()
-        self.output_tree.addTopLevelItem(QTreeWidgetItem([str(filename), tr("Externe Ausgabe · Zuordnung zum Entwurf ungeprüft · schreibgeschützt")]))
-        names = {"sektoren": tr("Sektoren"), "drs": tr("DRS-Zonen"), "startplaetze": tr("Startaufstellung"),
-                 "boxenplaetze": tr("Boxenplätze"), "boxengasse": tr("Boxengasse"), "kurven": tr("Erkannte Kurven"),
-                 "ideallinie": tr("Geschätzte Ideallinie"), "spielformate": tr("Spielformatdaten"),
-                 "AISplineData": tr("KI-Kurven und Bremslinien (AISplineData)"), "TrackSpace": tr("TrackSpace-Linien"),
-                 "pruefung": tr("Generatorprüfung"), "annahmen": tr("Annahmen / Grenzen")}
+        self.output_tree.addTopLevelItem(QTreeWidgetItem([str(filename), tr(("External output · relation to the draft "
+                                                                             "unchecked · read-only"))]))
+        names = {"sektoren": tr("Sectors"), "drs": tr("DRS zones"), "startplaetze": tr("Starting grid"),
+                 "boxenplaetze": tr("Pit boxes"), "boxengasse": tr("Pit lane"), "kurven": tr("Detected corners"),
+                 "ideallinie": tr("Estimated racing line"), "spielformate": tr("Game format data"),
+                 "AISplineData": tr("AI corners and braking lines (AISplineData)"), "TrackSpace": tr("TrackSpace lines"),
+                 "pruefung": tr("Generator check"), "annahmen": tr("Assumptions / limits")}
         def append(parent, key, value):
             label = names.get(key, str(key))
             if isinstance(value, (dict, list)):
-                node = QTreeWidgetItem([label, tr("{anzahl} Einträge", anzahl=len(value))])
+                node = QTreeWidgetItem([label, tr("{anzahl} entries", anzahl=len(value))])
                 parent.addChild(node)
                 children = value.items() if isinstance(value, dict) else enumerate(value)
                 for child_key, child in children:
                     append(node, child_key, child)
             else:
                 parent.addChild(QTreeWidgetItem([label, value_text(value)]))
-        append(self.output_tree.invisibleRootItem(), tr("Generatorlogik · Boxen / Start / Sektoren / DRS / KI"), data)
+        append(self.output_tree.invisibleRootItem(), tr("Generator logic · pits / start / sectors / DRS / AI"), data)
         self.output_tree.topLevelItem(1).setExpanded(True)
         self.output_tree.setColumnWidth(0, 460)
         self.output_tree.show()
@@ -2839,18 +2878,18 @@ class MainWindow(QMainWindow):
     def confirm_discard(self):
         if self.document.undo.isClean():
             return True
-        answer = QMessageBox.question(self, tr("Ungespeicherter Entwurf"), tr("Änderungen vor dem Verlassen speichern?"), QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, QMessageBox.Save)
+        answer = QMessageBox.question(self, tr("Unsaved draft"), tr("Save changes before leaving?"), QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, QMessageBox.Save)
         if answer == QMessageBox.Save:
             return self.save_project()
         return answer == QMessageBox.Discard
 
     def open_dialog(self):
-        filename, _ = QFileDialog.getOpenFileName(self, tr("Definition oder projekt.json öffnen"), filter=tr("JSON (*.json)"))
+        filename, _ = QFileDialog.getOpenFileName(self, tr("Open definition or projekt.json"), filter=tr("JSON (*.json)"))
         if filename:
             self.load_project(filename)
 
     def open_folder_dialog(self):
-        folder = QFileDialog.getExistingDirectory(self, tr("Projektordner öffnen"))
+        folder = QFileDialog.getExistingDirectory(self, tr("Open project folder"))
         if folder:
             self.load_project(folder)
 
@@ -2864,7 +2903,7 @@ class MainWindow(QMainWindow):
 
     def replace_project(self, project):
         if self.build_dialog and self.build_dialog.job:
-            self.status_label.setText(tr("Vor einem Projektwechsel den Bau beenden oder abbrechen."))
+            self.status_label.setText(tr("Finish or cancel the build before switching projects."))
             return
         self.preview_timer.stop()
         self.preview_pending = False
@@ -2913,20 +2952,23 @@ class MainWindow(QMainWindow):
         from .templates import TemplateDialog
         if not self.confirm_discard():
             return
-        dialog = TemplateDialog(self)
+        toolkit = self.document.project.manifest.get("werkzeugkasten")
+        dialog = TemplateDialog(self, game_tracks=lambda: spielstrecken(toolkit))
         if dialog.exec() != QDialog.Accepted:
             return
         values = dialog.values()
         if not values["path"]:
-            self.error(tr("Bitte eine Vorlagendatei wählen."))
+            self.error(tr("Please choose a template file."))
             return
         if values["kind"] == "spiel" and not values["code"]:
-            self.error(tr("Bitte den Streckencode der Spielstrecke angeben (z. B. monza)."))
+            self.error(tr("Please enter the track code of the game track (e.g. monza)."))
             return
-        toolkit = self.document.project.manifest.get("werkzeugkasten")
+        entry = dialog.selected_game_track()
+        name = entry["name"] if entry else Path(values["path"]).name
         self._create_from_tool(lambda fit: import_template(values["kind"], values["path"], values["code"], fit,
-                                                           values["spacing"], toolkit),
-                               tr("Vorlage {name} wird gelesen", name=Path(values['path']).name), values["fit"], tr("Vorlage"))
+                                                           values["spacing"], toolkit, rennlogik=values["rennlogik"],
+                                                           seitenraum=values["seitenraum"], kulisse=values["kulisse"]),
+                               tr("Reading template {name}", name=name), values["fit"], tr("Template"))
 
     def new_from_suggestion(self):
         """Zufälliger, gültiger Streckenvorschlag als neuer, ungespeicherter Entwurf."""
@@ -2939,7 +2981,7 @@ class MainWindow(QMainWindow):
         v = dialog.values()
         toolkit = self.document.project.manifest.get("werkzeugkasten")
         self._create_from_tool(lambda fit: suggest_track(v["seed"], v["length_m"], v["curves"], v["min_radius_m"], toolkit),
-                               tr("Vorschlag (Seed {seed}) wird berechnet", seed=v['seed']), True, tr("Vorschlag"))
+                               tr("Calculating suggestion (seed {seed})", seed=v['seed']), True, tr("Suggestion"))
 
     def _create_from_tool(self, make, busy_text, fit, label):
         """Führt ``make(fit)`` mit Wartecursor aus, fragt bei zu großer Vorlage nach dem Verkleinern und öffnet das Ergebnis."""
@@ -2956,17 +2998,19 @@ class MainWindow(QMainWindow):
             info = result["info"]
             if not info.get("passt_in_ao", True):
                 answer = QMessageBox.question(
-                    self, tr("Vorlage zu groß"),
-                    tr("Die Vorlage ist {breite:.0f} × {tiefe:.0f} m groß und passt nicht in die Spielwelt (X/Z ±1024 m).\n\n"
-                       "Gleichmäßig verkleinern? Breiten und Höhen bleiben. Bei „Nein“ bleibt die Originalgröße; die "
-                       "Prüfung meldet sie dann als Fehler.", breite=info['ausdehnung_m'][0], tiefe=info['ausdehnung_m'][1]), QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+                    self, tr("Template too large"),
+                    tr("The template is {breite:.0f} × {tiefe:.0f} m and does not fit into the game world even when "
+                       "rotated (about 1,944 × 2,032 m).\n\nScale it down evenly? Widths and heights are kept. With "
+                       "“No” the original size is kept; the check then reports it as an error.", breite=info['ausdehnung_m'][0], tiefe=info['ausdehnung_m'][1]), QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 if answer == QMessageBox.Yes:
                     result = run(True)
                     info = result["info"]
             project = Project(result["raw"], result["manifest"])
+            if result.get("umgebung"):
+                project.umgebung = result["umgebung"]       # Kulisse einer Spielstrecke (umgebung.json beim Speichern)
         except (ValueError, OSError, RuntimeError, KeyError, TypeError) as error:
-            self.status_label.setText(tr("{label} nicht möglich: {error}", label=label, error=error))
-            self.error(tr("{label} nicht möglich:\n{error}", label=label, error=error))
+            self.status_label.setText(tr("{label} not possible: {error}", label=label, error=error))
+            self.error(tr("{label} not possible:\n{error}", label=label, error=error))
             return
         self.replace_project(project)
         if self.document.project is not project:
@@ -2974,20 +3018,32 @@ class MainWindow(QMainWindow):
         # Der Entwurf ist neu und ungespeichert: Schließen/Neu fragt vorher nach dem Speichern.
         self.document.undo.resetClean()
         self._title()
-        parts = [tr("{label}: {anzahl} Punkte", label=label, anzahl=len(project.raw['mittellinie']['punkte'])), f"{info.get('laenge_m', 0) / 1000:.2f} km"]
+        parts = [tr("{label}: {anzahl} points", label=label, anzahl=len(project.raw['mittellinie']['punkte'])), f"{info.get('laenge_m', 0) / 1000:.2f} km"]
         if info.get("kurven_gezaehlt") is not None:
-            parts.append(tr("{kurven} Kurven, kleinster Radius {radius} m, Versuch {versuch}", kurven=info['kurven_gezaehlt'],
+            parts.append(tr("{kurven} corners, smallest radius {radius} m, attempt {versuch}", kurven=info['kurven_gezaehlt'],
                             radius=info.get('radius_min_m'), versuch=info.get('versuch')))
+        if info.get("drehung_grad"):
+            parts.append(tr("rotated by {grad:.1f}°", grad=info['drehung_grad']))
         if info.get("massstab", 1.0) != 1.0:
-            parts.append(tr("auf {prozent:.1f} % verkleinert", prozent=info['massstab'] * 100))
-        parts += info.get("warnungen", [])
-        text = " · ".join(parts) + tr(" · ungespeichert (Projekt → Speichern unter …)")
+            parts.append(tr("scaled down to {prozent:.1f} %", prozent=info['massstab'] * 100))
+        if info.get("rennlogik"):
+            raw = project.raw
+            parts.append(tr("{drs} DRS, {xm} Straight Mode zones, pit lane {box}",
+                            drs=len((raw.get("drs") or {}).get("zonen") or []),
+                            xm=len((raw.get("x_mode") or {}).get("zonen") or []),
+                            box=tr("yes") if (raw.get("boxengasse") or {}).get("aktiv") else tr("no")))
+        if info.get("seitenraum"):
+            parts.append(tr("{anzahl} side sections", anzahl=len((project.raw.get("seitenraum") or {}).get("abschnitte") or [])))
+        if info.get("kulisse"):
+            parts.append(tr("{anzahl} scenery objects", anzahl=info["kulisse"].get("objekte", 0)))
+        parts += [meldung(w) for w in info.get("warnungen", [])]
+        text = " · ".join(parts) + tr(" · unsaved (Project → Save as …)")
         self.status_label.setText(text)
         self.statusBar().showMessage(text, 12000)
 
     def save_project(self, save_as=False):
         if self.document.project.readonly:
-            self.error(tr("Unbekannte Projektfassung: nur lesend geöffnet."))
+            self.error(tr("Unknown project version: opened read-only."))
             return False
         folder = self.document.project.folder
         if folder:
@@ -2996,24 +3052,26 @@ class MainWindow(QMainWindow):
             except ValueError:
                 save_as = True
         if save_as or folder is None:
-            chosen = QFileDialog.getExistingDirectory(self, tr("Projektordner wählen (enthält projekt.json und definition.json)"))
+            chosen = QFileDialog.getExistingDirectory(self, tr(("Choose project folder (contains projekt.json and "
+                                                                "definition.json)")))
             if not chosen:
                 return False
             folder = Path(chosen)
             if (folder / "projekt.json").exists() and folder != self.document.project.folder:
-                answer = QMessageBox.question(self, tr("Projekt ersetzen"), tr("Der gewählte Ordner enthält bereits ein Projekt. Ersetzen?"), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                answer = QMessageBox.question(self, tr("Replace project"), tr(("The chosen folder already contains a "
+                                                                                "project. Replace it?")), QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 if answer != QMessageBox.Yes:
                     return False
         try:
             self.document.project.save(folder)
             self.document.undo.setClean()
             self._title()
-            self.statusBar().showMessage(tr("Projekt gespeichert: {folder}", folder=folder), 6000)
+            self.statusBar().showMessage(tr("Project saved: {folder}", folder=folder), 6000)
             self._drop_recovery()
             self._remember_current()
             return True
         except (ValueError, OSError) as error:
-            self.error(tr("Speichern fehlgeschlagen: {error}", error=error))
+            self.error(tr("Saving failed: {error}", error=error))
             return False
 
     def error(self, text):
@@ -3034,7 +3092,7 @@ class MainWindow(QMainWindow):
         mime.setData(kopieren.MIME, text.encode("utf-8"))
         mime.setText(text)
         QApplication.clipboard().setMimeData(mime)
-        self.status_label.setText(tr("{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.",
+        self.status_label.setText(tr("{anzahl} points copied · paste into an open track with Ctrl+V.",
                                      anzahl=len(daten["punkte"])))
         return True
 
@@ -3043,7 +3101,7 @@ class MainWindow(QMainWindow):
             return
         anzahl = len(self.document.selected_indices)
         self.document.delete()
-        self.status_label.setText(tr("{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.", anzahl=anzahl))
+        self.status_label.setText(tr("{anzahl} points cut · Ctrl+Z: undo.", anzahl=anzahl))
 
     # ------------------------------------------------------------------ Bildvorlage (Nachzeichnen)
     def _update_bild_action(self):
@@ -3051,9 +3109,9 @@ class MainWindow(QMainWindow):
         action = self.mode_actions.get("nachzeichnen")
         if action is not None:
             action.setEnabled(not self.document.project.readonly)
-            action.setToolTip(tr("Strecke auf der Bildvorlage nachzeichnen  (N)") if vorhanden else
-                              tr("Erst eine Bildvorlage laden: Projekt → „Bildvorlage laden …“ oder Strg+V mit einem "
-                                 "Bildschirmfoto"))
+            action.setToolTip(tr("Trace the track on the reference image  (N)") if vorhanden else
+                              tr("Load a reference image first: Project → “Load reference image …” or Ctrl+V with a "
+                                 "screenshot"))
         if hasattr(self, "bild_dock"):
             if not vorhanden:
                 self.bild_dock.hide()
@@ -3070,24 +3128,24 @@ class MainWindow(QMainWindow):
     def load_bildvorlage(self):
         if self.document.project.readonly:
             return
-        path, _ = QFileDialog.getOpenFileName(self, tr("Bildvorlage laden"), "",
-                                              tr("Bilder (*.png *.jpg *.jpeg *.bmp *.webp);;Alle Dateien (*)"))
+        path, _ = QFileDialog.getOpenFileName(self, tr("Load reference image"), "",
+                                              tr("Images (*.png *.jpg *.jpeg *.bmp *.webp);;All files (*)"))
         if not path:
             return
         try:
             daten = Path(path).read_bytes()
         except OSError as error:
-            self.error(tr("Bild nicht lesbar: {error}", error=error))
+            self.error(tr("Image cannot be read: {error}", error=error))
             return
         self._bildvorlage_setzen(daten, Path(path).name)
 
     def paste_bildvorlage(self):
         image = QApplication.clipboard().image()
         if image.isNull():
-            self.error(tr("Die Zwischenablage enthält kein Bild. Ausschnitt mit Win+Umschalt+S aufnehmen, dann einfügen."))
+            self.error(tr("The clipboard contains no image. Take a snip with Win+Shift+S, then paste."))
             return
         from .bildvorlage import qimage_png
-        self._bildvorlage_setzen(qimage_png(image), tr("Zwischenablage"))
+        self._bildvorlage_setzen(qimage_png(image), tr("Clipboard"))
 
     def _bildvorlage_setzen(self, daten, quelle):
         from .bildvorlage import SCHLUESSEL, bild_png, neue_vorlage
@@ -3100,31 +3158,32 @@ class MainWindow(QMainWindow):
             return
         alt = self.document.project.manifest.get(SCHLUESSEL)
         if isinstance(alt, dict) and alt.get("punkte"):
-            answer = QMessageBox.question(self, tr("Bildvorlage ersetzen"),
-                                          tr("Die bisherige Bildvorlage und ihre Stützpunkte werden ersetzt. Fortfahren?"),
+            answer = QMessageBox.question(self, tr("Replace reference image"),
+                                          tr(("The current reference image and its guide points will be replaced. "
+                                              "Continue?")),
                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if answer != QMessageBox.Yes:
                 return
         self.document.project.bildvorlage_daten = png
         vorlage = neue_vorlage(breite, hoehe)
         vorlage["quelle"] = quelle
-        self.document.edit(tr("Bildvorlage laden"), lambda raw, meta: meta.__setitem__(SCHLUESSEL, vorlage))
+        self.document.edit(tr("Load reference image"), lambda raw, meta: meta.__setitem__(SCHLUESSEL, vorlage))
         self.set_mode("nachzeichnen")
         self.map.fitInView(QRectF(vorlage["x"], vorlage["z"], breite, hoehe).adjusted(-40, -40, 40, 40), Qt.KeepAspectRatio)
-        self.status_label.setText(tr("Bildvorlage {quelle} geladen ({breite} × {hoehe} Pixel) · zuerst rechts „Maßstab "
-                                     "messen“, dann auf die Start-Ziel-Linie klicken", quelle=quelle, breite=breite, hoehe=hoehe))
+        self.status_label.setText(tr("Reference image {quelle} loaded ({breite} × {hoehe} pixels) · first “Measure "
+                                     "scale” on the right, then click the start/finish line", quelle=quelle, breite=breite, hoehe=hoehe))
 
     def remove_bildvorlage(self):
         from .bildvorlage import SCHLUESSEL
-        self.document.edit(tr("Bildvorlage entfernen"), lambda raw, meta: meta.pop(SCHLUESSEL, None))
+        self.document.edit(tr("Remove reference image"), lambda raw, meta: meta.pop(SCHLUESSEL, None))
         self.set_mode("auswahl", focus=False)
 
     def _massstab_gemessen(self, pixel):
-        meter, ok = QInputDialog.getDouble(self, tr("Maßstab"), tr("Wie viele Meter zeigt die gemessene Maßstabsleiste?"),
+        meter, ok = QInputDialog.getDouble(self, tr("Scale"), tr("How many metres does the measured scale bar show?"),
                                            100.0, 0.1, 100000.0, 1)
         if ok and meter > 0:
             self.werkzeug_bild.massstab(meter / pixel, True)
-            self.status_label.setText(tr("Maßstab gemessen: {wert} je Pixel", wert=zahl(meter / pixel, 3, "m")))
+            self.status_label.setText(tr("Scale measured: {wert} per pixel", wert=zahl(meter / pixel, 3, "m")))
 
     def bildvorlage_uebernehmen(self):
         """Gültige Runde der Bildvorlage als Kontrollpunkt-Strecke (ein Undo-Schritt, Runde geschlossen)."""
@@ -3134,13 +3193,14 @@ class MainWindow(QMainWindow):
         vorlage = werkzeug.vorlage
         hinweise = []
         if not vorlage.get("massstab_geprueft"):
-            hinweise.append(tr("Der Maßstab ist nicht an der Maßstabsleiste gemessen; Länge und Größe können falsch sein."))
+            hinweise.append(tr("The scale was not measured on the scale bar; length and size may be wrong."))
         if not (vorlage.get("massstab_geprueft") and vorlage.get("laenge_soll_m")):
-            hinweise.append(tr("Ob die Runde vollständig ist, wurde nicht geprüft (dazu Maßstab messen und Soll-Länge eintragen)."))
+            hinweise.append(tr(("Whether the lap is complete was not checked (measure the scale and enter the target "
+                                "length).")))
         if self.document.points or self.document.ml.get("art") != "kontrollpunkte":
-            hinweise.append(tr("Die bisherige Strecke wird ersetzt (Strg+Z macht es rückgängig)."))
+            hinweise.append(tr("The current track will be replaced (Ctrl+Z undoes it)."))
         if hinweise:
-            answer = QMessageBox.question(self, tr("Als Strecke übernehmen"), "\n\n".join(hinweise + [tr("Trotzdem übernehmen?")]),
+            answer = QMessageBox.question(self, tr("Use as track"), "\n\n".join(hinweise + [tr("Use it anyway?")]),
                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if answer != QMessageBox.Yes:
                 return
@@ -3152,14 +3212,14 @@ class MainWindow(QMainWindow):
             if not any(k in fahrbahn for k in ("breite", "breite_links", "breite_rechts")):
                 fahrbahn["breite"] = 14.0
             meta["runde_geschlossen"] = True
-        self.document.edit(tr("Bildvorlage als Strecke übernehmen"), uebernehmen)
+        self.document.edit(tr("Use reference image as track"), uebernehmen)
         self.set_mode("auswahl", focus=False)
         self.map.fit_track()
         weit = max(max(abs(p["x"]), abs(p["z"])) for p in punkte) + 7.0
-        text = tr("Strecke übernommen: {anzahl} Punkte, {laenge}", anzahl=len(punkte),
+        text = tr("Track taken over: {anzahl} points, {laenge}", anzahl=len(punkte),
                   laenge=zahl(werkzeug.befund["laenge_m"], 0, "m"))
         if weit > 1024:
-            text += tr(" · reicht bis {weite} vom Ursprung, Spielbereich ±1.024 m: Maßstab prüfen oder Strecke verschieben",
+            text += tr(" · reaches {weite} from the origin, game area ±1,024 m: check the scale or move the track",
                        weite=zahl(weit, 0, "m"))
         self.status_label.setText(text)
 
@@ -3179,20 +3239,20 @@ class MainWindow(QMainWindow):
         # Das eingefügte Stück ist gewählt: im Auswahlwerkzeug verschiebt Ziehen es, statt einen Punkt zu setzen
         self.set_mode("auswahl")
         a, b = plan["neu"]
-        teile = [tr("{anzahl} Punkte eingefügt", anzahl=b - a + 1),
-                 tr("hinten angehängt") if plan["hinten"] else tr("vorne angefügt")]
+        teile = [tr("{anzahl} points pasted", anzahl=b - a + 1),
+                 tr("added at the end") if plan["hinten"] else tr("added at the start")]
         if plan["umgedreht"]:
-            teile.append(tr("umgedreht"))
+            teile.append(tr("reversed"))
         if plan["verschoben"] is not None:
-            teile.append(tr("an das offene Ende verschoben ({abstand} m entfernt)", abstand=round(plan["abstand_m"])))
+            teile.append(tr("moved to the open end ({abstand} m away)", abstand=round(plan["abstand_m"])))
         if plan["versatz_m"]:
-            teile.append(tr("Streckenmeter um {meter} m verschoben", meter=round(plan["versatz_m"], 1)))
+            teile.append(tr("track metres shifted by {meter} m", meter=round(plan["versatz_m"], 1)))
         marken = [point_xyz(self.document.points[i]) for i in plan["ueberschneidungen"]]
         self.map.set_overlap_marks([(x, z) for x, _, z in marken])
         if marken:
-            teile.append(tr("überschneidet die Strecke an {anzahl} Punkten (rot) · „Überstand abschneiden“ oder verschieben",
+            teile.append(tr("overlaps the track at {anzahl} points (red) · “Cut overlap” or move it",
                             anzahl=len(marken)))
-        teile.append(tr("Strg+Z: rückgängig"))
+        teile.append(tr("Ctrl+Z: undo"))
         self.status_label.setText(" · ".join(teile))
 
     def track_length(self):
@@ -3205,7 +3265,7 @@ class MainWindow(QMainWindow):
         from .skalieren import SkalierenDialog
         laenge, aus_vorschau = self.track_length()
         if laenge < 1:
-            self.status_label.setText(tr("Keine Strecke zum Skalieren."))
+            self.status_label.setText(tr("No track to scale."))
             return
         dialog = SkalierenDialog(laenge, self)
         if dialog.exec() != QDialog.Accepted:
@@ -3217,9 +3277,11 @@ class MainWindow(QMainWindow):
             return
         self.set_mode("auswahl")
         self.map.fit_track()
-        self.status_label.setText(tr("Strecke um Faktor {faktor} skaliert, neue Länge etwa {laenge} m{hinweis} · Strg+Z: rückgängig.",
+        self.status_label.setText(tr(("Track scaled by factor {faktor}, new length about {laenge} m{hinweis} · "
+                                      "Ctrl+Z: undo."),
                                      faktor=f"{faktor:.3f}", laenge=f"{laenge * faktor:,.0f}".replace(",", "."),
-                                     hinweis="" if aus_vorschau else " " + tr("(Eingabelinie, die Vorschau zeigt die genaue Länge)")))
+                                     hinweis="" if aus_vorschau else " " + tr(("(input line, the preview shows the "
+                                                                               "exact length)"))))
 
     def open_here(self):
         try:
@@ -3228,7 +3290,7 @@ class MainWindow(QMainWindow):
             self.status_label.setText(meldung(error))
             return
         self.set_mode("auswahl")
-        self.status_label.setText(tr("Runde an der Auswahl geöffnet · Strg+V fügt kopierte Punkte an ein offenes Ende."))
+        self.status_label.setText(tr("Lap opened at the selection · Ctrl+V adds copied points to an open end."))
 
     def reverse_selection(self):
         try:
@@ -3237,7 +3299,7 @@ class MainWindow(QMainWindow):
             self.status_label.setText(meldung(error))
             return
         self.set_mode("auswahl")
-        self.status_label.setText(tr("Reihenfolge umgekehrt · Strg+Z: rückgängig."))
+        self.status_label.setText(tr("Order reversed · Ctrl+Z: undo."))
 
     def cut_overhang(self):
         try:
@@ -3247,7 +3309,7 @@ class MainWindow(QMainWindow):
             return
         self.set_mode("auswahl")
         self.map.set_overlap_marks([])
-        self.status_label.setText(tr("{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.", anzahl=anzahl))
+        self.status_label.setText(tr("{anzahl} overlapping points removed · Ctrl+Z: undo.", anzahl=anzahl))
 
     def show_help(self):
         self.help_dialog = HelpDialog(self)
@@ -3284,7 +3346,8 @@ class MainWindow(QMainWindow):
             return
         self.env_job = ProcessJob(self)
         self.env_job.done.connect(self._env_catalog_done)
-        self.env_panel.status.setText(tr("Katalog wird geladen …") if not neu else tr("Katalog wird neu aufgebaut (das dauert) …"))
+        self.env_panel.status.setText(tr("Loading catalogue …") if not neu else tr(("Rebuilding the catalogue "
+                                                                                       "(this takes a while) …")))
         self.env_panel.reload_button.setEnabled(False)
         self.env_job.start(worker_command(), {"task": "umgebung_katalog", "neu": neu, "toolkit": str(root)})
 
@@ -3299,7 +3362,7 @@ class MainWindow(QMainWindow):
                 raise ValueError(result.get("error", text))
             self.set_env_catalog(result)
         except (ValueError, TypeError) as error:
-            self.env_panel.set_catalog(self.env_catalog, tr("Katalog nicht verfügbar: {error}", error=str(error)[:300]))
+            self.env_panel.set_catalog(self.env_catalog, tr("Catalogue not available: {error}", error=str(error)[:300]))
 
     def _env_model_chosen(self, modell):
         """Ein Modell im Katalog gewählt: die Karte platziert es mit dem nächsten Klick."""
@@ -3328,7 +3391,7 @@ class MainWindow(QMainWindow):
         self.env_panel.disarm_terrain()
         if form:
             problem = umgebung.form_problem(art, form, self.document.project.manifest.get("versatz", [0, 0, 0]))
-            self.status_label.setText(tr("{name} „{id}“ gesetzt ({hoehe} m, Radius {radius} m) · Strg+Z macht rückgängig.",
+            self.status_label.setText(tr("{name} “{id}” placed ({hoehe} m, radius {radius} m) · Ctrl+Z undoes.",
                                          name=tr(umgebung.FORM_NAMEN[art]), id=form["id"], hoehe=zahl(form["hoehe_m"], 0),
                                          radius=zahl(form["radius_m"], 0))
                                       + (" ⚠ " + tr(problem) if problem else ""))
@@ -3389,7 +3452,7 @@ class MainWindow(QMainWindow):
         if not modell or not self.document.env_editable:
             return
         objekt = self.document.env_place(modell, x, z)
-        self.status_label.setText(tr("{modell} platziert bei X {x} · Z {z} · Strg+Z macht rückgängig.",
+        self.status_label.setText(tr("{modell} placed at X {x} · Z {z} · Ctrl+Z undoes.",
                                      modell=umgebung.kurzname(modell), x=zahl(objekt["x"], 1), z=zahl(objekt["z"], 1)))
 
     def _env_scatter(self, area):
@@ -3397,13 +3460,13 @@ class MainWindow(QMainWindow):
         settings = self.env_panel.scatter_settings()
         modelle = self.env_panel.chosen_models()
         if not modelle:
-            self.status_label.setText(tr("Zum Bepflanzen zuerst im Katalog ein oder mehrere Modelle wählen."))
+            self.status_label.setText(tr("To plant, first choose one or more models in the catalogue."))
             return
         shift = self.document.project.manifest.get("versatz", [0, 0, 0])
         try:
             gebiet = (umgebung.Gebiet("pinsel", punkte=area["punkte"], radius=area["radius"]) if area["form"] == "pinsel"
                       else umgebung.Gebiet("rechteck", rechteck=area["rechteck"]))
-            gruppe = settings["gruppe"] or umgebung.neue_gruppe(self.document.env_objects, tr("Streuung {n}"))
+            gruppe = settings["gruppe"] or umgebung.neue_gruppe(self.document.env_objects, tr("Scatter {n}"))
             objekte, info = umgebung.streuen(
                 gebiet, modelle, settings["dichte"], settings["seed"], hindernis=self._env_obstacle(),
                 abstand_fahrbahn=settings["abstand_fahrbahn"], abstand_objekte=settings["abstand_objekte"],
@@ -3411,20 +3474,21 @@ class MainWindow(QMainWindow):
                 vorhanden=self.document.env_objects, versatz=shift)
         except umgebung.StreuFehler as error:
             self.status_label.setText(
-                tr("Zu viele Objekte ({anzahl}, höchstens {maximum}): Dichte oder Fläche verkleinern.", **error.werte)
-                if error.code == "zu_viele" else tr("Bepflanzen nicht möglich: keine Fläche oder kein Modell."))
+                tr("Too many objects ({anzahl}, at most {maximum}): reduce the density or the area.", **error.werte)
+                if error.code == "zu_viele" else tr("Planting not possible: no area or no model."))
             return
         if not objekte:
             if info["verworfen_welt"] > max(info["verworfen_strecke"], info["verworfen_abstand"]):
-                self.status_label.setText(tr("Nichts gesetzt: Die Fläche liegt außerhalb des Streckenbereichs "
-                                             "(Welt X −920 … 1128, Z −1008 … 1040 m, Versatz eingerechnet)."))
+                self.status_label.setText(tr("Nothing placed: the area is outside the track area (world X −920 … 1128, "
+                                             "Z −1008 … 1040 m, offset included)."))
             else:
-                self.status_label.setText(tr("Nichts gesetzt: Die Fläche liegt auf der Strecke, zu nah daran oder die Dichte ist zu gering."))
+                self.status_label.setText(tr(("Nothing placed: the area is on the track, too close to it, or the "
+                                              "density is too low.")))
             return
-        self.document.env_add(objekte, tr("Fläche bepflanzen ({anzahl} Objekte)", anzahl=len(objekte)))
-        text = tr("{anzahl} Objekte in der Gruppe „{gruppe}“ gesetzt · Strg+Z macht rückgängig.", anzahl=len(objekte), gruppe=gruppe)
+        self.document.env_add(objekte, tr("Plant area ({anzahl} objects)", anzahl=len(objekte)))
+        text = tr("{anzahl} objects placed in the group “{gruppe}” · Ctrl+Z undoes.", anzahl=len(objekte), gruppe=gruppe)
         if len(objekte) < info["gewuenscht"]:
-            text += " " + tr("({gewuenscht} gewünscht; der Rest lag zu nah an Strecke und Nachbarn)", gewuenscht=info["gewuenscht"])
+            text += " " + tr("({gewuenscht} requested; the rest was too close to the track and neighbours)", gewuenscht=info["gewuenscht"])
         self.status_label.setText(text)
 
     def _env_properties(self, felder):
@@ -3485,7 +3549,7 @@ class MainWindow(QMainWindow):
         self._title()
         self.map.viewport().update()
         count = len(self.document.env_objects)
-        self.status_label.setText(tr("Umgebung geändert · {anzahl} Objekte", anzahl=zahl(count, 0)))
+        self.status_label.setText(tr("Environment changed · {anzahl} objects", anzahl=zahl(count, 0)))
         self._schedule_env_check()
 
     # --- Prüfung (UM-01 … UM-05)
@@ -3536,7 +3600,7 @@ class MainWindow(QMainWindow):
             self.env_issues = list(result["issues"])
         except (ValueError, TypeError, KeyError) as error:
             self.env_issues = [{"id": "UMG_PRUEFUNG", "kurz": "UM", "level": "Hinweis", "schwere": "hinweis", "stufe": "eingabe",
-                                "text": tr("Die Umgebung konnte nicht geprüft werden: {error}", error=str(error)[:200])}]
+                                "text": tr("The environment could not be checked: {error}", error=str(error)[:200])}]
         self.render_issues()
 
     def _env_issue_list(self, present):
@@ -3545,7 +3609,7 @@ class MainWindow(QMainWindow):
         error = self.document.project.umgebung_fehler
         if error:
             issues.append({"id": "UMG_DATEI", "kurz": "UM-01", "level": "Fehler", "schwere": "fehler", "stufe": "eingabe",
-                           "text": tr("umgebung.json ist nicht lesbar und bleibt unverändert: {error}", error=error)})
+                           "text": tr("umgebung.json is unreadable and stays unchanged: {error}", error=error)})
         seen = {(i.get("id"), (i.get("ort") or {}).get("objekt"), i.get("text")) for i in present}
         for issue in self.env_issues:
             key = (issue.get("id"), (issue.get("ort") or {}).get("objekt"), issue.get("text"))
@@ -3571,7 +3635,7 @@ class MainWindow(QMainWindow):
         setze_sprache(code)
         self._rebuild_ui()
         self._restore_ui_state(state)
-        self.statusBar().showMessage(tr("Sprache: {name}", name=SPRACHEN[code]), 5000)
+        self.statusBar().showMessage(tr("Language: {name}", name=SPRACHEN[code]), 5000)
 
     def _ui_state(self):
         """Was der Nutzer gerade sieht (nur Ansicht; Daten liegen im Dokument und bleiben ohnehin)."""
@@ -3628,7 +3692,7 @@ class MainWindow(QMainWindow):
             self._update_summary()
             self._mark_analysis_stale()
         if self.analysis_job is not None:
-            self._set_analysis_note(tr("Fahrlinie wird berechnet …"))
+            self._set_analysis_note(tr("Calculating racing line …"))
         self._busy(self.job is not None)
         self.cancel_action.setEnabled(self.job is not None)
         self.horizontal_split.setSizes(state["horizontal"])
@@ -3688,7 +3752,7 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event: QCloseEvent):
         if self.build_dialog and self.build_dialog.job:
             self.build_dialog.raise_()
-            self.build_dialog.phase.setText(tr("Bau läuft · zuerst Abbrechen wählen und das Bauende abwarten."))
+            self.build_dialog.phase.setText(tr("Build running · choose Cancel first and wait for the build to end."))
             event.ignore()
             return
         if not getattr(self, "_rebuilding", False) and not self.confirm_discard():

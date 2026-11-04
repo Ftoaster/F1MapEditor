@@ -33,7 +33,7 @@ def edit_text(value):
     if value is None:
         return ""
     if isinstance(value, bool):
-        return tr("ja") if value else tr("nein")
+        return tr("yes") if value else tr("no")
     if isinstance(value, int):
         return str(value)
     if isinstance(value, float):
@@ -78,7 +78,7 @@ def choice_value(key, text):
         if text.strip().lower() in (value, choice_text(value).lower()):
             return value
     if any(isinstance(v, float) for v in CHOICES.get(key, [])):
-        raise ValueError(tr("Bitte einen der Werte {werte} wählen.", werte=", ".join(choice_text(v) for v in CHOICES[key])))
+        raise ValueError(tr("Please choose one of {werte}.", werte=", ".join(choice_text(v) for v in CHOICES[key])))
     return text
 
 
@@ -201,9 +201,9 @@ class ChoiceDelegate(QStyledItemDelegate):
         if key in CHOICES:
             return [choice_text(v) for v in CHOICES[key]], False
         if isinstance(template, bool) or key.endswith(".aktiv") or key in ("aktiv", "umkehren", "partial"):
-            return [tr("ja"), tr("nein")], False
+            return [tr("yes"), tr("no")], False
         if key == "uebergang":
-            return [tr("ja"), tr("nein")], True          # oder Länge in m eintippen
+            return [tr("yes"), tr("no")], True          # oder Länge in m eintippen
         return None
 
     def createEditor(self, parent, option, index):
@@ -252,22 +252,23 @@ class WelcomePanel(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(28, 24, 28, 24)
         layout.setSpacing(10)
-        title = QLabel(tr("Neue Strecke"))
+        title = QLabel(tr("New track"))
         title.setStyleSheet("font-size: 20px; font-weight: 700;")
         layout.addWidget(title)
-        intro = QLabel(tr("Wie möchtest du beginnen?"))
+        intro = QLabel(tr("How would you like to start?"))
         layout.addWidget(intro)
         grid = QGridLayout()
         grid.setSpacing(8)
         self.buttons = {}
         for row, (key, glyph, text, info) in enumerate((
-                ("zeichnen", "punkte", tr("Strecke zeichnen"), tr("Punkte in die Karte klicken, dann „Runde schließen“")),
-                ("vorlage", "vorlage", tr("Aus Vorlage …"), tr("Echte Strecke (TUM-CSV), GPX-Spur oder Spielstrecke")),
-                ("vorschlag", "vorschlag", tr("Vorschlag erzeugen …"), tr("Zufällige, gültige Strecke mit Länge und Kurvenzahl")),
-                ("bild", "bild", tr("Aus Bild nachzeichnen …"),
-                 tr("Kartenausschnitt (Bildschirmfoto) als Vorlage, Strecke mit Klicks nachziehen")),
-                ("oeffnen", "oeffnen", tr("Projekt öffnen …"), tr("Vorhandenen Projektordner laden")),
-                ("beispiel", "auswahl", tr("Beispiel ansehen"), tr("Teststrecke aus dem Werkzeugkasten (fahrbar im Spiel)")))):
+                ("zeichnen", "punkte", tr("Draw track"), tr("Click points into the map, then “Close lap”")),
+                ("vorlage", "vorlage", tr("From template …"), tr("Real track (TUM CSV), GPX track or game track")),
+                ("vorschlag", "vorschlag", tr("Generate suggestion …"), tr(("Random, valid track with length and "
+                                                                           "number of corners"))),
+                ("bild", "bild", tr("Trace from image …"),
+                 tr("Map screenshot as reference, trace the track with clicks")),
+                ("oeffnen", "oeffnen", tr("Open project …"), tr("Load an existing project folder")),
+                ("beispiel", "auswahl", tr("View example"), tr("Test track from the toolkit (drivable in game)")))):
             button = QPushButton(icon(glyph), "  " + text)
             button.setMinimumWidth(210)
             button.setStyleSheet("text-align: left; padding-left: 10px;")
@@ -278,7 +279,7 @@ class WelcomePanel(QFrame):
             grid.addWidget(label, row, 1)
             self.buttons[key] = button
         layout.addLayout(grid)
-        self.recent_title = QLabel(tr("Zuletzt geöffnet"))
+        self.recent_title = QLabel(tr("Recently opened"))
         self.recent_title.setObjectName("heading")
         layout.addWidget(self.recent_title)
         self.recent_box = QVBoxLayout()
@@ -286,7 +287,7 @@ class WelcomePanel(QFrame):
         layout.addLayout(self.recent_box)
         self.recent_buttons = []
         self.set_recent([])
-        foot = QLabel(tr("Tipp: F1 zeigt jederzeit die Bedienung."))
+        foot = QLabel(tr("Tip: F1 shows the instructions at any time."))
         foot.setEnabled(False)
         layout.addWidget(foot)
         self.setMaximumWidth(640)
@@ -313,7 +314,7 @@ class WelcomePanel(QFrame):
 class HelpDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(tr("Bedienung"))
+        self.setWindowTitle(tr("How to use"))
         self.resize(720, 640)
         layout = QVBoxLayout(self)
         self.browser = QTextBrowser()
@@ -321,5 +322,5 @@ class HelpDialog(QDialog):
         layout.addWidget(self.browser)
         buttons = QDialogButtonBox(QDialogButtonBox.Close)
         buttons.rejected.connect(self.reject)
-        buttons.button(QDialogButtonBox.Close).setText(tr("Schließen"))
+        buttons.button(QDialogButtonBox.Close).setText(tr("Close"))
         layout.addWidget(buttons)

@@ -31,7 +31,7 @@ autosave, open last project, start screen). Everything at a glance: <b>Customise
 <i>Show everything</i> restores everything. The settings are remembered. <b>Ctrl+M</b> or double-clicking a tab
 maximises the lower area.
 <b>View → Sprache / Language</b> switches between German and English immediately, without a restart (project,
-undo history, preview and map view stay).</p>
+undo history, preview and map view stay). Without a saved choice the editor starts in English.</p>
 <h3>Left column</h3>
 <p><b>Display</b> and the point list open and close with a click on their heading. Long lists start closed and open in the
 <b>Points</b> tool. <b>Zoom in</b> and <b>Zoom out</b> (also Ctrl + and Ctrl −) are in the <b>View</b> menu.
@@ -62,6 +62,15 @@ metres (starting value: length of the current preview). It scales around the tra
 radii, cross-section sections, finish line, DRS and Straight Mode zones, pit entry and exit, and the position of environment
 objects and hills. Heights in metres, widths and the size of objects stay, so a longer track becomes flatter. One step,
 Ctrl+Z undoes it.</p>
+<h3>Load a track from the game</h3>
+<p><b>Project → New from template …</b>, source <i>Game track from F1 25</i>: the list shows all of the game's tracks
+(reverse layouts too); the editor only reads them and never writes to the game folder. It imports centre line, heights and
+widths, optionally also <b>pit lane, DRS and Straight Mode zones and starting grid</b>, <b>side areas from the driving
+physics</b> (kerbs, grass strips, gravel or asphalt run-off, barrier distance) and the <b>scenery</b> (trees, buildings,
+tents … as environment objects, without objects on the new track). If a track does not fit into the game world it is rotated
+first (Monza, Spa, Baku); only if that is not enough does the editor offer to scale it down. Suzuka crosses itself on a bridge
+and cannot be built. <i>Other file …</i> reads the ERP or package of a mod (scenery only from an ERP). Packages with the
+layout of an original track contain parts derived from game data: for your own use only, do not share them.</p>
 <h3>Find and recover</h3>
 <p><b>Go to</b> (field above the list): metres from the finish (e.g. 1250), corner (T4) or object (#12). The list
 shows station and corner for each point. <i>Project → Recently opened</i> and the start screen offer the last projects.

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.1
+
+- English is now the default language: a first start opens in English, and texts without a German translation show in
+  English. A language chosen before (View → Language) is kept. Messages of the track tools are English first too
+- The German interface also translates the import notes in the status bar and the texts of background tasks
+- Load a track from the game: New from template lists all F1 25 tracks (read-only). Besides centre line, heights and widths
+  it can take over the pit lane, DRS and Straight Mode zones, the starting grid, kerbs, gravel and barrier distances from the
+  driving physics, and the scenery (trees, buildings, tents) as environment objects. Packages made from an original track are
+  for your own use only
+- Templates that do not fit into the game world are rotated first and only scaled down if rotating is not enough; the game
+  world offset is set when a track only fits shifted into the hole of the outer terrain
+- Tight hairpins of imported tracks no longer fold the track edge (Bahrain, Shanghai, Austin)
+
 ## 0.3.0
 
 - Trace a track from an image: load a map picture or paste a screenshot (Ctrl+V), measure the scale on its scale bar, click a few support points in driving direction, and the editor finds the track between them. It only takes over a lap that is complete, does not cross itself and drives no part twice; red rings show where the lap is wrong, an orange "B" offers a second possible way

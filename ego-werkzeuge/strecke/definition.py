@@ -78,7 +78,7 @@ ACHSEN = {
 
 def achsen_matrix(name):
     if name not in ACHSEN:
-        raise ValueError("Unbekanntes Achsensystem '%s' (möglich: %s)" % (name, ", ".join(ACHSEN)))
+        raise ValueError("Unknown axis system '%s' (possible: %s)" % (name, ", ".join(ACHSEN)))
     return ACHSEN[name]
 
 
@@ -291,24 +291,24 @@ STANDARD = {
 def _fahrzeug_pruefen(f):
     """Schritt D: Fahrzeugmodell, Parametersatz und g-g-v-Werte prüfen."""
     if f.get('modell', 'punktmasse') not in ('punktmasse', 'ggv'):
-        raise ValueError('fahrzeug.modell muss punktmasse oder ggv sein')
+        raise ValueError('fahrzeug.modell must be punktmasse or ggv')
     if f.get('parametersatz') is not None:
         if not isinstance(f['parametersatz'], str) or not f['parametersatz'].replace('_', '').isalnum():
-            raise ValueError('fahrzeug.parametersatz muss ein Name aus strecke/fahrzeuge/ sein')
+            raise ValueError('fahrzeug.parametersatz must be a name from strecke/fahrzeuge/')
         from .rennlinie import parametersatz_laden
         parametersatz_laden(f['parametersatz'])
     g = f.get('ggv') or {}
     if not isinstance(g, dict):
-        raise ValueError('fahrzeug.ggv muss ein Objekt sein')
+        raise ValueError('fahrzeug.ggv must be an object')
     for name in ('reibwert_quer', 'reibwert_bremsen', 'reibwert_antrieb', 'verzoegerung_max_ms2'):
         if g.get(name) is not None and not float(g[name]) > 0:
-            raise ValueError('fahrzeug.ggv.%s muss > 0 sein (oder leer)' % name)
+            raise ValueError('fahrzeug.ggv.%s must be > 0 (or empty)' % name)
     if not 1.0 <= float(g.get('ellipse_exponent', 2.0)) <= 10.0:
-        raise ValueError('fahrzeug.ggv.ellipse_exponent muss in [1, 10] liegen')
+        raise ValueError('fahrzeug.ggv.ellipse_exponent must be within [1, 10]')
     if not float(g.get('hoehe_glaettung_m', 10.0)) >= 0:
-        raise ValueError('fahrzeug.ggv.hoehe_glaettung_m darf nicht negativ sein')
+        raise ValueError('fahrzeug.ggv.hoehe_glaettung_m must not be negative')
     if not isinstance(g.get('hoeheneinfluss', True), bool):
-        raise ValueError('fahrzeug.ggv.hoeheneinfluss muss true oder false sein')
+        raise ValueError('fahrzeug.ggv.hoeheneinfluss must be true or false')
 
 
 def zusammenfuehren(basis, zusatz):
@@ -360,22 +360,22 @@ def seitenraum_pruefen(seitenraum):
     """Abschnitte des Seitenraums prüfen (Felder siehe STANDARD["seitenraum"])."""
     abschnitte = (seitenraum or {}).get("abschnitte") or []
     if not isinstance(abschnitte, list):
-        raise ValueError("seitenraum.abschnitte muss eine Liste sein")
+        raise ValueError("seitenraum.abschnitte must be a list")
     for i, ab in enumerate(abschnitte):
         ort = "seitenraum.abschnitte[%d]" % i
         if not isinstance(ab, dict) or ab.get("von_s") is None or ab.get("bis_s") is None:
-            raise ValueError("%s braucht von_s und bis_s" % ort)
+            raise ValueError("%s needs von_s and bis_s" % ort)
         if ab.get("seite", "beide") not in ("links", "rechts", "beide"):
-            raise ValueError("%s.seite muss links, rechts oder beide sein" % ort)
+            raise ValueError("%s.seite must be links, rechts or beide" % ort)
         if ab.get("auslauf") is not None and ab["auslauf"] not in SEITENRAUM_AUSLAUF:
-            raise ValueError("%s.auslauf muss gras, kies oder asphalt sein" % ort)
+            raise ValueError("%s.auslauf must be gras, kies or asphalt" % ort)
         for name, minimum in (("randstein_breite", 0.0), ("gruenstreifen_breite", 0.0), ("barriere_abstand", 0.5)):
             if ab.get(name) is not None and not float(ab[name]) >= minimum:
-                raise ValueError("%s.%s muss ≥ %g sein" % (ort, name, minimum))
+                raise ValueError("%s.%s must be ≥ %g" % (ort, name, minimum))
         rand = ab.get("rand_neigung")
         if rand is not None and rand != "strecke":
             if isinstance(rand, str) or not -RAND_NEIGUNG_MAX <= float(rand) <= RAND_NEIGUNG_MAX:
-                raise ValueError("%s.rand_neigung muss \"strecke\" oder ein Winkel bis ±%g° sein" % (ort, RAND_NEIGUNG_MAX))
+                raise ValueError("%s.rand_neigung must be \"strecke\" or an angle up to ±%g°" % (ort, RAND_NEIGUNG_MAX))
 
 
 def laden(pfad):
@@ -406,18 +406,17 @@ def aus_dict(daten, basisordner=".", quelle="<dict>"):
     elif art == "csv":
         datei = ml.get("datei")
         if not datei:
-            raise ValueError("mittellinie.datei fehlt (art = csv)")
+            raise ValueError("mittellinie.datei is missing (art = csv)")
         if not os.path.isabs(datei):
             datei = os.path.join(basisordner, datei)
         punkte, attr = csv_lesen(datei, achsen=ml.get("csv_achsen", "y_oben_rechtshaendig"))
         dicht = True
     else:
-        raise ValueError("mittellinie.art muss 'segmente', 'kontrollpunkte' oder 'csv' sein "
-                         "(angegeben: %r)" % (art,))
+        raise ValueError("mittellinie.art must be 'segmente', 'kontrollpunkte' or 'csv' (given: %r)" % (art,))
     if len(punkte) < 4:
-        raise ValueError("Mittellinie braucht mindestens 4 Punkte (hat %d)" % len(punkte))
+        raise ValueError("Centreline needs at least 4 points (has %d)" % len(punkte))
     if not np.all(np.isfinite(punkte)):
-        raise ValueError("Mittellinienpunkte müssen endlich sein")
+        raise ValueError("Centreline points must be finite")
     if ml.get("umkehren"):
         info.pop("segment_anfaenge", None)   # Indizes gelten nur für die Eingaberichtung
         punkte = punkte[::-1].copy()
@@ -446,7 +445,7 @@ def _parameter_pruefen(p):
             for v in obj:
                 endlich(v)
         elif isinstance(obj,(int,float)) and not math.isfinite(obj):
-            raise ValueError('Definitionswerte müssen endlich sein')
+            raise ValueError('Definition values must be finite')
     endlich(p)
     achsen_matrix(p['ausgabe']['achsen'])
     for gruppe, namen in {
@@ -459,39 +458,39 @@ def _parameter_pruefen(p):
         for name in namen:
             wert = float(p[gruppe][name])
             if not math.isfinite(wert) or wert <= 0:
-                raise ValueError('%s.%s muss endlich und > 0 sein' % (gruppe,name))
+                raise ValueError('%s.%s must be finite and > 0' % (gruppe,name))
     _uebergaenge_pruefen(p['mittellinie'].get('uebergaenge'))
     if not 0 < p['fahrzeug']['traktion_anteil'] <= 1:
-        raise ValueError('fahrzeug.traktion_anteil muss in (0, 1] liegen')
+        raise ValueError('fahrzeug.traktion_anteil must be within (0, 1]')
     _fahrzeug_pruefen(p['fahrzeug'])
     for gruppe,name in (('startaufstellung','anzahl'),('boxengasse','boxen'),('drs','anzahl')):
         wert = p[gruppe][name]
         if not isinstance(wert,int) or isinstance(wert,bool) or wert < (0 if gruppe=='drs' else 1):
-            raise ValueError('%s.%s muss eine gültige ganze Anzahl sein' % (gruppe,name))
+            raise ValueError('%s.%s must be a valid whole number' % (gruppe,name))
     if float(p['boxengasse']['tempolimit_kmh']) not in TEMPOLIMITS_KMH:
-        raise ValueError('boxengasse.tempolimit_kmh muss %s sein (Werte der Spielstrecken)'
+        raise ValueError('boxengasse.tempolimit_kmh must be %s (the values of the game\'s tracks)'
                          % '/'.join('%g' % v for v in TEMPOLIMITS_KMH))
     seitenraum_pruefen(p.get('seitenraum'))
     from . import zonen
     zonen.eingabe_pruefen(p)
     pi = p['ideallinie']
     if not isinstance(pi['iterationen'], int) or isinstance(pi['iterationen'], bool) or pi['iterationen'] < 1:
-        raise ValueError('ideallinie.iterationen muss eine ganze Zahl ≥ 1 sein')
+        raise ValueError('ideallinie.iterationen must be a whole number ≥ 1')
     if not float(pi['iterationen_toleranz_m']) > 0:
-        raise ValueError('ideallinie.iterationen_toleranz_m muss > 0 sein')
+        raise ValueError('ideallinie.iterationen_toleranz_m must be > 0')
     if pi.get('kruemmung_max') is not None and not float(pi['kruemmung_max']) > 0:
-        raise ValueError('ideallinie.kruemmung_max muss > 0 sein (oder leer)')
+        raise ValueError('ideallinie.kruemmung_max must be > 0 (or empty)')
     for gruppe,name in (('boxengasse','seite'),('startaufstellung','pole_seite')):
         if p[gruppe][name] not in ('links','rechts'):
-            raise ValueError('%s.%s muss links oder rechts sein' % (gruppe,name))
+            raise ValueError('%s.%s must be links or rechts' % (gruppe,name))
     if p['ideallinie']['sicherheitsabstand_m'] < 0:
-        raise ValueError('Sicherheitsabstand darf nicht negativ sein')
+        raise ValueError('Safety margin must not be negative')
     if p['fahrbahn']['randlinie_breite'] < 0 or p['start_ziel']['linienbreite'] < 0:
-        raise ValueError('Linienbreiten dürfen nicht negativ sein')
+        raise ValueError('Line widths must not be negative')
     for name in OBERFLAECHEN:
         code = p['oberflaechen_codes'][name]['code']
         if not isinstance(code,str) or len(code)!=4 or not code.isascii():
-            raise ValueError('Oberflächencode für %s muss vier ASCII-Zeichen enthalten' % name)
+            raise ValueError('Surface code for %s must contain four ASCII characters' % name)
 
 
 def _leere_attribute(n):
@@ -519,11 +518,11 @@ def _segment_kruemmung(seg):
         return float(seg["laenge"]), 0.0, 0.0
     vorz = {"links": 1.0, "rechts": -1.0}.get(seg.get("richtung"))
     if vorz is None:
-        raise ValueError("Segment %r: richtung muss 'links' oder 'rechts' sein" % seg)
+        raise ValueError("Segment %r: direction must be 'links' or 'rechts'" % seg)
     if typ == "bogen":
         r = float(seg["radius"])
         if r <= 0:
-            raise ValueError("Segment %r: Radius muss > 0 sein" % seg)
+            raise ValueError("Segment %r: radius must be > 0" % seg)
         if seg.get("winkel") is not None:
             laenge = r * math.radians(float(seg["winkel"]))
         else:
@@ -535,7 +534,7 @@ def _segment_kruemmung(seg):
         k0 = 0.0 if not r0 else vorz / float(r0)
         k1 = 0.0 if not r1 else vorz / float(r1)
         return float(seg["laenge"]), k0, k1
-    raise ValueError("Unbekannter Segmenttyp %r (gerade | bogen | klothoide)" % typ)
+    raise ValueError("Unknown segment type %r (gerade | bogen | klothoide)" % typ)
 
 
 #: Standardwerte der Übergänge (gleich STANDARD["mittellinie"]["uebergaenge"]).
@@ -550,20 +549,20 @@ def _uebergaenge_pruefen(regeln):
     if regeln is None:
         return
     if not isinstance(regeln, dict):
-        raise ValueError("mittellinie.uebergaenge muss ein Objekt sein")
+        raise ValueError("mittellinie.uebergaenge must be an object")
     r = dict(UEBERGANG_STANDARD, **regeln)
     if not isinstance(r["aktiv"], bool):
-        raise ValueError("mittellinie.uebergaenge.aktiv muss true oder false sein")
+        raise ValueError("mittellinie.uebergaenge.aktiv must be true or false")
     for name in ("a_faktor", "min_laenge_m", "max_laenge_m", "max_anteil"):
         if isinstance(r[name], bool) or not isinstance(r[name], (int, float)) or not r[name] > 0:
-            raise ValueError("mittellinie.uebergaenge.%s muss eine Zahl > 0 sein" % name)
+            raise ValueError("mittellinie.uebergaenge.%s must be a number > 0" % name)
     if r["laenge_m"] is not None and (isinstance(r["laenge_m"], bool) or
                                       not isinstance(r["laenge_m"], (int, float)) or r["laenge_m"] <= 0):
-        raise ValueError("mittellinie.uebergaenge.laenge_m muss leer oder > 0 sein")
+        raise ValueError("mittellinie.uebergaenge.laenge_m must be empty or > 0")
     if r["max_laenge_m"] < r["min_laenge_m"]:
-        raise ValueError("mittellinie.uebergaenge.max_laenge_m muss >= min_laenge_m sein")
+        raise ValueError("mittellinie.uebergaenge.max_laenge_m must be >= min_laenge_m")
     if not r["max_anteil"] <= 0.9:
-        raise ValueError("mittellinie.uebergaenge.max_anteil muss in (0, 0.9] liegen")
+        raise ValueError("mittellinie.uebergaenge.max_anteil must be within (0, 0.9]")
 
 
 def _uebergang_angabe(seg, ende):
@@ -577,8 +576,8 @@ def _uebergang_angabe(seg, ende):
         return False
     if isinstance(wert, (int, float)) and math.isfinite(wert) and wert > 0:
         return float(wert)
-    raise ValueError("Segment %r: uebergang muss true, false, eine Länge > 0 oder "
-                     "{\"anfang\": …, \"ende\": …} sein" % seg)
+    raise ValueError("Segment %r: transition must be true, false, a length > 0 or "
+                     "{\"anfang\": …, \"ende\": …}" % seg)
 
 
 def uebergang_laenge(ka, kb, regeln):
@@ -620,7 +619,7 @@ def segmente_mit_uebergaengen(segmente, regeln):
     form = [_segment_kruemmung(seg) for seg in segmente]
     for seg, (laenge, _, _) in zip(segmente, form):
         if laenge <= 0:
-            raise ValueError("Segment %r hat Länge <= 0" % seg)
+            raise ValueError("Segment %r has length <= 0" % seg)
     L = [0.0] * n            # Übergang an der Grenze i -> i+1 (Index i)
     uebergaenge, gekuerzt, weggelassen = [], [], []
     for i in range(n if n > 1 else 0):
@@ -660,10 +659,10 @@ def segmente_mit_uebergaengen(segmente, regeln):
                             "von": 1.0 - hinten / laenge, "bis": 1.0})
     warnungen = []
     if gekuerzt:
-        warnungen.append("Klothoiden-Übergang auf max_anteil gekürzt nach Segment %s"
+        warnungen.append("Clothoid transition shortened to max_anteil after segment %s"
                          % ", ".join(map(str, gekuerzt)))
     if weggelassen:
-        warnungen.append("Klothoiden-Übergang zu kurz (< %.0f m), Krümmungssprung bleibt nach Segment %s"
+        warnungen.append("Clothoid transition too short (< %.0f m), curvature jump remains after segment %s"
                          % (UEBERGANG_MIN_M, ", ".join(map(str, weggelassen))))
     return stuecke, uebergaenge, warnungen
 
@@ -681,7 +680,7 @@ def segmente_zu_punkten(start, segmente, schritt=1.0, schliessen="verteilen", ma
     "uebergaenge" (Liste der eingefügten Übergänge).
     """
     if not segmente:
-        raise ValueError("Keine Segmente angegeben")
+        raise ValueError("No segments given")
     _uebergaenge_pruefen(uebergaenge)
     x = float(start.get("x", 0.0))
     z = float(start.get("z", 0.0))
@@ -731,7 +730,7 @@ def segmente_zu_punkten(start, segmente, schritt=1.0, schliessen="verteilen", ma
             anfaenge.append(len(pts) - 1)
         laenge, k0, k1 = st["laenge"], st["k0"], st["k1"]
         if laenge <= 0:
-            raise ValueError("Segment %r hat Länge <= 0" % seg)
+            raise ValueError("Segment %r has length <= 0" % seg)
         if st["hoehe"] is not None:
             y_anf, y_ende = st["hoehe"]
         else:
@@ -767,17 +766,16 @@ def segmente_zu_punkten(start, segmente, schritt=1.0, schliessen="verteilen", ma
     drehung = math.degrees(phi - phi0)
     rest = (drehung + 180.0) % 360.0 - 180.0
     if abs(abs(drehung) - 360.0) > 5.0 and abs(rest) > 5.0:
-        warnungen.append("Gesamtdrehung %.1f° statt ±360° – Strecke schließt in der Richtung nicht"
+        warnungen.append("Total turning %.1f° instead of ±360°: the track does not close in direction"
                          % drehung)
     elif abs(rest) > 1.0:
-        warnungen.append("Richtungsfehler beim Schließen: %.2f°" % rest)
+        warnungen.append("Direction error when closing: %.2f°" % rest)
     if lage_fehler > max_fehler and schliessen != "erzwingen":
-        raise ValueError("Segmente schließen nicht: Endpunkt %.1f m vom Start entfernt "
-                         "(erlaubt %.1f m)" % (lage_fehler, max_fehler))
+        raise ValueError("Segments do not close: end point is %.1f m from the start (allowed %.1f m)" % (lage_fehler, max_fehler))
     if schliessen == "fehler" and lage_fehler > 0.01:
-        raise ValueError("Segmente schließen nicht exakt (%.3f m)" % lage_fehler)
+        raise ValueError("Segments do not close exactly (%.3f m)" % lage_fehler)
     if lage_fehler > 0.01:
-        warnungen.append("Schließfehler %.2f m (x %.2f, z %.2f) wurde über %.0f m verteilt"
+        warnungen.append("Closing error %.2f m (x %.2f, z %.2f) was spread over %.0f m"
                          % (lage_fehler, fehler[0], fehler[2], s))
     # Lage- und Höhenfehler linear verteilen
     pts = pts - np.outer(s_werte / s, fehler)
@@ -820,7 +818,7 @@ def kontrollpunkte_lesen(liste):
             attr["querneigung_grad"][i] = qn
         else:
             if len(p) not in (2, 3):
-                raise ValueError("Kontrollpunkt %d: [x, z] oder [x, z, y] erwartet" % i)
+                raise ValueError("Control point %d: [x, z] or [x, z, y] expected" % i)
             x, z = float(p[0]), float(p[1])
             y = float(p[2]) if len(p) == 3 else 0.0
         pts.append((x, y, z))
@@ -846,7 +844,7 @@ def csv_lesen(pfad, achsen="y_oben_rechtshaendig"):
     with open(pfad, "r", encoding="utf-8-sig") as f:
         zeilen = [z.strip() for z in f if z.strip() and not z.lstrip().startswith("#")]
     if not zeilen:
-        raise ValueError("CSV %s ist leer" % pfad)
+        raise ValueError("CSV %s is empty" % pfad)
 
     def teilen(z):
         for t in (";", ",", "\t"):
@@ -864,11 +862,11 @@ def csv_lesen(pfad, achsen="y_oben_rechtshaendig"):
         daten_zeilen = zeilen[1:]
     werte = np.array([[float(w) for w in teilen(z)] for z in daten_zeilen], dtype=float)
     if werte.ndim != 2 or werte.shape[1] < 3:
-        raise ValueError("CSV %s: mindestens 3 Spalten (x, y, z) erwartet" % pfad)
+        raise ValueError("CSV %s: at least 3 columns (x, y, z) expected" % pfad)
     spalte = {n: i for i, n in enumerate(namen)}
     for n in ("x", "y", "z"):
         if n not in spalte:
-            raise ValueError("CSV %s: Spalte '%s' fehlt (Kopf: %s)" % (pfad, n, namen))
+            raise ValueError("CSV %s: column '%s' is missing (header: %s)" % (pfad, n, namen))
     roh = werte[:, [spalte["x"], spalte["y"], spalte["z"]]]
     m = achsen_matrix(achsen)
     pts = roh @ m        # Ausgabe = M @ intern  ->  intern = M^T @ Ausgabe (M orthogonal)

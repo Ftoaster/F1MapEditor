@@ -39,7 +39,7 @@ def mitte(positionen):
 def faktor_pruefen(faktor):
     faktor = float(faktor)
     if not FAKTOR_MIN <= faktor <= FAKTOR_MAX:
-        raise ValueError(tr("Faktor muss zwischen {a} und {b} liegen.", a=FAKTOR_MIN, b=FAKTOR_MAX))
+        raise ValueError(tr("Factor must be between {a} and {b}.", a=FAKTOR_MIN, b=FAKTOR_MAX))
     return faktor
 
 
@@ -114,17 +114,17 @@ class SkalierenDialog(QDialog):
     def __init__(self, laenge, parent=None):
         super().__init__(parent)
         self.laenge = float(laenge)
-        self.setWindowTitle(tr("Strecke skalieren"))
+        self.setWindowTitle(tr("Scale track"))
         self.setMinimumWidth(460)
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel(tr("Die ganze Strecke wird um ihre Mitte größer oder kleiner: Punkte, Segmentlängen und Radien, "
-                                "Abschnitte und Zonen sowie die Lage der Umgebung. Höhen, Breiten und die Größe der "
-                                "Umgebungsobjekte bleiben. Strg+Z macht es rückgängig.")))
+        layout.addWidget(QLabel(tr("The whole track grows or shrinks around its centre: points, segment lengths and "
+                                   "radii, sections and zones, and the position of the environment. Heights, widths "
+                                   "and the size of environment objects stay. Ctrl+Z undoes it.")))
         layout.itemAt(0).widget().setWordWrap(True)
         form = QFormLayout()
-        form.addRow(tr("Aktuelle Länge"), QLabel(f"{self.laenge:,.0f} m".replace(",", ".")))
-        self.nach_faktor = QRadioButton(tr("Um Faktor"))
-        self.nach_laenge = QRadioButton(tr("Auf Länge"))
+        form.addRow(tr("Current length"), QLabel(f"{self.laenge:,.0f} m".replace(",", ".")))
+        self.nach_faktor = QRadioButton(tr("By factor"))
+        self.nach_laenge = QRadioButton(tr("To length"))
         gruppe = QButtonGroup(self)
         gruppe.addButton(self.nach_faktor)
         gruppe.addButton(self.nach_laenge)
@@ -134,18 +134,18 @@ class SkalierenDialog(QDialog):
         self.faktor.setDecimals(3)
         self.faktor.setSingleStep(0.05)
         self.faktor.setValue(1.1)
-        self.faktor.setAccessibleName(tr("Skalierungsfaktor"))
+        self.faktor.setAccessibleName(tr("Scale factor"))
         self.ziel = QDoubleSpinBox()
         self.ziel.setRange(round(self.laenge * FAKTOR_MIN), round(self.laenge * FAKTOR_MAX))
         self.ziel.setDecimals(0)
         self.ziel.setSingleStep(100)
         self.ziel.setSuffix(" m")
         self.ziel.setValue(round(self.laenge * 1.1))
-        self.ziel.setAccessibleName(tr("Ziellänge in Metern"))
+        self.ziel.setAccessibleName(tr("Target length in metres"))
         form.addRow(self.nach_faktor, self.faktor)
         form.addRow(self.nach_laenge, self.ziel)
         self.ergebnis = QLabel()
-        form.addRow(tr("Ergebnis"), self.ergebnis)
+        form.addRow(tr("Result"), self.ergebnis)
         layout.addLayout(form)
         knoepfe = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         knoepfe.accepted.connect(self.accept)
@@ -164,5 +164,5 @@ class SkalierenDialog(QDialog):
 
     def _zeigen(self):
         f = self.wert()
-        self.ergebnis.setText(tr("Faktor {faktor} · etwa {laenge} m", faktor=f"{f:.3f}",
+        self.ergebnis.setText(tr("Factor {faktor} · about {laenge} m", faktor=f"{f:.3f}",
                                  laenge=f"{self.laenge * f:,.0f}".replace(",", ".")))

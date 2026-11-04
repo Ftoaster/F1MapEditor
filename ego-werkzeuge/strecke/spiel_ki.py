@@ -45,22 +45,22 @@ def _splines(logik):
     for s in daten:
         punkte = np.asarray(s['position'], dtype=float)
         if punkte.ndim != 2 or punkte.shape[1] != 3 or not np.all(np.isfinite(punkte)):
-            raise ValueError('TrackSpace benötigt endliche XYZ-Punkte')
+            raise ValueError('TrackSpace needs finite XYZ points')
         spline = streckenlogik.Spline(s['name'], s['position'], bool(s['closed']))
         if spline.laenge <= 0 or len(punkte) < 2:
-            raise ValueError('TrackSpace-Länge muss positiv sein')
+            raise ValueError('TrackSpace length must be positive')
         out.append(spline)
     haupt = [s for s in out if s.geschlossen]
     box = [s for s in out if not s.geschlossen]
     if len(haupt) != 1 or len(box) != 1:
-        raise ValueError('AP12 unterstützt genau eine Haupt- und eine Boxenspline')
+        raise ValueError('AP12 supports exactly one main and one pit spline')
     return [haupt[0], box[0]]
 
 
 def _original_splines(archiv):
     ress = [r for r in archiv if r.resource_type == 'TrackSpace']
     if len(ress) != 1:
-        raise ValueError('Vorlage muss genau einen TrackSpace enthalten')
+        raise ValueError('Template must contain exactly one TrackSpace')
     st = streckenlogik.Strecke('vorlage')
     streckenlogik.lade_trackspace(st, bxml.read_resource(ress[0]))
     return sorted(st.splines.values(), key=lambda s: not s.geschlossen)
@@ -69,13 +69,13 @@ def _original_splines(archiv):
 def _ai(archiv):
     ress = [r for r in archiv if r.resource_type == 'AISplineData']
     if len(ress) != 1:
-        raise ValueError('Genau eine AISplineData-Ressource erforderlich')
+        raise ValueError('Exactly one AISplineData resource required')
     doc = bxml.read_resource(ress[0])
     gates = {g['id']: g for g in streckenlogik.ki_gates(doc)}
     linien = [dict(e.attrib) for e in doc.iter('brake_line')]
     ids = [int(e['id']) for e in linien]
     if len(ids) != len(set(ids)) or not all(int(e['gate_id']) in gates for e in linien):
-        raise ValueError('Doppelte Brems-ID oder ungültiger Bremsgate-Bezug')
+        raise ValueError('Duplicate brake ID or invalid brake gate reference')
     return gates, linien
 
 
@@ -98,14 +98,14 @@ def _profil(logik):
     v = np.asarray(ideal.get('geschwindigkeit_m_s', []), float)
     xyz = np.asarray(ideal.get('position', []), float)
     if len(p) < 3 or v.shape != p.shape or xyz.shape != (len(p), 3):
-        raise ValueError('Profilmodus benötigt Ideallinie mit progress, position, geschwindigkeit_m_s')
+        raise ValueError('Profile mode needs a racing line with progress, position, geschwindigkeit_m_s')
     if (not np.all(np.isfinite(p)) or not np.all(np.isfinite(v)) or
             not np.all(np.isfinite(xyz)) or np.any(v <= 0) or
             abs(p[0]) > 1e-9 or np.any(np.diff(p) <= 0) or p[-1] >= 1):
-        raise ValueError('Ungültiges Geschwindigkeitsprofil (Ring ohne doppelten Endpunkt erwartet)')
+        raise ValueError('Invalid speed profile (ring without duplicate end point expected)')
     ds = np.linalg.norm(np.diff(np.vstack([xyz, xyz[:1]]), axis=0), axis=1)
     if np.any(ds <= 0):
-        raise ValueError('Doppelte Punkte im Geschwindigkeitsprofil')
+        raise ValueError('Duplicate points in the speed profile')
     vn = np.roll(v, -1)
     dt = 2*ds/(v+vn)
     zeit = np.r_[0, np.cumsum(dt)]
@@ -115,14 +115,14 @@ def _profil(logik):
     fahrzeug = logik.get('fahrzeug', {})
     masse = float(fahrzeug.get('masse_kg', 800))
     if not math.isfinite(masse) or masse <= 0:
-        raise ValueError('Positive Fahrzeugmasse erforderlich')
+        raise ValueError('Positive vehicle mass required')
     drag = (0.5*float(fahrzeug.get('luftdichte', 1.2))*
             float(fahrzeug.get('cw_a_m2', 1.5))/masse*((v+vn)/2)**2)
     arbeit = np.maximum(0, a+drag+9.81*float(fahrzeug.get('rollwiderstand', 0.015)))*ds
     ernte = np.maximum(0, -a)*ds
     k = np.asarray(ideal.get('kruemmung_1_m', np.zeros_like(v)), float)
     if k.shape != p.shape or not np.all(np.isfinite(k)):
-        raise ValueError('Ungültige Krümmungsfolge')
+        raise ValueError('Invalid curvature sequence')
     reifen = ds*(1+np.abs(k)*v*v/9.81)
     def normiert(werte):
         total = float(werte.sum())
@@ -194,10 +194,10 @@ def _bremsen(daten, gates, linien, splines, profil, modus, pit_limit):
             continue
         lookup = {int(e.get('id')): e for e in alt}
         if len(lookup) != len(alt):
-            raise ValueError('Doppelte Brems-ID in Reifengruppe')
+            raise ValueError('Duplicate brake ID in tyre group')
         # Vorlagenmodus erfindet keine Kalibrierung für neue IDs.
         if modus == 'vorlage' and set(ids) != set(lookup):
-            raise ValueError('Brems-ID-Sätze verschieden; profil-Modus oder konsistente Logik nötig')
+            raise ValueError('Brake ID sets differ; profile mode or consistent logic needed')
         neu = []
         for linie in linien:
             nummer = int(linie['id'])
@@ -235,7 +235,7 @@ def _bremsen(daten, gates, linien, splines, profil, modus, pit_limit):
         gruppe.children = kinder
         bericht.append({'gruppe': gruppe.name, 'ids': ids})
     if not bericht:
-        raise ValueError('Bremssettings ohne Reifengruppen')
+        raise ValueError('Brake settings have no tyre groups')
     return bericht
 
 
@@ -246,7 +246,7 @@ def _verbrauch(d, obj, typ, faktor, profil, samplezahl):
     for i, s in enumerate(obj[liste]):
         alt = np.asarray(s[samples], float)
         if len(alt) < 2 or not np.all(np.isfinite(alt)):
-            raise ValueError('Granulartabelle benötigt mindestens zwei endliche Samples')
+            raise ValueError('Granular table needs at least two finite samples')
         n = samplezahl or len(alt)
         if profil is None:
             neu = _interpolieren(alt, n, faktor)
@@ -275,7 +275,7 @@ def _reifen(d, obj, faktor, profil):
                     pfad = ['tyre_list', i, 'mass_list', j, 'difficulty_list_', k, 'startingWears_list', l]
                     p, ende = s['samples_progress'], s['samples_endingWear']
                     if len(p) != len(ende) or not p:
-                        raise ValueError('Unpassende Reifen-Samplefolgen')
+                        raise ValueError('Mismatched tyre sample sequences')
                     start = float(s['wear'])
                     if profil is None:
                         neu = [min(1, start+(v-start)*faktor) for v in ende]
@@ -332,14 +332,14 @@ def _ki_ressource(auftrag):
     d = ki_daten.fragmente_lesen(typ, quelle)
     if typ == 'VPTimes':
         if len(d.vp_tabellen) != 2:
-            raise ValueError('VP-Vorlage benötigt zwei Routentabellen')
+            raise ValueError('VP template needs two route tables')
         for route, t in enumerate(d.vp_tabellen):
             for s in t.saetze:
                 n = max(2, int(round((s.anzahl-1)*faktoren[route]))+1)
                 if route == 0 and g['vp_abtastung'] == 'original':
                     n = s.anzahl          # Stützpunktzahl der Mod behalten (Eingrenzung des Absturzes mit Mod 1.0.2)
                 if n > 100000:
-                    raise ValueError('VP-Zielabtastung zu groß')
+                    raise ValueError('VP target sampling too large')
                 if modus == 'profil' and route == 0:
                     form = np.interp(np.linspace(0, 1, n), profil['p'], profil['zeit'])
                     zeiten = form*s.zeiten[-1]/float(g['referenz'])
@@ -360,12 +360,12 @@ def _ki_ressource(auftrag):
     raw = [ki_daten.schreiben(d)]
     if len(ziel) > 1:
         if d.dokument is None or len(ziel) != 2:
-            raise ValueError('Unbekannte KI-Zusatzfragmente')
+            raise ValueError('Unknown additional AI fragments')
         raw.append(bxml.compute_tsmd(d.dokument))
     # Erneut parsen, bevor die erste Zielressource geändert wird.
     kontrolle = ki_daten.lesen(raw[0], typ)
     if ki_daten.schreiben(kontrolle) != raw[0]:
-        raise ValueError('KI-Ausgabe besteht erneuten Rundlauf nicht')
+        raise ValueError('AI output fails the repeated round trip')
     if not any(alt != x for alt, x in zip(ziel, raw)):
         return typ, None
     return typ, [(x, erp.fragment_packen(x)) for x in raw]
@@ -389,7 +389,7 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     """
     erlaubt = {'modus', 'bremsmodus', 'ers_strategie', 'granular_samples', 'referenz_zeit_s', 'profil_fahrzeug', 'ohne_pakete', 'nur_typen', 'vp_abtastung'}
     if set(optionen)-erlaubt:
-        raise TypeError('Unbekannte KI-Optionen: '+', '.join(sorted(set(optionen)-erlaubt)))
+        raise TypeError('Unknown AI options: '+', '.join(sorted(set(optionen)-erlaubt)))
     modus = optionen.get('modus', 'skalieren')
     bremsmodus = optionen.get('bremsmodus', 'vorlage')
     strategie = optionen.get('ers_strategie', 'neutral')
@@ -398,13 +398,13 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     nur_typen = frozenset(optionen.get('nur_typen') or ())
     vp_abtastung = optionen.get('vp_abtastung') or 'auto'
     if vp_abtastung not in ('auto', 'skaliert', 'original'):
-        raise ValueError('vp_abtastung: auto, skaliert oder original')
+        raise ValueError('vp_abtastung: auto, skaliert or original')
     if modus not in ('skalieren', 'profil') or bremsmodus not in ('vorlage', 'profil'):
-        raise ValueError('Unbekannter KI-/Bremsmodus')
+        raise ValueError('Unknown AI/brake mode')
     if strategie not in ('neutral', 'behalten'):
-        raise ValueError('Unbekannte ERS-Strategie')
+        raise ValueError('Unknown ERS strategy')
     if samples is not None and (isinstance(samples, bool) or not isinstance(samples, int) or not 2 <= samples <= 100000):
-        raise ValueError('granular_samples muss eine Ganzzahl zwischen 2 und 100000 sein')
+        raise ValueError('granular_samples must be a whole number between 2 and 100000')
     logik = (json.loads(Path(logik_json).read_text(encoding='utf-8'))
              if isinstance(logik_json, (str, Path)) else copy.deepcopy(logik_json))
     if optionen.get('profil_fahrzeug') and modus == 'profil':
@@ -413,7 +413,7 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     koordinaten = logik.get('koordinatensystem', {})
     if (koordinaten.get('achsen', 'y_oben_rechtshaendig') != 'y_oben_rechtshaendig' or
             koordinaten.get('einheit', 'm') != 'm'):
-        raise ValueError('KI-Adapter benötigt Meter, Y oben und rechtshändige Koordinaten')
+        raise ValueError('AI adapter needs metres, Y up and right-handed coordinates')
     neu = _splines(logik)
     im_archiv = _original_splines(archiv)
     if len(im_archiv) != len(neu) or any(
@@ -421,21 +421,21 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
             not np.allclose(np.asarray(a.punkte)-a.punkte[0], np.asarray(n.punkte)-n.punkte[0],
                             atol=0.02, rtol=0)
             for a, n in zip(im_archiv, neu)):
-        raise ValueError('Zuerst den Ziel-TrackSpace schreiben: Splinepunkte weichen ab')
+        raise ValueError('Write the target TrackSpace first: spline points differ')
     gates, linien = _ai(archiv)
     eingabe_gates = logik.get('spielformate', logik)['AISplineData']['gates']
     ziel_gates = {int(g['id']): g for g in eingabe_gates}
     if set(ziel_gates) != set(gates) or len(ziel_gates) != len(eingabe_gates):
-        raise ValueError('Zuerst die Ziel-aispline schreiben: Gate-IDs/-Zahl weichen ab')
+        raise ValueError('Write the target aispline first: gate IDs or count differ')
     # AP11 verschiebt alle Punkte um denselben verbindlichen Versatz. Die
     # Invarianz unter Translation wird geprüft, keine Koordinaten werden geändert.
     delta = np.asarray(next(iter(gates.values()))['position'])-np.asarray(ziel_gates[next(iter(gates))]['position'])
     if any(not np.allclose(np.asarray(a.punkte)-np.asarray(n.punkte), delta, atol=0.02, rtol=0)
            for a, n in zip(im_archiv, neu)):
-        raise ValueError('TrackSpace und aispline müssen denselben Platzierungsversatz verwenden')
+        raise ValueError('TrackSpace and aispline must use the same placement offset')
     if any(np.linalg.norm(np.asarray(g['position'])-ziel_gates[i]['position']-delta) > 0.02
            for i, g in gates.items()):
-        raise ValueError('Ziel-aispline passt räumlich nicht zur Logik (zuerst Logik schreiben)')
+        raise ValueError('Target aispline does not match the logic spatially (write the logic first)')
     # Für die Projektion beide Darstellungen in dasselbe Koordinatensystem bringen.
     projektionsgates = copy.deepcopy(gates)
     for g in projektionsgates.values():
@@ -447,7 +447,7 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     with _vorlage(vorlage) as quelle:
         alt = _original_splines(quelle)
         if len(alt) != 2 or not alt[0].geschlossen or alt[1].geschlossen:
-            raise ValueError('Unpassende Vorlagenrouten')
+            raise ValueError('Mismatched template routes')
         faktoren = [n.laenge/a.laenge for n, a in zip(neu, alt)]
         gleiche_geometrie = all(len(a.punkte) == len(n.punkte) and
             np.allclose(np.asarray(a.punkte)-a.punkte[0], np.asarray(n.punkte)-n.punkte[0], rtol=0, atol=1e-7)
@@ -456,13 +456,13 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
                    if r.resource_type in ki_daten.TYPEN and '/ai/' in r.identifier}
         ziele = [r for r in archiv if r.resource_type in ki_daten.TYPEN]
         if not ziele:
-            raise ValueError('Keine Fahrzeug-KI im Zielarchiv')
+            raise ValueError('No vehicle AI in the target archive')
         referenz = optionen.get('referenz_zeit_s')
         if modus == 'profil' and referenz is None:
             kandidaten = [r for key, r in sorted(quellen.items()) if r.resource_type == 'VPTimes']
             bevorzugt = [r for r in kandidaten if '/f1_2025_vehicle_package/ferrari/' in r.identifier]
             if not kandidaten:
-                raise ValueError('VP-Referenzzeit fehlt')
+                raise ValueError('VP reference time is missing')
             vp = ki_daten.ressourcen_lesen((bevorzugt or kandidaten)[0])
             mass = float(logik.get('fahrzeug', {}).get('masse_kg', 800))
             s = min(vp.vp_tabellen[0].saetze, key=lambda s:
@@ -471,15 +471,15 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
                      abs(s.parameter['grip']-1), abs(s.parameter['masse']-mass)))
             referenz = s.zeiten[-1]
         if referenz is not None and (not math.isfinite(float(referenz)) or float(referenz) <= 0):
-            raise ValueError('Positive endliche Referenzzeit erforderlich')
+            raise ValueError('Positive finite reference time required')
         zeitfaktor = float(profil['zeit'][-1]/referenz) if modus == 'profil' else faktoren[0]
         auftraege, ergebnisse, uebersprungen = [], [], 0
         for res in ziele:
             suffix = res.identifier.split('/ai/', 1)[-1]
             if suffix not in quellen or quellen[suffix].resource_type != res.resource_type:
-                raise ValueError('KI-Vorlagenressource fehlt: '+res.identifier)
+                raise ValueError('AI template resource is missing: '+res.identifier)
             if len(res.fragments) != len(quellen[suffix].fragments):
-                raise ValueError('Quell-/Zielfragmente verschieden')
+                raise ValueError('Source and target fragments differ')
             if nur_typen and res.resource_type not in nur_typen:
                 ergebnisse.append((res.resource_type, None))      # Typ ausgenommen (Eingrenzung des Absturzes)
                 uebersprungen += 1

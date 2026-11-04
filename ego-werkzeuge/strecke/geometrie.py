@@ -131,7 +131,7 @@ def netz_erzeugen(ml, qp, param):
     wl, wr = st.wl, st.wr
     lw = float(param["fahrbahn"].get("randlinie_breite", 0.0) or 0.0)
     if lw >= np.min(wl+wr)/2:
-        raise ValueError("Randlinien sind breiter als die Fahrbahn")
+        raise ValueError("Edge lines are wider than the road")
     eR, eL = prof["rechts"]["e"], prof["links"]["e"]
     D = np.column_stack([-(wr[:, None] + eR[:, ::-1]),              # 6 Spalten: e5..e0 rechts
                          -wr + lw, wl - lw,

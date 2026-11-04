@@ -95,7 +95,7 @@ class GeometrieFehler(ValueError):
 def _mat_index(t: g.Terrain, name: str) -> int:
     treffer = [i for i, m in enumerate(t.materialien) if m.endswith('/' + name)]
     if len(treffer) != 1:
-        raise GeometrieFehler('Terrainmaterial fehlt oder ist mehrdeutig: %s' % name)
+        raise GeometrieFehler('Terrain material is missing or ambiguous: %s' % name)
     return treffer[0]
 
 
@@ -576,7 +576,7 @@ def grundflaeche(T_boden: np.ndarray, T_mauer_oben: np.ndarray, loch: dict, *, z
                         X[j, spalte] = q[d.argmin(), 0]; Z[j, spalte] = q[d.argmin(), 2]
                         H[j, spalte] = q[d.argmin(), 1]; rand_treffer += 1
     if np.any(bedeckt[0, :] | bedeckt[-1, :] | bedeckt[:, 0] | bedeckt[:, -1]):
-        raise GeometrieFehler('Strecke reicht bis an den Rand des Außenterrain-Lochs')
+        raise GeometrieFehler('Track reaches the edge of the outer terrain hole')
     H[bedeckt] = hv[bedeckt] - abstand_unter_strecke
     fest |= bedeckt
     frei = ~fest
@@ -789,8 +789,8 @@ def traeger_pruefen(archiv: erp.ErpFile, manifest: Optional[dict] = None) -> Non
     fehlt = [kennung for kennung in (TERRAIN, physik_kennung(archiv)) if archiv.find(kennung) is None]
     if fehlt:
         version = str((manifest or {}).get('version') or '?')
-        raise GeometrieFehler('Träger passt nicht: In der Portimão-Mod (Version %s) fehlt %s. Getestet sind die Versionen '
-                              '%s (Download-Seite der Mod, Reiter „History“).'
+        raise GeometrieFehler('Carrier does not fit: the Portimão mod (version %s) has no %s. Tested versions: %s (mod '
+                              'download page, History tab).'
                               % (version, fehlt[0], GETESTETE_MOD_VERSION))
 
 
@@ -835,27 +835,27 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
     if grund_art is True or grund_art is None or grund_art is False:
         grund_art = 'raster' if grund_art is True else 'keine'
     if grund_art not in ('raster', 'adaptiv', 'keine'):
-        raise ValueError('grundflaeche: raster, adaptiv oder keine')
+        raise ValueError('grundflaeche: raster, adaptiv or keine')
     mit_grund = grund_art != 'keine'
     mauer_physik = optionen.get('mauer_physik', 'senkrecht')
     if mauer_physik not in ('senkrecht', 'alle', 'keine'):
-        raise ValueError('mauer_physik: senkrecht, alle oder keine')
+        raise ValueError('mauer_physik: senkrecht, alle or keine')
     hoehe_versatz = float(optionen.get('hoehe_versatz') or 0.0)
     physik_umfang = optionen.get('physik_umfang') or 'voll'
     if physik_umfang not in ('voll', 'ohne_grund', 'fahrbahn'):
-        raise ValueError('physik_umfang: voll, ohne_grund oder fahrbahn')
+        raise ValueError('physik_umfang: voll, ohne_grund or fahrbahn')
     physik_kante_max = optionen.get('physik_kante_max')
     physik_kante_max = float(physik_kante_max) if physik_kante_max else None
     traeger_pruefen(archiv)
     terrain_res = archiv.find(TERRAIN)
     physik_res = archiv.find(physik_kennung(archiv))
     if len(physik_res.fragments) != 1:
-        raise GeometrieFehler('TRN~ muss genau ein Fragment haben')
+        raise GeometrieFehler('TRN~ must have exactly one fragment')
     netz = netz_laden(netz_npz, optionen.get('definition'))
     namen = netz['namen']
     fehlend = [k for k in KLASSEN if k not in namen and k not in OPTIONAL]
     if fehlend:
-        raise GeometrieFehler('Generatornetz ohne Klassen: %s' % fehlend)
+        raise GeometrieFehler('Generator mesh without classes: %s' % fehlend)
     pos = np.array(platzierung.punkte(netz['vertices']), dtype=np.float64)
     if hoehe_versatz:
         pos[:, 1] += hoehe_versatz
@@ -870,11 +870,11 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
                              randvertices=int(len(loch['rand'])), ersatz=loch['ersatz']))
     if (pos[:, 0].min() <= loch['x0'] or pos[:, 0].max() >= loch['x0'] + loch['kante']
             or pos[:, 2].min() <= loch['z0'] or pos[:, 2].max() >= loch['z0'] + loch['kante']):
-        raise GeometrieFehler('Platzierte Strecke liegt nicht vollständig im Loch des Außenterrains')
+        raise GeometrieFehler('Placed track does not lie completely inside the hole of the outer terrain')
     # --- Render
     welt_uv = optionen.get('welt_uv') or 'konstant'
     if welt_uv not in ('konstant', 'echt'):
-        raise ValueError('welt_uv: konstant oder echt')
+        raise ValueError('welt_uv: konstant or echt')
     if welt_uv == 'echt':
         bereich = welt_uv_bereich(loch, pos)
         vorlagen = dict(vorlagen, _welt_uv_loch=bereich)
@@ -897,7 +897,7 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
         try:
             grund = gelaende.adaptive_grundflaeche(pos, tri[~markierung], loch, **(optionen.get('gelaende') or {}))
         except gelaende.GelaendeFehler as exc:
-            raise GeometrieFehler('Adaptive Grundfläche: %s (Ausweg: grundflaeche=raster)' % exc) from exc
+            raise GeometrieFehler('Adaptive ground surface: %s (way out: grundflaeche=raster)' % exc) from exc
     elif mit_grund:
         grund = grundflaeche(T_boden, T_mauer_oben, loch, zelle=zelle,
                              abstand_unter_strecke=float(optionen.get('abstand_unter_strecke', 0.3)),
@@ -987,7 +987,7 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
     elif trn_flags == 'alle7':
         flags = np.full(len(pt), 7, dtype=np.uint8)
     else:
-        raise ValueError('trn_flags: kanten oder alle7')
+        raise ValueError('trn_flags: kanten or alle7')
     trn_statistik = {}
     roh = trn_erzeugen(pv, pt, c_teile, vertex_attribute=pa, flags=flags,
                        max_dreiecke=int(optionen.get('max_dreiecke_kachel', 512)), statistik=trn_statistik)

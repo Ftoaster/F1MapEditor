@@ -86,21 +86,22 @@ class EnvironmentPanel(QScrollArea):
 
     # ------------------------------------------------------------------ Aufbau
     def _catalog_box(self):
-        box = QGroupBox(tr("Katalog"))
+        box = QGroupBox(tr("Catalogue"))
         layout = QVBoxLayout(box)
         row = QHBoxLayout()
         self.search = QLineEdit()
-        self.search.setPlaceholderText(tr("Modell suchen …"))
+        self.search.setPlaceholderText(tr("Search model …"))
         self.search.setClearButtonEnabled(True)
-        self.search.setToolTip(tr("Sucht im Namen, in der Familie und in der Kennung des Modells."))
+        self.search.setToolTip(tr("Searches the name, family and identifier of the model."))
         self.search.textChanged.connect(self.fill_list)
         self.category = QComboBox()
-        self.category.addItem(tr("Alle Kategorien"), None)
+        self.category.addItem(tr("All categories"), None)
         for key in umgebung.KATEGORIEN:
             self.category.addItem(tr(umgebung.KATEGORIE_NAMEN[key]), key)
         self.category.currentIndexChanged.connect(self.fill_list)
-        self.reload_button = QPushButton(tr("Neu einlesen"))
-        self.reload_button.setToolTip(tr("Katalog aus dem Spielordner neu aufbauen (dauert; der Spielordner wird nur gelesen)."))
+        self.reload_button = QPushButton(tr("Reload"))
+        self.reload_button.setToolTip(tr(("Rebuild the catalogue from the game folder (takes a while; the game folder "
+                                          "is only read).")))
         self.reload_button.clicked.connect(self.refresh_requested)
         row.addWidget(self.search, 1)
         row.addWidget(self.category)
@@ -109,20 +110,20 @@ class EnvironmentPanel(QScrollArea):
         self.list = QListWidget()
         self.list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.list.setUniformItemSizes(True)
-        self.list.setAccessibleName(tr("Katalog der Umgebungsmodelle"))
-        self.list.setToolTip(tr("Ein Modell wählen und auf die Karte klicken: platzieren. Mehrere wählen (Strg/Umschalt): "
-                                "Mischung für „Fläche bepflanzen“."))
+        self.list.setAccessibleName(tr("Catalogue of environment models"))
+        self.list.setToolTip(tr("Choose a model and click the map to place it. Choose several (Ctrl/Shift): mix for "
+                                "“Plant area”."))
         self.list.itemSelectionChanged.connect(self._list_changed)
         layout.addWidget(self.list, 1)
-        self.status = QLabel(tr("Katalog noch nicht geladen"))
+        self.status = QLabel(tr("Catalogue not loaded yet"))
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
         return box
 
     def _detail_box(self):
-        box = QGroupBox(tr("Modell"))
+        box = QGroupBox(tr("Model"))
         layout = QVBoxLayout(box)
-        self.preview = QLabel(tr("keine Vorschau"))
+        self.preview = QLabel(tr("no preview"))
         self.preview.setFixedSize(150, 150)
         self.preview.setAlignment(Qt.AlignCenter)
         self.preview.setStyleSheet("border: 1px solid #44566A; border-radius: 4px;")
@@ -135,71 +136,71 @@ class EnvironmentPanel(QScrollArea):
         return box
 
     def _scatter_box(self):
-        box = QGroupBox(tr("Fläche bepflanzen (Werkzeug B)"))
+        box = QGroupBox(tr("Plant area (tool B)"))
         form = QFormLayout(box)
         form.setVerticalSpacing(3)
         self.form_choice = QComboBox()
-        self.form_choice.addItem(tr("Rechteck"), "rechteck")
-        self.form_choice.addItem(tr("Pinsel"), "pinsel")
+        self.form_choice.addItem(tr("Rectangle"), "rechteck")
+        self.form_choice.addItem(tr("Brush"), "pinsel")
         self.form_choice.currentIndexChanged.connect(self._form_changed)
         self.radius = _spin(2, 300, 30, 5, 0, " m")
-        self.radius.setToolTip(tr("Pinselradius: wie breit der Strich ist"))
+        self.radius.setToolTip(tr("Brush radius: how wide the stroke is"))
         self.radius.valueChanged.connect(lambda *_: self.settings_changed.emit())
         row = QHBoxLayout()
         row.addWidget(self.form_choice, 1)
         row.addWidget(self.radius)
-        form.addRow(tr("Fläche"), row)
-        self.density = _spin(1, 2000, 60, 10, 0, tr(" je ha"))
-        self.density.setToolTip(tr("Objekte je Hektar (100 × 100 m); 400 entspricht etwa einem Baum alle 5 m"))
-        form.addRow(tr("Dichte"), self.density)
+        form.addRow(tr("Area"), row)
+        self.density = _spin(1, 2000, 60, 10, 0, tr(" per ha"))
+        self.density.setToolTip(tr("Objects per hectare (100 × 100 m); 400 is roughly one tree every 5 m"))
+        form.addRow(tr("Density"), self.density)
         self.track_distance = _spin(0, 300, umgebung.STANDARD_ABSTAND_FAHRBAHN, 1, 0, " m")
-        self.track_distance.setToolTip(tr("Mindestabstand zur Mauer bzw. zum äußeren Rand der Strecke (Fahrbahn, "
-                                          "Randbänder, Mauer, Boxengasse); Standard 15 m hinter der Mauer"))
-        form.addRow(tr("Abstand zur Strecke"), self.track_distance)
+        self.track_distance.setToolTip(tr("Minimum distance to the wall or outer edge of the track (road, edge bands, "
+                                          "wall, pit lane); default 15 m behind the wall"))
+        form.addRow(tr("Distance to track"), self.track_distance)
         self.object_distance = _spin(0, 100, 3, 0.5, 1, " m")
-        self.object_distance.setToolTip(tr("Mindestabstand der Objekte zueinander (auch zu schon vorhandenen)"))
-        form.addRow(tr("Abstand untereinander"), self.object_distance)
+        self.object_distance.setToolTip(tr("Minimum distance between objects (also to existing ones)"))
+        form.addRow(tr("Spacing between objects"), self.object_distance)
         row = QHBoxLayout()
         self.scale_min = _spin(umgebung.SKALA_MIN, umgebung.SKALA_MAX, 0.8, 0.1, 2)
         self.scale_max = _spin(umgebung.SKALA_MIN, umgebung.SKALA_MAX, 1.2, 0.1, 2)
         row.addWidget(self.scale_min)
         row.addWidget(QLabel("–"))
         row.addWidget(self.scale_max)
-        form.addRow(tr("Skala von – bis"), row)
+        form.addRow(tr("Scale from – to"), row)
         row = QHBoxLayout()
-        self.random_rotation = QCheckBox(tr("Drehung zufällig"))
+        self.random_rotation = QCheckBox(tr("Random rotation"))
         self.random_rotation.setChecked(True)
         self.seed = QSpinBox()
         self.seed.setRange(0, 999999)
         self.seed.setValue(1)
-        self.seed.setToolTip(tr("Saatwert: gleicher Wert und gleiche Einstellungen ergeben dieselbe Streuung"))
-        self.dice = QPushButton(tr("Würfeln"))
-        self.dice.setToolTip(tr("Neuen Saatwert wählen (andere Verteilung)"))
+        self.seed.setToolTip(tr("Seed: the same value and settings give the same scatter"))
+        self.dice = QPushButton(tr("Roll dice"))
+        self.dice.setToolTip(tr("Choose a new seed (different distribution)"))
         self.dice.clicked.connect(self.roll_seed)
         row.addWidget(self.random_rotation, 1)
-        row.addWidget(QLabel(tr("Saat")))
+        row.addWidget(QLabel(tr("Random seed")))
         row.addWidget(self.seed)
         row.addWidget(self.dice)
         form.addRow(row)
         self.group_name = QLineEdit()
-        self.group_name.setPlaceholderText(tr("Streuung 1, Streuung 2 …"))
-        self.group_name.setToolTip(tr("Name der Gruppe: eine Streuung lässt sich gemeinsam wählen und löschen"))
-        form.addRow(tr("Gruppe"), self.group_name)
+        self.group_name.setPlaceholderText(tr("Scatter 1, Scatter 2 …"))
+        self.group_name.setToolTip(tr("Group name: a scatter can be selected and deleted together"))
+        form.addRow(tr("Group"), self.group_name)
         self._form_changed()
         return box
 
     def _terrain_box(self):
-        box = QGroupBox(tr("Gelände"))
+        box = QGroupBox(tr("Terrain"))
         layout = QVBoxLayout(box)
         row = QHBoxLayout()
-        self.hill_button = QPushButton(tr("Hügel setzen"))
+        self.hill_button = QPushButton(tr("Place hill"))
         self.hill_button.setCheckable(True)
-        self.hill_button.setToolTip(tr("Hügel oder Senke in der Grundfläche des Streckenbereichs: sichtbar und befahrbar. "
-                                       "Zur Strecke hin flacht der Bau ihn ab (30 m + 40 m Übergang)."))
-        self.mountain_button = QPushButton(tr("Berg setzen"))
+        self.hill_button.setToolTip(tr("Hill or hollow in the ground surface of the track area: visible and drivable. "
+                                       "The build flattens it towards the track (30 m + 40 m transition)."))
+        self.mountain_button = QPushButton(tr("Place mountain"))
         self.mountain_button.setCheckable(True)
-        self.mountain_button.setToolTip(tr("Berg im Außenterrain außerhalb des Streckenbereichs: nur Kulisse am Horizont, "
-                                           "keine Fahrphysik. Zum Setzen herauszoomen."))
+        self.mountain_button.setToolTip(tr("Mountain in the outer terrain outside the track area: scenery on the "
+                                           "horizon only, no driving physics. Zoom out to place it."))
         self.hill_button.toggled.connect(lambda on: self._arm("huegel", on))
         self.mountain_button.toggled.connect(lambda on: self._arm("berge", on))
         row.addWidget(self.hill_button)
@@ -208,10 +209,10 @@ class EnvironmentPanel(QScrollArea):
         form = QFormLayout()
         form.setVerticalSpacing(3)
         self.terrain_height = _spin(-60, 2000, 40, 10, 0, " m")
-        self.terrain_height.setToolTip(tr("Höhe in der Mitte; negativ = Senke (nur bei Hügeln)"))
+        self.terrain_height.setToolTip(tr("Height at the centre; negative = hollow (hills only)"))
         self.terrain_radius = _spin(30, 5000, 200, 10, 0, " m")
-        self.terrain_radius.setToolTip(tr("Radius der Form; der Rand läuft weich aus (Kosinusglocke)"))
-        form.addRow(tr("Höhe"), self.terrain_height)
+        self.terrain_radius.setToolTip(tr("Radius of the shape; the edge fades out smoothly (cosine bell)"))
+        form.addRow(tr("Height"), self.terrain_height)
         form.addRow(tr("Radius"), self.terrain_radius)
         layout.addLayout(form)
         self.terrain_height.valueChanged.connect(lambda v: self._terrain_send("hoehe_m", v))
@@ -219,8 +220,8 @@ class EnvironmentPanel(QScrollArea):
         self.terrain_text = QLabel()
         self.terrain_text.setWordWrap(True)
         layout.addWidget(self.terrain_text)
-        self.terrain_delete = QPushButton(tr("Form löschen"))
-        self.terrain_delete.setToolTip(tr("Gewählten Hügel/Berg entfernen (Entf)"))
+        self.terrain_delete = QPushButton(tr("Delete shape"))
+        self.terrain_delete.setToolTip(tr("Remove the selected hill/mountain (Del)"))
         self.terrain_delete.clicked.connect(self.terrain_delete_requested)
         layout.addWidget(self.terrain_delete)
         layout.addStretch(1)
@@ -275,13 +276,13 @@ class EnvironmentPanel(QScrollArea):
             for widget in (self.hill_button, self.mountain_button):
                 widget.setEnabled(editierbar)
             if form is None:
-                self.terrain_text.setText(tr("Hügel liegen im Streckenbereich (sichtbar und befahrbar), Berge außerhalb "
-                                             "(nur Kulisse). Knopf drücken, dann auf die Karte klicken."))
+                self.terrain_text.setText(tr("Hills lie inside the track area (visible and drivable), mountains "
+                                             "outside (scenery only). Press a button, then click on the map."))
                 return
             self._set_terrain_range(art)
             self.terrain_height.setValue(form["hoehe_m"])
             self.terrain_radius.setValue(form["radius_m"])
-            text = tr("{name} „{id}“ · X {x} · Z {z}", name=tr(umgebung.FORM_NAMEN[art]), id=form["id"],
+            text = tr("{name} “{id}” · X {x} · Z {z}", name=tr(umgebung.FORM_NAMEN[art]), id=form["id"],
                       x=zahl(form["x"], 0), z=zahl(form["z"], 0))
             if problem:
                 text += "\n⚠ " + tr(problem)
@@ -290,7 +291,7 @@ class EnvironmentPanel(QScrollArea):
             self._loading = False
 
     def _selection_box(self):
-        box = QGroupBox(tr("Umgebung · Auswahl"))
+        box = QGroupBox(tr("Environment · selection"))
         layout = QVBoxLayout(box)
         self.selection_text = QLabel()
         self.selection_text.setWordWrap(True)
@@ -298,37 +299,38 @@ class EnvironmentPanel(QScrollArea):
         form = QFormLayout()
         form.setVerticalSpacing(3)
         self.height_box = _spin(umgebung.HOEHE_MIN, umgebung.HOEHE_MAX, 0, 0.5, 2, " m")
-        self.height_box.setToolTip(tr("Abstand des Fußpunkts über dem Gelände (der Bau bestimmt die Geländehöhe selbst)"))
+        self.height_box.setToolTip(tr(("Distance of the base point above the terrain (the build determines the "
+                                       "terrain height itself)")))
         self.rotation_box = _spin(0, 360, 0, 15, 1, "°")
         self.rotation_box.setWrapping(True)
-        self.rotation_box.setToolTip(tr("Drehung um die Hochachse, mathematisch positiv in der Draufsicht"))
+        self.rotation_box.setToolTip(tr("Rotation about the vertical axis, mathematically positive in plan view"))
         self.scale_box = _spin(umgebung.SKALA_MIN, umgebung.SKALA_MAX, 1, 0.1, 2)
         self.group = QLineEdit()
-        self.group.setToolTip(tr("Gruppe (Streuung); leer = keine"))
-        form.addRow(tr("Höhe über Grund"), self.height_box)
-        form.addRow(tr("Drehung"), self.rotation_box)
-        form.addRow(tr("Skala"), self.scale_box)
-        form.addRow(tr("Gruppe"), self.group)
+        self.group.setToolTip(tr("Group (scatter); empty = none"))
+        form.addRow(tr("Height above ground"), self.height_box)
+        form.addRow(tr("Rotation"), self.rotation_box)
+        form.addRow(tr("Object scale"), self.scale_box)
+        form.addRow(tr("Group"), self.group)
         layout.addLayout(form)
         self.height_box.editingFinished.connect(lambda: self._send("hoehe_m", self.height_box.value()))
         self.rotation_box.editingFinished.connect(lambda: self._send("drehung_grad", self.rotation_box.value()))
         self.scale_box.editingFinished.connect(lambda: self._send("skala", self.scale_box.value()))
         self.group.editingFinished.connect(lambda: self._send("gruppe", self.group.text().strip()))
         buttons = QGridLayout()
-        self.group_button = QPushButton(tr("Gruppe wählen"))
+        self.group_button = QPushButton(tr("Select group"))
         self.group_button.clicked.connect(self.select_group_requested)
-        self.group_delete = QPushButton(tr("Gruppe löschen"))
+        self.group_delete = QPushButton(tr("Delete group"))
         self.group_delete.clicked.connect(self.delete_group_requested)
-        self.delete_button = QPushButton(tr("Löschen"))
-        self.delete_button.setToolTip(tr("Gewählte Objekte entfernen (Entf)"))
+        self.delete_button = QPushButton(tr("Delete"))
+        self.delete_button.setToolTip(tr("Remove the selected objects (Del)"))
         self.delete_button.clicked.connect(self.delete_requested)
         buttons.addWidget(self.group_button, 0, 0)
         buttons.addWidget(self.group_delete, 0, 1)
         buttons.addWidget(self.delete_button, 1, 0, 1, 2)
         layout.addLayout(buttons)
-        self.ground_cover = QCheckBox(tr("Bodenbewuchs (Gras/Unkraut)"))
-        self.ground_cover.setToolTip(tr("Aus: der Bau leert den Bodenbewuchs wie bisher. An: Gras und Unkraut des Trägers "
-                                        "bleiben erhalten. Neue Umgebungsdateien starten mit „an“."))
+        self.ground_cover = QCheckBox(tr("Ground cover (grass/weeds)"))
+        self.ground_cover.setToolTip(tr("Off: the build clears the ground cover as before. On: grass and weeds of the "
+                                        "carrier are kept. New environment files start with “on”."))
         self.ground_cover.toggled.connect(lambda on: None if self._loading else self.ground_cover_toggled.emit(on))
         layout.addWidget(self.ground_cover)
         self.count_label = QLabel()
@@ -343,8 +345,8 @@ class EnvironmentPanel(QScrollArea):
         self.index = umgebung.katalog_index(katalog)
         self.fill_list()
         self.status.setText(text if text is not None else
-                            tr("{anzahl} Modelle im Katalog", anzahl=zahl(len(self.models), 0)) if katalog else
-                            tr("Katalog noch nicht geladen"))
+                            tr("{anzahl} models in the catalogue", anzahl=zahl(len(self.models), 0)) if katalog else
+                            tr("Catalogue not loaded yet"))
 
     def fill_list(self, *_args):
         key = self.category.currentData()
@@ -421,22 +423,23 @@ class EnvironmentPanel(QScrollArea):
     def _show_details(self, modell):
         eintrag = self.index.get(modell) if modell else None
         if not eintrag:
-            self.details.setText(tr("Kein Modell gewählt.") if not modell else
-                                 tr("{modell}\nNicht im Katalog.", modell=umgebung.kurzname(modell)))
+            self.details.setText(tr("No model chosen.") if not modell else
+                                 tr("{modell}\nNot in the catalogue.", modell=umgebung.kurzname(modell)))
             self.preview.setPixmap(QPixmap())
-            self.preview.setText(tr("keine Vorschau"))
+            self.preview.setText(tr("no preview"))
             return
         size = eintrag.get("groesse_m") or [0, 0, 0]
         lines = [f"<b>{eintrag.get('name') or umgebung.kurzname(modell)}</b>",
                  tr(umgebung.KATEGORIE_NAMEN.get(eintrag.get("kategorie"), "Sonstiges")) + (f" · {eintrag['familie']}" if eintrag.get("familie") else ""),
-                 tr("Größe {x} × {z} × {y} m (Breite × Tiefe × Höhe)", x=zahl(size[0], 1), z=zahl(size[2], 1), y=zahl(size[1], 1)),
-                 tr("Radius auf der Karte {radius} m", radius=zahl(eintrag.get("radius_m") or 0, 1))]
+                 tr("Size {x} × {z} × {y} m (width × depth × height)", x=zahl(size[0], 1), z=zahl(size[2], 1), y=zahl(size[1], 1)),
+                 tr("Radius on the map {radius} m", radius=zahl(eintrag.get("radius_m") or 0, 1))]
         if eintrag.get("quelle"):
-            lines.append(tr("Quelle: {quelle}", quelle=eintrag["quelle"]))
-        lines.append(tr("schon im Trägerpaket") if eintrag.get("im_traeger") else tr("wird beim Bau aus dem Spiel kopiert"))
+            lines.append(tr("Source: {quelle}", quelle=eintrag["quelle"]))
+        lines.append(tr("already in the carrier package") if eintrag.get("im_traeger") else tr(("copied from the game during "
+                                                                                      "the build")))
         self.details.setText("<br>".join(lines))
         self.preview.setPixmap(QPixmap())
-        self.preview.setText(tr("Vorschau wird erstellt …"))
+        self.preview.setText(tr("Creating preview …"))
 
     def _request_preview(self):
         modell = self.armed_model()
@@ -450,7 +453,7 @@ class EnvironmentPanel(QScrollArea):
         pixmap = QPixmap(str(pfad)) if pfad else QPixmap()
         if pixmap.isNull():
             self.preview.setPixmap(QPixmap())
-            self.preview.setText(tr("keine Vorschau"))
+            self.preview.setText(tr("no preview"))
         else:
             self.preview.setPixmap(pixmap.scaled(self.preview.size() - QSize(4, 4), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
@@ -478,12 +481,12 @@ class EnvironmentPanel(QScrollArea):
             for widget in (self.height_box, self.rotation_box, self.scale_box, self.group, self.delete_button):
                 widget.setEnabled(first is not None and editierbar)
             if first is None:
-                self.selection_text.setText(tr("Nichts gewählt. Im Werkzeug „Umgebung“ (U) ein Objekt anklicken."))
+                self.selection_text.setText(tr("Nothing selected. Click an object with the “Environment” tool (U)."))
                 self.group.setText("")
             else:
                 name = umgebung.kurzname(first["modell"])
                 self.selection_text.setText(name if len(objekte) == 1 else
-                                            tr("{anzahl} Objekte · Werte des ersten: {name}", anzahl=len(objekte), name=name))
+                                            tr("{anzahl} objects · values of the first: {name}", anzahl=len(objekte), name=name))
                 self.height_box.setValue(first.get("hoehe_m", 0.0))
                 self.rotation_box.setValue(first.get("drehung_grad", 0.0))
                 self.scale_box.setValue(first.get("skala", 1.0))
@@ -493,7 +496,7 @@ class EnvironmentPanel(QScrollArea):
             self.group_delete.setEnabled(has_group and editierbar)
             self.ground_cover.setChecked(bool(bodenbewuchs))
             self.ground_cover.setEnabled(editierbar)
-            self.count_label.setText(tr("{anzahl} Objekte in der Umgebung", anzahl=zahl(anzahl, 0)))
+            self.count_label.setText(tr("{anzahl} objects in the environment", anzahl=zahl(anzahl, 0)))
         finally:
             self._loading = False
 

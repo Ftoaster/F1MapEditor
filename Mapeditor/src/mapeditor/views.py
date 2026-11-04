@@ -38,11 +38,12 @@ class ProfileView(QWidget):
         self._band = None                       # Bereichsauswahl (QPointF, QPointF)
         self._pending = None                    # Maus auf dem Profil gedrückt, Richtung noch offen
         self.setMinimumHeight(170)
-        self.setAccessibleName(tr("Höhenprofil in Metern ab Ziel") if kind == "height" else tr("Querneigung in Grad ab Ziel"))
+        self.setAccessibleName(tr("Height profile in metres from the finish") if kind == "height" else tr(("Banking in degrees from the "
+                                                                                                "finish")))
         self.unit = "m" if kind == "height" else "°"
         self.setFocusPolicy(Qt.ClickFocus)
         self.setMouseTracking(True)
-        self.setToolTip(tr("Mausrad: waagerecht zoomen · mittlere Maustaste: verschieben · Doppelklick: ganze Runde"))
+        self.setToolTip(tr("Mouse wheel: zoom horizontally · middle mouse button: pan · double-click: whole lap"))
 
     # ------------------------------------------------------------------ Griffe
     def nodes(self):
@@ -119,7 +120,7 @@ class ProfileView(QWidget):
         text = self.palette().text().color()
         painter.setPen(text)
         if not self.preview or not self.preview["pos"]:
-            painter.drawText(24, 40, tr("Profil: geschlossene Runde mit mindestens vier Punkten erforderlich."))
+            painter.drawText(24, 40, tr("Profile: a closed lap with at least four points is required."))
             return
         data = self.preview
         bank = self.kind == "bank"
@@ -135,21 +136,21 @@ class ProfileView(QWidget):
         painter.drawRect(plot)
         painter.setPen(text)
         if bank and nodes and self.editable:
-            title = tr("Querneigung in ° (+ = links höher) · ↑↓ 0,1° · Mausrad: Zoom · Rechtsklick: Werkzeuge")
+            title = tr("Banking in ° (+ = left higher) · ↑↓ 0.1° · mouse wheel: zoom · right-click: tools")
         elif bank:
-            title = tr("Querneigung in ° (+ = links höher)")
+            title = tr("Banking in ° (+ = left higher)")
         elif nodes and self.editable:
-            title = tr("Höhenprofil in m · ↑↓ 0,1 m · Mausrad: Zoom · Rechtsklick: Werkzeuge")
+            title = tr("Height profile in m · ↑↓ 0.1 m · mouse wheel: zoom · right-click: tools")
         else:
-            title = tr("Höhenprofil in m")
-        title += (tr(" · deine Eingabe (Vorschau folgt)") if data.get("input") else
-                  "" if bank or nodes else tr(" · durchgezogen: berechnet, gestrichelt: deine Eingabe"))
+            title = tr("Height profile in m")
+        title += (tr(" · your input (preview follows)") if data.get("input") else
+                  "" if bank or nodes else tr(" · solid: computed, dashed: your input"))
         # Titel links, Cursorwert rechts in derselben Zeile; der Titel wird bei Platzmangel gekürzt
         i = min(range(len(data["s"])), key=lambda i: abs(data["s"][i] - self.station))
         if bank:
             cursor = dezimal(tr("Cursor {station:.1f} m · {wert:.2f}°", station=self.station, wert=values[i]))
         else:
-            cursor = dezimal(tr("Cursor {station:.1f} m · {wert:.2f} {unit} · Steigung {gradient:+.1f} %",
+            cursor = dezimal(tr("Cursor {station:.1f} m · {wert:.2f} {unit} · gradient {gradient:+.1f} %",
                                 station=self.station, wert=values[i], unit="m", gradient=data['gradient'][i]))
         metrics = painter.fontMetrics()
         room = plot.right() - 16 - metrics.horizontalAdvance(cursor) - 16
@@ -158,15 +159,15 @@ class ProfileView(QWidget):
         painter.drawText(8, int(plot.top() + 5), dezimal(f"{hi:.1f}"))
         painter.drawText(8, int(plot.bottom()), dezimal(f"{lo:.1f}"))
         is_input = data.get("input", False)
-        origin = tr("Eingabeursprung") if is_input else tr("Ziel")
+        origin = tr("input origin") if is_input else tr("finish")
         if self.view:
             painter.drawText(int(plot.left()), self.height() - 10, f"{s0:.0f} m")
             painter.drawText(int(plot.right() - 330), self.height() - 10,
-                             tr("{s1:.0f} m · Station ab {origin} · Zoom (Doppelklick: ganze Runde)", s1=s1, origin=origin))
+                             tr("{s1:.0f} m · station from {origin} · zoom (double-click: whole lap)", s1=s1, origin=origin))
         else:
             painter.drawText(int(plot.left()), self.height() - 10, "0 · " + origin)
             painter.drawText(int(plot.right() - (255 if is_input else 190)), self.height() - 10,
-                             tr("{length:.0f} m · Station ab ", length=data['length']) + origin)
+                             tr("{length:.0f} m · station from ", length=data['length']) + origin)
         painter.save()
         painter.setClipRect(QRectF(plot.left() - 8, 0, plot.width() + 16, self.height()))
         closed = data.get("closed", True)
@@ -239,9 +240,9 @@ class ProfileView(QWidget):
             p = next((q for node, q in pts if node["index"] in moving), pts[0][1])
             painter.setPen(accent)
             if self.kind == "height":
-                label = trn(len(moving), "{dy:+.1f} m · {n} Punkt", "{dy:+.1f} m · {n} Punkte", dy=dy)
+                label = trn(len(moving), "{dy:+.1f} m · {n} point", "{dy:+.1f} m · {n} points", dy=dy)
             else:
-                label = trn(len(moving), "{dy:+.1f}° · {n} Punkt", "{dy:+.1f}° · {n} Punkte", dy=dy)
+                label = trn(len(moving), "{dy:+.1f}° · {n} point", "{dy:+.1f}° · {n} points", dy=dy)
             painter.drawText(QPointF(p.x() + 10, p.y() - 10), dezimal(label))
 
     def _paint_band(self, painter, accent):
@@ -395,24 +396,24 @@ class ProfileView(QWidget):
         menu = QMenu(self)
         count = len(self.selected)
         if self.kind == "height":
-            entries = (("uebergang", tr("Sanfter Übergang A→B (S-Kurve)"), 3),
-                       ("rampe", tr("Gleichmäßige Steigung (Rampe zwischen erstem und letztem)"), 3),
-                       ("eben", tr("Auf gleiche Höhe (Mittelwert)"), 2),
-                       ("glaetten", tr("Glätten (Unebenheiten ausgleichen)"), 1),
-                       ("eingeben", tr("Höhe eingeben …"), 1))
+            entries = (("uebergang", tr("Smooth transition A→B (S-curve)"), 3),
+                       ("rampe", tr("Even gradient (ramp between first and last)"), 3),
+                       ("eben", tr("Same height (mean value)"), 2),
+                       ("glaetten", tr("Smooth (even out bumps)"), 1),
+                       ("eingeben", tr("Enter height …"), 1))
         else:
-            entries = (("uebergang", tr("Sanfter Übergang A→B (S-Kurve)"), 3),
-                       ("rampe", tr("Gleichmäßiger Verlauf (Rampe zwischen erstem und letztem)"), 3),
-                       ("eben", tr("Gleiche Querneigung (Mittelwert)"), 2),
-                       ("glaetten", tr("Glätten (Sprünge ausgleichen)"), 1),
-                       ("eingeben", tr("Querneigung eingeben …"), 1))
+            entries = (("uebergang", tr("Smooth transition A→B (S-curve)"), 3),
+                       ("rampe", tr("Even progression (ramp between first and last)"), 3),
+                       ("eben", tr("Same banking (mean)"), 2),
+                       ("glaetten", tr("Smooth (even out jumps)"), 1),
+                       ("eingeben", tr("Enter banking …"), 1))
         for key, text, need in entries:
             action = menu.addAction(text)
             action.setEnabled(self.editable and count >= need)
             action.triggered.connect(lambda checked=False, key=key: self.height_tool.emit(key))
         if not count:
             menu.addSeparator()
-            menu.addAction(tr("Erst Punkte wählen (Klick oder Rahmen)")).setEnabled(False)
+            menu.addAction(tr("Select points first (click or box)")).setEnabled(False)
         menu.exec(global_pos)
 
 
@@ -428,16 +429,16 @@ class CrossSection(QWidget):
         self.station = 0
         self.edge_input = None      # Eingabe vor „Übernehmen“: {"wert": None|"strecke"|Grad, "seite": beide|links|rechts}
         self.setMinimumHeight(190)
-        self.setAccessibleName(tr("Querschnitt: Blick in Fahrtrichtung, links höher bei positiver Querneigung"))
+        self.setAccessibleName(tr("Cross-section: looking in driving direction, left higher with positive banking"))
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(self.palette().text().color())
         exaggeration = self._exaggeration()
-        painter.drawText(18, 24, tr("Blick in Fahrtrichtung · Höhe {faktor}-fach",
+        painter.drawText(18, 24, tr("Looking in driving direction · height ×{faktor}",
                                     faktor=zahl(exaggeration, 1 if exaggeration < 2 else 0))
-                         + (tr(" · deine Eingabe") if self.preview and self.preview.get("input") else tr(" · veraltet") if self.stale else ""))
+                         + (tr(" · your input") if self.preview and self.preview.get("input") else tr(" · outdated") if self.stale else ""))
         if not self.preview or not self.preview["pos"]:
             return
         v = self.preview
@@ -450,7 +451,7 @@ class CrossSection(QWidget):
             painter.setPen(QPen(QColor("#67D9F5"), 4))
             painter.drawLine(center + QPointF(-wl * scale, -wl * math.tan(angle) * scale * 5), center + QPointF(wr * scale, wr * math.tan(angle) * scale * 5))
             painter.setPen(self.palette().text().color())
-            painter.drawText(18, 49, tr("Links {wl} · Rechts {wr} · Querneigung {vorzeichen}{bank}°", wl=zahl(wl, 2, 'm'), wr=zahl(wr, 2, 'm'),
+            painter.drawText(18, 49, tr("Left {wl} · right {wr} · banking {vorzeichen}{bank}°", wl=zahl(wl, 2, 'm'), wr=zahl(wr, 2, 'm'),
                                 vorzeichen='+' if v['bank'][i] >= 0 else '', bank=zahl(v['bank'][i], 2)))
             return
         left, right = v["sides"]["links"], v["sides"]["rechts"]
@@ -489,11 +490,11 @@ class CrossSection(QWidget):
             barrier_position = xy(sign * (width + distances[-1]))
             painter.setPen(QPen(QColor(MATERIALS[4]), 3))
             painter.drawLine(barrier_position, barrier_position - QPointF(0, min(45, v.get("barrier", {}).get("hoehe", 1.2) * scale * exaggeration)))
-        names.add(tr("Barriere"))
+        names.add(tr("Barrier"))
         painter.setPen(self.palette().text().color())
-        painter.drawText(18, 49, tr("Links {wl}  /  Rechts {wr}  ·  {vorzeichen}{bank}°  ·  Station {station}", wl=zahl(wl, 2, 'm'), wr=zahl(wr, 2, 'm'),
+        painter.drawText(18, 49, tr("Left {wl}  /  right {wr}  ·  {vorzeichen}{bank}°  ·  station {station}", wl=zahl(wl, 2, 'm'), wr=zahl(wr, 2, 'm'),
                                     vorzeichen='+' if v['bank'][i] >= 0 else '', bank=zahl(v['bank'][i], 2), station=zahl(self.station, 1, 'm')))
-        painter.drawText(18, self.height() - 15, tr("Bänder: ") + " · ".join(sorted(names)))
+        painter.drawText(18, self.height() - 15, tr("Bands: ") + " · ".join(sorted(names)))
 
     def _edge_rise(self, i, angle):
         """Höhenänderung je Meter nach außen (links, rechts): aus der Vorschau, die Eingabe vor „Übernehmen“ geht vor."""
@@ -551,7 +552,7 @@ class SpeedView(QWidget):
         self.station = 0.0
         self.setMinimumHeight(150)
         self.setMouseTracking(True)
-        self.setAccessibleName(tr("Geschwindigkeit über die Runde aus dem Fahrlinienlauf"))
+        self.setAccessibleName(tr("Speed over the lap from the racing-line run"))
 
     def _plot(self):
         return QRectF(52, 36, max(10, self.width() - 70), max(10, self.height() - 70))   # unten 2 Zeilen Kurvennummern
@@ -567,8 +568,8 @@ class SpeedView(QWidget):
         text = self.palette().text().color()
         painter.setPen(text)
         if not self.analysis:
-            painter.drawText(24, 40, tr("Geschwindigkeit: erscheint nach dem Fahrlinienlauf (startet automatisch nach "
-                                     "einer Änderung, oder „Prüfen“ / Strg+Enter)."))
+            painter.drawText(24, 40, tr("Speed: appears after the racing-line run (starts automatically after a "
+                                        "change, or “Check” / Ctrl+Enter)."))
             return
         a = self.analysis
         plot = self._plot()
@@ -577,7 +578,9 @@ class SpeedView(QWidget):
 
         def xy(s, v):
             return QPointF(plot.left() + s / length * plot.width(), plot.bottom() - v / top * plot.height())
-        painter.drawText(16, 22, tr("Geschwindigkeit der Ideallinie in km/h über die Runde ({length:.0f} m ab Ziel) · rot: Bremszonen · Klick: Cursor", length=length) + (tr(" · veraltet, wird neu berechnet") if self.stale else ""))
+        painter.drawText(16, 22, tr(("Speed of the racing line in km/h over the lap ({length:.0f} m from the finish) "
+                                     "· red: braking zones · click: cursor"), length=length) + (tr((" · outdated, being "
+                                                                                                                                                                              "recalculated")) if self.stale else ""))
         if self.stale:
             painter.setOpacity(.45)
         painter.setPen(QPen(QColor("#52677A"), 1))

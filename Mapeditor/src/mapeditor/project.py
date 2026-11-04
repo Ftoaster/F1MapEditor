@@ -38,7 +38,7 @@ def encoded(data):
 class Project:
     def __init__(self, raw=None, manifest=None, folder=None, source=None):
         self.raw = copy.deepcopy(raw if raw is not None else {
-            "name": tr("Neue Strecke"), "mittellinie": {"art": "kontrollpunkte", "punkte": []}})
+            "name": tr("New track"), "mittellinie": {"art": "kontrollpunkte", "punkte": []}})
         self.manifest = copy.deepcopy(manifest if manifest is not None else {
             "schema": 1, "definition": "definition.json", "runde_geschlossen": False,
             "thema": "dunkel", "versatz": [0, 0, 0]})
@@ -49,7 +49,7 @@ class Project:
         if self.folder and (self.folder / "spieltests.json").exists():
             data = read_json(self.folder / "spieltests.json")
             if not isinstance(data, list) or any(not isinstance(entry, dict) for entry in data):
-                raise ValueError(tr("Ungültiges Spieltest-Protokoll."))
+                raise ValueError(tr("Invalid playtest log."))
             self.playtests = data
         # Umgebung (Bäume, Gebäude …): ``umgebung.json`` neben der Definition; None = keine Datei. Eine nicht lesbare
         # Datei bleibt unberührt (``umgebung_fehler``): der Editor öffnet das Projekt, bearbeitet sie aber nicht.
@@ -120,7 +120,7 @@ class Project:
             definition = cls.definition_path(path.parent, data)
             return cls(read_json(definition), data, path.parent, definition)
         if not isinstance(data, dict) or not isinstance(data.get("mittellinie"), dict):
-            raise ValueError(tr("Keine Streckendefinition: mittellinie fehlt."))
+            raise ValueError(tr("No track definition: mittellinie is missing."))
         return cls(data, {"schema": 1, "definition": "definition.json",
                           "runde_geschlossen": True, "thema": "dunkel", "versatz": [0, 0, 0]}, source=path)
 
@@ -129,34 +129,34 @@ class Project:
         relative = Path(manifest.get("definition", "definition.json"))
         target = (folder / relative).resolve()
         if relative.is_absolute() or folder.resolve() not in target.parents or target.name == "projekt.json":
-            raise ValueError(tr("Definitionspfad muss innerhalb des Projektordners liegen."))
+            raise ValueError(tr("Definition path must be inside the project folder."))
         return target
 
     def save(self, folder=None):
         if self.readonly:
-            raise ValueError(tr("Unbekannte Projektfassung: nur lesend geöffnet."))
+            raise ValueError(tr("Unknown project version: opened read-only."))
         target = writable_path(folder or self.folder or "")
         if folder is None and self.folder is None:
-            raise ValueError(tr("Bitte einen Projektordner wählen."))
+            raise ValueError(tr("Please choose a project folder."))
         definition = self.definition_path(target, self.manifest)
         writable_path(definition)
         writable_path(target / "projekt.json")
         writable_path(target / "spieltests.json")
         if definition.name == "spieltests.json":
-            raise ValueError(tr("Definitionspfad kollidiert mit dem Spieltest-Protokoll."))
+            raise ValueError(tr("Definition path collides with the playtest log."))
         new_definition, new_manifest = encoded(self.raw), encoded(self.manifest)
         # Externe CSV-Quellen bleiben unverändert; relative Beilagen werden mitgenommen.
         ml = self.raw.get("mittellinie", {})
         if ml.get("art") == "csv":
             rel = Path(ml["datei"])
             if rel.is_absolute() or ".." in rel.parts:
-                raise ValueError(tr("CSV zuerst als relative Beilage im Quellordner ablegen."))
+                raise ValueError(tr("First place the CSV as a relative attachment in the source folder."))
             original = (self.basis / rel).resolve()
             destination = (target / rel).resolve()
             if target not in destination.parents:
-                raise ValueError(tr("CSV-Ziel muss innerhalb des Projektordners liegen."))
+                raise ValueError(tr("CSV target must be inside the project folder."))
             if destination in (definition, target / "projekt.json", target / "spieltests.json"):
-                raise ValueError(tr("CSV-Beilage kollidiert mit einer Projektdatei."))
+                raise ValueError(tr("CSV attachment collides with a project file."))
             if original != destination:
                 atomic_write(destination, original.read_bytes())
         manifest_path = target / "projekt.json"
@@ -194,7 +194,7 @@ class Project:
 
     def save_playtests(self):
         if self.readonly or not self.folder:
-            raise ValueError(tr("Spieltests brauchen ein gespeichertes, beschreibbares Projekt."))
+            raise ValueError(tr("Playtests need a saved, writable project."))
         atomic_write(self.folder / "spieltests.json", encoded(self.playtests))
 
 

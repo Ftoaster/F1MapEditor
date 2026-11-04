@@ -82,10 +82,13 @@ def _volumes(tore, geschlossen, name, typ):
                         for i in range(n)]}
 
 
-def _querabstand(pos, normale, rand, index, erwartet):
-    """Schnitt mit benachbarten Randsegmenten statt nur Projektion auf die Normale."""
+def _querabstand(pos, normale, rand, index, erwartet, fenster=70):
+    """Schnitt mit benachbarten Randsegmenten statt nur Projektion auf die Normale.
+
+    Findet das Fenster (±``fenster`` Randpunkte) keinen Schnitt, wird einmal mit ±250 gesucht (4.11.2026: der
+    Außenrand der sehr breiten ersten Kurve von Austin liegt weiter entfernt); sonst bleibt das Ergebnis gleich."""
     n = len(rand)
-    idx = (index + np.arange(-70, 71)) % n
+    idx = (index + np.arange(-fenster, fenster + 1)) % n
     a, b = rand[idx], rand[(idx+1) % n]
     e = b[:, [0, 2]] - a[:, [0, 2]]
     ao = a[:, [0, 2]] - pos[[0, 2]]
@@ -96,7 +99,9 @@ def _querabstand(pos, normale, rand, index, erwartet):
         u = (ao[:, 0]*d[1]-ao[:, 1]*d[0]) / den
     ok = (np.abs(den)>1e-12) & (u>=-1e-8) & (u<=1+1e-8)
     if not np.any(ok):
-        raise ValueError('KI-Gate schneidet eine Streckengrenze nicht')
+        if fenster < 250 and n > 2 * fenster + 1:
+            return _querabstand(pos, normale, rand, index, erwartet, 250)
+        raise ValueError('AI gate does not cross a track limit')
     kandidaten = ell[ok]
     return float(kandidaten[np.argmin(np.abs(kandidaten-erwartet))])
 
@@ -230,7 +235,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
     pl = param['logik']
     schritt = float(pl['trackspace_schritt_m'])
     if not 7 <= schritt <= 11:
-        raise ValueError('TrackSpace-Schritt muss 7–11 m betragen')
+        raise ValueError('TrackSpace step must be 7–11 m')
     ns = max(3, int(round(L/schritt)))
     s_ts = np.arange(ns)*L/ns
     pos_ts = ml.stationen(s_ts).pos
@@ -249,7 +254,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
 
     # Sektorgrenzen nahe Dritteln auf möglichst geraden Abschnitten, nie überlappend.
     if param['sektoren']['anzahl'] != 3:
-        raise ValueError('Die Spielformate erwarten drei Sektoren')
+        raise ValueError('The game formats expect three sectors')
     grenzen = [0.0]
     feste = param['sektoren'].get('grenzen_m')
     for frac in (1/3, 2/3) if not feste else ():
@@ -259,7 +264,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
         grenzen.append(float(ml.s[kand[np.argmin(wert)]]))
     if feste:
         if len(feste) != 2 or not 0 < float(feste[0]) < float(feste[1]) < L:
-            raise ValueError('sektoren.grenzen_m braucht zwei Werte 0 < a < b < Länge (Meter ab Ziel)')
+            raise ValueError('sektoren.grenzen_m needs two values 0 < a < b < length (metres from the finish)')
         grenzen += [float(feste[0]), float(feste[1])]
     grenzen.append(L)
     sektoren = [{'nummer': i+1, 's_start_m': grenzen[i], 's_ende_m': grenzen[i+1],
@@ -438,7 +443,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
 
     pg = param['startaufstellung']
     if pg['abstand_pole_m']+(pg['anzahl']-1)*pg['abstand_m']+pg['fahrzeuglaenge_m']/2 >= L:
-        raise ValueError('Startaufstellung ist länger als die Strecke')
+        raise ValueError('Grid is longer than the track')
     plaetze = []
     for i in range(pg['anzahl']):
         ss = -pg['abstand_pole_m']-i*pg['abstand_m']
@@ -448,7 +453,7 @@ def logik_berechnen(ml, qp, rl, param, kurven):
         off = float(off) if off is not None else float((stp.wl[0]+stp.wr[0])/4)
         d = vz*off-STARTPLATZ_QUER_M
         if not -stp.wr[0]+1 <= d <= stp.wl[0]-1:
-            raise ValueError('Startplatz liegt außerhalb der Fahrbahn')
+            raise ValueError('Grid slot lies outside the road')
         pos = _punkt(ml, ss, d)[0]
         links3 = np.array([stp.nl[0,0], np.tan(stp.bank[0]), stp.nl[0,1]])
         oben = _einheit(np.cross(stp.t3[0],links3))

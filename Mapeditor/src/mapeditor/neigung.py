@@ -26,10 +26,10 @@ AUTO_FULL_R = 80.0       # Automatik: ab diesem Radius abwärts volle Stärke �
 AUTO_ZERO_R = 500.0      # … ab diesem Radius aufwärts flach (dazwischen linear in der Krümmung)
 
 SIDES = {                # Schlüssel: Beschriftung
-    "innen": N_("Kurveninnenseite tiefer"),
-    "aussen": N_("Kurvenaußenseite tiefer"),
-    "links": N_("links höher"),
-    "rechts": N_("rechts höher"),
+    "innen": N_("Corner inside lower"),
+    "aussen": N_("Corner outside lower"),
+    "links": N_("left higher"),
+    "rechts": N_("right higher"),
 }
 
 
@@ -52,7 +52,7 @@ def signed(magnitude, side, turn):
 def describe(value, turn):
     """Klartext für einen Wert: „flach“, „4,0° · Kurveninnenseite tiefer“, „2,0° · links höher“."""
     if abs(value) < 0.05:
-        return tr("flach")
+        return tr("flat")
     from .ux import zahl
     amount = zahl(abs(value), 1) + "°"
     if turn:
@@ -257,7 +257,7 @@ class BankPanel(QFrame):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 8)
         layout.setSpacing(6)
-        title = QLabel(tr("QUERNEIGUNG"))
+        title = QLabel(tr("BANKING"))
         title.setObjectName("heading")
         layout.addWidget(title)
         self.state = QLabel()
@@ -270,12 +270,11 @@ class BankPanel(QFrame):
         self.amount.setDecimals(1)
         self.amount.setSuffix(" °")
         self.amount.setKeyboardTracking(False)       # erst bei Enter/Pfeil übernehmen
-        self.amount.setToolTip(tr("Stärke der Neigung. Pfeile/Mausrad: 0,5°-Schritte, Enter übernimmt."))
+        self.amount.setToolTip(tr("Amount of banking. Arrows/mouse wheel: 0.5° steps, Enter applies."))
         self.side = QComboBox()
         for key, text in SIDES.items():
             self.side.addItem(tr(text), key)
-        self.side.setToolTip(tr("Welche Seite tiefer liegt. „Kurveninnenseite“ passt sich jeder Kurve an "
-                             "(Geraden bleiben dabei flach)."))
+        self.side.setToolTip(tr("Which side is lower. “Corner inside” adapts to every corner (straights stay flat)."))
         row.addWidget(self.amount)
         row.addWidget(self.side, 1)
         # Stärke, Seite, Schnellwerte und Warnung nur bei Auswahl (ohne Auswahl bleibt das Feld kompakt)
@@ -288,10 +287,10 @@ class BankPanel(QFrame):
         presets = QGridLayout()
         presets.setSpacing(4)
         self.preset_buttons = []
-        for col, (text, value, tip) in enumerate(((tr("Flach"), 0.0, tr("Keine Querneigung")),
-                                                  ("2°", 2.0, tr("Leichte Überhöhung")),
-                                                  ("4°", 4.0, tr("Deutliche Überhöhung")),
-                                                  (tr("FIA-Max"), FIA_MAX, tr("Höchstwert der FIA-Regeln (5,7°)")))):
+        for col, (text, value, tip) in enumerate(((tr("Flat"), 0.0, tr("No banking")),
+                                                  ("2°", 2.0, tr("Slight banking")),
+                                                  ("4°", 4.0, tr("Strong banking")),
+                                                  (tr("FIA max"), FIA_MAX, tr("Maximum of the FIA rules (5.7°)")))):
             button = QPushButton(text)
             button.setToolTip(tip)
             button.clicked.connect(lambda checked=False, value=value: self._preset(value))
@@ -303,18 +302,17 @@ class BankPanel(QFrame):
         self.warning.setStyleSheet("color: #D6A94A;")
         detail.addWidget(self.warning)
         whole = QHBoxLayout()
-        self.auto_button = QPushButton(tr("Alle Kurven automatisch"))
-        self.auto_button.setToolTip(tr("Ganze Strecke: jede Kurve zur Innenseite neigen – enge Kurven (R ≤ 80 m) mit "
-                                    "der eingestellten Stärke, weitere schwächer, ab R 500 m flach. Strg+Z macht rückgängig."))
-        self.flat_button = QPushButton(tr("Alles flach"))
-        self.flat_button.setToolTip(tr("Ganze Strecke ohne Querneigung (auch Fahrbahn-Standard und Abschnitte). "
-                                    "Strg+Z macht rückgängig."))
+        self.auto_button = QPushButton(tr("All corners automatically"))
+        self.auto_button.setToolTip(tr("Whole track: bank every corner towards the inside – tight corners (R ≤ 80 m) "
+                                       "with the set amount, wider ones less, flat from R 500 m. Ctrl+Z undoes."))
+        self.flat_button = QPushButton(tr("All flat"))
+        self.flat_button.setToolTip(tr("Whole track without banking (also road default and sections). Ctrl+Z undoes."))
         self.auto_button.clicked.connect(lambda: self.auto_requested.emit(self.amount.value() or 4.0))
         self.flat_button.clicked.connect(self.flat_requested.emit)
         whole.addWidget(self.auto_button)
         whole.addWidget(self.flat_button)
         layout.addLayout(whole)
-        hint = QLabel(tr("Übergänge glättet der Generator (Fahrbahn → Übergang, Standard 40 m)."))
+        hint = QLabel(tr("The generator smooths transitions (road → transition, default 40 m)."))
         hint.setWordWrap(True)
         hint.setEnabled(False)
         detail.addWidget(hint)
@@ -336,8 +334,8 @@ class BankPanel(QFrame):
     def _update_warning(self):
         value = self.amount.value()
         self.warning.setVisible(value > FIA_MAX + 1e-9)
-        self.warning.setText(tr("Über dem FIA-Höchstwert von 5,7° – die Prüfung meldet das (Ovale/Steilkurven sind "
-                                "erlaubt, aber nicht regelkonform).") if value > FIA_MAX + 1e-9 else "")
+        self.warning.setText(tr("Above the FIA maximum of 5.7° – the check reports this (ovals/steep banking are "
+                                "allowed, but not compliant).") if value > FIA_MAX + 1e-9 else "")
 
     def show_selection(self, values, turns_, count, editable):
         """Zustand der Auswahl anzeigen, ohne etwas zu schreiben."""
@@ -349,15 +347,14 @@ class BankPanel(QFrame):
                 widget.setEnabled(editable)
             self.detail.setVisible(count > 0)
             if not count:
-                self.state.setText(tr("Kurve oder Punkte wählen, um sie zu neigen. "
-                                   "Oder: „Alle Kurven automatisch“."))
+                self.state.setText(tr("Select a corner or points to bank them. Or: “All corners automatically”."))
                 return
             texts = {describe(v, t) for v, t in zip(values, turns_)}
             if len(texts) == 1:
-                self.state.setText(tr("Auswahl: {zustand}", zustand=texts.pop()) if count > 1 else
-                                   tr("Gewählt: {zustand}", zustand=texts.pop()))
+                self.state.setText(tr("Selection: {zustand}", zustand=texts.pop()) if count > 1 else
+                                   tr("Selected: {zustand}", zustand=texts.pop()))
             else:
-                self.state.setText(tr("Auswahl: gemischt ({anzahl} Objekte)", anzahl=count))
+                self.state.setText(tr("Selection: mixed ({anzahl} objects)", anzahl=count))
             first = max(values, key=abs) if values else 0.0
             self.amount.setValue(abs(first))
             turn = next((t for v, t in zip(values, turns_) if abs(v) >= 0.05), 0)

@@ -80,7 +80,7 @@ def zellen_berechnen(linien: Sequence[np.ndarray], korridor_m: float = 60.0,
         G, H = kand[erst], P[quelle[erst], 1]
     xyz = np.column_stack([G[:, 0] * raster, G[:, 1] * raster, np.round(H * 100 + hoehe_zusatz_cm)])
     if np.abs(xyz).max() > 32767:
-        raise ValueError("Zellkoordinate außerhalb i16")
+        raise ValueError("Cell coordinate outside i16")
     return xyz.astype(np.int64)
 
 
@@ -98,7 +98,7 @@ def pvs_fuer_strecke(archiv, logik: Optional[dict] = None, code: str = "portimao
         xyz = xyz[np.random.default_rng(9).permutation(len(xyz))]
     res = archiv.find_all(r"\.volumedata\.pvsbin$")
     if len(res) != 1 or len(archiv.find_all(r"\.header\.pvsbin$")) != 1:
-        raise ValueError("Archiv braucht genau ein PVS-Paar")
+        raise ValueError("Archive needs exactly one PVS pair")
     alt_daten = res[0].fragments[0].read()
     alt = pvs.vis_lesen(alt_daten)
     neu = pvs.zellen_neu_aufbauen(alt, [tuple(v) for v in xyz.tolist()], gruppe_b=gruppe_b,

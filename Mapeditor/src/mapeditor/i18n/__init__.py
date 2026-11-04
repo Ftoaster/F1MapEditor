@@ -1,15 +1,18 @@
-"""Übersetzung der Oberfläche: Deutsch ist Quelltext und Standard, Englisch kommt aus ``texte.csv``.
+"""Übersetzung der Oberfläche, **English First** (4.11.2026): Englisch ist Quelltext und Standard, Deutsch kommt aus
+``texte.csv``.
 
 Aufbau (Begründung in ``docs/uebersetzung.md``):
 
-* Im Code steht der deutsche Text selbst als Schlüssel: ``tr("Speichern")``. Fehlt eine Übersetzung, erscheint
-  der deutsche Text – die Oberfläche bleibt immer bedienbar.
-* Werte über benannte Platzhalter statt zusammengesetzter Sätze: ``tr("Höhe {wert} m", wert=zahl(y))``.
-* Mehrzahl: ``trn(n, "{n} Warnung", "{n} Warnungen")``; in der Tabelle als eine Zeile ``Einzahl|Mehrzahl``.
+* Im Code steht der englische Text selbst als Schlüssel: ``tr("Save")``. Fehlt eine Übersetzung, erscheint der
+  englische Text – die Oberfläche bleibt immer bedienbar.
+* Werte über benannte Platzhalter statt zusammengesetzter Sätze: ``tr("Height {wert} m", wert=zahl(y))``.
+* Mehrzahl: ``trn(n, "{n} warning", "{n} warnings")``; in der Tabelle als eine Zeile ``Einzahl|Mehrzahl``.
 * Konstanten auf Modulebene markiert ``N_("…")`` (gibt den Text unverändert zurück); übersetzt wird erst bei der
   Anzeige mit ``tr(konstante)``. So wirkt ein Sprachwechsel ohne Neuimport der Module.
-* Lange Texte (Hilfe) liegen als eigene Dateien je Sprache daneben: ``hilfe_de.html``, ``hilfe_en.html``.
-* Meldungen des Werkzeugkastens sind deutsch und fertig formatiert. ``meldung(text)`` bildet sie bei der Anzeige über
+* Deutsche Datenwerte (Stufen und Status aus dem Werkzeugkasten oder aus Projektdateien, z. B. „Fehler“) laufen ebenfalls
+  durch ``tr``: Steht der Wert in der Spalte ``de``, erscheint auf Englisch der Schlüssel dieser Zeile.
+* Lange Texte (Hilfe) liegen als eigene Dateien je Sprache daneben: ``hilfe_en.html``, ``hilfe_de.html``.
+* Meldungen des Werkzeugkastens sind englisch und fertig formatiert. ``meldung(text)`` bildet sie auf Deutsch über
   ``meldungen.csv`` (Vorlagen mit ``{}``) ab; ``pflege`` prüft, dass jede Vorlage des Werkzeugkastens dort steht.
 """
 
@@ -21,9 +24,10 @@ from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
 TABELLE = HIER / "texte.csv"
-SPALTEN = ("de", "en", "ort")
-SPRACHEN = {"de": "Deutsch", "en": "English"}
-STANDARD = "de"
+SPALTEN = ("en", "de", "ort")
+SPRACHEN = {"en": "English", "de": "Deutsch"}
+#: Quell- und Standardsprache (English First): Schlüssel im Code, Rückfall für fehlende Übersetzungen
+STANDARD = "en"
 MEHRZAHL_TRENNER = "|"
 
 _sprache = STANDARD
@@ -36,7 +40,7 @@ def N_(text):
 
 
 def lade_tabelle(pfad=TABELLE):
-    """Zeilen der Übersetzungstabelle als Liste von Dicts (Spalten ``de``, ``en``, ``ort``)."""
+    """Zeilen der Übersetzungstabelle als Liste von Dicts (Spalten ``en``, ``de``, ``ort``)."""
     with open(pfad, encoding="utf-8-sig", newline="") as datei:
         return [dict(zeile) for zeile in csv.DictReader(datei, delimiter=";")]
 
@@ -52,12 +56,16 @@ def schreibe_tabelle(zeilen, pfad=TABELLE):
 
 
 def _woerterbuch(sprache):
+    """Schlüssel (Englisch) → Text der Sprache; für ``STANDARD`` deutsche Datenwerte → Englisch."""
     if sprache not in _cache:
         try:
             zeilen = lade_tabelle()
         except OSError:
             zeilen = []
-        _cache[sprache] = {z["de"]: z.get(sprache) or "" for z in zeilen if z.get("de")}
+        if sprache == STANDARD:
+            _cache[sprache] = {z["de"]: z["en"] for z in zeilen if z.get("de") and z.get("en")}
+        else:
+            _cache[sprache] = {z["en"]: z.get(sprache) or "" for z in zeilen if z.get("en")}
     return _cache[sprache]
 
 
@@ -96,7 +104,7 @@ def dezimal(text):
 
 def _nachschlagen(text):
     if _sprache == STANDARD:
-        return text
+        return _woerterbuch(STANDARD).get(text) or text          # deutsche Datenwerte („Fehler“) → Englisch
     return _woerterbuch(_sprache).get(text) or text
 
 
@@ -110,7 +118,7 @@ def tr(text, **werte):
 
 
 def trn(n, einzahl, mehrzahl, **werte):
-    """Mehrzahl: ``trn(3, "{n} Warnung", "{n} Warnungen")`` → „3 Warnungen“ bzw. „3 warnings“.
+    """Mehrzahl: ``trn(3, "{n} warning", "{n} warnings")`` → „3 warnings“ bzw. „3 Warnungen“.
 
     ``n`` steht als Platzhalter ``{n}`` zur Verfügung (ohne Formatierung); für Zahlenformat ``n=zahl(…)`` übergeben."""
     werte.setdefault("n", n)
@@ -128,14 +136,14 @@ REGELN = HIER / "regeln.csv"
 
 
 def lade_regeln(pfad=REGELN):
-    """Übersetzte Titel der Prüfregeln des Werkzeugkastens (Spalten ``id``, ``kurz``, ``de``, ``en``)."""
+    """Übersetzte Titel der Prüfregeln des Werkzeugkastens (Spalten ``id``, ``kurz``, ``en``, ``de``)."""
     with open(pfad, encoding="utf-8-sig", newline="") as datei:
         return [dict(zeile) for zeile in csv.DictReader(datei, delimiter=";")]
 
 
 def rule_title(regel_id):
-    """Regeltitel in der aktiven Sprache, nur wenn nicht Deutsch (deutsche Meldungen bleiben unverändert)."""
-    if _sprache == STANDARD or not regel_id:
+    """Regeltitel auf Englisch vor der Meldung; auf Deutsch keiner (wie bisher: die Meldung allein)."""
+    if _sprache == "de" or not regel_id:
         return None
     if "regeln" not in _cache:
         try:
@@ -152,27 +160,31 @@ MELDUNG_TIEFE = 3
 
 def _meldungsmuster():
     """(exakte Texte, [(Regex, Vorlage)]): längster fester Text zuerst, damit allgemeine Vorlagen zuletzt greifen."""
-    if "meldungen" not in _cache:
+    schluessel = "meldungen:" + _sprache
+    if schluessel not in _cache:
         try:
             zeilen = lade_tabelle(MELDUNGEN)
         except OSError:
             zeilen = []
         exakt, muster = {}, []
         for zeile in zeilen:
-            de, en = zeile.get("de"), zeile.get("en")
-            if not de or not en:
+            quelle, ziel = zeile.get(STANDARD), zeile.get(_sprache)
+            if not quelle or not ziel:
                 continue
-            if "{}" not in de:
-                exakt[de] = en
+            if zeile.get("ort") == "wort" and zeile.get("de"):
+                # Datenwörter des Werkzeugkastens (Seiten, Oberflächen …) sind deutsch und stecken in englischen Meldungen
+                exakt[zeile["de"]] = ziel
+            if "{}" not in quelle:
+                exakt[quelle] = ziel
                 continue
-            teile = de.split("{}")
-            muster.append((sum(map(len, teile)), re.compile("(.+?)".join(map(re.escape, teile)), re.DOTALL), en))
-        _cache["meldungen"] = (exakt, [(regex, en) for _laenge, regex, en in sorted(muster, key=lambda m: -m[0])])
-    return _cache["meldungen"]
+            teile = quelle.split("{}")
+            muster.append((sum(map(len, teile)), re.compile("(.+?)".join(map(re.escape, teile)), re.DOTALL), ziel))
+        _cache[schluessel] = (exakt, [(regex, ziel) for _laenge, regex, ziel in sorted(muster, key=lambda m: -m[0])])
+    return _cache[schluessel]
 
 
 def _einsetzen(vorlage, werte):
-    """``{}`` der Reihe nach füllen, ``{2}`` gezielt, wenn die englische Satzstellung abweicht."""
+    """``{}`` der Reihe nach füllen, ``{2}`` gezielt, wenn die deutsche Satzstellung abweicht."""
     folge = iter(werte)
     return re.sub(r"\{(\d*)\}", lambda t: werte[int(t.group(1)) - 1] if t.group(1) else next(folge), vorlage)
 
@@ -191,13 +203,14 @@ def _uebersetzen(text, tiefe=0):
 
 
 def meldung(text):
-    """Meldung des Werkzeugkastens in der aktiven Sprache; Unbekanntes bleibt, wie es ist."""
+    """Meldung des Werkzeugkastens (englisch) in der aktiven Sprache; Unbekanntes bleibt, wie es ist. Auch auf Englisch
+    laufen Meldungen durch die Vorlagen: eingesetzte deutsche Datenwörter („rechts“, „randstein“) werden übersetzt."""
     text = str(text)
-    return text if _sprache == STANDARD or not text else _uebersetzen(text)
+    return _uebersetzen(text) if text else text
 
 
 def html(name):
-    """Langer Text als Datei je Sprache (``<name>_<sprache>.html``), sonst die deutsche Fassung."""
+    """Langer Text als Datei je Sprache (``<name>_<sprache>.html``), sonst die englische Fassung."""
     for code in (_sprache, STANDARD):
         pfad = HIER / f"{name}_{code}.html"
         if pfad.is_file():

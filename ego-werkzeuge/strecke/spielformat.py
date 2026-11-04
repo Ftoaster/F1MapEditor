@@ -21,7 +21,7 @@ from ego import bxml, erp, pkg, spielpfade, streckenlogik, tsquadtree
 def _zahl(wert):
     wert = float(wert)
     if not math.isfinite(wert):
-        raise ValueError('Nichtendlicher Logikwert')
+        raise ValueError('Non-finite logic value')
     return format(wert, '.12g')
 
 
@@ -37,7 +37,7 @@ def _setzen(el, name, wert, numerisch=False):
 def _vektor(el, name, wert):
     wert = [float(v) for v in wert]
     if len(wert) != 3 or not all(math.isfinite(v) for v in wert):
-        raise ValueError('Vektor benötigt drei endliche Werte')
+        raise ValueError('Vector needs three finite values')
     alt = el.get(name)
     if alt is None or streckenlogik.parse_vec(alt) != wert:
         el.set(name, ', '.join(_zahl(v) for v in wert))
@@ -83,7 +83,7 @@ def neutral_aus_strecke(st):
             if len(tore) == 1 and letztes is not None:
                 tore = [letztes, tore[0]]
             if len(tore) != 2:
-                raise ValueError('lade()-TS-Tore lassen sich bei Volume %d nicht zuordnen' % i)
+                raise ValueError('lade() TS gates cannot be assigned at volume %d' % i)
             volumes.append({'id': i, 'gates': tore})
             letztes = tore[-1]
         listen.append({'name': vl['name'], 'type': vl['typ'], 'closed': vl['geschlossen'],
@@ -133,7 +133,7 @@ def _struktur_eindeutig(paket, inst):
 def _platzschluessel(name):
     m = streckenlogik.PLATZ_RE.search(name or '')
     if not m:
-        raise ValueError('Unbekannter Platzierungsname: %s' % name)
+        raise ValueError('Unknown placement name: %s' % name)
     return m.group(1).lower(), int(m.group(2))
 
 
@@ -147,9 +147,9 @@ def _platz_klonen(paket, inst, name, uniqueid):
     encoded = name.encode('utf-8')
     uid = bytes.fromhex(uniqueid)
     if not encoded or len(encoded)>255 or b'\0' in encoded or len(uid)!=16:
-        raise ValueError('Ungültiger Placementname oder WOID')
+        raise ValueError('Invalid placement name or WOID')
     if any(i.name==name or i.uniqueid==uid.hex() for i in paket.instanzen()):
-        raise ValueError('Placementname oder WOID bereits belegt')
+        raise ValueError('Placement name or WOID already in use')
     neue_bloecke, gesehen = [], {}
     def klonen(block):
         if id(block) in gesehen:
@@ -198,7 +198,7 @@ class Schreiber:
             ('TM', 'trackmarkup'), ('TS', 'trackspacedata'), ('vehicles_layer', 'fahrzeugplaetze'))}
         self.ressourcen['TSQuadTree'] = archiv.find(q['trackspace']+'?context=quadtree')
         if any(r is None for r in self.ressourcen.values()):
-            raise ValueError('Vorlage enthält nicht alle sechs Logikressourcen')
+            raise ValueError('Template does not contain all six logic resources')
         self.roh = {t: tuple(f.read() for f in r.fragments) for t, r in self.ressourcen.items()}
         self.dokumente = {t: bxml.decode(self.roh[t][0]) for t in ('TrackSpace', 'AISplineData', 'TM', 'TS')}
         self.bremsressourcen = [r for r in archiv if r.resource_type == 'AIBrakeSettings'
@@ -213,10 +213,10 @@ class Schreiber:
                 if linien:
                     vorhanden = {int(l.get('id')) for l in linien}
                     if not ids <= vorhanden:
-                        raise ValueError('Brems-IDs fehlen in %s/%s' % (r.identifier, gruppe.name))
+                        raise ValueError('Brake IDs are missing in %s/%s' % (r.identifier, gruppe.name))
                     self.bremspruefung.append((r.identifier, gruppe.name, len(vorhanden)))
         if not self.bremsressourcen:
-            raise ValueError('Keine AIBrakeSettings in der Vorlage')
+            raise ValueError('No AIBrakeSettings in the template')
 
     def _gate_abbildung(self, ai, splines):
         neu = {s['name']: streckenlogik.Spline(s['name'], s['position'], s['closed']) for s in splines}
@@ -231,7 +231,7 @@ class Schreiber:
             spline = next(s for s in self.original.splines.values() if s.geschlossen != g.boxengasse)
             f = spline.fortschritt_von(g.position)[0]
             if g.boxengasse not in kandidaten:
-                raise ValueError('Vorlagen-Bremslinie benötigt fehlende Boxenroute')
+                raise ValueError('Template braking line needs a missing pit route')
             def abstand(v):
                 d = abs(v[0]-f)
                 return d if g.boxengasse else min(d, 1-d)
@@ -370,7 +370,7 @@ class Schreiber:
             attneu = []
             for z in zonen:
                 if any(z[k] != zonen[0][k] for k in ('SplineName', 'Start', 'End')):
-                    raise ValueError('TM-Zonenname %s hat widersprüchliche Bereiche' % name)
+                    raise ValueError('TM zone name %s has contradictory ranges' % name)
                 att = copy.deepcopy(attralt.get(z['Type'], bxml.Element('Attribute')))
                 att.set('Type', z['Type'])
                 props = att.find('Properties')
@@ -386,7 +386,7 @@ class Schreiber:
                     attneu.append(att)
                     continue
                 if len(propalt) != len(props.elements):
-                    raise ValueError('Wiederholte TM-Properties lassen sich im lade()-Modell nicht eindeutig ändern')
+                    raise ValueError('Repeated TM properties cannot be changed unambiguously in the lade() model')
                 propneu = []
                 for k, v in z.get('Properties', {}).items():
                     p = copy.deepcopy(propalt.get(k, bxml.Element('Property')))
@@ -420,14 +420,14 @@ class Schreiber:
         for platz in daten['placements']:
             key = _platzschluessel(platz['name'])
             if key in gesehen:
-                raise ValueError('Doppelter Fahrzeugplatz')
+                raise ValueError('Duplicate vehicle slot')
             gesehen.add(key)
             if key not in lookup:
                 if key[0] not in ('gridslot', 'pitbox'):
-                    raise ValueError('Neue Garagen benötigen konsistente externe Placement-Verweise')
+                    raise ValueError('New garages need consistent external placement references')
                 kandidaten = [i for k, i in lookup.items() if k[0]==key[0]]
                 if not kandidaten or 'matrix' not in platz or 'VehPlacement' not in platz:
-                    raise ValueError('Neuer Fahrzeugplatz benötigt Vorlage, Matrix und VehPlacement')
+                    raise ValueError('New vehicle slot needs a template, matrix and VehPlacement')
                 # Platz >1 besitzt einen expliziten Id-Override, anders als Pole.
                 vorlage = max(kandidaten, key=lambda i: _platzschluessel(i.name)[1])
                 uid = platz.get('uniqueid', uuid.uuid5(uuid.NAMESPACE_URL, self.code+':'+platz['name']).hex)
@@ -439,9 +439,9 @@ class Schreiber:
             if 'matrix' not in platz:
                 m[12:15] = platz['position']
             if len(m) != 16 or not all(math.isfinite(v) for v in m):
-                raise ValueError('Ungültige Platzierungsmatrix')
+                raise ValueError('Invalid placement matrix')
             if any(abs(m[i]-v) > 1e-6 for i, v in zip((3, 7, 11, 15), (0, 0, 0, 1))):
-                raise ValueError('Platzierungsmatrix ist nicht affin')
+                raise ValueError('Placement matrix is not affine')
             feld = _pfad(paket, inst.block, 'overrides', 'WorldObject', 'transform')
             _tabellenwert(paket, feld, struct.pack('<16f', *m))
             # Vorlagenname/woid beibehalten: F1Garage enthält wo id-Verweise auf
@@ -455,12 +455,12 @@ class Schreiber:
                         # Id=1 ist bei Pole/erster Box im Template geerbt.
                         if k == 'Id' and int(v) == 1:
                             continue
-                        raise ValueError('Placement-Override %s fehlt in Vorlage' % k)
+                        raise ValueError('Placement override %s is missing in the template' % k)
                     tab = paket.tabelle(f.wert)
                     if tab.datentyp == b'shnm':
                         raw = str(v).encode('ascii')
                         if len(raw) >= 16:
-                            raise ValueError('Placement-Gruppe ist zu lang')
+                            raise ValueError('Placement group is too long')
                         raw = raw.ljust(16, b'\0')
                     else:
                         raw = struct.pack('<'+pkg.FORMATE[tab.datentyp], v)
@@ -475,16 +475,16 @@ class Schreiber:
             logik = neutral_aus_strecke(logik)
         achsen = logik.get('koordinatensystem', {}).get('achsen', 'y_oben_rechtshaendig')
         if achsen != 'y_oben_rechtshaendig':
-            raise ValueError('Spieladapter benötigt Y oben, rechtshändig')
+            raise ValueError('Game adapter needs Y up, right-handed')
         sp = copy.deepcopy(logik.get('spielformate', logik))
         pruefe_neutral(sp)
         bremslinien = bremslinien or ('neutral' if rundlauf else 'vorlage')
         if bremslinien not in ('neutral', 'vorlage'):
-            raise ValueError('Unbekannter Bremslinienmodus')
+            raise ValueError('Unknown braking line mode')
         ids = {int(l['id']) for l in sp['AISplineData'].get('brake_lines', [])}
         original_ids = {int(l['id']) for l in self.original.linien['brake_lines']}
         if bremslinien == 'neutral' and ids != original_ids:
-            raise ValueError('Neue Brems-IDs erfordern konsistent neue Auto-Settings')
+            raise ValueError('New brake IDs require consistently new car settings')
         abbildung = {} if bremslinien == 'neutral' else self._gate_abbildung(sp['AISplineData'], sp['TrackSpace']['splines'])
         docs = {'TrackSpace': self._trackspace(sp['TrackSpace']),
                 'AISplineData': self._aispline(sp['AISplineData'], bremslinien, abbildung),
@@ -523,80 +523,80 @@ def pruefe_neutral(sp):
             for x in v:
                 endlich(x)
         elif isinstance(v, (int, float)) and not math.isfinite(v):
-            raise ValueError('Nichtendlicher Logikwert')
+            raise ValueError('Non-finite logic value')
     endlich(sp)
     splines = sp['TrackSpace']['splines']
     namen = {s['name'] for s in splines}
     if len(namen) != len(splines) or sum(bool(s['closed']) for s in splines) != 1:
-        raise ValueError('TrackSpace benötigt eindeutige Namen und einen Hauptring')
+        raise ValueError('TrackSpace needs unique names and a main ring')
     for s in splines:
         if len(s['position']) < (3 if s['closed'] else 2):
-            raise ValueError('Zu wenige Splineknoten')
+            raise ValueError('Too few spline nodes')
         for p in s['position']:
             if len(p) != 3:
-                raise ValueError('Splinepunkt benötigt XYZ')
+                raise ValueError('Spline point needs XYZ')
     ai = sp['AISplineData']
     gids = [int(g['id']) for g in ai['gates']]
     if len(set(gids)) != len(gids):
-        raise ValueError('Doppelte Gate-ID')
+        raise ValueError('Duplicate gate ID')
     for g in ai['gates']:
         if len(g['position']) != 3 or len(g['normal']) != 3 or abs(math.sqrt(sum(v*v for v in g['normal']))-1) > .002:
-            raise ValueError('Ungültige Gateposition/Einheitsnormale')
+            raise ValueError('Invalid gate position or unit normal')
         wp = g['waypoints']
         if len({w['type'] for w in wp}) != len(wp) or len(wp) != (7 if 'pit' in g['name'] else 9):
-            raise ValueError('KI-Gate benötigt neun bzw. sieben eindeutige Wegpunkte')
+            raise ValueError('AI gate needs nine or seven unique waypoints')
     links = ai['links']
     if [int(l['id']) for l in links] != list(range(len(links))):
-        raise ValueError('Link-IDs müssen fortlaufend sein')
+        raise ValueError('Link IDs must be consecutive')
     for l in links:
         if int(l['from_gate']) not in gids or int(l['to_gate']) not in gids:
-            raise ValueError('Link verweist auf fehlendes Gate')
+            raise ValueError('Link refers to a missing gate')
     for r in ai['routes']:
         a, b = int(r['from_link']), int(r['to_link'])
         if not 0 <= a <= b < len(links):
-            raise ValueError('Route verweist auf fehlenden Link')
+            raise ValueError('Route refers to a missing link')
         if r['type'] == 'track':
             if links[b]['to_gate'] != links[a]['from_gate']:
-                raise ValueError('Hauptroute ist nicht geschlossen')
+                raise ValueError('Main route is not closed')
         for i in range(a, b):
             if links[i]['to_gate'] != links[i+1]['from_gate']:
-                raise ValueError('Route ist nicht zusammenhängend')
+                raise ValueError('Route is not contiguous')
     for liste in ('brake_lines', 'corner_start_lines', 'corner_end_lines', 'retire_lines'):
         for l in ai.get(liste, []):
             for k in ('gate_id', 'pair_id'):
                 if k in l and int(l[k]) not in gids:
-                    raise ValueError('%s verweist auf fehlendes Gate' % liste)
+                    raise ValueError('%s refers to a missing gate' % liste)
     for vl in sp['TS']['volume_lists']:
         if vl.get('numVolumes', len(vl['volumes'])) != len(vl['volumes']):
-            raise ValueError('TS-Volumezähler stimmt nicht')
+            raise ValueError('TS volume counter is wrong')
         if [int(v['id']) for v in vl['volumes']] != list(range(len(vl['volumes']))):
-            raise ValueError('TS-Volume-IDs müssen fortlaufend sein')
+            raise ValueError('TS volume IDs must be consecutive')
         for i, v in enumerate(vl['volumes']):
             if len(v['gates']) != 2:
-                raise ValueError('TS-Volume benötigt zwei Tore')
+                raise ValueError('TS volume needs two gates')
             for g in v['gates']:
                 for k in ('point1', 'point2', 'point3', 'point4'):
                     if len(g[k]) != 3:
-                        raise ValueError('TS-Tor benötigt vier XYZ-Punkte')
+                        raise ValueError('TS gate needs four XYZ points')
             if i and vl['volumes'][i-1]['gates'][1] != v['gates'][0]:
-                raise ValueError('TS-Nachbarvolumes teilen das Tor nicht')
+                raise ValueError('Neighbouring TS volumes do not share the gate')
         if vl['closed'] and vl['volumes'][-1]['gates'][1] != vl['volumes'][0]['gates'][0]:
-            raise ValueError('TS-Hauptroute ist nicht geschlossen')
+            raise ValueError('TS main route is not closed')
     for z in sp['TM']['markup']:
         if z['SplineName'] not in namen or not (0 <= float(z['Start']) <= 1 and 0 <= float(z['End']) <= 1):
-            raise ValueError('Ungültige TM-Spline/Fortschritt')
+            raise ValueError('Invalid TM spline or progress')
 
 
 def erp_schreiben(quelle, ziel, ressourcen, ueberschreiben=False):
     """Nur abweichende Fragmente setzen, andere Ressourcen gepackt erhalten."""
     ziel = Path(ziel).resolve()
     if spielpfade.geschuetzt(ziel):
-        raise ValueError('Geschützter Ausgabepfad: %s' % ziel)
+        raise ValueError('Protected output path: %s' % ziel)
     with erp.open_erp(quelle) as a:
         for kennung, fragmente in ressourcen.items():
             r = a.find(kennung)
             if r is None or len(r.fragments) != len(fragmente):
-                raise ValueError('Ressource/Fragmentaufbau fehlt: %s' % kennung)
+                raise ValueError('Resource or fragment structure is missing: %s' % kennung)
             for i, raw in enumerate(fragmente):
                 if r.fragments[i].read() != raw:
                     r.set_fragment_data(i, raw)

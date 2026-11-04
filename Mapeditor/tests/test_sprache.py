@@ -1,4 +1,5 @@
-"""Lokalisierung: Übersetzungstabellen vollständig, englische Oberfläche, Sprachwahl, Zahlenformat."""
+"""Lokalisierung (English First seit 4.11.2026): Übersetzungstabellen vollständig, englische Standardoberfläche,
+deutsche Übersetzung, Sprachwahl, Zahlenformat. Die übrigen Tests laufen auf Deutsch (conftest.TESTSPRACHE)."""
 
 import sys
 from pathlib import Path
@@ -25,7 +26,7 @@ def englisch():
 def test_tabelle_vollstaendig_und_ohne_luecken():
     befund = pflege.pruefen()
     assert befund["fehlend"] == [], "Schlüssel im Code ohne Tabellenzeile (pflege --schreiben)"
-    assert befund["leer"] == [], "Zeilen ohne Englisch"
+    assert befund["leer"] == [], "Zeilen ohne Deutsch"
     assert befund["platzhalter"] == [] and befund["mehrzahl"] == [] and befund["doppelt"] == []
     zeilen = lade_tabelle()
     assert len(zeilen) > 700
@@ -59,51 +60,85 @@ def test_meldungen_des_werkzeugkastens_vollstaendig():
     assert not any(befund.values()), befund
 
 
-@pytest.mark.parametrize("deutsch, englisch_erwartet", [
-    ("keine Kurvenlinien für Bremslinien (Träger Portimão: 15 Haupt-Bremslinien)",
-     "no corner lines for braking lines (Portimão carrier: 15 main braking lines)"),
-    ("Ideallinie konvergiert nicht: KKT-Rest 0.0012", "Racing line does not converge: KKT residual 0.0012"),
-    ("Geometrie und Fahrphysik", "Geometry and driving physics"),
-    ("Fahrbahnrand an 12 Stationen außerhalb X/Z ±1024 m (inkl. Versatz (0, 0, 0))",
-     "Track edge outside X/Z ±1024 m at 12 stations (including offset (0, 0, 0))"),
-    ("rechts: an 3 Stationen weniger als 2.5 m Platz bis zum nächsten Streckenteil (Barriere auf Mindestabstand gesetzt)",
+#: Meldungen des Werkzeugkastens sind englisch (English First); die deutsche Oberfläche übersetzt sie über meldungen.csv
+MELDUNGEN = [
+    ("no corner lines for braking lines (Portimão carrier: 15 main braking lines)",
+     "keine Kurvenlinien für Bremslinien (Träger Portimão: 15 Haupt-Bremslinien)"),
+    ("Racing line does not converge: KKT residual 0.0012", "Ideallinie konvergiert nicht: KKT-Rest 0.0012"),
+    ("Geometry and driving physics", "Geometrie und Fahrphysik"),
+    ("Track edge outside X/Z ±1024 m at 12 stations (including offset (0, 0, 0))",
+     "Fahrbahnrand an 12 Stationen außerhalb X/Z ±1024 m (inkl. Versatz (0, 0, 0))"),
+    ("rechts: less than 2.5 m of space to the next part of the track at 3 stations (barrier set to minimum distance)",
+     "rechts: an 3 Stationen weniger als 2.5 m Platz bis zum nächsten Streckenteil (Barriere auf Mindestabstand gesetzt)"),
+    ("Object b1 stands on asphalt/randstein", "Objekt b1 steht auf asphalt/randstein"),
+    ("Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the game world offset to "
+     "[69, 0, -18]",
+     "Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den Spielweltversatz auf "
+     "[69, 0, -18] stellen"),
+]
+
+
+@pytest.mark.parametrize("englisch_meldung, deutsch_erwartet", MELDUNGEN)
+def test_meldung_deutsch(englisch_meldung, deutsch_erwartet):
+    assert meldung(englisch_meldung) == deutsch_erwartet
+
+
+@pytest.mark.parametrize("roh, erwartet", [
+    ("rechts: less than 2.5 m of space to the next part of the track at 3 stations (barrier set to minimum distance)",
      "right: less than 2.5 m of space to the next part of the track at 3 stations (barrier set to minimum distance)"),
-    ("Objekt b1 steht auf asphalt/randstein", "Object b1 stands on asphalt/kerb"),
-    ("Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den Spielweltversatz auf "
-     "[69, 0, -18] stellen",
-     "Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the game world offset to "
-     "[69, 0, -18]"),
+    ("Object b1 stands on asphalt/randstein", "Object b1 stands on asphalt/kerb"),
+    ("Geometry and driving physics", "Geometry and driving physics"),
 ])
-def test_meldung_englisch(englisch, deutsch, englisch_erwartet):
-    assert meldung(deutsch) == englisch_erwartet
+def test_meldung_englisch_uebersetzt_datenwoerter(englisch, roh, erwartet):
+    """Deutsche Datenwörter des Werkzeugkastens (Seiten, Oberflächen) in englischen Meldungen werden übersetzt."""
+    assert meldung(roh) == erwartet
 
 
-def test_unbekannte_meldung_bleibt_und_deutsch_unveraendert(englisch):
-    assert meldung("Etwas ganz Neues 12") == "Etwas ganz Neues 12"
+def test_unbekannte_meldung_bleibt(englisch):
+    assert meldung("Something entirely new 12") == "Something entirely new 12"
     setze_sprache("de")
-    text = "keine Kurvenlinien für Bremslinien (Träger Portimão: 15 Haupt-Bremslinien)"
-    assert meldung(text) == text
+    assert meldung("Etwas ganz Neues 12") == "Etwas ganz Neues 12"
 
 
-def test_fehlerwert_in_tr_wird_uebersetzt(englisch):
-    assert "Racing line does not converge" in tr("Fehler · Vorschau: {error}", error="Ideallinie konvergiert nicht: KKT-Rest 1")
+def test_fehlerwert_in_tr_wird_uebersetzt():
+    assert "Ideallinie konvergiert nicht" in tr("Error · preview: {error}",
+                                                 error="Racing line does not converge: KKT residual 1")
+    assert tr("Error · preview: {error}", error="x").startswith("Fehler · Vorschau")
 
 
-def test_deutsch_ist_standard_und_unveraendert():
+def test_englisch_ist_standard():
+    """English First: Standard- und Rückfallsprache ist Englisch, ohne gespeicherte Wahl startet der Editor englisch."""
+    assert i18n.STANDARD == "en" and ansicht.load_language() == "en"
+    setze_sprache("en")
+    assert tr("Save") == "Save" and "How to use" in help_html()
+    assert tr("Ein Text ohne Tabellenzeile") == "Ein Text ohne Tabellenzeile"
+    setze_sprache("de")
+    assert tr("A text without a table row") == "A text without a table row"      # fehlt Deutsch → Englisch
+
+
+def test_deutsche_datenwerte_auf_englisch():
+    """Stufen und Status kommen deutsch aus dem Werkzeugkasten oder aus Projektdateien und erscheinen übersetzt."""
+    setze_sprache("en")
+    assert tr("Fehler") == "Error" and tr("Warnung") == "Warning"
+    setze_sprache("de")
+    assert tr("Fehler") == "Fehler"
+
+
+def test_deutsch_text_mehrzahl_zahlen():
     assert sprache() == "de"
-    assert tr("Speichern") == "Speichern"
-    assert trn(1, "{n} Warnung", "{n} Warnungen") == "1 Warnung"
-    assert trn(2, "{n} Warnung", "{n} Warnungen") == "2 Warnungen"
+    assert tr("Save") == "Speichern"
+    assert trn(1, "{n} warning", "{n} warnings") == "1 Warnung"
+    assert trn(2, "{n} warning", "{n} warnings") == "2 Warnungen"
     assert zahl(4903.14, 1, "m") == "4.903,1 m"
     assert edit_text(1.5) == "1,5" and edit_text(True) == "ja"
     assert "Bedienung" in help_html()
 
 
 def test_englisch_text_mehrzahl_zahlen(englisch):
-    assert tr("Speichern") == "Save"
-    assert tr("Projekt gespeichert: {folder}", folder="X") == "Project saved: X"
-    assert trn(1, "{n} Warnung", "{n} Warnungen") == "1 warning"
-    assert trn(3, "{n} Warnung", "{n} Warnungen") == "3 warnings"
+    assert tr("Save") == "Save"
+    assert tr("Project saved: {folder}", folder="X") == "Project saved: X"
+    assert trn(1, "{n} warning", "{n} warnings") == "1 warning"
+    assert trn(3, "{n} warning", "{n} warnings") == "3 warnings"
     assert zahl(4903.14, 1, "m") == "4,903.1 m"
     assert QLocale().decimalPoint() == "."
     assert edit_text(1.5) == "1.5" and edit_text(False) == "no"
@@ -155,7 +190,7 @@ def _anzahl_eigene_objekte(w):
 
 
 def test_sprachwechsel_sofort_ohne_neustart(app, point_project, example_preview):
-    assert ansicht.load_language() == "de"
+    assert ansicht.load_language() == "en"                              # nichts gespeichert: Standard Englisch
     w = MainWindow(point_project, auto_preview=False)
     w.resize(1400, 900)
     w.show()

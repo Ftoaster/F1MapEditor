@@ -3,7 +3,10 @@
 Aufruf (im Ordner ``Mapeditor``)::
 
     .venv/Scripts/python -m mapeditor.i18n.pflege            # Bericht: fehlend, leer, unbenutzt, Platzhalter
-    .venv/Scripts/python -m mapeditor.i18n.pflege --schreiben  # neue Schlüssel (en leer) anhängen, Orte erneuern
+    .venv/Scripts/python -m mapeditor.i18n.pflege --schreiben  # neue Schlüssel (de leer) anhängen, Orte erneuern
+
+English First (4.11.2026): Schlüssel ist der englische Text (Spalte ``en``), ``de`` ist die Übersetzung. Ein markierter
+Text, der in der Spalte ``de`` steht, gilt als deutscher Datenwert (Stufen/Status des Werkzeugkastens) und ist kein Befund.
 
 Gefunden werden Textliterale in ``tr("…")``, ``trn(n, "…", "…")`` (als ``Einzahl|Mehrzahl``) und ``N_("…")``.
 ``meldungen.csv`` wird mit den Meldungsvorlagen des Werkzeugkastens (``ego-werkzeuge/strecke``) abgeglichen: Texte in
@@ -62,44 +65,50 @@ def verwendete_schluessel(wurzel=QUELLEN):
 
 
 def pruefen(zeilen=None, verwendet=None):
-    """Befunde als Dict: fehlend (im Code, nicht in der Tabelle), leer (ohne Englisch), unbenutzt, platzhalter,
-    mehrzahl (Plural-Zeile ohne ``|`` im Englischen), doppelt."""
+    """Befunde als Dict: fehlend (im Code, nicht in der Tabelle), leer (ohne Deutsch), unbenutzt, platzhalter,
+    mehrzahl (Plural-Zeile ohne ``|`` im Deutschen), doppelt."""
     zeilen = lade_tabelle() if zeilen is None else zeilen
     verwendet = verwendete_schluessel() if verwendet is None else verwendet
     tabelle, doppelt = {}, []
     for zeile in zeilen:
-        if zeile["de"] in tabelle:
-            doppelt.append(zeile["de"])
-        tabelle[zeile["de"]] = zeile
-    befund = {"fehlend": sorted(k for k in verwendet if k not in tabelle),
-              "leer": sorted(k for k, z in tabelle.items() if not (z.get("en") or "").strip()),
-              "unbenutzt": sorted(k for k in tabelle if k not in verwendet),
+        if zeile["en"] in tabelle:
+            doppelt.append(zeile["en"])
+        tabelle[zeile["en"]] = zeile
+    datenwerte = {z["de"] for z in zeilen if z.get("de")}
+    befund = {"fehlend": sorted(k for k in verwendet if k not in tabelle and k not in datenwerte),
+              "leer": sorted(k for k, z in tabelle.items() if not (z.get("de") or "").strip()),
+              "unbenutzt": sorted(k for k in tabelle if k not in verwendet and z_unbenutzt(tabelle[k], verwendet)),
               "platzhalter": [], "mehrzahl": [], "doppelt": doppelt}
     for k, z in tabelle.items():
-        en = z.get("en") or ""
-        if not en:
+        de = z.get("de") or ""
+        if not de:
             continue
-        teile_de, teile_en = k.split(MEHRZAHL_TRENNER), en.split(MEHRZAHL_TRENNER)
+        teile_en, teile_de = k.split(MEHRZAHL_TRENNER), de.split(MEHRZAHL_TRENNER)
         if len(teile_de) != len(teile_en):
             befund["mehrzahl"].append(k)
-        elif any(platzhalter(a) != platzhalter(b) for a, b in zip(teile_de, teile_en)):
+        elif any(platzhalter(a) != platzhalter(b) for a, b in zip(teile_en, teile_de)):
             befund["platzhalter"].append(k)
     return befund
 
 
+def z_unbenutzt(zeile, verwendet):
+    """Eine Zeile ist auch benutzt, wenn ihr deutscher Text als Datenwert im Code steht."""
+    return zeile.get("de") not in verwendet
+
+
 def abgleichen(zeilen=None, verwendet=None):
-    """Neue Schlüssel anhängen (Englisch leer), Spalte ``ort`` erneuern; unbenutzte Zeilen bleiben stehen."""
+    """Neue Schlüssel anhängen (Deutsch leer), Spalte ``ort`` erneuern; unbenutzte Zeilen bleiben stehen."""
     if zeilen is None:
         zeilen = lade_tabelle() if TABELLE.exists() else []
     verwendet = verwendete_schluessel() if verwendet is None else verwendet
-    vorhanden = {z["de"] for z in zeilen}
+    vorhanden = {z["en"] for z in zeilen} | {z["de"] for z in zeilen if z.get("de")}
     for zeile in zeilen:
-        orte = verwendet.get(zeile["de"])
+        orte = verwendet.get(zeile["en"]) or verwendet.get(zeile.get("de"))
         zeile["ort"] = orte[0].split(":")[0] if orte else "unbenutzt"
     for text, orte in verwendet.items():
         if text not in vorhanden:
-            zeilen.append({"de": text, "en": "", "ort": orte[0].split(":")[0]})
-    zeilen.sort(key=lambda z: (z["ort"], z["de"].casefold()))
+            zeilen.append({"en": text, "de": "", "ort": orte[0].split(":")[0]})
+    zeilen.sort(key=lambda z: (z["ort"], z["en"].casefold()))
     return zeilen
 
 
@@ -138,8 +147,11 @@ def vorlagen_in_datei(pfad):
             if re.search(r"(Fehler|Error|SystemExit)$", getattr(node.exc.func, "id", "")):
                 ausdruck = node.exc.args[0]
         elif isinstance(node, ast.Call) and getattr(node.func, "attr", "") == "append" and node.args:
-            if getattr(node.func.value, "id", "") == "warnungen":
+            if getattr(node.func.value, "id", "") in ("warnungen", "hinweise"):
                 ausdruck = node.args[0]
+        elif isinstance(node, ast.Dict) and len(node.keys) == 1:    # return {"hinweis": "…"} (strecke/spielimport.py)
+            if isinstance(node.keys[0], ast.Constant) and node.keys[0].value == "hinweis":
+                ausdruck = node.values[0]
         elif isinstance(node, (ast.Assign, ast.AugAssign)):
             ziele = node.targets if isinstance(node, ast.Assign) else [node.target]
             if any(getattr(z, "id", "") in ("text", "grund") for z in ziele):
@@ -171,24 +183,24 @@ def meldungsvorlagen(ordner=WERKZEUG):
 
 
 def meldungen_pruefen(zeilen=None, vorlagen=None):
-    """Befunde für ``meldungen.csv``: fehlend, leer, platzhalter (andere Anzahl ``{}`` im Englischen)."""
+    """Befunde für ``meldungen.csv``: fehlend, leer, platzhalter (andere Anzahl ``{}`` im Deutschen)."""
     zeilen = lade_tabelle(MELDUNGEN) if zeilen is None else zeilen
     vorlagen = meldungsvorlagen() if vorlagen is None else vorlagen
-    tabelle = {z["de"]: z.get("en") or "" for z in zeilen}
+    tabelle = {z["en"]: z.get("de") or "" for z in zeilen}
     zaehlen = lambda t: len(re.findall(r"\{\d*\}", t))
     return {"meldung_fehlend": sorted(t for t in vorlagen if t not in tabelle),
-            "meldung_leer": sorted(t for t, en in tabelle.items() if not en.strip()),
-            "meldung_platzhalter": sorted(t for t, en in tabelle.items() if en and zaehlen(t) != zaehlen(en))}
+            "meldung_leer": sorted(t for t, de in tabelle.items() if not de.strip()),
+            "meldung_platzhalter": sorted(t for t, de in tabelle.items() if de and zaehlen(t) != zaehlen(de))}
 
 
 def meldungen_abgleichen():
     zeilen = lade_tabelle(MELDUNGEN) if MELDUNGEN.exists() else []
     vorlagen = meldungsvorlagen()
-    vorhanden = {z["de"] for z in zeilen}
+    vorhanden = {z["en"] for z in zeilen}
     for zeile in zeilen:
-        zeile["ort"] = vorlagen.get(zeile["de"], zeile.get("ort") if zeile.get("ort") == "wort" else "unbenutzt")
-    zeilen += [{"de": t, "en": "", "ort": ort} for t, ort in vorlagen.items() if t not in vorhanden]
-    zeilen.sort(key=lambda z: (z["ort"], z["de"].casefold()))
+        zeile["ort"] = vorlagen.get(zeile["en"], zeile.get("ort") if zeile.get("ort") == "wort" else "unbenutzt")
+    zeilen += [{"en": t, "de": "", "ort": ort} for t, ort in vorlagen.items() if t not in vorhanden]
+    zeilen.sort(key=lambda z: (z["ort"], z["en"].casefold()))
     return zeilen
 
 

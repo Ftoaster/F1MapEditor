@@ -47,16 +47,16 @@ FORM_GRENZEN = {"huegel": {"hoehe_m": (-60.0, 200.0), "radius_m": (30.0, 800.0)}
                 "berge": {"hoehe_m": (10.0, 2000.0), "radius_m": (100.0, 5000.0)}}
 FORM_STANDARD = {"huegel": {"hoehe_m": 40.0, "radius_m": 200.0}, "berge": {"hoehe_m": 400.0, "radius_m": 450.0}}
 FORM_PRAEFIX = {"huegel": "h", "berge": "b"}
-FORM_NAMEN = {"huegel": N_("Hügel"), "berge": N_("Berg")}
+FORM_NAMEN = {"huegel": N_("Hill"), "berge": N_("Mountain")}
 #: Berge: Mitte höchstens so weit von der Mitte des Streckenbereichs (Regel UMG_BERG_LAGE)
 BERG_ENTFERNUNG_MAX = 12000.0
 #: Berge: Lochrand bleibt fest (10 m), Übergang 150 m (Regel UMG_BERG_RAND)
 BERG_RAND_M = 160.0
 
 KATEGORIEN = ("baum", "busch", "palme", "gebaeude", "zelt", "moebel", "flagge", "licht", "sonstiges")
-KATEGORIE_NAMEN = {"baum": N_("Bäume"), "busch": N_("Büsche"), "palme": N_("Palmen"), "gebaeude": N_("Gebäude"),
-                   "zelt": N_("Zelte"), "moebel": N_("Möbel"), "flagge": N_("Flaggen"), "licht": N_("Lichter"),
-                   "sonstiges": N_("Sonstiges")}
+KATEGORIE_NAMEN = {"baum": N_("Trees"), "busch": N_("Bushes"), "palme": N_("Palms"), "gebaeude": N_("Buildings"),
+                   "zelt": N_("Tents"), "moebel": N_("Furniture"), "flagge": N_("Flags"), "licht": N_("Lights"),
+                   "sonstiges": N_("Other")}
 KATEGORIE_FARBEN = {"baum": "#4CAF50", "busch": "#9CCC65", "palme": "#26C6A0", "gebaeude": "#C8B08A", "zelt": "#EF6F6C",
                     "moebel": "#BA68C8", "flagge": "#FFB74D", "licht": "#FFE45C", "sonstiges": "#90A4AE"}
 UNBEKANNT_FARBE = "#8D9BA9"
@@ -235,14 +235,14 @@ def form_problem(art, form, versatz=(0.0, 0.0, 0.0)):
     """Kurzer Text, wenn die Form nach den Regeln UMG_HUEGEL_LAGE/UMG_BERG_LAGE/UMG_BERG_RAND falsch liegt, sonst None."""
     aussen = rand_abstand(form["x"], form["z"], versatz)
     if art == "huegel":
-        return N_("Mitte außerhalb des Streckenbereichs") if aussen > 0 else None
+        return N_("Centre outside the track area") if aussen > 0 else None
     mitte = ((WELT_X[0] + WELT_X[1]) / 2, (WELT_Z[0] + WELT_Z[1]) / 2)
     if aussen <= 0:
-        return N_("Mitte im Streckenbereich: hier wirken nur Hügel")
+        return N_("Centre inside the track area: only hills work here")
     if math.hypot(form["x"] + versatz[0] - mitte[0], form["z"] + versatz[2] - mitte[1]) > BERG_ENTFERNUNG_MAX:
-        return N_("weiter als 12 km von der Mitte entfernt")
+        return N_("more than 12 km from the centre")
     if aussen < form["radius_m"] * 0.5 + BERG_RAND_M:
-        return N_("reicht an den Streckenbereich, wird dort abgeschnitten")
+        return N_("reaches the track area and is cut off there")
     return None
 
 

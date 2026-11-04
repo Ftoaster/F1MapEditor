@@ -18,13 +18,13 @@ from PySide6.QtWidgets import (
 from .i18n import N_, tr
 from .ux import zahl
 
-SIDES = {"beide": N_("beide Seiten"), "links": N_("links"), "rechts": N_("rechts")}
-RUNOFFS = {None: N_("Automatik"), "gras": N_("Gras"), "kies": N_("Kies"), "asphalt": N_("Asphalt")}
+SIDES = {"beide": N_("both sides"), "links": N_("left"), "rechts": N_("right")}
+RUNOFFS = {None: N_("Automation"), "gras": N_("Grass"), "kies": N_("Gravel"), "asphalt": N_("Asphalt")}
 #: Felder eines Seitenraum-Abschnitts mit Zahlenwert (None = Automatik)
 NUMBER_FIELDS = ("randstein_breite", "gruenstreifen_breite", "barriere_abstand")
 AUTO = -1.0              # Wert der Eingabefelder für „Automatik“ (Sondertext)
 #: Randwinkel: waagerecht (kein Eintrag), wie die Fahrbahn an dieser Stelle, eigener Winkel
-EDGES = {None: N_("Waagerecht"), "strecke": N_("Wie die Strecke"), "eigen": N_("Eigener Winkel")}
+EDGES = {None: N_("Level"), "strecke": N_("Same as track"), "eigen": N_("Custom angle")}
 EDGE_MAX = 30.0          # Grad, wie strecke/definition.py RAND_NEIGUNG_MAX
 
 
@@ -166,17 +166,18 @@ class CrossPanel(QFrame):
             box.setDecimals(0)
             box.setSingleStep(10)
             box.setSuffix(" m")
-            box.setToolTip(tr("Meter ab Ziel in Fahrtrichtung; über die Ziellinie erlaubt (von > bis)."))
+            box.setToolTip(tr(("Metres from the finish in driving direction; across the finish line allowed (from > "
+                               "to).")))
             span.addWidget(box, 1)
-        form.addRow(tr("Von / bis"), span)
+        form.addRow(tr("From / to"), span)
         quick = QHBoxLayout()
-        self.selection_button = QPushButton(tr("Auswahl A→B"))
-        self.selection_button.setToolTip(tr("Bereich zwischen dem ersten und letzten gewählten Punkt/Segment"))
+        self.selection_button = QPushButton(tr("Selection A→B"))
+        self.selection_button.setToolTip(tr("Range between the first and last selected point/segment"))
         self.selection_button.clicked.connect(lambda: self.range_requested.emit("auswahl"))
         self.cursor_button = QPushButton(tr("Cursor ±50 m"))
         self.cursor_button.clicked.connect(lambda: self.range_requested.emit("cursor"))
-        self.lap_button = QPushButton(tr("Ganze Runde"))
-        self.lap_button.setToolTip(tr("Bereich über die ganze Strecke"))
+        self.lap_button = QPushButton(tr("Whole lap"))
+        self.lap_button.setToolTip(tr("Range over the whole track"))
         self.lap_button.clicked.connect(lambda: self.range_requested.emit("runde"))
         quick.addWidget(self.selection_button)
         quick.addWidget(self.cursor_button)
@@ -185,7 +186,7 @@ class CrossPanel(QFrame):
         self.side = QComboBox()
         for key, text in SIDES.items():
             self.side.addItem(tr(text), key)
-        self.side.setToolTip(tr("Links/rechts in Fahrtrichtung"))
+        self.side.setToolTip(tr("Left/right in driving direction"))
         # zweispaltig: Alle Felder und „Übernehmen“ passen ohne Scrollen in den unteren Bereich
         grid = QGridLayout()
         grid.setVerticalSpacing(3)
@@ -196,46 +197,46 @@ class CrossPanel(QFrame):
         def field(row, column, text, widget):
             grid.addWidget(QLabel(text), row, column * 2)
             grid.addWidget(widget, row, column * 2 + 1)
-        field(0, 0, tr("Seite"), self.side)
-        self.road = _number_box(" m", tr("unverändert"), 30.0, tr("Halbe Fahrbahnbreite auf der Seite (Asphalt)"))
-        field(0, 1, tr("Fahrbahn (halb)"), self.road)
-        self.kerb = _number_box(" m", tr("Automatik"), 10.0, tr("Randsteinbreite; 0 = kein Randstein"))
-        field(1, 0, tr("Randstein"), self.kerb)
-        self.grass = _number_box(" m", tr("Automatik"), 30.0, tr("Grünstreifen zwischen Randstein und Auslauf"))
-        field(1, 1, tr("Grünstreifen"), self.grass)
+        field(0, 0, tr("Side"), self.side)
+        self.road = _number_box(" m", tr("unchanged"), 30.0, tr("Half road width on this side (asphalt)"))
+        field(0, 1, tr("Road (half)"), self.road)
+        self.kerb = _number_box(" m", tr("Automation"), 10.0, tr("Kerb width; 0 = no kerb"))
+        field(1, 0, tr("Kerb"), self.kerb)
+        self.grass = _number_box(" m", tr("Automation"), 30.0, tr("Grass strip between kerb and run-off"))
+        field(1, 1, tr("Grass strip"), self.grass)
         self.runoff = QComboBox()
         for key, text in RUNOFFS.items():
             self.runoff.addItem(tr(text), key)
-        self.runoff.setToolTip(tr("Auslaufzone bis zur Barriere: Gras, Kies oder Asphalt"))
-        field(2, 0, tr("Auslauf"), self.runoff)
-        self.barrier = _number_box(" m", tr("Automatik"), 200.0, tr("Abstand Fahrbahnrand → Barriere (höchstens so "
-                                                                   "weit, wie Platz bis zum nächsten Streckenteil ist)"))
-        field(2, 1, tr("Barriere"), self.barrier)
+        self.runoff.setToolTip(tr("Run-off area up to the barrier: grass, gravel or asphalt"))
+        field(2, 0, tr("Run-off"), self.runoff)
+        self.barrier = _number_box(" m", tr("Automation"), 200.0, tr("Distance road edge → barrier (at most as far as "
+                                                                    "there is room to the next part of the track)"))
+        field(2, 1, tr("Barrier"), self.barrier)
         edge = QHBoxLayout()
         self.edge = QComboBox()
         for key, text in EDGES.items():
             self.edge.addItem(tr(text), key)
-        self.edge.setToolTip(tr("Winkel neben der Fahrbahn: „Wie die Strecke“ setzt die Querneigung an jeder Stelle "
-                                "über die ersten 12 m fort, danach geht es waagerecht weiter."))
+        self.edge.setToolTip(tr("Angle beside the road: “Same as track” continues the banking at every point over the "
+                                "first 12 m, then it stays level."))
         self.edge_angle = QDoubleSpinBox()
         self.edge_angle.setRange(-EDGE_MAX, EDGE_MAX)
         self.edge_angle.setDecimals(1)
         self.edge_angle.setSuffix(" °")
-        self.edge_angle.setToolTip(tr("Positiv: Der Rand steigt nach außen an, negativ: er fällt ab."))
+        self.edge_angle.setToolTip(tr("Positive: the edge rises outwards, negative: it falls."))
         self.edge.currentIndexChanged.connect(lambda *_: self.edge_angle.setVisible(self.edge.currentData() == "eigen"))
         self.edge_angle.setVisible(False)
         edge.addWidget(self.edge, 1)
         edge.addWidget(self.edge_angle)
-        grid.addWidget(QLabel(tr("Randwinkel")), 3, 0)
+        grid.addWidget(QLabel(tr("Edge angle")), 3, 0)
         grid.addLayout(edge, 3, 1, 1, 3)
         layout.addLayout(form)
         layout.addLayout(grid)
         buttons = QHBoxLayout()
-        self.apply_button = QPushButton(tr("Übernehmen"))
-        self.apply_button.setToolTip(tr("Abschnitt für den Bereich setzen · Strg+Z macht rückgängig."))
+        self.apply_button = QPushButton(tr("Apply"))
+        self.apply_button.setToolTip(tr("Set a section for the range · Ctrl+Z undoes."))
         self.apply_button.clicked.connect(self.apply_requested.emit)
-        self.clear_button = QPushButton(tr("Automatik"))
-        self.clear_button.setToolTip(tr("Eigene Abschnitte im Bereich entfernen (Seitenraum und Fahrbahnbreite)"))
+        self.clear_button = QPushButton(tr("Automation"))
+        self.clear_button.setToolTip(tr("Remove your own sections in the range (roadside and road width)"))
         self.clear_button.clicked.connect(self.clear_requested.emit)
         buttons.addWidget(self.apply_button)
         buttons.addWidget(self.clear_button)
@@ -284,10 +285,10 @@ def describe(raw, input_s, side, s_start, length):
     """Kurztext: welche eigenen Abschnitte am Cursor wirken."""
     found = sections_at(raw, input_s, side)
     if not found:
-        return tr("Am Cursor ({side}): Automatik.", side=tr(SIDES.get(side, side)))
+        return tr("At the cursor ({side}): automatic.", side=tr(SIDES.get(side, side)))
     parts = []
     for i, ab in found:
         von, bis = (zahl(to_station(ab[k], s_start, length), 0, "m") for k in ("von_s", "bis_s"))
-        parts.append(tr("Abschnitt {nr} ({seite}, {von}–{bis})", nr=i + 1, seite=tr(SIDES.get(ab.get("seite", "beide"))),
+        parts.append(tr("Section {nr} ({seite}, {von}–{bis})", nr=i + 1, seite=tr(SIDES.get(ab.get("seite", "beide"))),
                         von=von, bis=bis))
-    return tr("Am Cursor wirkt: ") + "; ".join(parts)
+    return tr("Active at the cursor: ") + "; ".join(parts)

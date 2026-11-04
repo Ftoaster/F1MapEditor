@@ -1,5 +1,11 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.3.1
+
+- **Load a track from the game:** New from template lists all F1 25 tracks (read-only). Besides centre line, heights and widths it can take over the pit lane, DRS and Straight Mode zones, the starting grid, kerbs, gravel and barrier distances, and the scenery as environment objects. Packages made from an original track are for your own use only
+- **Better fit into the game world:** templates are rotated first and only scaled down if needed; the game world offset is set automatically
+- **English first:** the editor now starts in English; German is still available under View → Language
+
 ## New in 0.3.0
 
 - **Trace a track from an image:** load a map picture or paste a screenshot, measure the scale on its scale bar, click a few support points in driving direction, and the editor finds the track between them. It only takes over a lap that is complete, does not cross itself and drives no part twice
@@ -10,7 +16,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.0-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.1-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need
@@ -46,4 +52,4 @@ Use offline and at your own risk. Back up your save data and game database first
 
 ## Licence
 
-GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.3.0`.
+GPL-3.0-only for this project's code, see `LICENSE`. The source code of this release is in this repository at tag `v0.3.1`.

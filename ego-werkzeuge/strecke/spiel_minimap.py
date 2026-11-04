@@ -43,13 +43,13 @@ def _linie(logik, name):
     if (p.ndim != 2 or p.shape[1] != 3 or len(p) < 3 or len(fort) != len(p)
             or not np.isfinite(p).all() or not np.isfinite(fort).all()
             or np.any(np.diff(fort) <= 0) or abs(fort[0]) > 1e-8):
-        raise ValueError("Ungültige TrackSpace-Linie: %s" % name)
+        raise ValueError("Invalid TrackSpace line: %s" % name)
     if linie["closed"]:
         if fort[-1] >= 1:
-            raise ValueError("Geschlossener TrackSpace muss ohne doppelten Endpunkt vorliegen")
+            raise ValueError("Closed TrackSpace must have no duplicate end point")
         p, fort = np.vstack((p, p[0])), np.append(fort, 1)
     elif abs(fort[-1] - 1) > 1e-8:
-        raise ValueError("Offener TrackSpace muss bei Fortschritt 1 enden")
+        raise ValueError("Open TrackSpace must end at progress 1")
     return platzierung.punkte(p)[:, [0, 2]], fort
 
 
@@ -76,13 +76,13 @@ def minimap_metadaten(logik, *, code="portimao", vorlage=None, randfaktor=1.104)
     z_min. padding ist Installer-Metadatum und wird nicht nochmals eingerechnet.
     """
     if not np.isfinite(randfaktor) or randfaktor < 1.05:
-        raise ValueError("Randfaktor muss mindestens 1,05 sein")
+        raise ValueError("Margin factor must be at least 1.05")
     p, _ = _linie(logik, "maintrack")
     lo, hi = p.min(0), p.max(0)
     mitte = (lo + hi) / 2
     seite = float(np.max(hi - lo) * randfaktor)
     if seite <= 0:
-        raise ValueError("Mittellinie ohne räumliche Ausdehnung")
+        raise ValueError("Centreline has no spatial extent")
     lo, hi = mitte - seite / 2, mitte + seite / 2
     # Auf Millimeter runden wie in den Originalpaketen: Der Track Installer bricht mit
     # "Track UI preflight failed … Ordered PKG roundtrip failed" ab, wenn die Eckpunkte volle
@@ -92,7 +92,7 @@ def minimap_metadaten(logik, *, code="portimao", vorlage=None, randfaktor=1.104)
              "top_left": [float(lo[0]), float(hi[1])], "top_right": hi.tolist()}
     out = copy.deepcopy(vorlage) if vorlage is not None else _vorlage(code)
     if out.get("rotation", 0) != 0 or out.get("zoom_factor", 1) != 1:
-        raise ValueError("Nur ungedrehte Minimap mit Zoomfaktor 1 unterstützt")
+        raise ValueError("Only an unrotated minimap with zoom factor 1 is supported")
     for gruppe in ("textures", "textures_om_xm"):
         out[gruppe]["corners"] = copy.deepcopy(ecken)
     return out
@@ -104,12 +104,12 @@ def _sektoren(logik):
     for i in range(1, 4):
         z = [z for z in zonen if z["Type"] == "sector_%d" % i and z["SplineName"] == "maintrack"]
         if len(z) != 1:
-            raise ValueError("Genau eine Haupt-Sektorzone %d erwartet" % i)
+            raise ValueError("Exactly one main sector zone %d expected" % i)
         out.append((float(z[0]["Start"]), float(z[0]["End"])))
     if (abs(out[0][0]) > 1e-8 or abs(out[-1][1] - 1) > 1e-8
             or any(not 0 <= a < b <= 1 for a, b in out)
             or any(abs(out[i][1] - out[i + 1][0]) > 1e-8 for i in range(2))):
-        raise ValueError("Sektoren müssen die Runde lückenlos von 0 bis 1 abdecken")
+        raise ValueError("Sectors must cover the lap from 0 to 1 without gaps")
     return out
 
 
@@ -261,14 +261,14 @@ def minimap_einsetzen(archiv: erp.ErpFile, logik_json: str, **optionen) -> dict:
     erlaubt = {"code", "ausgabe", "minimap_vorlage", "randfaktor", "mips"}
     unbekannt = set(optionen) - erlaubt
     if unbekannt:
-        raise TypeError("Unbekannte Minimap-Optionen: %s" % ", ".join(sorted(unbekannt)))
+        raise TypeError("Unknown minimap options: %s" % ", ".join(sorted(unbekannt)))
     code = optionen.get("code", "portimao")
     logik = json.loads(Path(logik_json).read_text(encoding="utf-8"))
     koord = logik.get("koordinatensystem")
     if isinstance(koord, dict):
         koord = koord.get("achsen")
     if koord != "y_oben_rechtshaendig":
-        raise ValueError("Generator-Logik mit Koordinatensystem y_oben_rechtshaendig erwartet")
+        raise ValueError("Generator logic with coordinate system y_oben_rechtshaendig expected")
     _sektoren(logik)
     meta = minimap_metadaten(logik, code=code, vorlage=optionen.get("minimap_vorlage"),
                             randfaktor=optionen.get("randfaktor", 1.104))
@@ -285,10 +285,10 @@ def minimap_einsetzen(archiv: erp.ErpFile, logik_json: str, **optionen) -> dict:
     for _, kennung, _ in auftraege:
         srv = archiv.find(kennung)
         if srv is None or srv.resource_type != "GfxSRVResource":
-            raise ValueError("Minimap-Sicht fehlt: %s" % kennung)
+            raise ValueError("Minimap view is missing: %s" % kennung)
         t = grafik.Textur.aus_ressource(archiv.find(grafik.TexturSicht.aus_bytes(srv.fragments[0].read()).bild))
         if t.dimension != 2 or t.schichten != 1 or t.tiefe != 1 or t.format not in (15, 52, 54, 55, 57, 62, 69, 70):
-            raise ValueError("Ungeeignete Minimap-Textur: %s" % kennung)
+            raise ValueError("Unsuitable minimap texture: %s" % kennung)
     bilder = []
     for art, kennung, xmode in auftraege:
         srv = archiv.find(kennung)

@@ -19,7 +19,7 @@ def ausgabe_pruefen(ordner, quellen=()):
     """Verweigert Spielordner, Downloads und das Überschreiben der Definitionsquellen."""
     ziel = Path(ordner).resolve()
     if spielpfade.geschuetzt(ziel):
-        raise ValueError('Geschützter Ausgabeordner: %s' % ziel)
+        raise ValueError('Protected output folder: %s' % ziel)
     namen = {'strecke_logik.json','strecke_netz.json','strecke.npz','strecke.obj','strecke.mtl',
              'mittellinie.csv','definition_aufgeloest.json','bericht.json',
              'vorschau.svg','vorschau.png','vorschau_start.svg','vorschau_start.png'}
@@ -27,7 +27,7 @@ def ausgabe_pruefen(ordner, quellen=()):
         if quelle and not str(quelle).startswith('<'):
             q = Path(quelle).resolve()
             if q.parent == ziel and q.name in namen:
-                raise ValueError('Ausgabe würde Eingabe überschreiben: %s' % q)
+                raise ValueError('Output would overwrite the input: %s' % q)
     return ziel
 
 
@@ -37,7 +37,7 @@ def berechnen(defn):
     ml = mittellinie.Mittellinie(defn)
     pruefung = mittellinie.raender_pruefen(ml)
     if not pruefung['ok']:
-        raise ValueError('Fahrbahnränder gefaltet oder geschnitten: %s' % pruefung)
+        raise ValueError('Track edges folded or intersecting: %s' % pruefung)
     pk = defn.param['kurven']
     kurven = mittellinie.kurven_finden(ml, pk['kruemmung_schwelle'],pk['mindestwinkel_grad'],pk['zusammenfassen_m'])
     qp = querprofil.querprofil_berechnen(ml,defn.param,kurven)

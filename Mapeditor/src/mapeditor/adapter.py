@@ -15,7 +15,10 @@ import runpy
 import zipfile
 
 from PySide6.QtCore import QObject, QProcess, QProcessEnvironment, QTimer, Signal
-from .i18n import N_, tr
+from .i18n import N_, STANDARD, setze_sprache, sprache, tr
+
+#: Umgebungsvariable, mit der Arbeiterprozesse die Sprache der Oberfläche bekommen
+SPRACHE_ENV = "MAPEDITOR_SPRACHE"
 from .paths import writable_path
 from .process_group import ProcessGroup
 
@@ -32,8 +35,8 @@ def toolkit_path(configured=None):
                 return path
             # Ein ausdrücklich konfigurierter Pfad darf nicht unbemerkt ersetzt werden.
             if value == configured or value == os.environ.get("MAPEDITOR_WERKZEUGKASTEN"):
-                raise ValueError(tr("Werkzeugkasten nicht gefunden: {path}", path=path))
-    raise ValueError(tr("Werkzeugkasten fehlt. Pfad über Werkzeuge → Werkzeugkasten wählen setzen."))
+                raise ValueError(tr("Toolkit not found: {path}", path=path))
+    raise ValueError(tr("Toolkit missing. Set the path via Tools → Choose toolkit."))
 
 
 def worker_command():
@@ -45,18 +48,18 @@ def worker_command():
 #: Streckencodes, die die Spieldatenbank kennt und das Spiel selbst nicht lädt (Werkzeugkasten
 #: ``strecke/streckencode.py`` ``DB_ALTSTRECKEN``, docs/streckencode.md): (Code, Einstufung, Hinweis), empfohlene zuerst.
 TRACK_CODES = (
-    ("sochi", N_("empfohlen"), N_("fast vollständige Streckendaten; im Spiel bestätigt")),
-    ("hanoi", N_("gut"), N_("Streckendaten vorhanden")),
-    ("paul_ricard", N_("gut"), N_("Streckendaten vorhanden; steht in alten Ereignislisten")),
-    ("hockenheim", N_("unklar"), N_("nur wenige Datenbankeinträge; ob die Strecke auswählbar wird, ist offen")),
-    ("sepang", N_("unklar"), N_("nur wenige Datenbankeinträge; ob die Strecke auswählbar wird, ist offen")),
-    ("portimao", N_("belegt"), N_("Code des Portimão-Mods (Träger); eine Übertragung ersetzt Portimão")),
-    ("bahrain24", N_("belegt"), N_("Code des Sepang-Mods; eine Übertragung ersetzt Sepang")),
-    ("styria", N_("riskant"), N_("gleiche Anlage wie Österreich; lädt vermutlich deren Ordner")),
-    ("silverstone_int", N_("riskant"), N_("Layout-Variante von Silverstone")),
-    ("suzuka_east", N_("riskant"), N_("Layout-Variante von Suzuka")),
-    ("texas_nat", N_("riskant"), N_("Layout-Variante von Texas")),
-    ("bahrain_pad", N_("riskant"), N_("Layout-Variante von Bahrain")),
+    ("sochi", N_("recommended"), N_("almost complete track data; confirmed in game")),
+    ("hanoi", N_("good"), N_("track data present")),
+    ("paul_ricard", N_("good"), N_("track data present; listed in old event lists")),
+    ("hockenheim", N_("unclear"), N_("only a few database entries; unclear whether the track becomes selectable")),
+    ("sepang", N_("unclear"), N_("only a few database entries; unclear whether the track becomes selectable")),
+    ("portimao", N_("occupied"), N_("Code of the Portimão mod (carrier); a transfer replaces Portimão")),
+    ("bahrain24", N_("occupied"), N_("Code of the Sepang mod; a transfer replaces Sepang")),
+    ("styria", N_("risky"), N_("same venue as Austria; probably loads its folder")),
+    ("silverstone_int", N_("risky"), N_("Layout variant of Silverstone")),
+    ("suzuka_east", N_("risky"), N_("Layout variant of Suzuka")),
+    ("texas_nat", N_("risky"), N_("Layout variant of Texas")),
+    ("bahrain_pad", N_("risky"), N_("Layout variant of Bahrain")),
 )
 #: Erweiterte Bauoptionen (überschreiben das Profil „empfohlen“): Streckencode, Streckenname, PVS-Variante
 BUILD_CODES = tuple(code for code, _, _ in TRACK_CODES)
@@ -118,13 +121,13 @@ def build_command(toolkit, project_folder, output, packages, name="entwurf", pyt
     ``umgebung``: Pfad der ``umgebung.json`` (Umgebungsobjekte, Vertrag ``umgebung_vertrag.md``); ohne Angabe
     gibt es keinen ``--umgebung``-Schalter und der Bau wie bisher (Bodenbewuchs geleert)."""
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", name):
-        raise ValueError(tr("Bauname: 1–80 Buchstaben/Ziffern, Bindestrich oder Unterstrich."))
+        raise ValueError(tr("Build name: 1–80 letters/digits, hyphen or underscore."))
     if profile != "empfohlen":
-        raise ValueError(tr("Unbekanntes Bauprofil."))
+        raise ValueError(tr("Unknown build profile."))
     root, target = writable_path(output), writable_path(packages)
     work = writable_path(root / name)
     if (target / (name + ".zip")).exists() or work.exists():
-        raise ValueError(tr("Bauname bereits vorhanden. Vorschlag: {name}_neu", name=name))
+        raise ValueError(tr("Build name already exists. Suggestion: {name}_neu", name=name))
     if getattr(sys, "frozen", False) and python is None:
         prefix = [sys.executable, "--werkzeug-cli", "neue_strecke_tool.py"]
     else:
@@ -146,23 +149,23 @@ def _option_args(options):
     args = []
     ziel = options.get("ziel") or "ego"
     if ziel not in BUILD_ZIELE:
-        raise ValueError(tr("Bauziel {wert!r} unbekannt.", wert=ziel))
+        raise ValueError(tr("Unknown build target {wert!r}.", wert=ziel))
     if ziel != "ego":
         args += ["--ziel", ziel]
     code = options.get("streckencode")
     if code and ziel == "ego":
         if code not in BUILD_CODES:
-            raise ValueError(tr("Streckencode {code!r} nicht erlaubt (nur {wert}).", code=code, wert=', '.join(BUILD_CODES)))
+            raise ValueError(tr("Track code {code!r} not allowed (only {wert}).", code=code, wert=', '.join(BUILD_CODES)))
         args += ["--streckencode", code]
     name = (options.get("streckenname") or "").strip()
     if name:
         if len(name) > 60 or any(c in name for c in '"\\<>|'):
-            raise ValueError(tr("Streckenname: höchstens 60 Zeichen, keine Anführungszeichen oder Sonderzeichen."))
+            raise ValueError(tr("Track name: at most 60 characters, no quotation marks or special characters."))
         args += ["--streckenname", name]
     pvs = options.get("pvs_variante")
     if pvs:
         if pvs not in BUILD_PVS:
-            raise ValueError(tr("PVS-Variante {pvs!r} unbekannt.", pvs=pvs))
+            raise ValueError(tr("PVS variant {pvs!r} unknown.", pvs=pvs))
         args += ["--pvs-variante", pvs]
     if options.get("traeger_teilen") and ziel == "swofty":
         args.append("--traeger-teilen")
@@ -171,16 +174,16 @@ def _option_args(options):
     raster = options.get("raster")
     if raster:
         if raster != 26:
-            raise ValueError(tr("Raster {wert!r} unbekannt.", wert=raster))
+            raise ValueError(tr("Unknown grid size {wert!r}.", wert=raster))
         args += ["--raster", str(raster)]
     if "weltkarten" in options:
         args.append("--weltkarten" if options["weltkarten"] else "--no-weltkarten")
     if options.get("weltkarten"):
         biom, farbton = options.get("biom") or "standard", options.get("farbton") or "standard"
         if biom not in BUILD_BIOME:
-            raise ValueError(tr("Landschaft {wert!r} unbekannt.", wert=biom))
+            raise ValueError(tr("Unknown landscape {wert!r}.", wert=biom))
         if farbton not in BUILD_FARBTOENE:
-            raise ValueError(tr("Farbton {wert!r} unbekannt.", wert=farbton))
+            raise ValueError(tr("Unknown colour tone {wert!r}.", wert=farbton))
         args += ["--biom", biom, "--farbton", farbton]
     return args
 
@@ -198,7 +201,7 @@ def injector_command(toolkit, action, package, backups, python=None):
 
     Sicherungen gehen in ``backups`` (beschreibbar, außerhalb von Spiel und Installation)."""
     if action not in ("plan", "injizieren"):
-        raise ValueError(tr("Unbekannte Schnellaustausch-Aktion."))
+        raise ValueError(tr("Unknown quick swap action."))
     arguments = ["--sicherungsordner", str(writable_path(backups)), action, str(Path(package).resolve())]
     if action == "injizieren":
         arguments.append("--ausfuehren")
@@ -289,6 +292,7 @@ class ProcessJob(QObject):
         env = QProcessEnvironment.systemEnvironment()
         env.insert("PYTHONIOENCODING", "utf-8")
         env.insert("PYTHONDONTWRITEBYTECODE", "1")
+        env.insert(SPRACHE_ENV, sprache())            # Texte des Arbeiters in der Sprache der Oberfläche
         # Quellstart und installierter Start benutzen denselben Arbeitervertrag.
         if not getattr(sys, "frozen", False):
             env.insert("PYTHONPATH", str(Path(__file__).resolve().parents[1]) + os.pathsep + env.value("PYTHONPATH"))
@@ -379,14 +383,14 @@ class BuildJob(ProcessJob):
         try:
             event = json.loads(line)
             if event.get("schema") != "ego-bau-ereignis/1" or not isinstance(event.get("typ"), str):
-                raise ValueError(tr("Unbekanntes Bauereignis"))
+                raise ValueError(tr("Unknown build event"))
             if self.terminal is not None:
-                raise ValueError(tr("Ereignis nach dem Bauende"))
+                raise ValueError(tr("Event after the end of the build"))
             if event["typ"] in ("ergebnis", "fehler", "abbruch"):
                 self.terminal = event
             self.event.emit(event)
         except (ValueError, TypeError, AttributeError) as error:
-            self.protocol_error = tr("Ungültiger Ereignisstrom: {error}", error=error)
+            self.protocol_error = tr("Invalid event stream: {error}", error=error)
             self.output.emit(self.protocol_error + "\n" + line + "\n")
 
     def _read(self):
@@ -426,7 +430,7 @@ class BuildJob(ProcessJob):
                 try:
                     from .project import atomic_write, encoded
                     atomic_write(self.work / "bau_status.json", encoded({"status": "abgebrochen",
-                                 "text": tr("Abbruch-Zeitlimit: Prozessbaum hart beendet"), "hart_beendet": True}))
+                                 "text": tr("Cancel timeout: process tree killed"), "hart_beendet": True}))
                 except (ValueError, OSError) as error:
                     self.output.emit(f"Abbruchstatus nicht gespeichert: {error}\n")
         if not self.completed:
@@ -680,12 +684,14 @@ NEW_MANIFEST = {"schema": 1, "definition": "definition.json", "runde_geschlossen
 def calculate_template(request):
     """Vorlagen-Import und Zufallsvorschlag (Schritt F): ausschließlich Werkzeugkasten-Module.
 
-    ``task``: ``import`` (``kind`` tum|gpx|spiel, ``path``, ``code`` für spiel, ``fit``, ``spacing``) oder
-    ``vorschlag`` (``seed``, ``length_m``, ``curves``, ``min_radius_m``). Antwort: ``raw`` (Rohdefinition),
-    ``manifest`` (versatz 0, die Strecke ist auf ±1024 m zentriert) und ``info`` (= ``raw["editor_import"]``)."""
+    ``task``: ``import`` (``kind`` tum|gpx|spiel, ``path``, ``code`` für spiel, ``fit``, ``spacing``; für spiel
+    außerdem ``rennlogik``, ``seitenraum``, ``kulisse``) oder ``vorschlag`` (``seed``, ``length_m``, ``curves``,
+    ``min_radius_m``). Antwort: ``raw`` (Rohdefinition), ``manifest`` (Spielweltversatz aus dem Import, sonst 0),
+    ``info`` (= ``raw["editor_import"]``) und bei ``kulisse`` ``umgebung`` (``umgebung.json``-Daten)."""
     root = toolkit_path(request.get("toolkit"))
     sys.dont_write_bytecode = True
     sys.path.insert(0, str(root))
+    umgebung_daten = None
     if request["task"] == "vorschlag":
         from strecke import vorschlag
         raw = vorschlag.vorschlag(seed=int(request["seed"]), laenge_m=float(request["length_m"]),
@@ -699,10 +705,46 @@ def calculate_template(request):
         elif kind == "gpx":
             raw = importe.gpx(path, einpassen=fit)
         elif kind == "spiel":
-            raw = importe.spielstrecke(path, request.get("code") or "", punktabstand_m=spacing, einpassen=fit)
+            code = request.get("code") or ""
+            raw = importe.spielstrecke(path, code, punktabstand_m=spacing, einpassen=fit,
+                                       rennlogik=bool(request.get("rennlogik", True)),
+                                       seitenraum=bool(request.get("seitenraum", True)))
+            if request.get("kulisse"):
+                umgebung_daten = _game_scenery(importe, path, code, raw)
         else:
-            raise ValueError(tr("Unbekannte Vorlagenart: {kind}", kind=kind))
-    return {"raw": raw, "manifest": dict(NEW_MANIFEST), "info": raw.get("editor_import", {})}
+            raise ValueError(tr("Unknown template type: {kind}", kind=kind))
+    info = raw.get("editor_import", {})
+    manifest = dict(NEW_MANIFEST)
+    if any(info.get("versatz_m") or []):         # Strecke passt nur verschoben ins Loch des Außengeländes
+        manifest["versatz"] = [int(v) if float(v).is_integer() else round(float(v), 3) for v in info["versatz_m"]]
+    answer = {"raw": raw, "manifest": manifest, "info": info}
+    if umgebung_daten is not None:
+        answer["umgebung"] = umgebung_daten
+    return answer
+
+
+def _game_scenery(importe, path, code, raw):
+    """Kulisse der Spielstrecke (Ausbaustufe 6) oder None; Ergebnis und Gründe stehen in ``raw["editor_import"]``."""
+    info = raw["editor_import"]
+    if not str(path).lower().endswith(".erp"):
+        info["warnungen"].append(tr("Scenery is only imported from an ERP, not from a mod package."))
+        return None
+    try:
+        daten, kulisse = importe.spielstrecke_kulisse(path, code, raw)
+    except (ValueError, OSError, KeyError) as error:
+        info["warnungen"].append(tr("Scenery not imported: {fehler}", fehler=error))
+        return None
+    info["kulisse"] = kulisse
+    return daten if daten.get("objekte") else None
+
+
+def calculate_game_tracks(request):
+    """Spielstrecken im Spielordner für die Auswahlliste (nur lesend)."""
+    root = toolkit_path(request.get("toolkit"))
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, str(root))
+    from strecke import spielimport
+    return {"strecken": spielimport.strecken(request.get("spielordner"), request.get("sprache") or "de")}
 
 
 def run_task(request, timeout=300):
@@ -711,7 +753,7 @@ def run_task(request, timeout=300):
     Wirft ``ValueError`` mit der Meldung des Werkzeugkastens; blockiert (Sekunden)."""
     root = toolkit_path(request.get("toolkit"))
     request = dict(request, toolkit=str(root))
-    env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1")
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONDONTWRITEBYTECODE="1", **{SPRACHE_ENV: sprache()})
     if not getattr(sys, "frozen", False):
         env["PYTHONPATH"] = str(Path(__file__).resolve().parents[1]) + os.pathsep + env.get("PYTHONPATH", "")
     flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
@@ -719,20 +761,32 @@ def run_task(request, timeout=300):
         done = subprocess.run(worker_command(), input=json.dumps(request, ensure_ascii=False).encode("utf-8"),
                               capture_output=True, timeout=timeout, env=env, creationflags=flags)
     except (OSError, subprocess.TimeoutExpired) as error:
-        raise ValueError(tr("Arbeiterprozess nicht verfügbar: {error}", error=error)) from error
+        raise ValueError(tr("Worker process not available: {error}", error=error)) from error
     try:
         answer = json.loads(done.stdout.decode("utf-8"))
     except ValueError:
-        raise ValueError(tr("Arbeiterprozess ohne gültige Antwort: ") + done.stderr.decode("utf-8", "replace")[-400:]) from None
+        raise ValueError(tr("Worker process returned no valid answer: ") + done.stderr.decode("utf-8", "replace")[-400:]) from None
     if "error" in answer:
         raise ValueError(answer["error"])
     return answer
 
 
-def import_template(kind, path, code=None, fit=False, spacing=None, toolkit=None):
-    """Neue Rohdefinition aus TUM-CSV (``tum``), GPX-Spur (``gpx``) oder Spielstrecke (``spiel`` + ``code``)."""
+def import_template(kind, path, code=None, fit=False, spacing=None, toolkit=None, rennlogik=True, seitenraum=True,
+                    kulisse=False):
+    """Neue Rohdefinition aus TUM-CSV (``tum``), GPX-Spur (``gpx``) oder Spielstrecke (``spiel`` + ``code``).
+
+    Nur für Spielstrecken: ``rennlogik`` (Boxengasse, Zonen, Startaufstellung), ``seitenraum`` (aus der Fahrphysik),
+    ``kulisse`` (Objekte als Umgebung, Antwortfeld ``umgebung``)."""
     return run_task({"task": "import", "kind": kind, "path": str(path), "code": code, "fit": fit,
-                     "spacing": spacing, "toolkit": toolkit})
+                     "spacing": spacing, "toolkit": toolkit, "rennlogik": rennlogik, "seitenraum": seitenraum,
+                     "kulisse": kulisse}, timeout=900 if kulisse else 300)
+
+
+def spielstrecken(toolkit=None, spielordner=None):
+    """Spielstrecken für die Auswahl in „Neu aus Vorlage“: ``[{code, name, datei, rueckwaerts, bruecke}]``."""
+    from .i18n import sprache
+    return run_task({"task": "spielstrecken", "toolkit": toolkit, "spielordner": spielordner,
+                     "sprache": sprache()})["strecken"]
 
 
 def suggest_track(seed, length_m=5000.0, curves=14, min_radius_m=30.0, toolkit=None):
@@ -813,7 +867,7 @@ def calculate_env_catalog(request):
     """Arbeitsprozess: Katalog der Umgebungsmodelle (Zwischenspeicher des Werkzeugkastens, ``neu`` liest neu ein)."""
     modul = _umgebung_modul(request.get("toolkit"))
     if modul is None:
-        raise ValueError(tr("Der Werkzeugkasten enthält noch keine Umgebungsmodelle (strecke/umgebung.py fehlt)."))
+        raise ValueError(tr("The toolkit does not contain environment models yet (strecke/umgebung.py is missing)."))
     return modul.katalog(spielordner=request.get("spielordner"), neu=bool(request.get("neu")))
 
 
@@ -821,7 +875,7 @@ def calculate_env_preview(request):
     """Arbeitsprozess: Silhouette eines Modells als PNG (vom Werkzeugkasten zwischengespeichert)."""
     modul = _umgebung_modul(request.get("toolkit"))
     if modul is None:
-        raise ValueError(tr("Der Werkzeugkasten enthält noch keine Umgebungsmodelle (strecke/umgebung.py fehlt)."))
+        raise ValueError(tr("The toolkit does not contain environment models yet (strecke/umgebung.py is missing)."))
     ziel = writable_path(request["pfad"])
     ziel.parent.mkdir(parents=True, exist_ok=True)
     return {"pfad": str(modul.vorschau(request["modell"], str(ziel), int(request.get("groesse", 160))))}
@@ -836,7 +890,7 @@ def calculate_env_check(request):
     sys.path.insert(0, str(root))
     modul = _umgebung_modul(request.get("toolkit"))
     if modul is None:
-        raise ValueError(tr("Der Werkzeugkasten enthält noch keine Umgebungsmodelle (strecke/umgebung.py fehlt)."))
+        raise ValueError(tr("The toolkit does not contain environment models yet (strecke/umgebung.py is missing)."))
     from strecke import definition, erzeugung
     shift = request.get("shift", [0, 0, 0])
     defn = definition.aus_dict(request["raw"], basisordner=request.get("basis", "."))
@@ -872,12 +926,14 @@ def env_cache_folder():
 
 def worker_main():
     try:
+        setze_sprache(os.environ.get(SPRACHE_ENV) or STANDARD)
         request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
         task = request.get("task")
         result = (calculate_analysis(request) if task == "analyse" else
                   calculate_env_catalog(request) if task == "umgebung_katalog" else
                   calculate_env_preview(request) if task == "umgebung_vorschau" else
                   calculate_env_check(request) if task == "umgebung_pruefen" else
+                  calculate_game_tracks(request) if task == "spielstrecken" else
                   calculate_template(request) if task else calculate_preview(request))
         sys.stdout.buffer.write(json.dumps(result, ensure_ascii=False, allow_nan=False).encode("utf-8"))
         return 0

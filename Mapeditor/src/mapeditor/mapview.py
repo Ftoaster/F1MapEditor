@@ -21,8 +21,8 @@ from .input_geometry import input_geometry
 
 MATERIALS = {0: "#596675", 1: "#D65B65", 2: "#436A50", 3: "#B49768", 4: "#A8B2BB", 5: "#48596C", 6: "#F5F5F0",
              7: "#6B7684"}
-MATERIAL_NAMES = {0: N_("Asphalt"), 1: N_("Randstein"), 2: N_("Gras"), 3: N_("Kies"), 4: N_("Mauer"), 5: N_("Boxengasse"),
-                  6: N_("Randlinie"), 7: N_("Asphalt-Auslauf")}
+MATERIAL_NAMES = {0: N_("Asphalt"), 1: N_("Kerb"), 2: N_("Grass"), 3: N_("Gravel"), 4: N_("Wall"), 5: N_("Pit lane"),
+                  6: N_("Edge line"), 7: N_("Asphalt run-off")}
 
 ROTATE_HANDLE_PX = 30     # Abstand des Drehgriffs über dem Auswahlkasten
 SNAP_DEG = 15.0           # Raster beim Drehen mit Umschalt
@@ -73,7 +73,7 @@ class MapView(QGraphicsView):
         self.setOptimizationFlags(QGraphicsView.DontSavePainterState | QGraphicsView.DontAdjustForAntialiasing)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setFocusPolicy(Qt.StrongFocus)
-        self.setAccessibleName(tr("Streckenkarte: X rechts, Z unten, Meter"))
+        self.setAccessibleName(tr("Track map: X right, Z down, metres"))
         # Verschieben mit mittlerer Taste/Leertaste, Mausrad zoomt: Rollbalken sind überflüssig
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -381,13 +381,13 @@ class MapView(QGraphicsView):
             if many:
                 break
             painter.setPen(text_color)
-            painter.drawText(xy + QPointF(12, -10).toPoint(), f"{i + 1}" + (tr(" · Ende ziehen") if self.input["segments"] else ""))
+            painter.drawText(xy + QPointF(12, -10).toPoint(), f"{i + 1}" + (tr(" · drag end") if self.input["segments"] else ""))
             if i < len(self.input["segments"]) and self.document.ml["segmente"][i]["typ"] == "bogen":
                 middle = self.input["segments"][i]["middle"]
                 mid = QPointF(*to_view(middle[0], middle[2]))
                 painter.setBrush(QColor("#FFD184"))
                 painter.drawRect(QRectF(mid.x() - 5, mid.y() - 5, 10, 10))
-                painter.drawText(mid + QPointF(10, 18).toPoint(), tr("Radius ziehen"))
+                painter.drawText(mid + QPointF(10, 18).toPoint(), tr("Drag radius"))
         if self.preview:
             self._draw_preview_marks(painter, to_view, text_color)
             if self.analysis:
@@ -405,45 +405,46 @@ class MapView(QGraphicsView):
         gesture = self.drag_point is not None or self.rotate_center is not None
         gesture = gesture or self.env_drag is not None and self.env_drag["active"] or self.env_area is not None
         gesture = gesture or self.terrain_drag is not None and self.terrain_drag["active"]
-        state = (tr("Loslassen übernimmt · Esc bricht ab") if gesture else
-                 tr("noch keine Strecke") if not self.document.points and not self.input["segments"] else
-                 tr("Vorschau veraltet – wird neu berechnet") if self.stale else
-                 tr("Vorschau aktuell") if self.preview else
-                 tr("Runde schließen für die Vorschau") if not self.document.project.closed and self.document.points else
-                 tr("Vorschau ausstehend"))
+        state = (tr("Release applies · Esc cancels") if gesture else
+                 tr("no track yet") if not self.document.points and not self.input["segments"] else
+                 tr("Preview outdated – being recalculated") if self.stale else
+                 tr("Preview up to date") if self.preview else
+                 tr("Close the lap for the preview") if not self.document.project.closed and self.document.points else
+                 tr("Preview pending"))
         note = f"  ·  {self.analysis_note}" if self.analysis_note and not gesture else ""
         # Oben links eine Zeile für das Wichtige: Werkzeug und aktuelle Vorschau stehen schon in Leiste und Statuszeile
         top = 12
-        if (self.show_hints or gesture) and (note or state != tr("Vorschau aktuell") or self.mode != "auswahl"):
-            names = {"punkte": tr("Punkte setzen"), "umgebung": tr("Umgebung"), "streuen": tr("Fläche bepflanzen"),
-                     "nachzeichnen": tr("Nachzeichnen")}
-            self._chip(painter, 12, top, f"{names.get(self.mode, tr('Auswahl'))}  ·  {state}{note}",
+        if (self.show_hints or gesture) and (note or state != tr("Preview up to date") or self.mode != "auswahl"):
+            names = {"punkte": tr("Set points"), "umgebung": tr("Environment"), "streuen": tr("Plant area"),
+                     "nachzeichnen": tr("Trace")}
+            self._chip(painter, 12, top, f"{names.get(self.mode, tr('Select'))}  ·  {state}{note}",
                        "#D6A94A" if self.stale and not gesture else None)
             top += 30
         count = len(selected_set)
         if self.rotate_center is not None:
-            hint = tr("Drehen {winkel:+.1f}° · Umschalt: {raster:.0f}°-Schritte · Esc: abbrechen", winkel=math.degrees(self.rotate_angle),
+            hint = tr("Rotate {winkel:+.1f}° · Shift: {raster:.0f}° steps · Esc: cancel", winkel=math.degrees(self.rotate_angle),
                       raster=SNAP_DEG)
         elif self.mode in ENV_MODES:
             hint = self._env_hint()
         elif self.mode == "nachzeichnen" and self.trace is not None:
             hint = self.trace.hinweis()
         elif self.mode == "punkte":
-            hint = (tr("Klick setzt einen Punkt · ab 4 Punkten „Runde schließen“ · V oder Esc: zurück zur Auswahl")
+            hint = (tr("Click sets a point · from 4 points “Close lap” · V or Esc: back to selection")
                     if not self.document.project.closed else
-                    tr("Klick fügt einen Punkt an der nächsten Stelle der Strecke ein · V oder Esc: zurück zur Auswahl"))
+                    tr("Click inserts a point at the nearest place on the track · V or Esc: back to selection"))
         elif self.document.rotatable():
-            what = tr("ganze Strecke") if self.document.rotatable() == "strecke" else tr("{count} Punkte", count=count)
-            hint = tr("{what} gewählt · ziehen oder Pfeiltasten: verschieben · runder Griff: drehen · Entf: löschen", what=what)
+            what = tr("whole track") if self.document.rotatable() == "strecke" else tr("{count} points", count=count)
+            hint = tr("{what} selected · drag or arrow keys: move · round handle: rotate · Del: delete", what=what)
         elif count == 1:
-            hint = (tr("Ende ziehen: Länge/Winkel · gelbes Quadrat: Radius · rechts: Werte ändern") if self.input["segments"]
-                    else tr("Punkt ziehen: verschieben · Entf: löschen · rechts: Höhe und Breite"))
+            hint = (tr("Drag end: length/angle · yellow square: radius · right: change values") if self.input["segments"]
+                    else tr("Drag point: move · Del: delete · right: height and width"))
         elif not self.document.points and not self.input["segments"]:
             hint = ""
         else:
-            hint = (tr("Klick wählt · Rahmen ziehen wählt mehrere · Doppelklick auf die Linie fügt einen Punkt ein · F1: Hilfe")
+            hint = (tr(("Click selects · drag a box to select several · double-click on the line inserts a point · "
+                        "F1: help"))
                     if not self.input["segments"] else
-                    tr("Klick wählt ein Segment · Strg+A: ganze Strecke verschieben/drehen · F1: Hilfe"))
+                    tr("Click selects a segment · Ctrl+A: move/rotate the whole track · F1: help"))
         if hint and (self.show_hints or gesture):
             self._chip(painter, 12, top, hint)                # oben: unten lag der Hinweis über der Strecke
         if self.show_frame:
@@ -451,7 +452,7 @@ class MapView(QGraphicsView):
             corner = QPointF(*to_view(-1024 - shift[0], -1024 - shift[2]))
             if -200 < corner.x() < width - 60 and -20 < corner.y() < height - 20:
                 painter.setPen(QColor("#D4AA61"))
-                painter.drawText(corner + QPointF(6, 16), tr("Spielbereich ±1024 m"))
+                painter.drawText(corner + QPointF(6, 16), tr("Play area ±1024 m"))
         if self.show_scale:
             self._scale_bar(painter, width, height, text_color)
         if self.overlap_marks and self.overlap_revision == self.document.revision:
@@ -473,26 +474,28 @@ class MapView(QGraphicsView):
 
     def _env_hint(self):
         if not self.document.env_editable:
-            return tr("Umgebung nur lesend: umgebung.json ist nicht lesbar oder das Projekt hat eine unbekannte Fassung")
+            return tr("Environment read-only: umgebung.json is unreadable or the project has an unknown version")
         if self.mode == "streuen":
             if self.env_form == "pinsel":
-                return tr("Mit gedrückter Maustaste malen: dort wird bepflanzt · Radius und Dichte im Reiter „Umgebung“ · Esc: zurück")
-            return tr("Rechteck aufziehen: die Fläche wird bepflanzt · Dichte im Reiter „Umgebung“ · Esc: zurück")
+                return tr(("Paint with the mouse button held: planting happens there · radius and density in the "
+                           "“Environment” tab · Esc: back"))
+            return tr("Drag a rectangle: the area is planted · density in the “Environment” tab · Esc: back")
         if self.terrain_armed:
-            return (tr("Klick setzt einen Hügel (im Streckenbereich, negative Höhe = Senke) · Esc: zurück")
+            return (tr("Click places a hill (inside the track area, negative height = hollow) · Esc: back")
                     if self.terrain_armed == "huegel" else
-                    tr("Klick setzt einen Berg (außerhalb des Streckenbereichs; herauszoomen) · Esc: zurück"))
+                    tr("Click places a mountain (outside the track area; zoom out) · Esc: back"))
         form = self.document.terrain_form(self.document.terrain_selected) if self.document.terrain_selected else None
         if form is not None:
-            return tr("„{name}“ gewählt · Mitte ziehen: verschieben · Höhe und Radius im Reiter „Umgebung“ · Entf: löschen",
+            return tr(("“{name}” selected · drag the centre: move · height and radius in the “Environment” tab · Del: "
+                       "delete"),
                       name=form["id"])
         if self.env_model:
-            return tr("Klick setzt „{modell}“ · Klick auf ein Objekt wählt es · Esc: Modell abwählen",
+            return tr("Click places “{modell}” · click an object to select it · Esc: deselect model",
                       modell=umgebung.kurzname(self.env_model))
         if self.document.env_selected:
-            return tr("{anzahl} Objekte gewählt · ziehen: verschieben · Entf: löschen · Doppelklick: ganze Gruppe",
+            return tr("{anzahl} objects selected · drag: move · Del: delete · double-click: whole group",
                       anzahl=len(self.document.env_selected))
-        return tr("Modell im Katalog wählen und klicken zum Platzieren · Rahmen ziehen wählt mehrere · Esc: zurück")
+        return tr("Choose a model in the catalogue and click to place · drag a frame to select several · Esc: back")
 
     def _draw_env(self, painter, to_view, width, height):
         """Umgebungsebene: Kreise in Katalogröße, Farbe je Kategorie; Auswahl hell, Ziehen/Bepflanzen als Entwurf."""
@@ -672,7 +675,7 @@ class MapView(QGraphicsView):
             painter.setPen(QPen(QColor("#FFFFFF"), 3, Qt.DashLine))
             painter.drawLine(a, b)
         painter.setPen(text_color)
-        anchor, label = QPointF(a) + QPointF(8, -10), tr("ZIEL · 0 m")
+        anchor, label = QPointF(a) + QPointF(8, -10), tr("FINISH · 0 m")
         metrics = painter.fontMetrics()           # Platz belegen: spätere Schilder (DRS, Straight Mode) weichen aus
         self._placed.append(QRectF(anchor.x() - 4, anchor.y() - metrics.ascent() - 2,
                                    metrics.horizontalAdvance(label) + 8, metrics.height() + 3))
@@ -929,7 +932,7 @@ class MapView(QGraphicsView):
             anchor = zone.get("_anchor")
             if anchor is None or not self.show_labels:
                 continue
-            text = zone["label"] + (tr(" (Automatik)") if zone["auto"] else "")
+            text = zone["label"] + (tr(" (automatic)") if zone["auto"] else "")
             pos = anchor + (QPointF(10, -14) if zone["art"] == "xmode" else QPointF(10, 24))
             selected = (zone["art"], zone["index"]) == self.zone_selected
             self._label(painter, pos, text, QColor(self.ZONE_FARBEN[zone["art"]]).lighter(130).name(), force=selected)

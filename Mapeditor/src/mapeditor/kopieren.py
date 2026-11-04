@@ -61,7 +61,7 @@ def kopie(document):
     ml = document.ml
     auswahl = sorted(document.selected_indices)
     if not auswahl:
-        raise ValueError(tr("Nichts gewählt: erst Punkte wählen (Rahmen ziehen oder Strg+A)."))
+        raise ValueError(tr("Nothing selected: select points first (drag a box or Ctrl+A)."))
     if ml.get("art") == "segmente":
         from .input_geometry import input_geometry
         g = input_geometry(document)
@@ -69,7 +69,7 @@ def kopie(document):
             raise ValueError(g["error"])
         folge = kette(auswahl, len(g["segments"]), False)
         if folge is None:
-            raise ValueError(tr("Nur zusammenhängende Punkte oder Segmente lassen sich kopieren."))
+            raise ValueError(tr("Only connected points or segments can be copied."))
         punkte = []
         for i in folge:
             e, seg = g["segments"][i], ml["segmente"][i]
@@ -82,10 +82,10 @@ def kopie(document):
     elif ml.get("art") == "kontrollpunkte":
         folge = kette(auswahl, len(document.points), document.project.closed)
         if folge is None:
-            raise ValueError(tr("Nur zusammenhängende Punkte oder Segmente lassen sich kopieren."))
+            raise ValueError(tr("Only connected points or segments can be copied."))
         punkte = [_punkt(document.points[i]) for i in folge]
     else:
-        raise ValueError(tr("Diese Eingabeart lässt sich nicht kopieren."))
+        raise ValueError(tr("This kind of input cannot be copied."))
     return {"format": FORMAT, "version": VERSION, "punkte": punkte,
             "quelle": {"name": document.project.raw.get("name", ""), "geschlossen": bool(document.project.closed)}}
 
@@ -99,11 +99,11 @@ def aus_text(text):
     try:
         daten = json.loads(text)
     except (TypeError, ValueError):
-        raise ValueError(tr("Die Zwischenablage enthält keine kopierten Streckenpunkte."))
+        raise ValueError(tr("The clipboard holds no copied track points."))
     if not isinstance(daten, dict) or daten.get("format") != FORMAT:
-        raise ValueError(tr("Die Zwischenablage enthält keine kopierten Streckenpunkte."))
+        raise ValueError(tr("The clipboard holds no copied track points."))
     if int(daten.get("version", 0)) > VERSION:
-        raise ValueError(tr("Die Punkte stammen aus einer neueren Mapeditor-Version."))
+        raise ValueError(tr("The points come from a newer Mapeditor version."))
     punkte = []
     for p in daten.get("punkte") or []:
         try:
@@ -112,12 +112,12 @@ def aus_text(text):
                 if p.get(k) is not None:
                     neu[k] = float(p[k])
         except (TypeError, ValueError, KeyError):
-            raise ValueError(tr("Die Zwischenablage enthält keine kopierten Streckenpunkte."))
+            raise ValueError(tr("The clipboard holds no copied track points."))
         if not all(math.isfinite(neu[k]) for k in ("x", "y", "z")):
-            raise ValueError(tr("Die Zwischenablage enthält keine kopierten Streckenpunkte."))
+            raise ValueError(tr("The clipboard holds no copied track points."))
         punkte.append(neu)
     if not punkte:
-        raise ValueError(tr("Die Zwischenablage enthält keine kopierten Streckenpunkte."))
+        raise ValueError(tr("The clipboard holds no copied track points."))
     return punkte
 
 
@@ -184,7 +184,7 @@ def einfuegen_plan(strecke, stueck, geschlossen):
     Rückgabe: dict(punkte, neu=(erster, letzter Index der eingefügten Punkte), hinten, umgedreht, verschoben (dx, dz)
     oder None, versatz_m (Länge, um die sich die Streckenmeter ab dem ersten Punkt verschieben), abstand_m, knick_grad)."""
     if geschlossen:
-        raise ValueError(tr("Einfügen geht nur bei offener Strecke: erst „Runde öffnen“ oder „Runde hier öffnen“."))
+        raise ValueError(tr("Pasting only works on an open track: first use “Open lap” or “Open lap here”."))
     stueck = [copy.deepcopy(p) for p in stueck]
     strecke = list(strecke)
     if len(strecke) < 2:
@@ -245,7 +245,7 @@ def oeffnen_plan(punkte, auswahl):
     n = len(punkte)
     folge = kette(auswahl, n, True)
     if folge is None or len(folge) >= n - 1:
-        raise ValueError(tr("Zum Öffnen einen Punkt oder ein zusammenhängendes Stück wählen."))
+        raise ValueError(tr("Select one point or a connected piece to open the lap there."))
     pts = [point_xyz(p) for p in punkte]
     stationen = [0.0]
     for a, b in zip(pts, pts[1:]):
@@ -258,7 +258,7 @@ def oeffnen_plan(punkte, auswahl):
         weg = set(folge)
         behalten = [(erster + k) % n for k in range(n) if (erster + k) % n not in weg]
     if len(behalten) < 2:
-        raise ValueError(tr("Zum Öffnen einen Punkt oder ein zusammenhängendes Stück wählen."))
+        raise ValueError(tr("Select one point or a connected piece to open the lap there."))
     return [punkte[i] for i in behalten], stationen[erster], laenge
 
 
@@ -341,11 +341,11 @@ def ueberstand_plan(punkte, auswahl, abstand, geschlossen):
     n = len(punkte)
     folge = kette(auswahl, n, False)
     if geschlossen or folge is None or not (folge[0] == 0 or folge[-1] == n - 1) or len(folge) >= n - 1:
-        raise ValueError(tr("„Überstand abschneiden“ braucht eine offene Strecke und ein gewähltes Stück an einem ihrer Enden."))
+        raise ValueError(tr("“Cut overlap” needs an open track and a selected piece at one of its ends."))
     a, b = folge[0], folge[-1]
     treffer = ueberschneidungen(punkte, (a, b), abstand)
     if not treffer:
-        raise ValueError(tr("Das gewählte Stück überschneidet die Strecke nicht."))
+        raise ValueError(tr("The selected piece does not overlap the track."))
     if a == 0:              # Anschluss bei b, freies Ende vorne
         schnitt = max(treffer)
         weg = list(range(0, schnitt + 1))
@@ -357,5 +357,5 @@ def ueberstand_plan(punkte, auswahl, abstand, geschlossen):
         neu = punkte[:schnitt]
         versatz = 0.0
     if len(neu) < 2:
-        raise ValueError(tr("Nach dem Abschneiden blieben zu wenige Punkte übrig."))
+        raise ValueError(tr("Too few points would be left after cutting."))
     return neu, weg, versatz

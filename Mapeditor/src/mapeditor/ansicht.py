@@ -12,47 +12,56 @@ from .i18n import N_, SPRACHEN, STANDARD, tr
 
 #: (Schlüssel, Gruppe, Beschriftung, Tooltip, Standard)
 FEATURES = [
-    ("raster", N_("Kartenebenen"), N_("Raster"), N_("Hilfslinien; Abstand siehe Maßstab unten rechts"), True),
-    ("raender", N_("Kartenebenen"), N_("Fahrbahnränder"), N_("Berechnete Randsteine, Grün- und Kiesstreifen"), True),
-    ("richtung", N_("Kartenebenen"), N_("Fahrtrichtung"), N_("Pfeile in Fahrtrichtung"), True),
-    ("spielbereich", N_("Kartenebenen"), N_("Spielbereich ±1024 m"), N_("Die Strecke muss vollständig in diesem Rahmen liegen"), True),
-    ("zonen", N_("Kartenebenen"), N_("DRS / Straight Mode"), N_("Zonen auf der Strecke"), True),
-    ("ideallinie", N_("Kartenebenen"), N_("Ideallinie · Bremspunkte · Tafeln"),
-     N_("Ideallinie aus dem Fahrlinienlauf: rot Bremsen, gelb Rollen, grün Vollgas; rote Dreiecke = Bremsbeginn, "
-     "weiße Quadrate = Entfernungstafeln"), True),
-    ("rennbetrieb", N_("Kartenebenen"), N_("Box · Startplätze · Sektoren"),
-     N_("Boxengasse (orange), Boxen, Startaufstellung und Sektorgrenzen aus dem Fahrlinienlauf"), True),
-    ("kurvennummern", N_("Kartenebenen"), N_("Kurvennummern"), N_("T1 … wie im Spiel; Klick auf eine Nummer zeigt die Kurve"), True),
-    ("umgebung", N_("Kartenebenen"), N_("Umgebung"),
-     N_("Bäume, Büsche, Gebäude … als Kreise in Katalogröße (Farbe je Kategorie); bearbeiten mit Werkzeug „Umgebung“ (U)"), True),
-    ("eingabepunkte", N_("Kartenebenen"), N_("Eingabepunkte"), N_("Kontrollpunkte bzw. Segmentenden als Griffe"), True),
-    ("beschriftungen", N_("Kartenebenen"), N_("Zonenbeschriftungen"), N_("Namen der DRS-/Straight-Mode-Zonen und der Boxengasse"), True),
-    ("massstab", N_("Kartenebenen"), N_("Maßstab"), N_("Maßstab unten rechts"), True),
-    ("kartenhinweise", N_("Kartenebenen"), N_("Hinweisschilder"), N_("Zustand oben und Bedienhinweis unten in der Karte"), True),
-    ("seitenleiste", N_("Bereiche"), N_("Seitenleiste (Anzeige, Strecke)"), N_("Linke Leiste mit Ebenen und Objektliste"), True),
-    ("eigenschaften", N_("Bereiche"), N_("Eigenschaften"), N_("Rechte Leiste mit Einstellungen"), True),
-    ("unterer_bereich", N_("Bereiche"), N_("Profile und Auswertung (unten)"), N_("Reiter unter der Karte"), True),
-    ("querneigungsfeld", N_("Bereiche"), N_("Querneigungsfeld"), N_("Feld „Querneigung“ in den Eigenschaften"), True),
-    ("werkzeugleiste", N_("Bereiche"), N_("Werkzeugleiste"), N_("Knöpfe oben"), True),
-    ("kopfzeile", N_("Bereiche"), N_("Kopfzeile (Projekt)"), N_("Projektname, Speicherzustand und Ordner"), True),
-    ("statuszeile", N_("Bereiche"), N_("Statuszeile"), N_("Zustand, Prüfsumme und Werkzeug unten"), True),
-    ("reiter_hoehe", N_("Reiter"), N_("Höhenprofil"), "", True),
-    ("reiter_neigung", N_("Reiter"), N_("Querneigung"), "", True),
-    ("reiter_querschnitt", N_("Reiter"), N_("Querschnitt"), "", True),
-    ("reiter_geschwindigkeit", N_("Reiter"), N_("Geschwindigkeit"), "", True),
-    ("reiter_pruefung", N_("Reiter"), N_("Prüfung"), "", True),
-    ("reiter_auswertung", N_("Reiter"), N_("Auswertung"), "", True),
-    ("reiter_umgebung", N_("Reiter"), N_("Umgebung"), N_("Katalog, Bepflanzen und Eigenschaften der Umgebungsobjekte"), True),
-    ("fahrlinie_auto", N_("Automatik"), N_("Fahrlinie automatisch berechnen"),
-     N_("Nach jeder Änderung rechnet der Generator im Hintergrund Ideallinie, Kurven, Bremspunkte, Tafeln und die "
-     "Prüfung (je nach Strecke 10–50 s). Aus: nur mit „Prüfen“ (Strg+Enter)."), True),
-    ("autosicherung", N_("Automatik"), N_("Autosicherung"),
-     N_("Ungespeicherte Änderungen jede Minute in eine Wiederherstellungsdatei im Projektordner sichern"), True),
-    ("letztes_projekt", N_("Automatik"), N_("Letztes Projekt beim Start öffnen"), N_("Ohne Angabe startet der Editor mit dem "
-     "zuletzt geöffneten Projekt"), False),
-    ("startbildschirm", N_("Automatik"), N_("Startbildschirm bei leerem Projekt"), N_("Auswahl Zeichnen/Vorlage/Vorschlag"), True),
+    ("raster", N_("Map layers"), N_("Grid"), N_("Guide lines; spacing see scale bottom right"), True),
+    ("raender", N_("Map layers"), N_("Track edges"), N_("Computed kerbs, grass and gravel strips"), True),
+    ("richtung", N_("Map layers"), N_("Driving direction"), N_("Arrows in driving direction"), True),
+    ("spielbereich", N_("Map layers"), N_("Play area ±1024 m"), N_(("The track must lie completely inside this "
+                                                                         "frame")), True),
+    ("zonen", N_("Map layers"), N_("DRS / Straight Mode"), N_("Zones on the track"), True),
+    ("ideallinie", N_("Map layers"), N_("Racing line · braking points · boards"),
+     N_("Racing line from the racing-line run: red braking, yellow coasting, green full throttle; red triangles = "
+        "braking point, white squares = distance boards"), True),
+    ("rennbetrieb", N_("Map layers"), N_("Pit · grid slots · sectors"),
+     N_("Pit lane (orange), pit boxes, starting grid and sector boundaries from the racing-line run"), True),
+    ("kurvennummern", N_("Map layers"), N_("Corner numbers"), N_(("T1 … as in the game; click a number to show the "
+                                                                   "corner")), True),
+    ("umgebung", N_("Map layers"), N_("Environment"),
+     N_(("Trees, bushes, buildings … as circles at catalogue size (colour per category); edit with the “Environment” "
+         "tool (U)")), True),
+    ("eingabepunkte", N_("Map layers"), N_("Input points"), N_("Control points or segment ends as handles"), True),
+    ("beschriftungen", N_("Map layers"), N_("Zone labels"), N_(("Names of the DRS/Straight Mode zones and "
+                                                                          "of the pit lane")), True),
+    ("massstab", N_("Map layers"), N_("Scale"), N_("Scale bottom right"), True),
+    ("kartenhinweise", N_("Map layers"), N_("Hint labels"), N_(("State at the top and usage hint at the bottom "
+                                                                      "of the map")), True),
+    ("seitenleiste", N_("Areas"), N_("Side panel (display, track)"), N_(("Left panel with layers and object "
+                                                                                "list")), True),
+    ("eigenschaften", N_("Areas"), N_("Properties"), N_("Right panel with settings"), True),
+    ("unterer_bereich", N_("Areas"), N_("Profiles and analysis (bottom)"), N_("Tabs below the map"), True),
+    ("querneigungsfeld", N_("Areas"), N_("Banking field"), N_("“Banking” field in the properties"), True),
+    ("werkzeugleiste", N_("Areas"), N_("Toolbar"), N_("Buttons at the top"), True),
+    ("kopfzeile", N_("Areas"), N_("Header (project)"), N_("Project name, save state and folder"), True),
+    ("statuszeile", N_("Areas"), N_("Status bar"), N_("State, checksum and tool at the bottom"), True),
+    ("reiter_hoehe", N_("Tabs"), N_("Height profile"), "", True),
+    ("reiter_neigung", N_("Tabs"), N_("Banking"), "", True),
+    ("reiter_querschnitt", N_("Tabs"), N_("Cross-section"), "", True),
+    ("reiter_geschwindigkeit", N_("Tabs"), N_("Speed"), "", True),
+    ("reiter_pruefung", N_("Tabs"), N_("Checks"), "", True),
+    ("reiter_auswertung", N_("Tabs"), N_("Analysis"), "", True),
+    ("reiter_umgebung", N_("Tabs"), N_("Environment"), N_(("Catalogue, planting and properties of the environment "
+                                                          "objects")), True),
+    ("fahrlinie_auto", N_("Automation"), N_("Calculate racing line automatically"),
+     N_("After every change the generator calculates racing line, corners, braking points, boards and the check in the "
+        "background (10–50 s depending on the track). Off: only with “Check” (Ctrl+Enter)."), True),
+    ("autosicherung", N_("Automation"), N_("Autosave"),
+     N_("Save unsaved changes every minute to a recovery file in the project folder"), True),
+    ("letztes_projekt", N_("Automation"), N_("Open last project on start"), N_("Without an argument the editor "
+                                                                                     "starts with the last opened "
+                                                                                     "project"), False),
+    ("startbildschirm", N_("Automation"), N_("Start screen for an empty project"), N_(("Choice of "
+                                                                                       "Draw/Template/Suggestion")), True),
 ]
-GROUPS = [N_("Kartenebenen"), N_("Bereiche"), N_("Reiter"), N_("Automatik")]
+GROUPS = [N_("Map layers"), N_("Areas"), N_("Tabs"), N_("Automation")]
 DEFAULTS = {key: default for key, _, _, _, default in FEATURES}
 LABELS = {key: label for key, _, label, _, _ in FEATURES}
 TIPS = {key: tip for key, _, _, tip, _ in FEATURES}
@@ -77,7 +86,7 @@ def save_state(key, value):
 
 
 def load_language():
-    """Gespeicherte Oberflächensprache (``de``/``en``), Standard Deutsch."""
+    """Gespeicherte Oberflächensprache (``en``/``de``), Standard Englisch (English First, 4.11.2026)."""
     value = str(settings().value("sprache", STANDARD) or STANDARD).lower()
     return value if value in SPRACHEN else STANDARD
 
@@ -109,9 +118,10 @@ class ViewDialog(QDialog):
 
     def __init__(self, state, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(tr("Ansicht anpassen"))
+        self.setWindowTitle(tr("Customise view"))
         layout = QVBoxLayout(self)
-        intro = QLabel(tr("Was der Editor zeigt und automatisch tut. Änderungen wirken sofort und bleiben gespeichert."))
+        intro = QLabel(tr(("What the editor shows and does automatically. Changes take effect immediately and are "
+                           "remembered.")))
         intro.setWordWrap(True)
         layout.addWidget(intro)
         self.boxes = {}
@@ -133,8 +143,8 @@ class ViewDialog(QDialog):
         layout.addLayout(grid)
         buttons = QDialogButtonBox(QDialogButtonBox.Close)
         buttons.rejected.connect(self.reject)
-        buttons.button(QDialogButtonBox.Close).setText(tr("Schließen"))
-        reset = QPushButton(tr("Alles einblenden"))
+        buttons.button(QDialogButtonBox.Close).setText(tr("Close"))
+        reset = QPushButton(tr("Show everything"))
         reset.clicked.connect(self.show_all)
         buttons.addButton(reset, QDialogButtonBox.ResetRole)
         layout.addWidget(buttons)

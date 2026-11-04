@@ -30,13 +30,14 @@ def main(argv=None):
     from .project import Project
     from .window import MainWindow
 
-    parser = argparse.ArgumentParser(description="Mapeditor · Strecken entwerfen und prüfen", add_help=False)
-    parser.add_argument("-h", "--help", action="help", help="Hilfe anzeigen und beenden")
-    parser._positionals.title = "Positionsargumente"
-    parser._optionals.title = "Optionen"
-    parser.add_argument("projekt", nargs="?", help="Projektordner, Manifest oder Definitions-JSON")
-    parser.add_argument("--sprache", choices=["de", "en"],
-                        help="Oberflächensprache für diesen Start (de/en); sonst die gespeicherte Wahl (Menü Ansicht, Sprache)")
+    parser = argparse.ArgumentParser(description="Mapeditor · design and check tracks", add_help=False)
+    parser.add_argument("-h", "--help", action="help", help="show this help and exit")
+    parser._positionals.title = "positional arguments"
+    parser._optionals.title = "options"
+    parser.add_argument("projekt", nargs="?", help="project folder, manifest or definition JSON")
+    parser.add_argument("--sprache", choices=["en", "de"],
+                        help="interface language for this start (en/de); otherwise the saved choice (View → Language), "
+                             "otherwise English")
     args = parser.parse_args(argv)
     app = QApplication(sys.argv[:1])
     app.setApplicationName("Mapeditor")
@@ -59,7 +60,7 @@ def main(argv=None):
         project = Project.open(start) if start else Project()
         window = MainWindow(project)
     except (ValueError, OSError, TypeError, KeyError) as error:
-        QMessageBox.critical(None, tr("Projekt konnte nicht geöffnet werden"), str(error))
+        QMessageBox.critical(None, tr("Project could not be opened"), str(error))
         return 1
     window.show()
     return app.exec()

@@ -189,7 +189,7 @@ def approximieren(punkte, sigma_m, schritt_m=1.0, knoten_m=4.0, basis="spline"):
     keep = np.linalg.norm(np.roll(p, -1, axis=0) - p, axis=1) > 1e-9
     pk = p[keep]
     if len(pk) < 4:
-        raise ValueError("Approximation braucht mindestens 4 verschiedene Punkte")
+        raise ValueError("Approximation needs at least 4 different points")
     if basis == "catmull_rom":
         c, start = _catmull_rom_zentripetal(pk, schritt_m / 2)
         seg = np.linalg.norm(np.roll(c, -1, axis=0) - c, axis=1)
@@ -231,13 +231,13 @@ class PeriodischerSpline:
     def __init__(self, punkte, param=None):
         p = np.asarray(punkte, dtype=float)
         if p.ndim != 2 or len(p) < 3:
-            raise ValueError("Spline braucht mindestens 3 Punkte")
+            raise ValueError("Spline needs at least 3 points")
         self.p = p
         n = len(p)
         if param is None:
             d = np.linalg.norm(np.roll(p, -1, axis=0) - p, axis=1)
             if np.any(d < 1e-9):
-                raise ValueError("Doppelte aufeinanderfolgende Punkte in der Mittellinie")
+                raise ValueError("Duplicate consecutive points in the centreline")
             self.t = np.concatenate([[0.0], np.cumsum(d)])
         else:
             self.t = np.asarray(param, dtype=float)
@@ -268,7 +268,7 @@ class PeriodischerSpline:
                     + (y1 / h - m1 * h / 6))
         if ableitung == 2:
             return (m0 * a + m1 * b) / h
-        raise ValueError("ableitung 0, 1 oder 2")
+        raise ValueError("derivative 0, 1 or 2")
 
     def _geschw(self, tq):
         return np.linalg.norm(self.auswerten(tq, 1), axis=1)
@@ -410,7 +410,7 @@ class Mittellinie:
         self.wr = werte["breite_rechts"]
         self.bank = np.radians(werte["querneigung_grad"])
         if np.any(self.wl <= 0.5) or np.any(self.wr <= 0.5):
-            raise ValueError("Fahrbahnbreite je Seite muss > 0,5 m sein")
+            raise ValueError("Road width per side must be > 0.5 m")
 
         # ---- Höhe: Spline + gleitender Mittelwert
         tau = self.spline.param_aus_s(s_e)

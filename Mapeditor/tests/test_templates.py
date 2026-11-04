@@ -139,8 +139,16 @@ def test_adapter_errors_are_messages_not_crashes(tmp_path):
         adapter.import_template("gpx", tmp_path / "gibt_es_nicht.gpx")
     with pytest.raises(ValueError, match="Vorlagenart"):
         adapter.import_template("kml", tmp_path / "x.kml")
-    with pytest.raises(ValueError, match="Länge"):
+    with pytest.raises(ValueError, match="Length"):
         adapter.suggest_track(1, length_m=100)
+
+
+@pytest.mark.skipif(not SPIEL.exists(), reason="Spielordner nicht vorhanden")
+def test_adapter_lists_game_tracks():
+    tracks = adapter.spielstrecken()
+    monza = next(t for t in tracks if t["code"] == "monza")
+    assert monza["name"] == "Italien – Monza" and Path(monza["datei"]) == SPIEL and not monza["bruecke"]
+    assert any(t["rueckwaerts"] for t in tracks) and len(tracks) >= 25
 
 
 def test_guess_code():
@@ -247,7 +255,9 @@ def test_journey_too_large_template_asks_and_shrinks(editor, tmp_path, monkeypat
     assert not errors, errors
     assert asked and asked[0][0] == "Vorlage zu groß" and "3000" in asked[0][1]
     info = w.document.project.raw["editor_import"]
-    assert info["passt_in_ao"] and info["massstab"] < 0.7
+    # erst gedreht (diagonal), dann nur so weit verkleinert wie nötig, Versatz ins Loch des Außengeländes
+    assert info["passt_in_ao"] and info["drehung_grad"] > 0 and info["massstab"] < 0.9
+    assert w.document.project.manifest["versatz"] == [52, 0, 8]
     settle(w)
     assert not [i for i in w.preview["issues"] if i.get("id") == "LAGE_AUSSERHALB_AO"]
 
@@ -301,6 +311,7 @@ def test_journey_missing_file_and_missing_code_are_refused(editor, monkeypatch):
 
     def handler(dialog):
         dialog.kind.setCurrentIndex(2)
+        dialog.track.setCurrentIndex(dialog.track.count() - 1)          # „Andere Datei …“
         dialog.path.setText("C:/irgendwo/strecke.erp")      # ergibt vorgeschlagenen Code „strecke“
         dialog.code.clear()
         ok(dialog)
@@ -314,11 +325,13 @@ def test_journey_game_track_template_guesses_code_and_reads_only(editor, monkeyp
     w = editor()
     before = (SPIEL.stat().st_size, SPIEL.stat().st_mtime)
     monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *a, **k: (str(SPIEL), ""))
-    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.Yes)   # Monza ist größer als ±1024 m
 
     def handler(dialog):
         dialog.kind.setCurrentIndex(2)
-        assert dialog.code.isVisible()
+        assert dialog.track.isVisible() and not dialog.code.isVisible()
+        dialog.track.setCurrentIndex(dialog.track.count() - 1)          # „Andere Datei …“
+        assert dialog.code.isVisible() and dialog.path.isVisible()
+        dialog.take_scenery.setChecked(False)
         QTest.mouseClick(dialog.browse_button, Qt.LeftButton)
         assert dialog.code.text() == "monza"
         dialog.spacing.setValue(30)
@@ -328,10 +341,45 @@ def test_journey_game_track_template_guesses_code_and_reads_only(editor, monkeyp
     assert not errors, errors
     raw = w.document.project.raw
     assert raw["name"] == "Vorlage monza (Spiel)" and raw["editor_import"]["code"] == "monza"
-    assert raw["editor_import"]["massstab"] < 1.0 and len(raw["mittellinie"]["punkte"]) > 100
+    # Monza passt gedreht in Originalgröße (Ausbaustufe 3)
+    assert raw["editor_import"]["massstab"] == 1.0 and raw["editor_import"]["drehung_grad"] > 0
+    assert len(raw["mittellinie"]["punkte"]) > 100 and w.document.project.umgebung is None
     settle(w)
-    assert 5000 < w.preview["length"] < 5800
+    assert 5700 < w.preview["length"] < 5850
     assert before == (SPIEL.stat().st_size, SPIEL.stat().st_mtime)
+
+
+@pytest.mark.skipif(not SPIEL.exists(), reason="Spielordner nicht vorhanden")
+def test_journey_game_track_from_list_with_race_logic_sides_and_scenery(editor, monkeypatch):
+    """Ausbaustufen 1–6: Monza aus der Liste, mit Boxengasse, Zonen, Startaufstellung, Seitenbereichen und Kulisse."""
+    w = editor()
+    seen = {}
+
+    def handler(dialog):
+        dialog.kind.setCurrentIndex(2)
+        codes = [dialog.track.itemData(i)["code"] if dialog.track.itemData(i) else None for i in range(dialog.track.count())]
+        assert "monza" in codes and codes[-1] is None and "suzuka" in codes
+        dialog.track.setCurrentIndex(codes.index("suzuka"))
+        assert "Brücke" in dialog.hint.text() and not dialog.path.isVisible()
+        dialog.track.setCurrentIndex(codes.index("monza"))
+        assert "eigenen Gebrauch" in dialog.hint.text() and dialog.take_scenery.isChecked()
+        dialog.spacing.setValue(30)
+        seen["values"] = dialog.values()
+        ok(dialog)
+    errors = drive(handler)
+    menu_action(w, "Neu aus Vorlage …").trigger()
+    assert not errors, errors
+    v = seen["values"]
+    assert v["code"] == "monza" and v["path"].endswith("monza_common.erp") and v["rennlogik"] and v["kulisse"]
+    project = w.document.project
+    raw, info = project.raw, project.raw["editor_import"]
+    assert raw["boxengasse"]["aktiv"] and raw["drs"]["zonen"] and raw["startaufstellung"]["anzahl"] == 22
+    assert len(raw["seitenraum"]["abschnitte"]) >= 10
+    assert project.umgebung and len(project.umgebung["objekte"]) == info["kulisse"]["objekte"] > 100
+    text = w.status_label.text()
+    assert "gedreht" in text and "Kulissenobjekte" in text and "DRS" in text
+    settle(w)
+    assert not [i for i in w.preview["issues"] if i.get("schwere") == "fehler"]
 
 
 def test_journey_suggestion_is_reproducible_and_valid(editor, tmp_path):

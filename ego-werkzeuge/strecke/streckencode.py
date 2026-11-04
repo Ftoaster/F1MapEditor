@@ -277,9 +277,9 @@ class Umbenennung:
     def __init__(self, alt: str, neu: str):
         for c in (alt, neu):
             if not CODE_MUSTER.match(c or ""):
-                raise StreckencodeFehler("Ungültiger Streckencode: %r" % c)
+                raise StreckencodeFehler("Invalid track code: %r" % c)
         if alt == neu:
-            raise StreckencodeFehler("Alter und neuer Code sind gleich (%s)" % alt)
+            raise StreckencodeFehler("Old and new code are the same (%s)" % alt)
         self.alt, self.neu = alt, neu
         self.alt_b = alt.encode()
         self._praefixe = (
@@ -344,7 +344,7 @@ def _cstrs(d: bytes, a: int, b: int) -> List[Tuple[int, bytes]]:
         out.append((pos - a, d[pos:e]))
         pos = e + 1
     if pos != b:
-        raise StreckencodeFehler("Zeichenkettenbereich endet nicht sauber")
+        raise StreckencodeFehler("String section does not end cleanly")
     return out
 
 
@@ -363,7 +363,7 @@ def _pool_neu(liste: List[Tuple[int, bytes]], f: Callable[[str], str]) -> Tuple[
 def _rundlauf(klasse, d: bytes, was: str):
     obj = klasse.aus_bytes(d)
     if obj.to_bytes() != d:
-        raise StreckencodeFehler("%s: Rundlauf nicht bitgleich – Umbenennen nicht sicher" % was)
+        raise StreckencodeFehler("%s: round trip not bit-identical, renaming is not safe" % was)
     return obj
 
 
@@ -379,9 +379,9 @@ def mesh_umbenennen(d: bytes, f) -> Optional[bytes]:
 def modell_umbenennen(d: bytes, f) -> Optional[bytes]:
     m = grafik.GfxModell.aus_bytes(d)
     if m.rest is not None:
-        raise StreckencodeFehler("GfxModelRes mit nicht entschlüsseltem Rest")
+        raise StreckencodeFehler("GfxModelRes with undecoded remainder")
     if m.to_bytes() != d:
-        raise StreckencodeFehler("GfxModelRes: Rundlauf nicht bitgleich")
+        raise StreckencodeFehler("GfxModelRes: round trip not bit-identical")
     neu = [f(k) for k in m.mesh_kennungen]
     if neu == m.mesh_kennungen:
         return None
@@ -415,7 +415,7 @@ def material_umbenennen(d: bytes, f) -> Optional[bytes]:
     n, ncb, wg, osh, onam, otex, oheap, ocb = K.unpack_from(d, 0)
     basis = K.size + P.size * n
     if not (wg + 8 * ncb == osh <= onam <= otex <= oheap <= ocb <= len(d) - basis):
-        raise StreckencodeFehler("GfxMaterialRes: unerwartete Bereichsfolge")
+        raise StreckencodeFehler("GfxMaterialRes: unexpected section order")
     tex = _cstrs(d, basis + otex, basis + oheap)
     heap = _cstrs(d, basis + oheap, basis + ocb)
     t_offs, t_blob, t_len = _pool_neu(tex, f)
@@ -427,12 +427,12 @@ def material_umbenennen(d: bytes, f) -> Optional[bytes]:
         p = list(P.unpack_from(d, K.size + P.size * i))
         if p[1] == 2:  # Textur: Offset in der Texturliste, Größe = Länge inkl. Null
             if p[7] not in t_offs:
-                raise StreckencodeFehler("GfxMaterialRes: Texturoffset %d ungültig" % p[7])
+                raise StreckencodeFehler("GfxMaterialRes: texture offset %d invalid" % p[7])
             p[7] = t_offs[p[7]]
             p[4] = t_len[p[7]] + 1
         if p[3] == 3:  # Heap-Index einer Textur
             if p[8] not in h_offs:
-                raise StreckencodeFehler("GfxMaterialRes: Heap-Offset %d ungültig" % p[8])
+                raise StreckencodeFehler("GfxMaterialRes: heap offset %d invalid" % p[8])
             p[8] = h_offs[p[8]]
         P.pack_into(params, P.size * i, *p)
     neu_heap = otex + len(t_blob)
@@ -445,14 +445,14 @@ def mip_umbenennen(d: bytes, f) -> Optional[bytes]:
     """GfxSurfaceRes Fragment 2: Längenbyte, Pfad, Null, Rest (Stufentabelle) unverändert."""
     laenge = d[0]
     if d[1 + laenge] != 0:
-        raise StreckencodeFehler("Mip-Verweis ohne Nullbyte")
+        raise StreckencodeFehler("Mip reference without null byte")
     alt = d[1:1 + laenge].decode("utf-8", "surrogateescape")
     neu = f(alt)
     if neu == alt:
         return None
     nb = neu.encode("utf-8", "surrogateescape")
     if len(nb) > 255:
-        raise StreckencodeFehler("Mip-Pfad länger als 255 Byte: %s" % neu)
+        raise StreckencodeFehler("Mip path longer than 255 bytes: %s" % neu)
     return bytes([len(nb)]) + nb + d[1 + laenge:]
 
 
@@ -483,14 +483,14 @@ def pkg_umbenennen(d: bytes, f) -> Optional[bytes]:
         while pos < len(D):
             n = D[pos]
             if pos + n + 2 > len(D) or D[pos + n + 1] != 0:
-                raise StreckencodeFehler("pkg: !sbi ist keine reine Zeichenkettenfolge")
+                raise StreckencodeFehler("pkg: !sbi is not a plain string sequence")
             liste.append((pos, D[pos + 1:pos + 1 + n]))
             pos += n + 2
         offs, teile, q = {}, [], 0
         for o, s in liste:
             s2 = f(s.decode("utf-8", "surrogateescape")).encode("utf-8", "surrogateescape")
             if len(s2) > 255:
-                raise StreckencodeFehler("pkg-Zeichenkette länger als 255 Byte")
+                raise StreckencodeFehler("pkg string longer than 255 bytes")
             offs[o] = q
             teile.append(bytes([len(s2)]) + s2 + b"\0")
             q += len(s2) + 2
@@ -509,7 +509,7 @@ def pkg_umbenennen(d: bytes, f) -> Optional[bytes]:
             if r.typ != 0x80 and r.typ in abbildung:
                 offs = abbildung[r.typ][0]
                 if r.index not in offs:
-                    raise StreckencodeFehler("pkg: Verweis zeigt nicht auf einen Zeichenkettenanfang")
+                    raise StreckencodeFehler("pkg: reference does not point to the start of a string")
                 r.index = offs[r.index]
     for i, (_, neu) in abbildung.items():
         tabellen[i].daten = neu
@@ -547,7 +547,7 @@ def _umbenennen_fragment(auftrag):
         d = neu
     for muster in regeln.reste:
         if muster in d:
-            raise StreckencodeFehler("%s (%s): nicht unterstützter Verweis mit %r bleibt übrig"
+            raise StreckencodeFehler("%s (%s): unsupported reference with %r remains"
                                      % (kennung, typ, muster))
     beispiel, rest = None, regeln.alt_b in d
     if rest:
@@ -598,7 +598,7 @@ def archiv_umbenennen(a: "erp.ErpFile", regeln: Umbenennung) -> dict:
         neu_k = regeln.kennung(r.identifier)
         if neu_k != r.identifier:
             if neu_k in vorhanden or neu_k in neue_kennungen:
-                raise StreckencodeFehler("Kennung nach Umbenennung doppelt: %s" % neu_k)
+                raise StreckencodeFehler("Duplicate ID after renaming: %s" % neu_k)
             neue_kennungen.add(neu_k)
             r.identifier = neu_k
             kennungen[r.resource_type] += 1
@@ -710,7 +710,7 @@ def erp_umbenennen(quelle: str, ziel: str, regeln: Umbenennung, pruefen: bool = 
                    mip_namen: Optional[set] = None, protokoll=print) -> dict:
     """Quelle lesen, umbenennen, nach ziel schreiben und prüfen. Die Quelle bleibt unverändert."""
     if os.path.abspath(quelle) == os.path.abspath(ziel):
-        raise StreckencodeFehler("Ziel darf nicht die Quelle sein")
+        raise StreckencodeFehler("Target must not be the source")
     with erp.open_erp(quelle) as a:
         md5_falsch_vorher = erp.md5_falsch(a)
         protokoll("Umbenennen %s -> %s …" % (regeln.alt, regeln.neu))
@@ -769,12 +769,12 @@ def erp_pruefen(quelle: str, ziel: str, regeln: Umbenennung, mip_namen: Optional
     ordner = "asset_groups/environment_package/tracks/%s/mipmaps/" % regeln.neu
     eigene = {k: n for k, n in vb["mips"].items() if k.startswith("asset_groups/")}
     falscher_ordner = [k for k in eigene if not k.startswith(ordner)]
-    text = "%d Texturen -> %s" % (sum(eigene.values()), ordner)
+    text = "%d textures -> %s" % (sum(eigene.values()), ordner)
     ok = vb["mips"] == mip_alt and not falscher_ordner
     if mip_namen is not None:
         fehlen = sorted(k.rsplit("/", 1)[1] for k in eigene if k.rsplit("/", 1)[1] not in mip_namen)
         ok &= not fehlen
-        text += ", alle Dateien im Paket" if not fehlen else ", fehlen im Paket: %s" % ", ".join(fehlen[:3])
+        text += ", all files in the package" if not fehlen else ", missing in the package: %s" % ", ".join(fehlen[:3])
     melde("Mip-Pfade = Kopierziel", ok, text)
     return erg
 
@@ -793,7 +793,7 @@ def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str]
                         aktivierung_behalten: bool = False) -> dict:
     m = copy.deepcopy(manifest)
     if m.get("track_code") != regeln.alt:
-        raise StreckencodeFehler("Manifest hat track_code %r statt %r" % (m.get("track_code"), regeln.alt))
+        raise StreckencodeFehler("Manifest has track_code %r instead of %r" % (m.get("track_code"), regeln.alt))
     m["track_code"] = regeln.neu
     if name:
         m["track_name"] = name
@@ -801,7 +801,7 @@ def manifest_umbenennen(manifest: dict, regeln: Umbenennung, name: Optional[str]
     for c in m.get("copy_directories", []):
         alt = "asset_groups/environment_package/tracks/%s/mipmaps/" % regeln.alt
         if c.get("destination") != alt:
-            raise StreckencodeFehler("Unerwartetes Kopierziel %r" % c.get("destination"))
+            raise StreckencodeFehler("Unexpected copy target %r" % c.get("destination"))
         c["destination"] = "asset_groups/environment_package/tracks/%s/mipmaps/" % regeln.neu
     if aktivierung_behalten:          # Paket aus dem eigenen Bau: Renndaten bleiben, nur die Basis wechselt
         m["activation"]["copy_from_track"] = aktivierung_vorlage
@@ -869,7 +869,7 @@ def metadaten_setzen(manifest: dict, werte: dict) -> dict:
     liste = [e for e in akt.get("track_overrides") or [] if e.get("path") not in werte]
     for pfad, wert in werte.items():
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", str(pfad)):
-            raise StreckencodeFehler("Ungültiger Metadaten-Schlüssel %r" % pfad)
+            raise StreckencodeFehler("Invalid metadata key %r" % pfad)
         liste.append({"path": str(pfad), "value": wert if isinstance(wert, str) else
                       ("True" if wert is True else "False" if wert is False else str(wert))})
     akt["track_overrides"] = liste
@@ -907,7 +907,7 @@ def paket_umbenennen(quelle: str, ziel: str, code: str, name: Optional[str] = No
                      ueberschreiben: bool = False, protokoll=print, aktivierung_behalten: bool = False) -> dict:
     """Mod-Paket (ZIP) mit neuem Streckencode bauen. Die Quelle bleibt unverändert."""
     if os.path.exists(ziel) and not ueberschreiben:
-        raise FileExistsError("Zieldatei existiert bereits: %s" % ziel)
+        raise FileExistsError("Target file already exists: %s" % ziel)
     arbeit = arbeitsordner or os.path.join(os.path.dirname(os.path.abspath(ziel)), "_umbenennen")
     paket.ordner_leeren(arbeit)
     t0 = time.time()

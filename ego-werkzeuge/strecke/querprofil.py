@@ -97,7 +97,7 @@ def boxen_u(pbox, U):
     b = U - a
     span = (pbox["boxen"] - 1) * pbox["box_abstand_m"]
     if span > b - a:
-        raise ValueError("Boxenplätze passen nicht in den vollbreiten Abschnitt")
+        raise ValueError("Pit boxes do not fit into the full-width section")
     return (a + b) / 2 + (np.arange(pbox["boxen"]) - (pbox["boxen"] - 1) / 2) * pbox["box_abstand_m"]
 
 
@@ -180,11 +180,10 @@ def querprofil_berechnen(ml, param, kurven):
         s_ein = (L - pbox["einfahrt_vor_start_m"]) % L
         U = pbox["einfahrt_vor_start_m"] + pbox["ausfahrt_nach_start_m"]
         if not 0 < U < L:
-            raise ValueError("Boxengasse muss kürzer als eine Runde sein")
+            raise ValueError("Pit lane must be shorter than one lap")
         an, ue = pbox["anlauf_m"], pbox["uebergang_m"]
         if U < 2 * (an + ue) + 20:
-            raise ValueError("Boxengasse zu kurz: Ein- und Ausfahrt (%.0f m) brauchen mindestens "
-                             "%.0f m" % (U, 2 * (an + ue) + 20))
+            raise ValueError("Pit lane too short: entry and exit (%.0f m) need at least %.0f m" % (U, 2 * (an + ue) + 20))
         u = np.mod(st.s - s_ein, L)
         box_bereich = u < U
         v = U - u                                      # Restweg bis zum Ende
@@ -230,9 +229,9 @@ def querprofil_berechnen(ml, param, kurven):
         verfuegbar = frei[name]
         eng = verfuegbar < pb["mindestabstand"]
         if np.any(eng):
-            warnungen.append("%s: an %d Stationen weniger als %.1f m Platz bis zum nächsten "
-                             "Streckenteil (Barriere auf Mindestabstand gesetzt)"
-                             % (name, int(eng.sum()), pb["mindestabstand"]))
+            warnungen.append("%s: less than %.1f m of space to the next part of the track at %d "
+                             "stations (barrier set to minimum distance)"
+                             % (name, pb["mindestabstand"], int(eng.sum())))
         e_bar = np.minimum(e_bar, np.maximum(verfuegbar, pb["mindestabstand"]))
         h = int(round(15.0 / ds))
         e_bar = periodisch_mittel(periodisch_minimum(e_bar, h), h)
@@ -242,8 +241,8 @@ def querprofil_berechnen(ml, param, kurven):
             noetig = np.where(box_bereich, e2 + pbox["hinter_box_m"]
                               + garage_gewicht * pbox.get("gebaeude_tiefe_m", 0.0), 0)
             if np.any(noetig > verfuegbar + 1e-6):
-                warnungen.append("Boxengasse: an %d Stationen reicht der Platz neben der Strecke "
-                                 "nicht (Überlappung mit anderem Streckenteil möglich)"
+                warnungen.append("Pit lane: not enough space beside the track at %d stations (may overlap another part "
+                                 "of the track)"
                                  % int(np.sum(noetig > verfuegbar + 1e-6)))
             e_bar = np.maximum(e_bar, noetig)
         k = np.minimum(kerb[name], np.maximum(e_bar - e2, 0))

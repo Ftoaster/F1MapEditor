@@ -109,17 +109,17 @@ def eingabe_pruefen(param) -> None:
     for gruppe, felder in (("drs", ("erkennung_m", "aktivierung_m", "ende_m")), ("x_mode", ("von_m", "bis_m"))):
         zonen = (param.get(gruppe) or {}).get("zonen") or []
         if not isinstance(zonen, list):
-            raise ValueError("%s.zonen muss eine Liste sein" % gruppe)
+            raise ValueError("%s.zonen must be a list" % gruppe)
         for i, z in enumerate(zonen):
             if not isinstance(z, dict):
-                raise ValueError("%s.zonen[%d] muss ein Objekt sein" % (gruppe, i))
+                raise ValueError("%s.zonen[%d] must be an object" % (gruppe, i))
             for f in felder:
                 v = z.get(f)
                 if isinstance(v, bool) or not isinstance(v, (int, float)) or not np.isfinite(v):
-                    raise ValueError("%s.zonen[%d].%s fehlt oder ist keine Zahl" % (gruppe, i, f))
+                    raise ValueError("%s.zonen[%d].%s is missing or not a number" % (gruppe, i, f))
             if gruppe == "x_mode" and not isinstance(z.get("partial", True), bool):
-                raise ValueError("x_mode.zonen[%d].partial muss true oder false sein" % i)
+                raise ValueError("x_mode.zonen[%d].partial must be true or false" % i)
             if gruppe == "x_mode" and z.get("partial_versatz_m") is not None:
                 v = z["partial_versatz_m"]
                 if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
-                    raise ValueError("x_mode.zonen[%d].partial_versatz_m muss ≥ 0 sein (leer = ohne Partial)" % i)
+                    raise ValueError("x_mode.zonen[%d].partial_versatz_m must be ≥ 0 (empty = no partial)" % i)

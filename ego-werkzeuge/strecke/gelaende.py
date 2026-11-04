@@ -110,7 +110,7 @@ def streckenrand(pos: np.ndarray, tri: np.ndarray, raster: float = 0.001, versat
         nb.setdefault(b, []).append(a)
     falsch = [k for k, v in nb.items() if len(v) != 2]
     if falsch:
-        raise GelaendeFehler('Streckenrand nicht eindeutig: %d Vertices mit Grad != 2 (z. B. bei %s)'
+        raise GelaendeFehler('Track edge ambiguous: %d vertices with degree != 2 (e.g. at %s)'
                              % (len(falsch), np.round(P[falsch[0]], 2).tolist()))
     gesehen, schleifen = set(), []
     for s in sorted(nb):
@@ -124,7 +124,7 @@ def streckenrand(pos: np.ndarray, tri: np.ndarray, raster: float = 0.001, versat
             if n == s:
                 break
             if n in gesehen:
-                raise GelaendeFehler('Streckenrand: Schleife nicht geschlossen')
+                raise GelaendeFehler('Track edge: loop not closed')
             sch.append(n)
             gesehen.add(n)
             vor, cur = cur, n
@@ -199,7 +199,7 @@ class _CDT:
         elif N[i + 2] == alt:
             N[i + 2] = neu
         else:
-            raise GelaendeFehler('Triangulierung inkonsistent (Nachbar)')
+            raise GelaendeFehler('Triangulation inconsistent (neighbour)')
 
     # --- Punktsuche
     def suchen(self, p):
@@ -210,7 +210,7 @@ class _CDT:
         while True:
             schritte += 1
             if schritte > 10 * len(V) + 100:
-                raise GelaendeFehler('Punktsuche läuft nicht zusammen')
+                raise GelaendeFehler('Point search does not converge')
             i = 3 * t
             weiter = -1
             for k0 in range(3):
@@ -262,7 +262,7 @@ class _CDT:
         (a, b, c), (_, nb, nc) = self._gedreht_k(t, k)
         u = self.N[3 * t + k]
         if u < 0:
-            raise GelaendeFehler('Punkt auf dem Hüllrand')
+            raise GelaendeFehler('Point on the hull boundary')
         (d, c2, b2), (_, ub, uc) = self._gedreht(u, None, t)
         t2, t4 = self._neu(), self._neu()
         T1, T3 = t, u
@@ -290,7 +290,7 @@ class _CDT:
         if nachbar is not None:
             k = 0 if N[i] == nachbar else 1 if N[i + 1] == nachbar else 2
             if N[i + k] != nachbar:
-                raise GelaendeFehler('Triangulierung inkonsistent (Drehung)')
+                raise GelaendeFehler('Triangulation inconsistent (rotation)')
         else:
             k = 0 if V[i] == v else 1 if V[i + 1] == v else 2
         return self._gedreht_k(t, k)
@@ -315,7 +315,7 @@ class _CDT:
         grenze = self.flips + 100000
         while stapel:
             if self.flips > grenze:
-                raise GelaendeFehler('Legalisieren läuft nicht zusammen')
+                raise GelaendeFehler('Legalisation does not converge')
             t, k = stapel.pop()
             i = 3 * t
             u = N[i + k]
@@ -341,14 +341,14 @@ class _CDT:
         t0 = self.vt[a]
         V, N = self.V, self.N
         if a not in V[3 * t0:3 * t0 + 3]:
-            raise GelaendeFehler('Vertex-Dreieck-Zuordnung veraltet')
+            raise GelaendeFehler('Vertex-triangle mapping out of date')
         erg, t = [], t0
         while True:
             erg.append(t)
             (_, v1, v2), (_, n1, n2) = self._gedreht(t, a)
             t = n1                     # über Kante (v2, a) – gegenüber v1
             if t < 0:
-                raise GelaendeFehler('Vertex auf dem Hüllrand')
+                raise GelaendeFehler('Vertex on the hull boundary')
             if t == t0 or len(erg) > 10000:
                 return erg
 
@@ -376,15 +376,15 @@ class _CDT:
             for v, o in ((v1, o1), (v2, o2)):
                 if o == 0 and (self.x[v] - self.x[a]) * (self.x[b] - self.x[a]) + \
                         (self.y[v] - self.y[a]) * (self.y[b] - self.y[a]) > 0:
-                    raise GelaendeFehler('Punkt liegt auf einer Zwangskante (Streckenrand berührt sich?)')
+                    raise GelaendeFehler('Point lies on a constraint edge (does the track edge touch itself?)')
         if start is None:
-            raise GelaendeFehler('Zwangskante nicht auffindbar')
+            raise GelaendeFehler('Constraint edge cannot be found')
         # schneidende Kanten sammeln
         kanten = deque()
         t, v1, v2 = start
         while True:
             if (min(v1, v2), max(v1, v2)) in self.zwang:
-                raise GelaendeFehler('Zwangskanten schneiden sich (Streckenrand überlappt sich selbst?)')
+                raise GelaendeFehler('Constraint edges intersect (does the track edge overlap itself?)')
             kanten.append((v1, v2))
             u = self._nachbar_ueber(t, v1, v2)
             j = 3 * u
@@ -393,7 +393,7 @@ class _CDT:
                 break
             o = self.orient(a, b, w)
             if o == 0:
-                raise GelaendeFehler('Punkt liegt auf einer Zwangskante (Streckenrand berührt sich?)')
+                raise GelaendeFehler('Point lies on a constraint edge (does the track edge touch itself?)')
             # v1 links von a→b (orient(a,b,v1) > 0)? Dann ersetzt w die Seite mit gleichem Vorzeichen
             if (o > 0) == (self.orient(a, b, v1) > 0):
                 v1 = w
@@ -405,7 +405,7 @@ class _CDT:
         while kanten:
             runden += 1
             if runden > 100000:
-                raise GelaendeFehler('Zwangskante: Kippen läuft nicht zusammen')
+                raise GelaendeFehler('Constraint edge: flipping does not converge')
             v1, v2 = kanten.popleft()
             t = self._dreieck_mit_kante(v1, v2)
             k = [q for q in range(3) if self.V[3 * t + q] not in (v1, v2)][0]
@@ -427,7 +427,7 @@ class _CDT:
         for k in range(3):
             if self.V[i + k] not in (v1, v2):
                 return self.N[i + k]
-        raise GelaendeFehler('Kante nicht im Dreieck')
+        raise GelaendeFehler('Edge not in triangle')
 
     def _schneidet(self, a, b, p, d):
         if p in (a, b) or d in (a, b):
@@ -480,7 +480,7 @@ class _CDT:
                     par[u] = w
                     q.append(u)
                 elif (par[u] - w) % 2:
-                    raise GelaendeFehler('Gebietsparität widersprüchlich (offene Zwangskantenkette)')
+                    raise GelaendeFehler('Region parity contradictory (open chain of constraint edges)')
         return np.array(par), np.array(V, np.int64).reshape(-1, 3)
 
 
@@ -653,10 +653,10 @@ def adaptive_grundflaeche(pos: np.ndarray, tri: np.ndarray, loch: dict, *, h_min
     x0, z0, kante = float(loch['x0']), float(loch['z0']), float(loch['kante'])
     K = int(round(kante))
     if K & (K - 1):
-        raise GelaendeFehler('Lochkante %.3f m ist keine Zweierpotenz' % kante)
+        raise GelaendeFehler('Hole edge %.3f m is not a power of two' % kante)
     P, schleifen, rand_info = streckenrand(pos, tri)
     if not schleifen:
-        raise GelaendeFehler('Kein Streckenrand gefunden')
+        raise GelaendeFehler('No track edge found')
     zeiten['streckenrand'] = time.perf_counter() - t_start
     # Lochrand-Vertices (exakt aus dem Außenterrain); Ersatz: 16-m-Raster auf Höhe 0
     rand = np.asarray(loch.get('rand', np.zeros((0, 3))), np.float64)
@@ -680,7 +680,7 @@ def adaptive_grundflaeche(pos: np.ndarray, tri: np.ndarray, loch: dict, *, h_min
     sp = loc(P[np.concatenate(schleifen)])
     abstand_loch = float(min(sp.min(), K - sp.max()))
     if abstand_loch < rand_h:
-        raise GelaendeFehler('Strecke reicht bis %.1f m an den Rand des Außenterrain-Lochs' % abstand_loch)
+        raise GelaendeFehler('Track comes within %.1f m of the edge of the outer terrain hole' % abstand_loch)
     innen_pkt, qt_stat = _quadtree_punkte(segs, K, h_min, h_max, rand_h, abstufung, rand_abstand=rand_h / 2)
     zeiten['quadtree'] = time.perf_counter() - t_start
     # Punktliste: Streckenrand, Lochrand, Innenpunkte
@@ -707,7 +707,7 @@ def adaptive_grundflaeche(pos: np.ndarray, tri: np.ndarray, loch: dict, *, h_min
         if not cdt.einfuegen(p):
             doppelt += 1
     if doppelt:
-        raise GelaendeFehler('%d doppelte Punkte in der Grundfläche' % doppelt)
+        raise GelaendeFehler('%d duplicate points in the ground surface' % doppelt)
     zeiten['delaunay'] = time.perf_counter() - t_start
     # Zwangskanten: Streckenschleifen und Lochrand
     fehlend = 0

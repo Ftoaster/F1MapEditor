@@ -229,11 +229,11 @@ def vorschlag(seed: int = 1, laenge_m: float = STANDARD_LAENGE_M, min_radius_m: 
 
     ``pruefen=False`` überspringt nur die Generator-Prüfregeln (``vorab_pruefen``), die Formprüfung bleibt."""
     if not LAENGE_BEREICH_M[0] <= laenge_m <= LAENGE_BEREICH_M[1]:
-        raise ValueError("Länge %.0f m außerhalb %.0f–%.0f m." % ((laenge_m,) + LAENGE_BEREICH_M))
+        raise ValueError("Length %.0f m outside %.0f–%.0f m." % ((laenge_m,) + LAENGE_BEREICH_M))
     if not KURVEN_BEREICH[0] <= kurven <= KURVEN_BEREICH[1]:
-        raise ValueError("Kurvenzahl %d außerhalb %d–%d." % ((kurven,) + KURVEN_BEREICH))
+        raise ValueError("Number of corners %d outside %d–%d." % ((kurven,) + KURVEN_BEREICH))
     if not MIN_RADIUS_BEREICH_M[0] <= min_radius_m <= MIN_RADIUS_BEREICH_M[1]:
-        raise ValueError("Mindestradius %.0f m außerhalb %.0f–%.0f m." % ((min_radius_m,) + MIN_RADIUS_BEREICH_M))
+        raise ValueError("Minimum radius %.0f m outside %.0f–%.0f m." % ((min_radius_m,) + MIN_RADIUS_BEREICH_M))
     seed = int(seed)
     gruende: dict = {}
     for versuch in range(max_versuche):
@@ -279,5 +279,6 @@ def vorschlag(seed: int = 1, laenge_m: float = STANDARD_LAENGE_M, min_radius_m: 
                 continue
         meta["verworfen"] = dict(gruende)
         return d
-    raise VorschlagFehler("Nach %d Versuchen keine gültige Strecke (Gründe: %s). Mindestradius verkleinern oder Länge/Kurvenzahl ändern."
+    raise VorschlagFehler(("No valid track after %d attempts (reasons: %s). Reduce the minimum radius or change the "
+                           "length or number of corners.")
                           % (max_versuche, gruende))

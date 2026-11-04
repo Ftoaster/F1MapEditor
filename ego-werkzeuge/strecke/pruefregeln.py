@@ -129,163 +129,166 @@ class Regel:
 
 _R = [
     # ---------------------------------------------------------------- Eingabe / Generator
-    Regel("DEF_UNGUELTIG", "IN-01", FEHLER, "eingabe", "Definition kann nicht geladen werden",
+    Regel("DEF_UNGUELTIG", "IN-01", FEHLER, "eingabe", "Definition cannot be loaded",
           QUELLEN["definition"], "Ladeprüfung der Definition"),
-    Regel("DEF_WARNUNG", "IN-02", WARNUNG, "eingabe", "Hinweis des Definitionsladers/der Mittellinie (z. B. Schließfehler verteilt)",
+    Regel("DEF_WARNUNG", "IN-02", WARNUNG, "eingabe", ("Note from the definition loader/centreline (e.g. closing "
+                                                       "error distributed)"),
           QUELLEN["definition"], "Ladeprüfung der Definition"),
-    Regel("GEO_RAND_FALTUNG", "GE-01", FEHLER, "eingabe", "Fahrbahnrand faltet sich (Radius kleiner als Halbbreite)",
+    Regel("GEO_RAND_FALTUNG", "GE-01", FEHLER, "eingabe", "Track edge folds over (radius smaller than half-width)",
           QUELLEN["mittellinie"], "Generator lehnt gefaltete Ränder ab (erzeugung.berechnen)"),
-    Regel("GEO_RAENDER_SCHNITT", "GE-01", FEHLER, "eingabe", "Fahrbahnränder schneiden sich in der Draufsicht",
+    Regel("GEO_RAENDER_SCHNITT", "GE-01", FEHLER, "eingabe", "Track edges intersect in plan view",
           QUELLEN["mittellinie"], "Generator lehnt geschnittene Ränder ab"),
     # Warnung statt Fehler (27.10.2026, Test der maximalen Ausdehnung im Spiel). Harte Grenze bleibt das Loch des
     # Außenterrains (x -920…1128, z -1008…1040): dort brechen spiel_geometrie/gelaende den Bau ab.
-    Regel("LAGE_AUSSERHALB_AO", "KO-01", WARNUNG, "eingabe", "Strecke/Logik außerhalb X/Z ±1024 m (AO-Abdeckung des Trägers)",
+    Regel("LAGE_AUSSERHALB_AO", "KO-01", WARNUNG, "eingabe", ("Track/logic outside X/Z ±1024 m (AO coverage of the "
+                                                              "carrier package)"),
           QUELLEN["platzierung"], "AO-Atlas des Portimão-Trägers; trägerbezogen (Baku, Monza … liegen weiter außen)"),
-    Regel("LAGE_AUSSERHALB_LOCH", "KO-02", FEHLER, "generator", "Strecke liegt nicht vollständig im Loch des Außenterrains",
+    Regel("LAGE_AUSSERHALB_LOCH", "KO-02", FEHLER, "generator", ("Track does not lie completely inside the hole of "
+                                                                 "the outer terrain"),
           QUELLEN["schritt2"], "spiel_geometrie.geometrie_einsetzen bricht sonst ab"),
-    Regel("DRS_ANZAHL", "DR-01", WARNUNG, "generator", "Weniger DRS-Zonen als gewünscht",
+    Regel("DRS_ANZAHL", "DR-01", WARNUNG, "generator", "Fewer DRS zones than requested",
           "ego-werkzeuge/strecke/erzeugung.py", "Generatorbericht"),
     Regel("DRS_ZONE_UNGUELTIG", "DR-02", FEHLER, "eingabe",
-          "Eigene DRS-Zone unbrauchbar (zu kurz, länger als die halbe Runde oder Erkennung nicht vor der Aktivierung)",
+          "Custom DRS zone unusable (too short, longer than half a lap, or detection not before activation)",
           "ego-werkzeuge/strecke/zonen.py", "Originale: Aktivierung 300–1000 m, Erkennung 50–600 m davor"),
-    Regel("DRS_ZONEN_UEBERLAPPEN", "DR-03", WARNUNG, "eingabe", "Eigene DRS-Aktivierungszonen überlappen sich",
+    Regel("DRS_ZONEN_UEBERLAPPEN", "DR-03", WARNUNG, "eingabe", "Custom DRS activation zones overlap",
           "ego-werkzeuge/strecke/zonen.py", "Originale: Aktivierungszonen verschiedener IDs überlappen nie"),
     Regel("XMODE_ZONE_UNGUELTIG", "XM-01", FEHLER, "eingabe",
-          "Straight-Mode-Zone unbrauchbar (kürzer als 50 m oder länger als die halbe Runde)",
+          "Straight Mode zone unusable (shorter than 50 m or longer than half a lap)",
           "ego-werkzeuge/strecke/zonen.py", "Originale: 180–1750 m je Zone"),
-    Regel("XMODE_ZONEN_UEBERLAPPEN", "XM-02", WARNUNG, "eingabe", "Straight-Mode-Zonen überlappen sich",
+    Regel("XMODE_ZONEN_UEBERLAPPEN", "XM-02", WARNUNG, "eingabe", "Straight Mode zones overlap",
           "ego-werkzeuge/strecke/zonen.py", "Originale: Full-Zonen überlappen nie"),
     Regel("XMODE_IN_KURVE", "XM-03", WARNUNG, "eingabe",
-          "Straight-Mode-Zone reicht in eine enge Kurve (Radius < 250 m)",
+          "Straight Mode zone reaches into a tight corner (radius < 250 m)",
           "ego-werkzeuge/strecke/zonen.py", "Straight Mode gehört auf Geraden; Originale enden vor dem Bremspunkt"),
     Regel("XMODE_EIGENE_UNGETESTET", "XM-04", HINWEIS, "eingabe",
-          "Eigene Straight-Mode-Zonen ersetzen die Träger-Zonen – Spielwirkung noch nicht im Spiel bestätigt",
+          "Custom Straight Mode zones replace the carrier zones – in-game effect not yet confirmed",
           QUELLEN["absturz"], "Bisher wurden x_mode_1/2 auf Portimãos Meterabstände gesetzt (Spieltest v8)"),
     Regel("GEO_RADIUS_KLEIN", "GE-02", WARNUNG, "eingabe",
-          "Kurvenradius kleiner als bei jeder Originalstrecke (7,5 m, Bahrain)", QUELLEN["recherche"],
+          "Corner radius smaller than on any original track (7.5 m, Bahrain)", QUELLEN["recherche"],
           "Messung aller 28 Spielstrecken 24.10.2026"),
     Regel("GEO_KRUEMMUNG_SPRUNG", "GE-03", WARNUNG, "eingabe",
-          "Krümmung ändert sich abrupter als bei jeder Originalstrecke (Knick) – Approximation/Klothoiden nutzen",
+          "Curvature changes more abruptly than on any original track (kink) – use approximation/clothoids",
           QUELLEN["recherche"], "Messung aller 28 Spielstrecken: max. 1,05e-2 /m² (Monaco)"),
     Regel("LAENGE_UEBER_ORIGINALEN", "GE-04", WARNUNG, "eingabe",
-          "Strecke länger als jede Originalstrecke (7.007 m, Spa)", QUELLEN["schritt2"],
+          "Track longer than any original track (7,007 m, Spa)", QUELLEN["schritt2"],
           "8-km-Editor-Bau stürzte beim Laden ab (16.10.2026, Ursache nicht eindeutig)"),
     Regel("FIA_KENNWERT", "FI-01", HINWEIS, "eingabe",
-          "Abweichung von FIA-Grade-1-Kennwerten (Breite, Gridbreite, Länge, Gerade, Querneigung, Start-Steigung)",
+          "Deviation from FIA Grade 1 values (width, grid width, length, straight, banking, start gradient)",
           QUELLEN["recherche"], "Fachpresse; für das Spiel nicht nötig, nur Realismus"),
     Regel("EINGABE_PUNKTLUECKE", "IN-03", WARNUNG, "eingabe",
-          "Große Lücke zwischen zwei Kontrollpunkten (Spline überbrückt sie frei, z. B. nach Rahmen-Löschen)",
+          "Large gap between two control points (the spline bridges it freely, e.g. after box deletion)",
           QUELLEN["definition"], "Editor-Bau 16.10.2026: 392 m / 693 m Lücken zwischen sonst 5 m Abstand"),
     Regel("KI_GATES_VIELE", "KI-05", WARNUNG, "generator",
-          "Mehr KI-Gates als jede Originalstrecke (max. 571, Madrid)", QUELLEN["schritt2"],
+          "More AI gates than any original track (max. 571, Madrid)", QUELLEN["schritt2"],
           "Abfrage aller 28 Spielstrecken 16.10.2026; Editor-Bau mit 598 Gates stürzte beim Laden ab"),
     Regel("KI_KURVEN_ZUSAMMENGELEGT", "KI-06", HINWEIS, "generator",
-          "Mehr Hauptkurven als Bremslinien-IDs des Trägers (15) – der Bau legt die dichtesten Kurven zusammen",
+          "More main corners than carrier braking-line IDs (15) – the build merges the closest corners",
           QUELLEN["schritt2"], "Alle 28 Originale: Bremslinien ≥ Kurven; Editor-Strecke mit 16 Kurven stürzte ab, "
           "testedit5_kurven15 (zusammengelegt) läuft (25.10.2026)"),
     Regel("PVS_ZELLEN_VIELE", "PV-01", WARNUNG, "generator",
-          "Mehr PVS-Zellen (Korridor) als jede Originalstrecke (max. 36.409, Losail)", QUELLEN["schritt2"],
+          "More PVS cells (corridor) than any original track (max. 36,409, Losail)", QUELLEN["schritt2"],
           "Editor-Bau mit 59.557 Zellen stürzte beim Laden ab; v20 lief mit 37.917"),
-    Regel("BOX_FEHLT", "BO-00", FEHLER, "generator", "Keine Boxengasse (offene Boxen-Spline) in der Generatorlogik",
+    Regel("BOX_FEHLT", "BO-00", FEHLER, "generator", "No pit lane (open pit spline) in the generator logic",
           "ego-werkzeuge/strecke/spiel_welt.py", "Träger verlangt Boxenlinie, Boxenzonen und Box-Bremslinien"),
     Regel("KI_KURVEN_FUER_BREMSLINIEN", "KI-04", FEHLER, "generator",
-          "Zu wenige Kurven-Gates für alle Haupt-Bremslinien des Trägers",
+          "Too few corner gates for all main braking lines of the carrier package",
           QUELLEN["bremslinien"], "spiel_welt._bremslinien_in_kurven bricht sonst ab"),
     Regel("BOX_MAUER_AUF_BOXENLINIE", "BO-02", HINWEIS, "generator",
-          "Mauerdreiecke auf der Boxenlinie (werden beim Bau entfernt)",
+          "Wall triangles on the pit line (removed during the build)",
           QUELLEN["absturz"], "Spieltest v6: Mauer an der Boxenausfahrt; Korrektur spiel_geometrie"),
     # ---------------------------------------------------------------- Profil
-    Regel("STRECKENCODE_UNZULAESSIG", "CO-01", FEHLER, "profil", "Streckencode unzulässig",
+    Regel("STRECKENCODE_UNZULAESSIG", "CO-01", FEHLER, "profil", "Track code not allowed",
           QUELLEN["streckencode"], "Installer-/Spielregeln (AP16)"),
     Regel("STRECKENCODE_NICHT_IN_DB", "CO-02", WARNUNG, "profil",
-          "Streckencode nicht in der Spieldatenbank – Strecke im Spiel nicht auswählbar",
+          "Track code not in the game database – track cannot be selected in game",
           QUELLEN["streckencode"], "Installer: „Track not found in database“"),
     Regel("STRECKENCODE_TRAEGER", "CO-03", HINWEIS, "profil",
-          "Paket behält den Trägercode portimao (kollidiert mit einer installierten Portimão-Mod)",
+          "Package keeps the carrier code portimao (collides with an installed Portimão mod)",
           QUELLEN["streckencode"], "Empfohlen: sochi (Spieltest v18 ✔)"),
     Regel("PVS_PROFIL", "PL-01", WARNUNG, "profil",
-          "PVS nicht entlang der Strecke (Original-PVS bzw. „alles sichtbar“)",
+          "PVS not along the track (original PVS or “everything visible”)",
           QUELLEN["schritt2"], "v20: eigene PVS-Zellen beheben unsichtbare Welt neben der Box"),
     Regel("GEOMETRIE_ABGESCHALTET", "PK-03", WARNUNG, "profil",
-          "Bau ohne neue Geometrie bzw. Minimap – kein vollständiges Fahrpaket", "ego-werkzeuge/neue_strecke_tool.py",
+          "Build without new geometry or minimap – not a complete driving package", "ego-werkzeuge/neue_strecke_tool.py",
           "Diagnoseoption"),
     # ---------------------------------------------------------------- Logik
     Regel("KI_BREMSLINIE_AUSSERHALB_KURVE", "KI-01", FEHLER, "logik",
-          "Haupt-Bremslinie liegt nicht innerhalb einer Kurve (corner_start … nächstes corner_end)",
+          "Main braking line is not inside a corner (corner_start … next corner_end)",
           QUELLEN["bremslinien"], "Alle 30 Originalstrecken; Absturzursache bis v16, behoben in v17"),
     Regel("KI_BREMSLINIEN_ABSTAND", "KI-02", FEHLER, "logik",
-          "Haupt-Bremslinien zu dicht (gleiches Gate bzw. < 3 Gates Abstand)",
+          "Main braking lines too close (same gate or < 3 gates apart)",
           QUELLEN["absturz"], "Spieltest 15.10.2026 (Doppelkurve)"),
     Regel("KI_BREMSLINIEN_ID_SATZ", "KI-02", FEHLER, "logik",
-          "Bremslinien-IDs doppelt oder nicht gleich dem ID-Satz der .brakelinesettings",
+          "Braking-line IDs duplicated or not equal to the ID set of the .brakelinesettings",
           "ego-werkzeuge/strecke/spielformat.py", "Schreiber prüft gegen alle .brakelinesettings"),
-    Regel("KI_VERWEIS_UNGUELTIG", "KI-05", FEHLER, "logik", "KI-Linie verweist auf ein nicht vorhandenes Gate",
+    Regel("KI_VERWEIS_UNGUELTIG", "KI-05", FEHLER, "logik", "AI line refers to a gate that does not exist",
           "docs/formate/", "Formatkonsistenz"),
-    Regel("KI_BOX_KURVEN_FEHLEN", "KI-03", WARNUNG, "logik", "KI-Boxenroute ohne Kurvenlinien (R4)",
+    Regel("KI_BOX_KURVEN_FEHLEN", "KI-03", WARNUNG, "logik", "AI pit route without corner lines (R4)",
           QUELLEN["ap21"], "30/30 Originale haben 1–5 Kurven auf der Boxenroute; v17 lief ohne"),
     Regel("KI_BOX_BREMSLINIE_AUSSERHALB_KURVE", "KI-03", WARNUNG, "logik",
-          "Box-Bremslinie nicht innerhalb einer Kurve der Boxenroute (R4)", QUELLEN["ap21"], "30/30 Originale"),
+          "Pit braking line not inside a corner of the pit route (R4)", QUELLEN["ap21"], "30/30 Originale"),
     Regel("KI_BOX_PAIR_ID_FEHLT", "KI-03", HINWEIS, "logik",
-          "Kein pair_id zwischen Boxenausfahrts- und Streckenkurve (R5)", QUELLEN["ap21"], "25/30 Originale"),
+          "No pair_id between pit exit corner and track corner (R5)", QUELLEN["ap21"], "25/30 Originale"),
     Regel("KI_ROUTE_OHNE_RAUMWECHSEL", "KI-07", WARNUNG, "logik",
-          "KI-Route ohne Wechsel des Überholraums", QUELLEN["swofty"],
+          "AI route without a change of passing space", QUELLEN["swofty"],
           "Swofty Launcher: Absturz, sobald ein KI-Auto eine solche Route fährt, oft die Boxengasse"),
     Regel("ZONE_ZEITFAHR_TRIGGER_AUSSERHALB", "ZO-01", WARNUNG, "logik",
-          "ai_flying_lap_trigger überlappt rollingstart_tt nicht", QUELLEN["absturz"],
+          "ai_flying_lap_trigger does not overlap rollingstart_tt", QUELLEN["absturz"],
           "Portimão: Trigger in rollingstart_tt; Absturz v1/v2 ohne Überlappung (mit Vorlagen-Fortschritt), "
           "aber 8/30 Originale ohne Überlappung → keine Engine-Pflicht; Pflicht ist ZONE_ZEITFAHR_ABSTAND"),
     Regel("ZONE_ZEITFAHR_ABSTAND", "ZO-01", FEHLER, "logik",
-          "Zeitfahr-/ERS-/X-Mode-Zone nicht im Meterabstand der Vorlage zur Ziellinie", QUELLEN["absturz"],
+          "Time trial/ERS/X-mode zone not at the template's distance from the finish line", QUELLEN["absturz"],
           "Absturz v3 (Vorlagen-Fortschritt) und beim ERS-Wechsel (v8)"),
     Regel("ZONE_BEREICH_UNGUELTIG", "ZO-03", FEHLER, "logik",
-          "Zone mit Fortschritt außerhalb 0…1 oder unbekannter Spline", QUELLEN["ux"], "Formatkonsistenz"),
-    Regel("ZONE_NAME_MEHRDEUTIG", "ZO-02", FEHLER, "logik", "Gleicher Zonenname mit verschiedenen Bereichen",
+          "Zone with progress outside 0…1 or unknown spline", QUELLEN["ux"], "Formatkonsistenz"),
+    Regel("ZONE_NAME_MEHRDEUTIG", "ZO-02", FEHLER, "logik", "Same zone name with different ranges",
           "ego-werkzeuge/strecke/spielformat.py", "Schreiber verlangt eindeutige Bereiche je Name"),
-    Regel("ZONE_DRS_PAARE", "ZO-02", FEHLER, "logik", "DRS-Erkennung/-Aktivierung ohne eindeutiges ID-Paar",
+    Regel("ZONE_DRS_PAARE", "ZO-02", FEHLER, "logik", "DRS detection/activation without a unique ID pair",
           QUELLEN["absturz"], "AP13: DRS-IDs wie Vorlage"),
-    Regel("ZONE_DRL_UEBERLAPPUNG", "ZO-04", WARNUNG, "logik", "drl-Zonen der Hauptlinie überlappen sich",
+    Regel("ZONE_DRL_UEBERLAPPUNG", "ZO-04", WARNUNG, "logik", "drl zones of the main line overlap",
           QUELLEN["schritt2"], "Absturz beim Start der fliegenden Runde (15.10.2026, zusammen mit neuer aispline); "
           "29/30 Originale berühren sich höchstens (Ausnahme Singapur)"),
     Regel("TRACKSPACE_FORM", "ZO-03", FEHLER, "logik",
-          "TrackSpace braucht genau eine geschlossene Hauptlinie (ohne Doppelpunkt) und eine offene Boxenlinie",
+          "TrackSpace needs exactly one closed main line (without duplicate point) and one open pit line",
           "docs/formate/", "Formatkonsistenz"),
     Regel("BOX_SPLINE_NICHT_VERLAENGERT", "BO-01", FEHLER, "logik",
-          "Boxen-Spline reicht nicht weit genug vor die Einfahrt/hinter die Ausfahrt bzw. beginnt/endet neben der Hauptlinie",
+          "Pit spline does not reach far enough before the entry/after the exit, or starts/ends beside the main line",
           QUELLEN["absturz"], "Absturz bei Übergabe am Boxenende (v8: 300 m/200 m verlängert); Originale ≥ 35 m/40 m"),
-    Regel("BOX_SPLINE_SPRUNG", "BO-03", WARNUNG, "logik", "Boxen-Spline springt quer (nicht stetig, R3)",
+    Regel("BOX_SPLINE_SPRUNG", "BO-03", WARNUNG, "logik", "Pit spline jumps sideways (not continuous, R3)",
           QUELLEN["ap21"], "30/30 Originale stetig; v17 Sprung 5,3 m"),
-    Regel("BOX_TS_ABDECKUNG", "BO-04", WARNUNG, "logik", "TS-Box-Volumes decken die Boxen-Spline nicht ganz ab (R1)",
+    Regel("BOX_TS_ABDECKUNG", "BO-04", WARNUNG, "logik", "TS pit volumes do not fully cover the pit spline (R1)",
           QUELLEN["ap21"], "30/30 Originale"),
     Regel("BOX_IN_HAUPT_TS", "BO-05", WARNUNG, "logik",
-          "Boxengasse (Limiterbereich) liegt in den Haupt-TS-Volumes (R2)", QUELLEN["ap21"],
+          "Pit lane (limiter area) lies inside the main TS volumes (R2)", QUELLEN["ap21"],
           "25/30 Originale 0 %, max. 20,5 %; vermutete Ursache der Limiter-Anzeige auf der Strecke"),
     Regel("LOGIK_HOEHE_KONVENTION", "PH-02", HINWEIS, "logik",
-          "Logik liegt auf der Fahrphysik (Portimão: +0,20 m, Plätze +0,03 m)", QUELLEN["absturz"],
+          "Logic lies on the driving physics (Portimão: +0.20 m, grid slots +0.03 m)", QUELLEN["absturz"],
           "Originalunterschied, keine bewiesene Absturzursache"),
     # ---------------------------------------------------------------- Bau / Paket
     Regel("PLATZ_NICHT_AUF_FLAECHE", "PH-01", FEHLER, "bau",
-          "Fahrzeugplatz liegt nicht auf passender Fläche des neuen Netzes", "ego-werkzeuge/neue_strecke_tool.py",
+          "Car slot does not lie on a matching surface of the new mesh", "ego-werkzeuge/neue_strecke_tool.py",
           "logik_pruefen (Startplätze auf Asphalt, Boxen/Garagen in der Boxengasse)"),
     Regel("TRN_HOEHE_ABWEICHEND", "PH-03", WARNUNG, "bau",
-          "Fahrphysik weicht auf der Fahrbahn > 1 m vom Generatornetz ab", "ego-werkzeuge/neue_strecke_tool.py",
+          "Driving physics deviates > 1 m from the generator mesh on the track surface", "ego-werkzeuge/neue_strecke_tool.py",
           "trn_pruefen"),
-    Regel("PHYSIK_VERBLIEBEN", "PH-04", WARNUNG, "bau", "Verbliebene Träger-Instanzen mit Kollision",
+    Regel("PHYSIK_VERBLIEBEN", "PH-04", WARNUNG, "bau", "Remaining carrier instances with collision",
           "ego-werkzeuge/strecke/spiel_welt.py", "verbliebene_physik"),
-    Regel("ERP_PARSE_FEHLER", "PK-01", FEHLER, "bau", "Geänderte Ressource lässt sich nicht neu lesen",
+    Regel("ERP_PARSE_FEHLER", "PK-01", FEHLER, "bau", "Changed resource cannot be read back",
           "ego-werkzeuge/neue_strecke_tool.py", "ressourcen_neu_parsen"),
-    Regel("ERP_MD5_FALSCH", "PK-02", FEHLER, "bau", "Ressource mit falschem MD5", "ego-werkzeuge/ego/erp.py",
+    Regel("ERP_MD5_FALSCH", "PK-02", FEHLER, "bau", "Resource with wrong MD5", "ego-werkzeuge/ego/erp.py",
           "Neue Hashfehler sind nie erlaubt"),
     Regel("ERP_MD5_TRAEGER_ALTLAST", "PK-02", WARNUNG, "bau",
-          "Bekannte falsche MD5 des unveränderten Portimão-Trägers („mit Trägerabweichung geprüft“)",
+          "Known wrong MD5 of the unchanged Portimão carrier (“checked with carrier deviation”)",
           "CLAUDE.md", "2 WEP-Ressourcen der Original-Mod"),
-    Regel("MINIMAP_ECKEN_UNGERUNDET", "MM-01", FEHLER, "paket", "Minimap-Eckpunkte nicht auf mm gerundet",
+    Regel("MINIMAP_ECKEN_UNGERUNDET", "MM-01", FEHLER, "paket", "Minimap corner points not rounded to mm",
           QUELLEN["absturz"], "Installer-Fehler „Ordered PKG roundtrip failed“ (v1)"),
-    Regel("ZONE_MANIFEST_ERS", "ZO-02", FEHLER, "paket", "Manifest-ERS-Werte passen nicht zu den ERS-Zonen",
+    Regel("ZONE_MANIFEST_ERS", "ZO-02", FEHLER, "paket", "Manifest ERS values do not match the ERS zones",
           "ego-werkzeuge/neue_strecke_tool.py", "Manifest wird aus den TM-Zonen gesetzt"),
-    Regel("PAKET_PRUEFUNG", "PK-01", FEHLER, "paket", "Tiefe Paketprüfung meldet einen Fehler", QUELLEN["paket"],
+    Regel("PAKET_PRUEFUNG", "PK-01", FEHLER, "paket", "Deep package check reports an error", QUELLEN["paket"],
           "paket_tool.py pruefen --tief"),
     # ---------------------------------------------------------------- Umgebung (AP-U1, strecke/umgebung.py)
-    Regel("UMG_DATEI", "UM-01", FEHLER, "eingabe", "umgebung.json nicht lesbar oder ungültig", QUELLEN["umgebung"],
+    Regel("UMG_DATEI", "UM-01", FEHLER, "eingabe", "umgebung.json unreadable or invalid", QUELLEN["umgebung"],
           "Vertrag Abschnitt 1 (Schema 1, Pflichtfelder, Maßstab 0,2–5)"),
     Regel("UMG_MODELL_UNBEKANNT", "UM-02", FEHLER, "eingabe", "Umgebungsmodell nicht im Katalog der Spielinstallation",
           QUELLEN["umgebung"], "Katalog aus den Strecken-ERPs (umgebung.katalog); Bau kopiert nur Katalogmodelle"),
@@ -297,13 +300,13 @@ _R = [
           QUELLEN["umgebung"], "Objekte sind reine Kulisse ohne Kollision; auf der Fahrbahn fährt man hindurch"),
     Regel("UMG_VIELE", "UM-05", HINWEIS, "eingabe", "Mehr als 3.000 Umgebungsobjekte (Leistung)", QUELLEN["umgebung"],
           "Portimão-Träger: 1.274 Bäume, 16.642 Instanzen insgesamt"),
-    Regel("UMG_HUEGEL_LAGE", "UM-06", FEHLER, "eingabe", "Hügel/Senke mit Mitte außerhalb des Streckenbereichs",
+    Regel("UMG_HUEGEL_LAGE", "UM-06", FEHLER, "eingabe", "Hill/hollow with its centre outside the track area",
           QUELLEN["umgebung"], "Hügel verformen nur die Grundfläche im Loch des Außenterrains (Spieltest T4 ✔)"),
     Regel("UMG_BERG_LAGE", "UM-07", FEHLER, "eingabe",
-          "Berg mit Mitte im Streckenbereich oder mehr als 12 km von der Mitte entfernt", QUELLEN["umgebung"],
+          "Mountain with its centre inside the track area or more than 12 km from the centre", QUELLEN["umgebung"],
           "Berge verformen nur das Außenterrain (Spieltest T5 ✔); außen ist es grob aufgelöst"),
     Regel("UMG_BERG_RAND", "UM-08", HINWEIS, "eingabe",
-          "Berg reicht an den Rand des Streckenbereichs und wird dort abgeschnitten", QUELLEN["umgebung"],
+          "Mountain reaches the edge of the track area and is cut off there", QUELLEN["umgebung"],
           "Lochrand bleibt fest (10 m + 150 m Übergang), sonst Lücke zur Grundfläche"),
 ]
 REGELN: Dict[str, Regel] = {r.id: r for r in _R}
@@ -553,8 +556,8 @@ def logik_pruefen(lg, vorlage_zeitfahr_m=None, bremslinien_ids=None, manifest=No
         gp.add("LOGIK_HOEHE_KONVENTION")
         if float(plz.get("logik_dy", 0.0)) < 0.1:
             m.append(meldung("LOGIK_HOEHE_KONVENTION",
-                             "TrackSpace/KI-Gates/TS liegen %+.2f m über der Fahrphysik (Portimão +0,20 m); "
-                             "fahrbar bis v20, Wirkung von +0,20 m im Spiel ungeprüft." % float(plz.get("logik_dy", 0.0)),
+                             "TrackSpace/AI gates/TS lie %+.2f m above the driving physics (Portimão +0.20 m); "
+                             "drivable up to v20, effect of +0.20 m not tested in game." % float(plz.get("logik_dy", 0.0)),
                              ist=float(plz.get("logik_dy", 0.0)), soll=0.2))
     stufen = ["logik"]
     if manifest is not None:
@@ -569,14 +572,14 @@ def logik_pruefen(lg, vorlage_zeitfahr_m=None, bremslinien_ids=None, manifest=No
 
 def _trackspace_form(lo, m):
     if len(lo.haupt_splines) != 1 or len(lo.box_splines) > 1:
-        m.append(meldung("TRACKSPACE_FORM", "TrackSpace hat %d geschlossene und %d offene Splines (erwartet 1 und 1)"
+        m.append(meldung("TRACKSPACE_FORM", "TrackSpace has %d closed and %d open splines (expected 1 and 1)"
                          % (len(lo.haupt_splines), len(lo.box_splines))))
     if lo.haupt is not None:
         P = np.asarray(lo.haupt["position"], float)
         if len(P) < 4:
-            m.append(meldung("TRACKSPACE_FORM", "Hauptlinie hat nur %d Knoten" % len(P)))
+            m.append(meldung("TRACKSPACE_FORM", "Main line has only %d nodes" % len(P)))
         elif np.linalg.norm(P[0] - P[-1]) < 0.01:
-            m.append(meldung("TRACKSPACE_FORM", "Geschlossene Hauptlinie wiederholt den ersten Knoten am Ende",
+            m.append(meldung("TRACKSPACE_FORM", "Closed main line repeats the first node at the end",
                              ort(lo.haupt["name"], 0.0, P[0], "Knoten %d" % (len(P) - 1))))
     return {"TRACKSPACE_FORM"}
 
@@ -589,7 +592,7 @@ def _lage(lo, m):
     aussen = [(n, p) for n, p in punkte if max(abs(float(p[0])), abs(float(p[2]))) > AO_HALBBREITE_M]
     if aussen:
         n, p = max(aussen, key=lambda t: max(abs(float(t[1][0])), abs(float(t[1][2]))))
-        m.append(meldung("LAGE_AUSSERHALB_AO", "%d Logikpunkte außerhalb X/Z ±%d m; äußerster: %s"
+        m.append(meldung("LAGE_AUSSERHALB_AO", "%d logic points outside X/Z ±%d m; outermost: %s"
                          % (len(aussen), AO_HALBBREITE_M, n), ort(welt=p, objekt=n), ist=len(aussen), soll=0,
                          stufe="logik"))
     return {"LAGE_AUSSERHALB_AO"}
@@ -603,24 +606,24 @@ def _ki_haupt(lo, m, erwartete_ids):
                         ("retire_lines", _linien(ai, "retire_lines"))):
         for l in liste:
             if l["gate_id"] not in lo.gates:
-                m.append(meldung("KI_VERWEIS_UNGUELTIG", "%s id %d verweist auf fehlendes Gate %d"
+                m.append(meldung("KI_VERWEIS_UNGUELTIG", "%s id %d refers to missing gate %d"
                                  % (name, l["id"], l["gate_id"]), ort(objekt="%s %d" % (name, l["id"]))))
             if "pair_id" in l and int(l["pair_id"]) not in lo.gates:
-                m.append(meldung("KI_VERWEIS_UNGUELTIG", "%s id %d: pair_id %s ist kein Gate"
+                m.append(meldung("KI_VERWEIS_UNGUELTIG", "%s id %d: pair_id %s is not a gate"
                                  % (name, l["id"], l["pair_id"]), ort(objekt="%s %d" % (name, l["id"]))))
     for i, (a, b) in lo.links.items():
         if a not in lo.gates or b not in lo.gates:
-            m.append(meldung("KI_VERWEIS_UNGUELTIG", "Link %d verbindet fehlendes Gate (%d → %d)" % (i, a, b),
+            m.append(meldung("KI_VERWEIS_UNGUELTIG", "Link %d connects a missing gate (%d → %d)" % (i, a, b),
                              ort(objekt="link %d" % i)))
     ids = [l["id"] for l in bl]
     doppelt = sorted({i for i in ids if ids.count(i) > 1})
     if doppelt:
-        m.append(meldung("KI_BREMSLINIEN_ID_SATZ", "Bremslinien-IDs doppelt: %s" % doppelt, ist=doppelt))
+        m.append(meldung("KI_BREMSLINIEN_ID_SATZ", "Duplicate braking line IDs: %s" % doppelt, ist=doppelt))
     if erwartete_ids is not None and set(ids) != set(int(x) for x in erwartete_ids):
         fehlt = sorted(set(int(x) for x in erwartete_ids) - set(ids))
         zuviel = sorted(set(ids) - set(int(x) for x in erwartete_ids))
-        m.append(meldung("KI_BREMSLINIEN_ID_SATZ", "Bremslinien-IDs ≠ ID-Satz der .brakelinesettings (fehlen %s, "
-                         "überzählig %s)" % (fehlt, zuviel), ist=sorted(ids), soll=sorted(int(x) for x in erwartete_ids)))
+        m.append(meldung("KI_BREMSLINIEN_ID_SATZ", "Braking line IDs ≠ ID set of .brakelinesettings (missing %s, "
+                                                   "surplus %s)" % (fehlt, zuviel), ist=sorted(ids), soll=sorted(int(x) for x in erwartete_ids)))
     route = [g for g in lo.route_haupt if g in lo.gates]
     n = len(route)
     if not n:
@@ -631,13 +634,13 @@ def _ki_haupt(lo, m, erwartete_ids):
         i = idx[l["gate_id"]]
         drin, vor = _in_kurve(i, kurven, n, True)
         if not drin:
-            text = ("Haupt-Bremslinie %d (Gate %d) liegt außerhalb jeder Kurve. F1 25 erwartet Haupt-Bremslinien innerhalb "
+            text = ("Main braking line %d (gate %d) is outside every corner. F1 25 expects main braking lines inside "
                     "corner_start … corner_end." % (l["id"], l["gate_id"]))
             if vor is not None:
                 g_k = route[(i + vor) % n]
                 meter = ((lo.fortschritt(g_k) - lo.fortschritt(l["gate_id"])) % 1.0) * lo.L
-                text = ("Haupt-Bremslinie %d (Gate %d) liegt außerhalb jeder Kurve, %.0f m vor dem nächsten Kurvenanfang "
-                        "(Gate %d). F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end."
+                text = ("Main braking line %d (gate %d) is outside every corner, %.0f m before the next corner start "
+                        "(gate %d). F1 25 expects main braking lines inside corner_start … corner_end."
                         % (l["id"], l["gate_id"], meter, g_k))
             m.append(meldung("KI_BREMSLINIE_AUSSERHALB_KURVE", text,
                              lo.gate_ort(l["gate_id"], "brake_line %d" % l["id"])))
@@ -648,7 +651,7 @@ def _ki_haupt(lo, m, erwartete_ids):
             break
         d = (j - i) % n
         if d < BREMSLINIEN_MIN_ABSTAND_GATES:
-            m.append(meldung("KI_BREMSLINIEN_ABSTAND", "Bremslinien %d und %d nur %d Gates auseinander (mind. %d)"
+            m.append(meldung("KI_BREMSLINIEN_ABSTAND", "Braking lines %d and %d are only %d gates apart (at least %d)"
                              % (bid, bid2, d, BREMSLINIEN_MIN_ABSTAND_GATES),
                              lo.gate_ort(route[j], "brake_line %d" % bid2), ist=d, soll=BREMSLINIEN_MIN_ABSTAND_GATES))
     return gp
@@ -689,12 +692,12 @@ def _zonen(lo, m, vorlage_m):
         sp = z.get("SplineName")
         laenge = lo.L if sp == hl else lo.Lb
         if sp not in splines or not (math.isfinite(s) and math.isfinite(e) and 0 <= s <= 1 and 0 <= e <= 1):
-            m.append(meldung("ZONE_BEREICH_UNGUELTIG", "Zone %s (%s): Spline %s, Bereich %.4f…%.4f"
+            m.append(meldung("ZONE_BEREICH_UNGUELTIG", "Zone %s (%s): spline %s, range %.4f…%.4f"
                              % (z["Name"], z["Type"], sp, s, e), ort(sp, None, None, "Zone " + z["Name"])))
             continue
         key = (sp, round(s, 9), round(e, 9))
         if bereiche.setdefault(z["Name"], key) != key:
-            m.append(meldung("ZONE_NAME_MEHRDEUTIG", "Zonenname %s mit verschiedenen Bereichen" % z["Name"],
+            m.append(meldung("ZONE_NAME_MEHRDEUTIG", "Zone name %s with different ranges" % z["Name"],
                              ort(sp, s * laenge, None, "Zone " + z["Name"])))
     # DRS
     det = [z for z in zonen if z["Type"] == "drs_det"]
@@ -703,8 +706,8 @@ def _zonen(lo, m, vorlage_m):
     ai_ = [str(z.get("Properties", {}).get("ID")) for z in act]
     # Originale: je Erkennung genau eine ID, aber teils mehrere Aktivierungszonen je ID (Ungarn, Mexiko …)
     if len(set(di)) != len(di) or any(i not in ai_ for i in di):
-        m.append(meldung("ZONE_DRS_PAARE", "DRS-IDs Erkennung %s / Aktivierung %s: Erkennungs-ID doppelt oder ohne "
-                         "Aktivierung" % (di, ai_), ist={"erkennung": di, "aktivierung": ai_}))
+        m.append(meldung("ZONE_DRS_PAARE", "DRS IDs detection %s / activation %s: detection ID duplicated or without "
+                                           "activation" % (di, ai_), ist={"erkennung": di, "aktivierung": ai_}))
     # drl (Hauptlinie)
     drl = sorted(((float(z["Start"]), float(z["End"]), z["Name"]) for z in zonen
                   if z["Type"] == "drl" and z["SplineName"] == hl), key=lambda t: t[0])
@@ -712,7 +715,7 @@ def _zonen(lo, m, vorlage_m):
         for j in range(k + 1, len(drl)):
             a, b = drl[k], drl[j]
             if _ueberlappen(a[0], a[1], b[0], b[1]):  # Berühren (Ende = Anfang) ist erlaubt (Originale)
-                m.append(meldung("ZONE_DRL_UEBERLAPPUNG", "drl-Zonen %s und %s überlappen" % (a[2], b[2]),
+                m.append(meldung("ZONE_DRL_UEBERLAPPUNG", "drl zones %s and %s overlap" % (a[2], b[2]),
                                  ort(hl, b[0] * lo.L, None, "Zone " + b[2])))
     # Zeitfahren
     nach_name = {z["Name"]: z for z in zonen if z["SplineName"] == hl}
@@ -723,7 +726,7 @@ def _zonen(lo, m, vorlage_m):
         # Absturz v1/v2: Trigger (Vorlage, −1130…−939 m) und Generatorzone (−300…−20 m) ohne Überlappung.
         if not _ueberlappen(float(trig["Start"]), float(trig["End"]), a, b):
             m.append(meldung("ZONE_ZEITFAHR_TRIGGER_AUSSERHALB",
-                             "ai_flying_lap_trigger (%.4f…%.4f) überlappt rollingstart_tt (%.4f…%.4f) nicht"
+                             "ai_flying_lap_trigger (%.4f…%.4f) does not overlap rollingstart_tt (%.4f…%.4f)"
                              % (float(trig["Start"]), float(trig["End"]), a, b),
                              ort(hl, float(trig["Start"]) * lo.L, _punkt_bei(lo.HQ, lo.Hcum, float(trig["Start"]) * lo.L),
                                  "Zone ai_flying_lap_trigger")))
@@ -747,7 +750,7 @@ def _zonen(lo, m, vorlage_m):
                             abs(abs(ist_m - soll) - lo.L) <= ZEITFAHR_TOLERANZ_M
                 if not ok:
                     m.append(meldung("ZONE_ZEITFAHR_ABSTAND",
-                                     "Zone %s.%s: %.1f m zur Ziellinie, Vorlage %.1f m" % (name, feld, ist_m, soll),
+                                     "Zone %s.%s: %.1f m to the finish line, template %.1f m" % (name, feld, ist_m, soll),
                                      ort(hl, ist_b * lo.L, _punkt_bei(lo.HQ, lo.Hcum, ist_b * lo.L), "Zone " + name),
                                      ist=_r(ist_m), soll=soll))
     return gp
@@ -794,8 +797,8 @@ def _raumwechsel(lo, m):
         klassen = _raumklassen(lo, [g for g in route if g in lo.gates])
         if klassen and not raum_wechselt(klassen):
             m.append(meldung("KI_ROUTE_OHNE_RAUMWECHSEL",
-                             "KI-Route %s: Der Überholraum ändert sich auf keinem der %d Tore. Das Spiel stürzt ab, sobald ein KI-Auto "
-                             "sie fährt (der Swofty Launcher korrigiert das beim Bau)" % (name, len(klassen)),
+                             "AI route %s: the passing space does not change at any of its %d gates. The game crashes "
+                             "as soon as an AI car drives it (Swofty Launcher fixes this when it builds)" % (name, len(klassen)),
                              ort(lo.box["name"] if name == "pit" and lo.box else None, None, None, "route " + name),
                              ist=0, soll="≥ 1"))
 
@@ -811,19 +814,19 @@ def _box(lo, m):
     for k, wo in ((0, "Anfang"), (len(P) - 1, "Ende")):
         _, d = _projektion(lo.HQ, lo.Hcum, P[k])
         if d > BOXEN_ENDE_ABSTAND_MAX_M:
-            m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Boxen-Spline-%s liegt %.1f m neben der Hauptlinie" % (wo, d),
+            m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Pit spline %s lies %.1f m beside the main line" % (wo, d),
                              ort(pn, lo.Bcum[k], P[k], "Knoten %d" % k), ist=_r(d),
                              soll="≤ %.0f m" % BOXEN_ENDE_ABSTAND_MAX_M))
     zonen = [z for z in lo.zonen() if z["SplineName"] == pn]
     ein = [float(z["Start"]) for z in zonen if z["Type"] == "pit_lane_entry_zone"]
     aus = [float(z["End"]) for z in zonen if z["Type"] == "pitlane_exit_zone"]
     if ein and min(ein) * lo.Lb < BOXEN_VORLAUF_MIN_M:
-        m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Boxen-Spline beginnt nur %.0f m vor der Einfahrtszone "
-                         "(mind. %.0f m; Bau %.0f m)" % (min(ein) * lo.Lb, BOXEN_VORLAUF_MIN_M, BOXEN_VERLAENGERUNG_VOR_M),
+        m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Pit spline starts only %.0f m before the entry zone (at "
+                                                         "least %.0f m; build %.0f m)" % (min(ein) * lo.Lb, BOXEN_VORLAUF_MIN_M, BOXEN_VERLAENGERUNG_VOR_M),
                          ort(pn, 0.0, P[0], "pit_lane_entry_zone"), ist=_r(min(ein) * lo.Lb), soll=BOXEN_VORLAUF_MIN_M))
     if aus and (1 - max(aus)) * lo.Lb < BOXEN_NACHLAUF_MIN_M:
-        m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Boxen-Spline endet nur %.0f m hinter der Ausfahrtszone "
-                         "(mind. %.0f m; Bau %.0f m)" % ((1 - max(aus)) * lo.Lb, BOXEN_NACHLAUF_MIN_M, BOXEN_VERLAENGERUNG_NACH_M),
+        m.append(meldung("BOX_SPLINE_NICHT_VERLAENGERT", "Pit spline ends only %.0f m after the exit zone (at least "
+                                                         "%.0f m; build %.0f m)" % ((1 - max(aus)) * lo.Lb, BOXEN_NACHLAUF_MIN_M, BOXEN_VERLAENGERUNG_NACH_M),
                          ort(pn, lo.Lb, P[-1], "pitlane_exit_zone"), ist=_r((1 - max(aus)) * lo.Lb), soll=BOXEN_NACHLAUF_MIN_M))
     # R3: Querversatz zur Hauptlinie springt
     quer = np.array([_projektion(lo.HQ, lo.Hcum, p)[1] for p in P])
@@ -832,8 +835,8 @@ def _box(lo, m):
     spr = np.where((dq > BOX_SPRUNG_MAX_M) & (np.minimum(quer[:-1], quer[1:]) < BOX_SPRUNG_NAH_M))[0]
     if len(spr):
         k = int(spr[np.argmax(dq[spr])])
-        m.append(meldung("BOX_SPLINE_SPRUNG", "Boxen-Spline springt an %d Stelle(n) von der Hauptlinie quer, max. "
-                         "%.1f m auf %.1f m Länge" % (len(spr), dq[k], ds[k]), ort(pn, lo.Bcum[k + 1], P[k + 1], "Knoten %d" % (k + 1)),
+        m.append(meldung("BOX_SPLINE_SPRUNG", "Pit spline jumps sideways from the main line at %d point(s), up to %.1f "
+                                              "m over %.1f m" % (len(spr), dq[k], ds[k]), ort(pn, lo.Bcum[k + 1], P[k + 1], "Knoten %d" % (k + 1)),
                          ist=_r(dq[k]), soll="stetig (≤ %.0f m je Knoten)" % BOX_SPRUNG_MAX_M))
     # R1/R2: TS
     listen = lo.sp.get("TS", {}).get("volume_lists", [])
@@ -845,7 +848,7 @@ def _box(lo, m):
         s0 = _projektion(lo.BQ, lo.Bcum, mitte(box_vl["volumes"][0]["gates"][0]))[0]
         s1 = _projektion(lo.BQ, lo.Bcum, mitte(box_vl["volumes"][-1]["gates"][-1]))[0]
         if s0 > 5.0 or lo.Lb - s1 > 5.0:
-            m.append(meldung("BOX_TS_ABDECKUNG", "TS-Box-Volumes decken nur %.0f…%.0f m der %.0f m langen Boxen-Spline ab"
+            m.append(meldung("BOX_TS_ABDECKUNG", "TS pit volumes only cover %.0f…%.0f m of the %.0f m long pit spline"
                              % (s0, s1, lo.Lb), ort(pn, s0 if s0 > 5.0 else s1, None, "TS " + box_vl.get("name", "pit")),
                              ist=[_r(s0, 1), _r(s1, 1)], soll=[0, _r(lo.Lb, 1)]))
     lim = next((z for z in zonen if z["Type"] == "pit_lim_on"), None)
@@ -862,8 +865,8 @@ def _box(lo, m):
             nah = np.where(np.linalg.norm(mitten - q, axis=1) < 150)[0]
             drin += any(_im_viereck(q, polys[j]) for j in nah)
         if len(sel) and drin / len(sel) > BOX_IN_HAUPT_TS_MAX_ANTEIL:
-            m.append(meldung("BOX_IN_HAUPT_TS", "%.0f %% der Boxen-Spline im Limiterbereich liegen in Haupt-TS-Volumes "
-                             "(Originale meist 0 %%, max. 20,5 %%)" % (100 * drin / len(sel)),
+            m.append(meldung("BOX_IN_HAUPT_TS", "%.0f %% of the pit spline in the limiter area lies in main TS volumes "
+                                                "(originals mostly 0 %%, at most 20.5 %%)" % (100 * drin / len(sel)),
                              ort(pn, lo.Bcum[sel[0]], P[sel[0]], "pit_lim_on"), ist=_r(drin / len(sel), 3),
                              soll="≤ %.2f" % BOX_IN_HAUPT_TS_MAX_ANTEIL))
     # R4/R5: KI-Boxenroute
@@ -874,18 +877,18 @@ def _box(lo, m):
     cs_b = [l for l in cs if l["gate_id"] in box_gates]
     kurven, idx = _kurven_auf_route(route, cs_b, [l for l in ce if l["gate_id"] in box_gates], False)
     if not kurven:
-        m.append(meldung("KI_BOX_KURVEN_FEHLEN", "KI-Boxenroute ohne Kurvenlinien (Originale: 1–5 Kurven)",
+        m.append(meldung("KI_BOX_KURVEN_FEHLEN", "AI pit route has no corner lines (originals: 1–5 corners)",
                          ort(pn, None, None, "route pit"), ist=0, soll="1–5"))
     for l in bl:
         if l["gate_id"] in box_gates:
             drin, _ = _in_kurve(idx[l["gate_id"]], kurven, len(route), False) if l["gate_id"] in idx else (False, None)
             if not drin:
                 m.append(meldung("KI_BOX_BREMSLINIE_AUSSERHALB_KURVE",
-                                 "Box-Bremslinie %d (Gate %d) liegt in keiner Kurve der Boxenroute" % (l["id"], l["gate_id"]),
+                                 "Pit braking line %d (gate %d) is not in any corner of the pit route" % (l["id"], l["gate_id"]),
                                  lo.gate_ort(l["gate_id"], "brake_line %d" % l["id"])))
     if not any("pair_id" in l for l in cs_b):
-        m.append(meldung("KI_BOX_PAIR_ID_FEHLT", "Keine Kurve der Boxenroute mit pair_id zur Streckenkurve "
-                         "(25/30 Originale haben eine)", ort(pn, None, None, "corner_start_lines")))
+        m.append(meldung("KI_BOX_PAIR_ID_FEHLT", "No corner of the pit route has a pair_id to a track corner (25 of 30 "
+                                                 "originals have one)", ort(pn, None, None, "corner_start_lines")))
     return gp
 
 
@@ -896,7 +899,7 @@ def minimap_pruefen(minimap: dict, m: list) -> set:
         for name, wert in ecken.items():
             for v in wert:
                 if round(float(v), MINIMAP_NACHKOMMA) != float(v):
-                    m.append(meldung("MINIMAP_ECKEN_UNGERUNDET", "Minimap %s.%s = %r nicht auf mm gerundet"
+                    m.append(meldung("MINIMAP_ECKEN_UNGERUNDET", "Minimap %s.%s = %r not rounded to mm"
                                      % (gruppe, name, wert), ort(objekt="ui/minimap.json %s.%s" % (gruppe, name)),
                                      ist=wert))
                     break
@@ -910,7 +913,7 @@ def manifest_ers_pruefen(zonen, manifest, m) -> set:
         if feld in ers and typ in tm:
             soll = round(float(tm[typ]["Start"]), 4)
             if abs(float(ers[feld]) - soll) > 1e-4:
-                m.append(meldung("ZONE_MANIFEST_ERS", "manifest.ers.%s = %s, Zone %s beginnt bei %s"
+                m.append(meldung("ZONE_MANIFEST_ERS", "manifest.ers.%s = %s, zone %s starts at %s"
                                  % (feld, ers[feld], typ, soll), ort(objekt="manifest.json ers." + feld),
                                  ist=ers[feld], soll=soll))
     return {"ZONE_MANIFEST_ERS"}
@@ -925,10 +928,10 @@ def paket_pruefung_bewerten(pruefung: Sequence, m: list) -> set:
             falsch = [t.strip() for t in text.split(":", 1)[-1].split(";") if t.strip()]
             fremd = [f for f in falsch if not f.endswith(TRAEGER_MD5_ALTLAST)]
             if falsch and not fremd:
-                m.append(meldung("ERP_MD5_TRAEGER_ALTLAST", "Paket: %d bekannte falsche MD5 des Portimão-Trägers" % len(falsch),
+                m.append(meldung("ERP_MD5_TRAEGER_ALTLAST", "Package: %d known wrong MD5 of the Portimão carrier" % len(falsch),
                                  ort(objekt="; ".join(falsch)), stufe="paket"))
                 continue
-        m.append(meldung("PAKET_PRUEFUNG", "Paketprüfung „%s“: %s" % (name, text[:300]), ort(objekt=name)))
+        m.append(meldung("PAKET_PRUEFUNG", "Package check “%s”: %s" % (name, text[:300]), ort(objekt=name)))
     return {"PAKET_PRUEFUNG", "ERP_MD5_TRAEGER_ALTLAST"}
 
 
@@ -943,9 +946,9 @@ def bau_pruefungen_bewerten(pr: dict, m: list) -> set:
         alt = [k for k in p.get("md5_falsch", []) if k.endswith(TRAEGER_MD5_ALTLAST)]
         neu = [k for k in p.get("md5_falsch", []) if k not in alt]
         for k in neu:
-            m.append(meldung("ERP_MD5_FALSCH", "ERP %s: falscher MD5 %s" % (variante, k), ort(objekt=k)))
+            m.append(meldung("ERP_MD5_FALSCH", "ERP %s: wrong MD5 %s" % (variante, k), ort(objekt=k)))
         if alt:
-            m.append(meldung("ERP_MD5_TRAEGER_ALTLAST", "ERP %s: %d bekannte falsche MD5 des Trägers" % (variante, len(alt)),
+            m.append(meldung("ERP_MD5_TRAEGER_ALTLAST", "ERP %s: %d known wrong MD5 of the carrier" % (variante, len(alt)),
                              ort(objekt="; ".join(alt))))
         for f in p.get("parse_fehler", [])[:50]:
             m.append(meldung("ERP_PARSE_FEHLER", "ERP %s: %s" % (variante, f), ort(objekt=f.split(" ", 1)[0])))
@@ -954,14 +957,15 @@ def bau_pruefungen_bewerten(pr: dict, m: list) -> set:
         gp.add("PLATZ_NICHT_AUF_FLAECHE")
         for p in lg.get("plaetze", []):
             if not p.get("ok"):
-                m.append(meldung("PLATZ_NICHT_AUF_FLAECHE", "%s (%s) liegt auf %s, %.2f m von der Mittellinie"
+                m.append(meldung("PLATZ_NICHT_AUF_FLAECHE", "%s (%s) lies on %s, %.2f m from the centreline"
                                  % (p["name"].split("$")[-1], p["layer"], p.get("flaeche"), p["abstand_mittellinie_m"]),
                                  ort(None, None, p["position"], p["name"]), ist=p.get("flaeche")))
     t = pr.get("trn")
     if t and "auf_fahrbahn_hoehe_abweichend_gt_1m" in t:
         gp.add("TRN_HOEHE_ABWEICHEND")
         if t["auf_fahrbahn_hoehe_abweichend_gt_1m"]:
-            m.append(meldung("TRN_HOEHE_ABWEICHEND", "%d Fahrphysik-Dreiecke auf der Fahrbahn > 1 m vom Netz entfernt"
+            m.append(meldung("TRN_HOEHE_ABWEICHEND", ("%d driving physics triangles on the road are > 1 m away from "
+                                                      "the mesh")
                              % t["auf_fahrbahn_hoehe_abweichend_gt_1m"], ist=t["auf_fahrbahn_hoehe_abweichend_gt_1m"],
                              soll=0))
     return gp
@@ -976,25 +980,25 @@ def profil_pruefen(streckencode=None, pvs_variante=None, nur_original_pvs=False,
     if streckencode is not None:
         gp |= {"STRECKENCODE_UNZULAESSIG", "STRECKENCODE_NICHT_IN_DB", "STRECKENCODE_TRAEGER"}
         if streckencode == sc.STANDARD_ALT:
-            m.append(meldung("STRECKENCODE_TRAEGER", "Code %s bleibt; eine installierte Portimão-Mod wird ersetzt. "
-                             "Empfohlen: --streckencode sochi" % streckencode, ist=streckencode, soll="sochi"))
+            m.append(meldung("STRECKENCODE_TRAEGER", "Code %s is kept; an installed Portimão mod will be replaced. "
+                                                     "Recommended: --streckencode sochi" % streckencode, ist=streckencode, soll="sochi"))
         else:
             ok, hinweis = sc.code_bewerten(streckencode, ziel)
             if not ok:
-                m.append(meldung("STRECKENCODE_UNZULAESSIG", "Streckencode %s: %s" % (streckencode, hinweis),
+                m.append(meldung("STRECKENCODE_UNZULAESSIG", "Track code %s: %s" % (streckencode, hinweis),
                                  ist=streckencode))
             elif hinweis.startswith("WARNUNG"):
-                m.append(meldung("STRECKENCODE_NICHT_IN_DB", "Streckencode %s: %s" % (streckencode, hinweis),
+                m.append(meldung("STRECKENCODE_NICHT_IN_DB", "Track code %s: %s" % (streckencode, hinweis),
                                  ist=streckencode))
     if pvs_variante is not None:
         gp.add("PVS_PROFIL")
         if nur_original_pvs or pvs_variante != "strecke":
-            m.append(meldung("PVS_PROFIL", "PVS-Variante %s: neue Objekte im alten Portimão-Bereich können unsichtbar "
-                             "sein/flackern; empfohlen --pvs-variante strecke (v20)"
+            m.append(meldung("PVS_PROFIL", "PVS variant %s: new objects in the old Portimão area may be invisible or "
+                                           "flicker; recommended --pvs-variante strecke (v20)"
                              % ("Original" if nur_original_pvs else pvs_variante), ist=pvs_variante, soll="strecke"))
     gp.add("GEOMETRIE_ABGESCHALTET")
     if ohne_geometrie or ohne_minimap:
-        m.append(meldung("GEOMETRIE_ABGESCHALTET", "Bau %s – nur Diagnose, kein vollständiges Fahrpaket"
+        m.append(meldung("GEOMETRIE_ABGESCHALTET", "Build %s: diagnostics only, not a complete driving package"
                          % " und ".join(t for t, an in (("ohne Geometrie", ohne_geometrie),
                                                        ("ohne Minimap", ohne_minimap)) if an)))
     return gp
@@ -1061,10 +1065,10 @@ def vorab_pruefen(definition, basisordner=".", versatz=None, generator=None, mit
         i = int(np.argmin(np.abs(st.s - s)))
         return st.pos[i] + v
     for s in pr["faltung_s"]:
-        m.append(meldung("GEO_RAND_FALTUNG", "Fahrbahnrand faltet sich bei %.0f m (Radius kleiner als Halbbreite)" % s,
+        m.append(meldung("GEO_RAND_FALTUNG", "Track edge folds over at %.0f m (radius smaller than half width)" % s,
                          ort(hl, s, welt_bei(s))))
     for sch in pr["schnitte"][:20]:
-        m.append(meldung("GEO_RAENDER_SCHNITT", "Rand %s bei %.0f m schneidet Rand %s bei %.0f m"
+        m.append(meldung("GEO_RAENDER_SCHNITT", "Edge %s at %.0f m intersects edge %s at %.0f m"
                          % (sch["linie_a"], sch["s_a"], sch["linie_b"], sch["s_b"]), ort(hl, sch["s_a"], welt_bei(sch["s_a"]))))
     # Lage: Ränder inkl. Versatz (Netz mit Auslauf folgt mit Generator)
     rand = np.vstack([st.punkt(st.wl), st.punkt(-st.wr)]) + v
@@ -1072,8 +1076,8 @@ def vorab_pruefen(definition, basisordner=".", versatz=None, generator=None, mit
     if len(aussen):
         i = int(aussen[np.argmax(np.max(np.abs(rand[aussen][:, [0, 2]]), axis=1))])
         s = float(st.s[i % len(st.s)])
-        m.append(meldung("LAGE_AUSSERHALB_AO", "Fahrbahnrand an %d Stationen außerhalb X/Z ±%d m (inkl. Versatz %s)"
-                         % (len(aussen), AO_HALBBREITE_M, [float(x) for x in v]), ort(hl, s, rand[i]),
+        m.append(meldung("LAGE_AUSSERHALB_AO", "Track edge outside X/Z ±%d m at %d stations (including offset %s)"
+                         % (AO_HALBBREITE_M, len(aussen), [float(x) for x in v]), ort(hl, s, rand[i]),
                          ist=_r(float(np.max(np.abs(rand[:, [0, 2]])))), soll=AO_HALBBREITE_M, stufe="eingabe"))
     gp |= _zonen_eingabe_pruefen(ml, d.param, m, welt_bei)
     gp |= _geometrie_pruefen(ml, d.param, m, welt_bei)
@@ -1083,7 +1087,7 @@ def vorab_pruefen(definition, basisordner=".", versatz=None, generator=None, mit
         abst = np.linalg.norm(np.roll(P, -1, axis=0) - P, axis=1)
         med = float(np.median(abst))
         for i in np.flatnonzero((abst > max(100.0, 10 * med)))[:10]:
-            m.append(meldung("EINGABE_PUNKTLUECKE", "Lücke von %.0f m zwischen Punkt %d und %d (sonst ~%.0f m)"
+            m.append(meldung("EINGABE_PUNKTLUECKE", "Gap of %.0f m between points %d and %d (otherwise ~%.0f m)"
                              % (abst[i], i + 1, (i + 1) % len(P) + 1, med),
                              ort(None, None, np.r_[P[i, 0], 0.0, P[i, 1]] + v, "Punkt %d" % (i + 1)),
                              ist=_r(float(abst[i])), soll="< %.0f m" % max(100.0, 10 * med)))
@@ -1138,49 +1142,49 @@ def _geometrie_pruefen(ml, param, m, welt_bei):
     pos = st.pos[:: max(1, int(round(2.0 / ml.ds)))]
     r_min, dk_max, s_r, s_k = geometrie_kennwerte(pos[:, [0, 2]])
     if r_min < ORIGINAL_MIN_RADIUS_M:
-        m.append(meldung("GEO_RADIUS_KLEIN", "Kleinster Radius %.1f m bei %.0f m (Originale ≥ %.1f m)"
+        m.append(meldung("GEO_RADIUS_KLEIN", "Smallest radius %.1f m at %.0f m (originals ≥ %.1f m)"
                          % (r_min, s_r, ORIGINAL_MIN_RADIUS_M), ort(hl, s_r, welt_bei(s_r)),
                          ist=_r(r_min), soll=">= %.1f m" % ORIGINAL_MIN_RADIUS_M))
     if dk_max > ORIGINAL_MAX_DKAPPA:
-        m.append(meldung("GEO_KRUEMMUNG_SPRUNG", "Krümmungsänderung %.1e /m² bei %.0f m (Originale ≤ %.1e) – "
-                         "mittellinie.approximation_m (z. B. 6–8) oder Klothoiden-Übergänge verwenden"
+        m.append(meldung("GEO_KRUEMMUNG_SPRUNG", "Curvature change %.1e /m² at %.0f m (originals ≤ %.1e): use "
+                                                 "mittellinie.approximation_m (e.g. 6–8) or clothoid transitions"
                          % (dk_max, s_k, ORIGINAL_MAX_DKAPPA), ort(hl, s_k, welt_bei(s_k)),
                          ist=float("%.3g" % dk_max), soll="<= %.2g" % ORIGINAL_MAX_DKAPPA))
     if L > ORIGINAL_MAX_LAENGE_M:
-        m.append(meldung("LAENGE_UEBER_ORIGINALEN", "Streckenlänge %.0f m (längste Originalstrecke %.0f m)"
+        m.append(meldung("LAENGE_UEBER_ORIGINALEN", "Track length %.0f m (longest original track %.0f m)"
                          % (L, ORIGINAL_MAX_LAENGE_M), ist=_r(L), soll="<= %.0f m" % ORIGINAL_MAX_LAENGE_M))
     # FIA-Kennwerte (Hinweise)
     breite = st.wl + st.wr
     i = int(np.argmin(breite))
     if breite[i] < FIA_MIN_BREITE_M - 1e-6:
         s = float(st.s[i])
-        m.append(meldung("FIA_KENNWERT", "Fahrbahnbreite %.1f m bei %.0f m (FIA ≥ %.0f m)" % (breite[i], s, FIA_MIN_BREITE_M),
+        m.append(meldung("FIA_KENNWERT", "Track width %.1f m at %.0f m (FIA ≥ %.0f m)" % (breite[i], s, FIA_MIN_BREITE_M),
                          ort(hl, s, welt_bei(s)), ist=_r(float(breite[i])), soll=FIA_MIN_BREITE_M))
     pg = param.get("startaufstellung", {}) or {}
     grid_m = float(pg.get("abstand_pole_m", 6.0)) + (int(pg.get("anzahl", 22)) - 1) * float(pg.get("abstand_m", 8.0))
     maske = (st.s >= L - grid_m) | (st.s <= 100.0)
     if maske.any() and float(breite[maske].min()) < FIA_MIN_GRID_BREITE_M - 1e-6:
-        m.append(meldung("FIA_KENNWERT", "Startaufstellung nur %.1f m breit (FIA ≥ %.0f m bis zur ersten Kurve)"
+        m.append(meldung("FIA_KENNWERT", "Grid only %.1f m wide (FIA ≥ %.0f m up to the first corner)"
                          % (float(breite[maske].min()), FIA_MIN_GRID_BREITE_M), ort(hl, 0.0, welt_bei(0.0)),
                          ist=_r(float(breite[maske].min())), soll=FIA_MIN_GRID_BREITE_M))
     if not FIA_LAENGE_M[0] <= L <= FIA_LAENGE_M[1]:
-        m.append(meldung("FIA_KENNWERT", "Streckenlänge %.0f m (FIA %.1f–%.0f km)" % (L, FIA_LAENGE_M[0] / 1000, FIA_LAENGE_M[1] / 1000),
+        m.append(meldung("FIA_KENNWERT", "Track length %.0f m (FIA %.1f–%.0f km)" % (L, FIA_LAENGE_M[0] / 1000, FIA_LAENGE_M[1] / 1000),
                          ist=_r(L), soll="%.0f–%.0f m" % FIA_LAENGE_M))
     gerade = np.abs(ml.kappa_glatt) <= 1.0 / 700.0
     for a, e in laeufe(gerade):
         if (e - a) * ml.ds > FIA_MAX_GERADE_M:
             s = float(st.s[a % len(st.s)])
-            m.append(meldung("FIA_KENNWERT", "Gerade von %.0f m ab %.0f m (FIA ≤ %.0f m)" % ((e - a) * ml.ds, s, FIA_MAX_GERADE_M),
+            m.append(meldung("FIA_KENNWERT", "Straight of %.0f m from %.0f m (FIA ≤ %.0f m)" % ((e - a) * ml.ds, s, FIA_MAX_GERADE_M),
                              ort(hl, s, welt_bei(s)), ist=_r((e - a) * ml.ds), soll=FIA_MAX_GERADE_M))
     q = float(np.degrees(np.abs(ml.bank)).max())
     if q > FIA_MAX_QUERNEIGUNG_GRAD:
         s = float(st.s[int(np.argmax(np.abs(ml.bank)))])
-        m.append(meldung("FIA_KENNWERT", "Querneigung %.1f° bei %.0f m (FIA ≤ %.1f°)" % (q, s, FIA_MAX_QUERNEIGUNG_GRAD),
+        m.append(meldung("FIA_KENNWERT", "Banking %.1f° at %.0f m (FIA ≤ %.1f°)" % (q, s, FIA_MAX_QUERNEIGUNG_GRAD),
                          ort(hl, s, welt_bei(s)), ist=_r(q), soll=FIA_MAX_QUERNEIGUNG_GRAD))
     nahe = (st.s <= 150.0) | (st.s >= L - 150.0)
     steig = float(np.abs(ml.steigung[nahe]).max()) if nahe.any() else 0.0
     if steig > FIA_MAX_START_STEIGUNG:
-        m.append(meldung("FIA_KENNWERT", "Steigung an Start/Ziel %.1f %% (FIA ≤ %.0f %%)" % (steig * 100, FIA_MAX_START_STEIGUNG * 100),
+        m.append(meldung("FIA_KENNWERT", "Gradient at start/finish %.1f %% (FIA ≤ %.0f %%)" % (steig * 100, FIA_MAX_START_STEIGUNG * 100),
                          ort(hl, 0.0, welt_bei(0.0)), ist=_r(steig * 100), soll=FIA_MAX_START_STEIGUNG * 100))
     return gp
 
@@ -1202,7 +1206,7 @@ def _zonen_eingabe_pruefen(ml, param, m, welt_bei):
         for z in drs:
             vor = (z["aktivierung_s_m"] - z["erkennung_s_m"]) % L
             if not zn.MIN_ZONE_M <= z["laenge_m"] <= L / 2 or not 0 < vor <= L / 2:
-                m.append(meldung("DRS_ZONE_UNGUELTIG", "DRS-Zone %d: Aktivierung %.0f m lang, Erkennung %.0f m davor"
+                m.append(meldung("DRS_ZONE_UNGUELTIG", "DRS zone %d: activation %.0f m long, detection %.0f m before it"
                                  % (z["ID"] + 1, z["laenge_m"], vor),
                                  ort(hl, z["aktivierung_s_m"], welt_bei(z["aktivierung_s_m"]), "DRS-Zone %d" % (z["ID"] + 1)),
                                  ist=_r(z["laenge_m"]), soll=">= %.0f m" % zn.MIN_ZONE_M))
@@ -1210,16 +1214,16 @@ def _zonen_eingabe_pruefen(ml, param, m, welt_bei):
             for j in range(i + 1, len(drs)):
                 a, b = drs[i], drs[j]
                 if ueber(a["aktivierung_s_m"], a["ende_s_m"], b["aktivierung_s_m"], b["ende_s_m"]):
-                    m.append(meldung("DRS_ZONEN_UEBERLAPPEN", "DRS-Zonen %d und %d überlappen" % (a["ID"] + 1, b["ID"] + 1),
+                    m.append(meldung("DRS_ZONEN_UEBERLAPPEN", "DRS zones %d and %d overlap" % (a["ID"] + 1, b["ID"] + 1),
                                      ort(hl, b["aktivierung_s_m"], welt_bei(b["aktivierung_s_m"]), "DRS-Zone %d" % (b["ID"] + 1))))
     xm = zn.xmode_zonen(ml, param)
     if xm:
-        m.append(meldung("XMODE_EIGENE_UNGETESTET", "%d eigene Straight-Mode-Zone(n) statt der Träger-Zonen" % len(xm)))
+        m.append(meldung("XMODE_EIGENE_UNGETESTET", "%d custom Straight Mode zone(s) instead of the carrier zones" % len(xm)))
         kappa = np.abs(ml.kappa_glatt)
         for z in xm:
             name = "Straight Mode %d" % z["ID"]
             if not zn.MIN_ZONE_M <= z["laenge_m"] <= L / 2:
-                m.append(meldung("XMODE_ZONE_UNGUELTIG", "%s: %.0f m lang" % (name, z["laenge_m"]),
+                m.append(meldung("XMODE_ZONE_UNGUELTIG", "%s: %.0f m long" % (name, z["laenge_m"]),
                                  ort(hl, z["von_s_m"], welt_bei(z["von_s_m"]), name), ist=_r(z["laenge_m"]),
                                  soll="%.0f … %.0f m" % (zn.MIN_ZONE_M, L / 2)))
                 continue
@@ -1227,14 +1231,14 @@ def _zonen_eingabe_pruefen(ml, param, m, welt_bei):
             if innen.any() and float(kappa[innen].max()) > 1.0 / 250.0:
                 k = np.flatnonzero(innen)[int(np.argmax(kappa[innen]))]
                 s = float(ml.s[k])
-                m.append(meldung("XMODE_IN_KURVE", "%s reicht bei %.0f m in eine Kurve mit Radius %.0f m"
-                                 % (name, s, 1.0 / float(kappa[k])), ort(hl, s, welt_bei(s), name),
+                m.append(meldung("XMODE_IN_KURVE", "%s reaches into a corner with radius %.0f m at %.0f m"
+                                 % (name, 1.0 / float(kappa[k]), s), ort(hl, s, welt_bei(s), name),
                                  ist=_r(1.0 / float(kappa[k])), soll=">= 250 m"))
         for i in range(len(xm)):
             for j in range(i + 1, len(xm)):
                 a, b = xm[i], xm[j]
                 if ueber(a["von_s_m"], a["bis_s_m"], b["von_s_m"], b["bis_s_m"]):
-                    m.append(meldung("XMODE_ZONEN_UEBERLAPPEN", "Straight-Mode-Zonen %d und %d überlappen" % (a["ID"], b["ID"]),
+                    m.append(meldung("XMODE_ZONEN_UEBERLAPPEN", "Straight Mode zones %d and %d overlap" % (a["ID"], b["ID"]),
                                      ort(hl, b["von_s_m"], welt_bei(b["von_s_m"]), "Straight Mode %d" % b["ID"])))
     return gp
 
@@ -1262,39 +1266,40 @@ def _generator_pruefen(erg, d, v, m):
                     "namen": list(n.get("oberflaechen_namen") or n.get("namen") or [])}
     soll = 0 if d.param.get("drs", {}).get("zonen") else int(d.param.get("drs", {}).get("anzahl", 0) or 0)
     if len(logik.get("drs", [])) < soll:
-        m.append(meldung("DRS_ANZAHL", "Nur %d von %d DRS-Zonen erzeugt: keine weitere geeignete Gerade"
+        m.append(meldung("DRS_ANZAHL", "Only %d of %d DRS zones created: no further suitable straight"
                          % (len(logik.get("drs", [])), soll), ist=len(logik.get("drs", [])), soll=soll))
     sp = logik["spielformate"]
     gp |= {"KI_GATES_VIELE", "PVS_ZELLEN_VIELE", "KI_KURVEN_ZUSAMMENGELEGT"}
     n_kurven = len(sp["AISplineData"].get("corner_start_lines") or [])
     if n_kurven > TRAEGER_BREMSLINIEN:
-        m.append(meldung("KI_KURVEN_ZUSAMMENGELEGT", "%d Kurven, der Träger hat %d Bremslinien – der Bau legt %d "
-                         "Kurvenpaare mit der kürzesten Geraden dazwischen zusammen (wie Schikanen im Original)"
+        m.append(meldung("KI_KURVEN_ZUSAMMENGELEGT", "%d corners, the carrier has %d braking lines: the build merges "
+                                                     "%d corner pairs with the shortest straight between them (like "
+                                                     "chicanes in the originals)"
                          % (n_kurven, TRAEGER_BREMSLINIEN, n_kurven - TRAEGER_BREMSLINIEN),
                          ist=n_kurven, soll=TRAEGER_BREMSLINIEN))
     n_gates = len(sp["AISplineData"]["gates"])
     if n_gates > ORIGINAL_MAX_GATES:
-        m.append(meldung("KI_GATES_VIELE", "%d KI-Gates (Originale höchstens %d) – Strecke kürzer oder "
-                         "logik.gate_schritt_m größer" % (n_gates, ORIGINAL_MAX_GATES), ist=n_gates, soll=ORIGINAL_MAX_GATES))
+        m.append(meldung("KI_GATES_VIELE", "%d AI gates (originals at most %d): make the track shorter or "
+                                           "logik.gate_schritt_m larger" % (n_gates, ORIGINAL_MAX_GATES), ist=n_gates, soll=ORIGINAL_MAX_GATES))
     try:
         from . import spiel_pvs
         zellen = len(spiel_pvs.zellen_berechnen(spiel_pvs.linien_aus_logik(logik), 60.0))
     except Exception:  # noqa: BLE001  (Schätzung ist nur ein Hinweis)
         zellen = 0
     if zellen > ORIGINAL_MAX_PVS_ZELLEN:
-        m.append(meldung("PVS_ZELLEN_VIELE", "%d PVS-Zellen bei 60-m-Korridor (Originale höchstens %d) – "
-                         "Bau mit kleinerem --pvs-korridor" % (zellen, ORIGINAL_MAX_PVS_ZELLEN),
+        m.append(meldung("PVS_ZELLEN_VIELE", "%d PVS cells with a 60 m corridor (originals at most %d): build with a "
+                                             "smaller --pvs-korridor" % (zellen, ORIGINAL_MAX_PVS_ZELLEN),
                          ist=zellen, soll=ORIGINAL_MAX_PVS_ZELLEN))
     pit = [s for s in sp["TrackSpace"]["splines"] if not s["closed"]]
     if not pit:
-        m.append(meldung("BOX_FEHLT", "Generatorlogik ohne Boxengasse; der Träger braucht Boxenlinie und Boxenzonen"))
+        m.append(meldung("BOX_FEHLT", "Generator logic has no pit lane; the carrier needs a pit line and pit zones"))
     else:
         from . import spiel_welt
         try:
             spiel_welt._bremslinien_in_kurven(sp["AISplineData"], PORTIMAO_BREMSLINIEN_HAUPT,
                                               BREMSLINIEN_MIN_ABSTAND_GATES, {})
         except spiel_welt.WeltFehler as e:
-            m.append(meldung("KI_KURVEN_FUER_BREMSLINIEN", "%s (Träger Portimão: %d Haupt-Bremslinien)"
+            m.append(meldung("KI_KURVEN_FUER_BREMSLINIEN", "%s (Portimão carrier: %d main braking lines)"
                              % (e, PORTIMAO_BREMSLINIEN_HAUPT)))
         if netz is not None and netz["namen"]:
             breite = float((d.param.get("boxengasse") or {}).get("breite", 12.0) or 12.0)
@@ -1303,14 +1308,14 @@ def _generator_pruefen(erg, d, v, m):
                                        netz["namen"], np.asarray(mitte, float)[:, [0, 2]], breite)
             if len(weg):
                 c = netz["vertices"][netz["dreiecke"][weg[0]]].mean(0) + v
-                m.append(meldung("BOX_MAUER_AUF_BOXENLINIE", "%d Mauerdreiecke liegen auf der Boxenlinie; der Bau "
-                                 "entfernt sie (Spieltest v6)" % len(weg), ort(None, None, c, "Boxenmauer"), ist=len(weg)))
+                m.append(meldung("BOX_MAUER_AUF_BOXENLINIE", "%d wall triangles lie on the pit line; the build removes "
+                                                             "them (playtest v6)" % len(weg), ort(None, None, c, "Boxenmauer"), ist=len(weg)))
     if netz is not None:
         V = netz["vertices"][:, [0, 2]] + v[[0, 2]]
         aussen = np.max(np.abs(V), axis=1) > AO_HALBBREITE_M
         if aussen.any():
             i = int(np.argmax(np.max(np.abs(V), axis=1)))
-            m.append(meldung("LAGE_AUSSERHALB_AO", "Generatornetz: %d Vertices außerhalb X/Z ±%d m (inkl. Versatz)"
+            m.append(meldung("LAGE_AUSSERHALB_AO", "Generator mesh: %d vertices outside X/Z ±%d m (including offset)"
                              % (int(aussen.sum()), AO_HALBBREITE_M), ort(None, None, netz["vertices"][i] + v, "Netz"),
                              ist=int(aussen.sum()), soll=0, stufe="generator"))
         x0, z0, kante = LOCH_AUSSENTERRAIN
@@ -1318,12 +1323,12 @@ def _generator_pruefen(erg, d, v, m):
         if lo[0] <= x0 or hi[0] >= x0 + kante or lo[1] <= z0 or hi[1] >= z0 + kante:
             groesse = hi - lo
             if max(groesse) >= kante:
-                text = ("Strecke ist mit %.0f × %.0f m größer als das Loch des Außenterrains (Kante %.0f m): Der Bau bricht ab, "
-                        "Strecke verkleinern" % (groesse[0], groesse[1], kante))
+                text = ("At %.0f × %.0f m the track is larger than the hole of the outer terrain (edge %.0f m): the "
+                        "build will stop, make the track smaller" % (groesse[0], groesse[1], kante))
             else:
                 ziel = (x0 + kante / 2 - (lo[0] + hi[0]) / 2 + v[0], z0 + kante / 2 - (lo[1] + hi[1]) / 2 + v[2])
-                text = ("Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den "
-                        "Spielweltversatz auf [%.0f, %.0f, %.0f] stellen" % (ziel[0], v[1], ziel[1]))
+                text = ("Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the "
+                        "game world offset to [%.0f, %.0f, %.0f]" % (ziel[0], v[1], ziel[1]))
             m.append(meldung("LAGE_AUSSERHALB_LOCH", text, ist=_r(float(max(groesse))), soll=kante, stufe="generator"))
     return gp
 

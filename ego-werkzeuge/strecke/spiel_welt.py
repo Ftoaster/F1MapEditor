@@ -185,7 +185,7 @@ def leerer_layer(layer_name, vorlage=LEERER_LAYER_VORLAGE):
     sbi = p.tabelle(f_layer.wert)
     name = layer_name.encode("utf-8")
     if not name or len(name) > 255 or b"\0" in name:
-        raise WeltFehler("ungültiger Layername %r" % layer_name)
+        raise WeltFehler("invalid layer name %r" % layer_name)
     a, b = b"\x09instances\x00", b"\x05layer\x00"
     sbi.daten = a + b + bytes([len(name)]) + name + b"\x00"
     f_inst.name.index, f_layer.name.index, f_layer.wert.index = 0, len(a), len(a) + len(b)
@@ -195,7 +195,7 @@ def leerer_layer(layer_name, vorlage=LEERER_LAYER_VORLAGE):
     daten = pkg.schreiben(p)
     pruef = pkg.lesen(daten)
     if pruef.inhalt() != {"instances": [], "layer": layer_name}:
-        raise WeltFehler("leerer Layer fehlerhaft: %r" % pruef.inhalt())
+        raise WeltFehler("empty layer is faulty: %r" % pruef.inhalt())
     pruef.pruefen()
     return daten
 
@@ -328,7 +328,7 @@ def welt_aufraeumen(archiv, zustand, regeln=None):
             weg = [i for i in inst if i.uniqueid in original]
             konflikt = [i.name for i in weg if i.uniqueid in zustand.evgt_uids]
             if konflikt:
-                raise WeltFehler("Layer %s: EventGraph verweist auf %s" % (kurz, konflikt[:3]))
+                raise WeltFehler("Layer %s: EventGraph refers to %s" % (kurz, konflikt[:3]))
             eintrag["physik_entfernt"] = sum(hat_physik(p, i) for i in weg)
             eintrag["templates_entfernt"] = dict(Counter(i._wert("template") for i in weg).most_common())
             if len(weg) == len(inst):
@@ -366,7 +366,7 @@ def bremsmarker_setzen(archiv, zustand, marker, versatz_matrix=None):
         return {"tafeln": 0}
     r = layer_ressourcen(archiv, zustand.code).get(BREMSMARKER_LAYER)
     if r is None:
-        raise WeltFehler("Träger ohne Ebene %s – keine Vorlage für Entfernungstafeln" % BREMSMARKER_LAYER)
+        raise WeltFehler("Carrier has no layer %s: no template for distance boards" % BREMSMARKER_LAYER)
     p = pkg.lesen(r.fragments[0].read())
     vorlagen = {}
     for i in p.instanzen():
@@ -462,13 +462,13 @@ def _pit_abbildung(alt_zonen, neu_markup):
         for z in zonen:
             if z["Type"] == typ:
                 return float(z[feld])
-        raise WeltFehler("Ankerzone %s fehlt" % typ)
+        raise WeltFehler("Anchor zone %s is missing" % typ)
     paare = [("pit_lane_entry_zone", "Start"), ("pit_lim_on", "Start"), ("pit_lim_on", "End"),
              ("pitlane_exit_zone", "End")]
     xa = [0.0] + [anker(alt_zonen, t, f) for t, f in paare] + [1.0]
     xn = [0.0] + [anker(neu_markup, t, f) for t, f in paare] + [1.0]
     if any(b < a for a, b in zip(xa, xa[1:])) or any(b < a for a, b in zip(xn, xn[1:])):
-        raise WeltFehler("Boxenanker nicht monoton: %s / %s" % (xa, xn))
+        raise WeltFehler("Pit anchors not monotonic: %s / %s" % (xa, xn))
     return lambda f: float(np.interp(f, xa, xn))
 
 
@@ -654,7 +654,7 @@ def tm_aufbauen(lg, original, protokoll):
     for z in out:
         key = (z["SplineName"], round(z["Start"], 9), round(z["End"], 9))
         if bereiche.setdefault(z["Name"], key) != key:
-            raise WeltFehler("TM-Name %s mit verschiedenen Bereichen" % z["Name"])
+            raise WeltFehler("TM name %s with different ranges" % z["Name"])
     protokoll["tm"] = {"zonen": len(out), "aus_generator": len(gen), "entfernt": dict(entfernt),
                        "boxenabbildung": [round(f_pit(x), 4) for x in (0.362, 0.445, 0.7227, 0.8614)]}
     return out
@@ -691,7 +691,7 @@ def _bremslinien_in_kurven(ai, anzahl, min_abstand, protokoll):
     starts = sorted(idx[int(l["gate_id"])] for l in ai["corner_start_lines"] if int(l["gate_id"]) in idx)
     ends = sorted(idx[int(l["gate_id"])] for l in ai["corner_end_lines"] if int(l["gate_id"]) in idx)
     if not starts or not ends:
-        raise WeltFehler("keine Kurvenlinien für Bremslinien")
+        raise WeltFehler("no corner lines for braking lines")
     kurven = []
     for s in starts:
         e = next((x for x in ends if x > s), ends[0] + n)   # zyklisch über die Ziellinie
@@ -742,7 +742,7 @@ def _bremslinien_in_kurven(ai, anzahl, min_abstand, protokoll):
             if frei:
                 belegt.append(max(frei, key=lambda i: k[i % n]) % n)
     if len(belegt) < anzahl:
-        raise WeltFehler("zu wenige Kurven-Gates für %d Bremslinien" % anzahl)
+        raise WeltFehler("too few corner gates for %d braking lines" % anzahl)
     protokoll["bremslinien_kurven"] = {"kurven": len(kurven), "mit_generator_bremse": sum(map(mit_bremse, kurven)),
                                        "regel": "frühestes Gate mit ≥ %.0f %% der Scheitelkrümmung"
                                                 % (100 * BREMSLINIE_SCHEITEL_ANTEIL), "lage": lage}
@@ -845,7 +845,7 @@ def bremslinien_zuordnen(lg, original, tm_neu, protokoll):
                                  "fortschritt": round(float(gates[l["gate_id"]]["progress"]), 4),
                                  "box": "pit" in gates[l["gate_id"]]["name"]} for l in ai["brake_lines"]]
     if {l["id"] for l in linien} != set(haupt_ids) | set(box_ids):
-        raise WeltFehler("Bremslinien-ID-Satz unvollständig")
+        raise WeltFehler("Braking line ID set incomplete")
     return ai["brake_lines"]
 
 
@@ -973,14 +973,14 @@ def plaetze_berechnen(lg, zustand, protokoll):
     for (art, n), (kurz, name, (pos, R), uid) in sorted(alt.items()):
         if art == "gridslot":
             if n not in grid:
-                raise WeltFehler("kein neuer Startplatz %d" % n)
+                raise WeltFehler("no new grid slot %d" % n)
             ergebnis[kurz][name] = _matrix(*grid[n])
         elif art == "pitbox":
             ergebnis[kurz][name] = _matrix(*boxen[n])
         else:
             box = n if art == "f1garage" else (n + 1) // 2
             if ("pitbox", box) not in alt or box not in boxen:
-                raise WeltFehler("keine Box %d für %s" % (box, name))
+                raise WeltFehler("no box %d for %s" % (box, name))
             bpos, bR = alt[("pitbox", box)][2]
             off = (pos - bpos) @ bR.T
             abw.append(float(np.hypot(off[0], off[2])))
@@ -1061,7 +1061,7 @@ def garagen_versetzen(archiv, zustand, lg, protokoll=None):
             elif art == "pitgarage":
                 garagen_alt[n] = _rahmen(m)
     if not alt or not neu:
-        raise WeltFehler("Garagen versetzen: Boxenplätze fehlen (alt %d, neu %d)" % (len(alt), len(neu)))
+        raise WeltFehler("Moving garages: pit boxes are missing (old %d, new %d)" % (len(alt), len(neu)))
     nb = max(neu)
     if nb >= 2:
         d = neu[nb][0] - neu[nb - 1][0]
@@ -1100,7 +1100,7 @@ def garagen_versetzen(archiv, zustand, lg, protokoll=None):
         for i, M, n in zip(inst, mats, nrn):
             bpos, bR = alt[n]
             if n not in neu:
-                raise WeltFehler("Garagen versetzen: keine neue Box %d" % n)
+                raise WeltFehler("Moving garages: no new box %d" % n)
             npos, nR = neu[n]
             lokal = (M[3, :3] - bpos) @ bR.T
             rel = M[:3, :3] @ bR.T                          # Zeilen = Achsen der Instanz im Boxrahmen (mit Maßstab)
@@ -1421,7 +1421,7 @@ def boxen_korrektur(lg, protokoll, rand_min=2.0, ts_schritt=50.0, aussen_rand=4.
     n_box = len(box)
     kurven = [(0, max(2, i_lim0 - 1)), (i_lim0, i_lim1), (min(i_lim1 + 1, n_box - 3), n_box - 1)]
     if not (kurven[0][1] < kurven[1][0] and kurven[1][1] < kurven[2][0]):
-        raise WeltFehler("Boxenroute zu kurz für drei Kurven: %s" % (kurven,))
+        raise WeltFehler("Pit route too short for three corners: %s" % (kurven,))
     cs = [l for l in ai["corner_start_lines"] if "pit" not in gates[int(l["gate_id"])]["name"]]
     ce = [l for l in ai["corner_end_lines"] if "pit" not in gates[int(l["gate_id"])]["name"]]
     nid = max(int(l["id"]) for l in cs + ce) + 1
@@ -1466,7 +1466,7 @@ def logik_vorbereiten(logik, zustand, logik_dy=0.0, plaetze_dy=0.0, boxen_korrek
     sp = lg["spielformate"]
     namen_alt = {s.name for s in orig.splines.values()}
     if {s["name"] for s in sp["TrackSpace"]["splines"]} != namen_alt:
-        raise WeltFehler("Splinenamen weichen von der Vorlage ab: %s" % namen_alt)
+        raise WeltFehler("Spline names differ from the template: %s" % namen_alt)
     kurven_begrenzen(lg, orig, protokoll)
     bremslinien_zuordnen(lg, orig, None, protokoll)
     sp["TM"]["markup"] = tm_aufbauen(lg, orig, protokoll)
@@ -1483,7 +1483,7 @@ def logik_schreiben(archiv, zustand, lg):
     for kennung, fragmente in res.items():
         r = archiv.find(kennung)
         if r is None or len(r.fragments) != len(fragmente):
-            raise WeltFehler("Logikressource fehlt: %s" % kennung)
+            raise WeltFehler("Logic resource is missing: %s" % kennung)
         for i, raw in enumerate(fragmente):
             if r.fragments[i].read() != raw:
                 r.set_fragment_data(i, raw)
@@ -1495,7 +1495,7 @@ def pvs_alles_sichtbar(archiv):
     """PVS-Hauptvariante: jede Zelle sieht alle Objekte (``pvs.alles_sichtbar``)."""
     r = archiv.find_all(r"volumedata\.pvsbin$")
     if len(r) != 1:
-        raise WeltFehler("erwartet genau eine PVSVisRes, gefunden %d" % len(r))
+        raise WeltFehler("expected exactly one PVSVisRes, found %d" % len(r))
     r = r[0]
     vis = pvs.vis_lesen(r.fragments[0].read())
     vorher = r.fragments[0].size
@@ -1516,7 +1516,7 @@ def licht_platzhalter(archiv, zustand, behaltene_uids, neue_modell_uids):
             if i._wert("template") == "PhysicsTerrain":
                 terrain = bytes.fromhex(i.uniqueid)
     if terrain is None:
-        raise WeltFehler("Terrain$PhysicsTerrain nicht gefunden")
+        raise WeltFehler("Terrain$PhysicsTerrain not found")
     karte = licht.Lichtkarte()
     karte.hinzufuegen(terrain, 0, 1.0, 0.0, 0.0)
     behalten = 0

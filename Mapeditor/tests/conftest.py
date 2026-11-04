@@ -20,6 +20,12 @@ QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, tempfile.mkdtemp(pre
 
 from mapeditor.adapter import calculate_preview
 from mapeditor.project import Project
+from mapeditor.i18n import setze_sprache
+
+#: Die Oberfläche startet seit 4.11.2026 auf Englisch (English First). Die Nutzerreisen prüfen die deutsche Oberfläche,
+#: also auch den Übersetzungsweg; Tests der Standardsprache setzen sie selbst (test_sprache.py).
+TESTSPRACHE = "de"
+setze_sprache(TESTSPRACHE)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +43,14 @@ def doc_screenshot(widget, name):
     if os.environ.get("MAPEDITOR_SCREENSHOTS") == "1":
         SCREENSHOTS.mkdir(parents=True, exist_ok=True)
         assert image.save(str(SCREENSHOTS / name))
+
+
+@pytest.fixture(autouse=True)
+def testsprache():
+    """Jeder Test beginnt in der Testsprache, auch wenn ein vorheriger umgeschaltet hat."""
+    setze_sprache(TESTSPRACHE)
+    yield
+    setze_sprache(TESTSPRACHE)
 
 
 @pytest.fixture(autouse=True)

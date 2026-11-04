@@ -38,33 +38,33 @@ def code_label(code, rating, state=None):
     """Eintrag der Codeauswahl: „sochi · empfohlen · im Spiel“."""
     text = f"{code}  ·  {tr(rating)}"
     if state and code in (state.get("installiert") or {}):
-        text += "  ·  " + tr("im Spiel")
+        text += "  ·  " + tr("in game")
     return text
 
 
 def code_status(code, state):
     """Was „Ins Spiel übertragen“ für diesen Code tun kann (aus ``injektor_tool.py datenbank --json``)."""
     if state is None:
-        return tr("Zustand im Spiel unbekannt (Werkzeugkasten oder Spielordner nicht lesbar).")
+        return tr("State in the game unknown (toolkit or game folder not readable).")
     inst = (state.get("installiert") or {}).get(code)
     if not inst:
-        return tr("{code} ist noch nicht im Spiel: das Paket einmalig im Track Installer installieren und im EGO-Editor "
-                  "aktivieren („Activate mod“). Danach überträgt der Mapeditor jede neue Version selbst – auch bei "
-                  "deaktiviertem Mod.", code=code)
-    where = tr("{code} ist installiert ({slot}, zuletzt {paket}).", code=code, slot=inst.get("slot") or "?",
+        return tr("{code} is not in the game yet: install the package once with the Track Installer and activate it in "
+                  "the EGO editor (“Activate mod”). After that the map editor transfers every new version itself – "
+                  "even with the mod deactivated.", code=code)
+    where = tr("{code} is installed ({slot}, last {paket}).", code=code, slot=inst.get("slot") or "?",
                paket=inst.get("paket") or "?")
     if code in (state.get("aktiv") or []):
-        db = tr("Datenbank aktiv · „Ins Spiel übertragen“ ersetzt die Strecke direkt.")
+        db = tr("Database active · “Transfer to game” replaces the track directly.")
     elif state.get("zustand") == "aktiv" and not state.get("aktiv"):
-        db = tr("Datenbank aktiviert · „Ins Spiel übertragen“ ersetzt die Strecke direkt.")
+        db = tr("Database activated · “Transfer to game” replaces the track directly.")
     elif state.get("zustand") == "aktiv":
-        db = tr("In der aktiven Datenbank ist {code} nicht eingeschaltet (EGO-Editor: Database activation).", code=code)
+        db = tr("{code} is not enabled in the active database (EGO editor: Database activation).", code=code)
     elif code in (state.get("gemerkt") or []):
-        db = tr("Mod deaktiviert · die Übertragung aktiviert die Datenbank selbst wieder (gemerkte Aktivierung).")
+        db = tr("Mod deactivated · the transfer re-activates the database itself (remembered activation).")
     else:
-        db = tr("Datenbank nicht aktiviert und noch nicht gemerkt: einmal im EGO-Editor „Activate mod“ klicken – danach "
-                "geht es ohne den EGO-Editor.")
-    note = tr(" Spiel läuft – vor dem Übertragen beenden.") if state.get("spiel_laeuft") else ""
+        db = tr("Database not activated and no activation remembered yet: click “Activate mod” in the EGO editor once "
+                "– after that it works without the EGO editor.")
+    note = tr(" The game is running – quit it before transferring.") if state.get("spiel_laeuft") else ""
     return f"{where} {db}{note}"
 
 
@@ -72,7 +72,7 @@ def nearest_existing(path):
     path = Path(path)
     while not path.exists():
         if path.parent == path:
-            raise ValueError(tr("Datenträger oder Ordner nicht erreichbar: {path}", path=path))
+            raise ValueError(tr("Drive or folder not reachable: {path}", path=path))
         path = path.parent
     return path
 
@@ -88,7 +88,7 @@ def check_space(work, packages):
     for path, required in space_needs(work, packages):
         free = shutil.disk_usage(path).free
         if free < required:
-            raise ValueError(tr("Zu wenig freier Speicher auf {anchor}: {free:.1f} GB frei, {required:.1f} GB benötigt.", anchor=path.anchor, free=free / 1000000000.0, required=required / 1000000000.0))
+            raise ValueError(tr("Not enough free space on {anchor}: {free:.1f} GB free, {required:.1f} GB needed.", anchor=path.anchor, free=free / 1000000000.0, required=required / 1000000000.0))
 
 
 def space_text(work, packages):
@@ -98,10 +98,10 @@ def space_text(work, packages):
         for path, required in space_needs(work, packages):
             free = shutil.disk_usage(path).free
             drive = path.anchor.rstrip("\\/") or str(path)
-            parts.append(tr("Bedarf etwa {required} · frei {free} auf {drive}", required=zahl(required / 1000000000.0, 1, 'GB'), free=zahl(free / 1000000000.0, 0 if free >= 10000000000.0 else 1, 'GB'), drive=drive) + (tr(" – zu wenig!") if free < required else ""))
+            parts.append(tr("Needs about {required} · free {free} on {drive}", required=zahl(required / 1000000000.0, 1, 'GB'), free=zahl(free / 1000000000.0, 0 if free >= 10000000000.0 else 1, 'GB'), drive=drive) + (tr(" – not enough!") if free < required else ""))
         return " · ".join(parts)
     except (OSError, ValueError) as error:
-        return tr("Speicher nicht prüfbar: {error}", error=error)
+        return tr("Storage cannot be checked: {error}", error=error)
 
 
 def build_folders(project, output=None, packages=None):
@@ -173,11 +173,11 @@ class BuildDialog(QDialog):
         self.result = None
         self.command = None
         self.messages = []
-        self.setWindowTitle(tr("Bauen / Paket"))
+        self.setWindowTitle(tr("Build / package"))
         self.setWindowModality(Qt.WindowModal)
         self.resize(900, 790)
         layout = QVBoxLayout(self)
-        title = QLabel(tr("BAUEN / PAKET   ·   Profil empfohlen"))
+        title = QLabel(tr("BUILD / PACKAGE   ·   recommended profile"))
         layout.addWidget(title)
         self.profile_hint = hint = QLabel()
         hint.setWordWrap(True)
@@ -193,70 +193,73 @@ class BuildDialog(QDialog):
         except (OSError, ValueError):
             suggestion = "bau_" + datetime.now().strftime("%Y%m%d_%H%M%S")
         self.name = QLineEdit(suggestion)
-        self.name.setToolTip(tr("Fortlaufend vorgeschlagen (letzter Bau + 1); eine Beschreibung mit Unterstrich anhängen, "
-                             "z. B. „_tafeln50“."))
-        form.addRow(tr("Bauname"), self.name)
+        self.name.setToolTip(tr("Suggested consecutively (last build + 1); append a description with an underscore, "
+                                "e.g. “_tafeln50”."))
+        form.addRow(tr("Build name"), self.name)
         self.note = QLineEdit()
-        self.note.setPlaceholderText(tr("Was ist neu? (z. B. „Turn 11 Scheitel, 50-m-Tafeln“) – steht im Spieltest-Protokoll"))
-        form.addRow(tr("Was ist neu?"), self.note)
+        self.note.setPlaceholderText(tr("What's new? (e.g. “Turn 11 apex, 50 m boards”) – appears in the playtest log"))
+        form.addRow(tr("What's new?"), self.note)
         try:
             root = toolkit_path(self.project.manifest.get("werkzeugkasten"))
             carrier = str(default_carrier(root))
         except ValueError:
             carrier = ""
         self.carrier = QLineEdit(settings.get("traeger", carrier))
-        for label, field, file in ((tr("Arbeitsordner"), self.output, False), (tr("Paketordner"), self.packages, False),
-                                   (tr("Trägerpaket (ZIP)"), self.carrier, True)):
+        for label, field, file in ((tr("Working folder"), self.output, False), (tr("Package folder"), self.packages, False),
+                                   (tr("Carrier package (ZIP)"), self.carrier, True)):
             row = QHBoxLayout()
             row.addWidget(field)
-            button = QPushButton(tr("Wählen …"))
+            button = QPushButton(tr("Choose …"))
             button.clicked.connect(lambda checked=False, field=field, file=file: self.choose(field, file))
             row.addWidget(button)
             form.addRow(label, row)
         from PySide6.QtWidgets import QCheckBox
-        self.ki_profil = QCheckBox(tr("KI-Fahrdaten an die Strecke anpassen (Bremspunkte der Fahrhilfe und KI-Tempo)"))
+        self.ki_profil = QCheckBox(tr(("Adapt AI driving data to the track (braking points of the driving assist and "
+                                       "AI pace)")))
         self.ki_profil.setChecked(bool(settings.get("ki_profil", True)))
-        self.ki_profil.setToolTip(tr("Erzeugt die Zeit-/Geschwindigkeitskurve der KI (VPTimes) aus dem eigenen Profil statt "
-                                  "Portimãos Daten zu übernehmen. Ohne diese Option liegen Bremszonen ohne Bezug zu "
-                                  "den Kurven (25.10.2026). Neu, noch nicht im Spiel bestätigt."))
+        self.ki_profil.setToolTip(tr("Generates the AI time/speed curve (VPTimes) from the track's own profile instead "
+                                     "of taking over Portimão's data. Without this option braking zones have no "
+                                     "relation to the corners (25.10.2026). New, not yet confirmed in game."))
         form.addRow("", self.ki_profil)
-        self.race_data = QCheckBox(tr("Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse)"))
+        self.race_data = QCheckBox(tr("Work out race data from the track (laps, fuel, tyres, AI, pit lane)"))
         self.race_data.setChecked(bool(settings.get("renndaten", True)))
-        self.race_data.setToolTip(tr("Rennlänge und Kraftstoff nach den Regeln der Portimão-Mod 1.0.2, KI-Zeiten aus der "
-                                     "geschätzten Rundenzeit, Tempolimit und Zeitverlust der Boxengasse, Mindestrundenzeit für "
-                                     "Bestenlisten. Die Reifenwahl ist eine Schätzung."))
+        self.race_data.setToolTip(tr("Race distance and fuel follow the rules of Portimão mod 1.0.2, AI times come "
+                                     "from the estimated lap time, plus the pit lane speed limit and the time a pit "
+                                     "stop costs, and the minimum lap time for leaderboards. The tyre choice is an "
+                                     "estimate."))
         form.addRow("", self.race_data)
         self.target = QComboBox()
-        self.target.addItem(tr("Track Installer (EGO-Editor)"), "ego")
+        self.target.addItem(tr("Track Installer (EGO Editor)"), "ego")
         self.target.addItem(tr("Swofty Launcher"), "swofty")
         self.target.setCurrentIndex(max(0, self.target.findData(settings.get("ziel", "ego"))))
-        self.target.setToolTip(tr("Swofty Launcher: Addon mit eigenem Streckencode und eigenem Namen im Menü, beliebig viele "
-                                  "Strecken. Start nur über den Launcher, offline und ohne EA AntiCheat."))
-        form.addRow(tr("Bauen für"), self.target)
-        self.shared_carrier = QCheckBox(tr("Gemeinsamen Träger nutzen (0,45 statt 3 GB je Strecke)"))
+        self.target.setToolTip(tr("Swofty Launcher: an addon with its own track code and its own name in the menus, "
+                                  "for as many tracks as you like. Starts only from the launcher, offline and without "
+                                  "EA AntiCheat."))
+        form.addRow(tr("Build for"), self.target)
+        self.shared_carrier = QCheckBox(tr("Use a shared carrier (0.45 instead of 3 GB per track)"))
         self.shared_carrier.setChecked(bool(settings.get("traeger_teilen", True)))
-        self.shared_carrier.setToolTip(tr("Die Texturen der Portimão-Mod liegen einmal in einem Träger-Addon neben den Paketen, und jede "
-                                          "Strecke verweist nur darauf. Der Launcher braucht das Träger-Addon zusätzlich."))
+        self.shared_carrier.setToolTip(tr("The Portimão mod's textures sit once in a carrier addon next to the "
+                                          "packages, and every track only points to it. The launcher needs the carrier "
+                                          "addon as well."))
         form.addRow("", self.shared_carrier)
         self.grid_size = QComboBox()
-        self.grid_size.addItem(tr("24 Autos (Standard)"), 0)
-        self.grid_size.addItem(tr("26 Autos"), 26)
+        self.grid_size.addItem(tr("24 cars (default)"), 0)
+        self.grid_size.addItem(tr("26 cars"), 26)
         self.grid_size.setCurrentIndex(max(0, self.grid_size.findData(settings.get("raster", 0))))
-        self.grid_size.setToolTip(tr("Legt Startplätze, Garagen und Boxen für 26 Autos an. Damit 26 Autos fahren, braucht das "
-                                     "Spiel zusätzlich ein Addon wie Custom Grid Size."))
-        form.addRow(tr("Raster"), self.grid_size)
+        self.grid_size.setToolTip(tr("Adds grid slots, garages and pit boxes for 26 cars. For 26 cars to actually "
+                                     "race, the game also needs an addon such as Custom Grid Size."))
+        form.addRow(tr("Grid"), self.grid_size)
         # Streckencode: alle Codes, die die Spieldatenbank kennt; Zustand im Spiel darunter
         self.code = QComboBox()
         self.code.setMaxVisibleItems(len(TRACK_CODES))
-        self.code.setToolTip(tr("Spielcode, unter dem die Strecke installiert wird. Jeder Code ist ein eigener Platz im "
-                             "Spiel: mehrere eigene Strecken nebeneinander brauchen verschiedene Codes "
-                             "(docs/streckencode.md)."))
+        self.code.setToolTip(tr("Game code the track is installed under. Each code is a separate slot in the game: "
+                                "several custom tracks side by side need different codes (docs/streckencode.md)."))
         self.game_state = None
         self.status_read = False
         self.status_job = None
         self._fill_codes()
         self.code.setCurrentIndex(max(0, self.code.findData(settings.get("streckencode", "sochi"))))
-        self.code_label = QLabel(tr("Streckencode"))
+        self.code_label = QLabel(tr("Track code"))
         form.addRow(self.code_label, self.code)
         self.code_info = QLabel()
         self.code_info.setWordWrap(True)
@@ -265,7 +268,7 @@ class BuildDialog(QDialog):
         self.code.currentIndexChanged.connect(self._update_code_info)
         self.target.currentIndexChanged.connect(self._update_code_info)
         # Erweiterte Bauoptionen (überschreiben das Profil); eingeklappt
-        self.advanced_toggle = QPushButton(tr("Erweiterte Bauoptionen ▸"))
+        self.advanced_toggle = QPushButton(tr("Advanced build options ▸"))
         self.advanced_toggle.setCheckable(True)
         self.advanced_toggle.setFlat(True)
         self.advanced_toggle.setStyleSheet("text-align: left;")
@@ -273,36 +276,37 @@ class BuildDialog(QDialog):
         advanced = self.advanced_form = QFormLayout(self.advanced)
         advanced.setContentsMargins(0, 0, 0, 0)
         self.track_name = QLineEdit(settings.get("streckenname", ""))
-        self.track_name.setPlaceholderText(tr("aus der Definition: {name}", name=self.project.raw.get('name') or tr("Teststrecke")))
+        self.track_name.setPlaceholderText(tr("from the definition: {name}", name=self.project.raw.get('name') or tr("Test track")))
         self.pvs = QComboBox()
-        self.pvs.addItem(tr("entlang der Strecke (empfohlen)"), "strecke")
-        self.pvs.addItem(tr("Original-Zellen sehen alles"), "alles")
+        self.pvs.addItem(tr("along the track (recommended)"), "strecke")
+        self.pvs.addItem(tr("Original cells see everything"), "alles")
         self.pvs.setCurrentIndex(max(0, self.pvs.findData(settings.get("pvs_variante", "strecke"))))
-        self.world_maps = QCheckBox(tr("Eigene Boden- und Umlandkarten"))
-        self.world_maps.setToolTip(tr("Ersetzt Portimãos Luftbilder: Boden aus den Flächen der Strecke, Ideallinie auf dem "
-                                      "Asphalt, Umland passend zu Hügeln und Bergen."))
+        self.world_maps = QCheckBox(tr("Own ground and surroundings maps"))
+        self.world_maps.setToolTip(tr("Replaces Portimão's aerial photos: ground from the track surfaces, racing line "
+                                      "on the asphalt, surroundings matching hills and mountains."))
         self.world_maps.setChecked(bool(settings.get("weltkarten", True)))
         self.biome = QComboBox()
-        self.biome.addItem(tr("Gras (Standard)"), "standard")
-        self.biome.addItem(tr("Wüste"), "wueste")
+        self.biome.addItem(tr("Grass (default)"), "standard")
+        self.biome.addItem(tr("Desert"), "wueste")
         self.biome.setCurrentIndex(max(0, self.biome.findData(settings.get("biom", "standard"))))
         self.tint = QComboBox()
-        self.tint.addItem(tr("Standard"), "standard")
-        self.tint.addItem(tr("Trocken"), "trocken")
-        self.tint.addItem(tr("Saftig"), "saftig")
-        self.tint.addItem(tr("Herbst"), "herbst")
+        self.tint.addItem(tr("Default"), "standard")
+        self.tint.addItem(tr("Dry"), "trocken")
+        self.tint.addItem(tr("Lush"), "saftig")
+        self.tint.addItem(tr("Autumn"), "herbst")
         self.tint.setCurrentIndex(max(0, self.tint.findData(settings.get("farbton", "standard"))))
         self.world_maps.toggled.connect(self.biome.setEnabled)
         self.world_maps.toggled.connect(self.tint.setEnabled)
         self.biome.setEnabled(self.world_maps.isChecked())
         self.tint.setEnabled(self.world_maps.isChecked())
-        self.track_name_label = QLabel(tr("Streckenname"))
+        self.track_name_label = QLabel(tr("Track name"))
         advanced.addRow(self.track_name_label, self.track_name)
-        advanced.addRow(tr("Sichtbarkeit (PVS)"), self.pvs)
+        advanced.addRow(tr("Visibility (PVS)"), self.pvs)
         advanced.addRow("", self.world_maps)
-        advanced.addRow(tr("Landschaft"), self.biome)
-        advanced.addRow(tr("Farbton"), self.tint)
-        fixed = QLabel(tr("Fest im Profil: Boxengassen-Korrektur, Aktivierungsvorlage portimao, nur Hauptvariante."))
+        advanced.addRow(tr("Landscape"), self.biome)
+        advanced.addRow(tr("Colour tone"), self.tint)
+        fixed = QLabel(tr(("Fixed in the profile: pit lane correction, activation template portimao, main variant "
+                           "only.")))
         fixed.setWordWrap(True)
         fixed.setEnabled(False)
         advanced.addRow("", fixed)
@@ -320,12 +324,12 @@ class BuildDialog(QDialog):
         for field in (self.output, self.packages):
             field.editingFinished.connect(self.update_space)
         self.update_space()
-        self.phase = QLabel(tr("Bereit · Fortschritt zeigt Phasengrenzen."))
+        self.phase = QLabel(tr("Ready · progress shows phase boundaries."))
         self.phase.setWordWrap(True)
         layout.addWidget(self.phase)
         self.progress = QProgressBar()
         self.progress.setRange(0, 1000)
-        self.progress.setFormat(tr("%p % · Phasenfortschritt"))
+        self.progress.setFormat(tr("%p % · phase progress"))
         layout.addWidget(self.progress)
         self.issue_list = QListWidget()
         self.issue_list.setWordWrap(True)
@@ -334,9 +338,9 @@ class BuildDialog(QDialog):
         self.result_text = QPlainTextEdit()
         self.result_text.setReadOnly(True)
         self.result_text.setMaximumHeight(130)
-        self.result_text.setPlaceholderText(tr("Nach dem Bau: Paketpfad, Größe, SHA-256 und Prüfbericht."))
+        self.result_text.setPlaceholderText(tr("After the build: package path, size, SHA-256 and check report."))
         layout.addWidget(self.result_text)
-        self.log_toggle = QPushButton(tr("Technisches Protokoll anzeigen"))
+        self.log_toggle = QPushButton(tr("Show technical log"))
         self.log_toggle.setCheckable(True)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
@@ -346,37 +350,38 @@ class BuildDialog(QDialog):
         self.log_toggle.toggled.connect(self.log.setVisible)
         layout.addWidget(self.log_toggle)
         layout.addWidget(self.log)
-        install = QLabel(tr("Erstinstallation eines Streckencodes: ZIP einmalig im Track Installer installieren und im "
-                         "EGO-Editor aktivieren. Danach jede neue Version mit „Ins Spiel übertragen“ – ohne EGO-Editor, "
-                         "auch bei deaktiviertem Mod (sichert die betroffenen Spieldateien, schreibt nach deiner "
-                         "Bestätigung ins Spiel; Spiel vorher beenden)."))
+        install = QLabel(tr("First installation of a track code: install the ZIP once with the Track Installer and "
+                            "activate it in the EGO editor. After that, every new version with “Transfer to game” – "
+                            "without the EGO editor, even with the mod deactivated (backs up the affected game files, "
+                            "writes to the game after your confirmation; quit the game first)."))
         install.setWordWrap(True)
         layout.addWidget(install)
         buttons = QHBoxLayout()
-        self.start_button = QPushButton(tr("Prüfen und bauen"))
+        self.start_button = QPushButton(tr("Check and build"))
         self.start_button.clicked.connect(self.start_build)
-        self.cancel_button = QPushButton(tr("Abbrechen"))
+        self.cancel_button = QPushButton(tr("Cancel"))
         self.cancel_button.setEnabled(False)
         self.cancel_button.clicked.connect(self.cancel_build)
-        self.explorer_button = QPushButton(tr("Im Explorer zeigen"))
+        self.explorer_button = QPushButton(tr("Show in Explorer"))
         self.explorer_button.setEnabled(False)
         self.explorer_button.clicked.connect(self.show_package)
-        self.report_button = QPushButton(tr("Prüfbericht öffnen"))
+        self.report_button = QPushButton(tr("Open check report"))
         self.report_button.setEnabled(False)
         self.report_button.clicked.connect(self.show_report)
-        self.inject_button = QPushButton(tr("Ins Spiel übertragen …"))
+        self.inject_button = QPushButton(tr("Transfer to game …"))
         self.inject_button.setEnabled(False)
         self.inject_button.clicked.connect(self.inject_start)
-        self.install_button = QPushButton(tr("Im Launcher installieren"))
+        self.install_button = QPushButton(tr("Install in launcher"))
         self.install_button.setEnabled(False)
         self.install_button.clicked.connect(lambda: self.launcher_start(False))
-        self.play_button = QPushButton(tr("Im Launcher installieren und starten"))
+        self.play_button = QPushButton(tr("Install in launcher and start"))
         self.play_button.setEnabled(False)
         self.play_button.clicked.connect(lambda: self.launcher_start(True))
-        self.diagnosis_button = QPushButton(tr("Letzte Sitzung auswerten"))
-        self.diagnosis_button.setToolTip(tr("Zeigt die Zusammenfassung der letzten Sitzung im Swofty Launcher mit Absturzdaten."))
+        self.diagnosis_button = QPushButton(tr("Read last session"))
+        self.diagnosis_button.setToolTip(tr(("Shows the summary of the last session in Swofty Launcher, with crash "
+                                             "data.")))
         self.diagnosis_button.clicked.connect(self.launcher_diagnosis)
-        self.close_button = QPushButton(tr("Schließen"))
+        self.close_button = QPushButton(tr("Close"))
         self.close_button.clicked.connect(self.close)
         for button in (self.start_button, self.cancel_button, self.inject_button, self.install_button, self.play_button,
                        self.diagnosis_button, self.explorer_button, self.report_button):
@@ -436,14 +441,15 @@ class BuildDialog(QDialog):
         self.code.setVisible(not self.swofty())
         self.code_label.setVisible(not self.swofty())
         if self.swofty():
-            self.code_info.setText(tr("Erzeugt ein Addon: im Launcher auf die Seite Addons ziehen, dann über den Launcher "
-                                      "starten. Der Code entsteht aus dem Streckennamen, das Menü zeigt diesen Namen."))
+            self.code_info.setText(tr("Creates an addon: drag it onto the launcher's Addons page, then start the game "
+                                      "from the launcher. The code comes from the track name, and the menus show that "
+                                      "name."))
             self._update_profile_hint()
             return
         code = self.code.currentData()
         hint = next((tr(h) for c, _, h in TRACK_CODES if c == code), "")
         if self.status_job is not None:
-            state = tr("Zustand im Spiel wird gelesen …")
+            state = tr("Reading state in the game …")
         elif self.status_read:
             state = code_status(code, self.game_state)
         else:
@@ -478,7 +484,7 @@ class BuildDialog(QDialog):
 
     def _toggle_advanced(self, on):
         self.advanced.setVisible(on)
-        self.advanced_toggle.setText(tr("Erweiterte Bauoptionen ▾") if on else tr("Erweiterte Bauoptionen ▸"))
+        self.advanced_toggle.setText(tr("Advanced build options ▾") if on else tr("Advanced build options ▸"))
 
     def options(self):
         return {"ziel": self.target.currentData(), "traeger_teilen": self.shared_carrier.isChecked(),
@@ -493,12 +499,12 @@ class BuildDialog(QDialog):
             return
         o = self.options()
         self.profile_hint.setText(
-            tr("Streckencode {streckencode} · PVS {pvs} · Name „{name}“ · Boxenkorrektur · eine Hauptvariante.\n"
-               "Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). "
-               "Der Bau erzeugt einen Schnappschuss; während des Baus kann weitergearbeitet werden.",
-               streckencode=tr("aus dem Namen") if self.swofty() else o['streckencode'],
-               pvs=tr("entlang der Strecke") if o['pvs_variante'] == 'strecke' else tr("Original"),
-               name=o['streckenname'] or self.project.raw.get('name') or tr("Teststrecke")))
+            tr("Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.\nBefore the "
+               "build the project is saved and checked (same state: result of the last check). The build creates a "
+               "snapshot; you can keep working during the build.",
+               streckencode=tr("from the name") if self.swofty() else o['streckencode'],
+               pvs=tr("along the track") if o['pvs_variante'] == 'strecke' else tr("Original"),
+               name=o['streckenname'] or self.project.raw.get('name') or tr("Test track")))
 
     def update_space(self):
         try:
@@ -509,9 +515,9 @@ class BuildDialog(QDialog):
 
     def choose(self, field, file):
         if file:
-            value, _ = QFileDialog.getOpenFileName(self, tr("Trägerpaket wählen"), field.text(), tr("ZIP (*.zip)"))
+            value, _ = QFileDialog.getOpenFileName(self, tr("Choose carrier package"), field.text(), tr("ZIP (*.zip)"))
         else:
-            value = QFileDialog.getExistingDirectory(self, tr("Eigenen Ausgabeordner wählen"), field.text())
+            value = QFileDialog.getExistingDirectory(self, tr("Choose your own output folder"), field.text())
         if value:
             field.setText(value)
 
@@ -523,7 +529,7 @@ class BuildDialog(QDialog):
         self.inject_button.setEnabled(not active and self.inject_record is not None)
         for button in (self.install_button, self.play_button):
             button.setEnabled(not active and self.launcher_job is None and self.launcher_record is not None)
-        self.cancel_button.setText(tr("Abbrechen"))
+        self.cancel_button.setText(tr("Cancel"))
         self._update_buttons()
 
     def _update_buttons(self):
@@ -544,23 +550,23 @@ class BuildDialog(QDialog):
             return
         try:
             if self.project.readonly or not self.project.closed:
-                raise ValueError(tr("Bau braucht eine geschlossene Runde und eine bekannte Projektfassung."))
+                raise ValueError(tr("A build needs a closed lap and a known project version."))
             if self.main.properties.pending():
-                raise ValueError(tr("Ungültige Feldeingabe zuerst korrigieren."))
+                raise ValueError(tr("Correct the invalid field input first."))
             if not all(f.text().strip() for f in (self.name, self.output, self.packages, self.carrier)):
-                raise ValueError(tr("Bitte Bauname, beide Ausgabeordner und Trägerpaket angeben."))
+                raise ValueError(tr("Please enter build name, both output folders and carrier package."))
             root = toolkit_path(self.project.manifest.get("werkzeugkasten"))
             output, packages = writable_path(self.output.text()), writable_path(self.packages.text())
             carrier = Path(self.carrier.text()).expanduser().resolve()
             if not carrier.is_file():
-                raise ValueError(tr("Trägerpaket fehlt: {carrier}", carrier=carrier))
+                raise ValueError(tr("Carrier package missing: {carrier}", carrier=carrier))
             # Zielschutz und Namen vor dem Speichern prüfen; Befehl danach neu bilden.
             build_command(root, self.project.basis, output, packages, self.name.text(), carrier=carrier,
                           options=self.options())
             check_space(output, packages)
             settings = {"ausgabe": str(output), "pakete": str(packages), "traeger": str(carrier),
                         "ki_profil": self.ki_profil.isChecked(), **self.options()}
-            self.main.document.edit(tr("Baueinstellungen ändern"), lambda raw, meta: meta.update(bauen=settings))
+            self.main.document.edit(tr("Change build settings"), lambda raw, meta: meta.update(bauen=settings))
             if not self.main.save_project():
                 return
             self.command = build_command(root, self.project.folder, output, packages, self.name.text(), carrier=carrier,
@@ -581,11 +587,11 @@ class BuildDialog(QDialog):
             self.check_key = check_key(self.project.raw, self.project.folder, shift)
             cached = getattr(self.main, "check_cache", {}).get(self.check_key)
             if cached is not None:
-                self.phase.setText(tr("Vorabprüfung: Ergebnis der letzten Prüfung dieses Stands wird verwendet"))
-                self.log.appendPlainText(tr("Vorabprüfung aus dem Zwischenspeicher (gleiche Definition, Basis und Versatz)."))
+                self.phase.setText(tr("Pre-check: using the result of the last check of this state"))
+                self.log.appendPlainText(tr("Pre-check from the cache (same definition, base and offset)."))
                 self.use_check(cached)
                 return
-            self.phase.setText(tr("Vorabprüfung mit Generator …"))
+            self.phase.setText(tr("Pre-check with generator …"))
             self.job = ProcessJob(self)
             self.job.done.connect(self.checked)
             self.job.start(worker_command(), {"task": "analyse", "raw": copy.deepcopy(self.project.raw),
@@ -606,7 +612,7 @@ class BuildDialog(QDialog):
         old.deleteLater()
         try:
             if code == -2:
-                self.phase.setText(tr("Vorabprüfung abgebrochen · kein Bau gestartet"))
+                self.phase.setText(tr("Pre-check cancelled · no build started"))
                 self.busy(False)
                 return
             response = json.loads(text)
@@ -627,7 +633,7 @@ class BuildDialog(QDialog):
             for message in report["meldungen"]:
                 self.add_message(message)
             if not report["zusammenfassung"]["ok"]:
-                raise ValueError(tr("Vorabprüfung: Fehler beheben, bevor ein Fahrpaket gebaut werden kann."))
+                raise ValueError(tr("Pre-check: fix the errors before a driving package can be built."))
             self.launch()
         except (ValueError, KeyError, OSError) as error:
             self.phase.setText(meldung(error))
@@ -657,7 +663,7 @@ class BuildDialog(QDialog):
         self.job.output.connect(self.log.insertPlainText)
         self.job.done.connect(self.build_finished)
         self.busy(True)
-        self.phase.setText(tr("Bau startet · gespeichertes Projekt wird als Schnappschuss übernommen"))
+        self.phase.setText(tr("Build starting · the saved project is taken over as a snapshot"))
         self.job.start(self.command)
 
     def add_message(self, message):
@@ -666,7 +672,7 @@ class BuildDialog(QDialog):
         self.messages.append(issue)
         self.issue_list.addItem(f"{tr(issue['level'])} · {issue.get('kurz', issue['id'])} · {meldung(issue['text'])}")
         self.issue_list.item(self.issue_list.count() - 1).setData(Qt.UserRole, issue)
-        self.main.add_build_issue(issue, self.record["id"] if self.record else tr("Vorabprüfung"))
+        self.main.add_build_issue(issue, self.record["id"] if self.record else tr("Pre-check"))
 
     def jump_message(self, item):
         self.main.jump_issue(item)
@@ -676,16 +682,16 @@ class BuildDialog(QDialog):
         if typ == "start":
             entry = event.get("eingabe", {})
             self.record["eingabe"] = entry
-            self.log.appendPlainText(tr("Schnappschuss: ") + json.dumps(entry, ensure_ascii=False))
+            self.log.appendPlainText(tr("Snapshot: ") + json.dumps(entry, ensure_ascii=False))
         elif typ == "phase":
-            self.phase.setText(meldung(event.get("titel", event.get("phase", tr("Bau")))))
+            self.phase.setText(meldung(event.get("titel", event.get("phase", tr("Build run")))))
             self.progress.setValue(round(float(event.get("fortschritt", 0)) * 1000))
         elif typ == "meldung":
             self.add_message(event["meldung"])
         elif typ == "log":
             self.log.appendPlainText(event.get("text", ""))
         elif typ == "pruefung":
-            self.log.appendPlainText(tr("Prüfung {stufe}: {zusammenfassung}", stufe=tr(str(event.get('stufe'))), zusammenfassung=event.get('zusammenfassung')))
+            self.log.appendPlainText(tr("Check {stufe}: {zusammenfassung}", stufe=tr(str(event.get('stufe'))), zusammenfassung=event.get('zusammenfassung')))
         elif typ == "ergebnis":
             self.result = event
         elif typ in ("fehler", "abbruch"):
@@ -701,8 +707,8 @@ class BuildDialog(QDialog):
                    bool(terminal.get("pakete")) and all(p.get("pruefung_ok") for p in terminal["pakete"]))
         if success:
             self.result = terminal
-            label = tr("Paket geprüft") if terminal["status"] == "ok" else tr("Mit Trägerabweichung geprüft")
-            self.phase.setText(label + tr(" · Spieltest offen"))
+            label = tr("Package checked") if terminal["status"] == "ok" else tr("Checked with carrier deviation")
+            self.phase.setText(label + tr(" · playtest open"))
             self.progress.setValue(1000)
             packages = terminal["pakete"]
             self.record.update(pakete=packages, paket=packages[0]["pfad"], bau_status=terminal["status"],
@@ -710,30 +716,32 @@ class BuildDialog(QDialog):
             lines = [label]
             for package in packages:
                 lines += [package["pfad"], tr("{groesse:.3f} GB · SHA-256: {sha256}", groesse=package.get('groesse', 0) / 1e9,
-                                                    sha256=package.get('sha256', tr("nicht vorhanden")))]
-            lines += [tr("Prüfbericht: ") + str(terminal.get("pruefbericht", "")), tr("Bericht: ") + str(terminal.get("bericht_md", ""))]
+                                                    sha256=package.get('sha256', tr("not available")))]
+            lines += [tr("Check report: ") + str(terminal.get("pruefbericht", "")), tr("Report: ") + str(terminal.get("bericht_md", ""))]
             self.result_text.setPlainText("\n".join(lines))
             self.explorer_button.setEnabled(True)
             self.report_button.setEnabled(bool(terminal.get("pruefbericht")))
             self._update_buttons()
             self.set_inject_target(self.record)
             if self.record["optionen"].get("ziel") == "swofty":
-                self.result_text.appendPlainText(tr("Im Swofty Launcher auf die Seite Addons ziehen und über den Launcher starten."))
+                self.result_text.appendPlainText(tr(("Drag it onto the Addons page of Swofty Launcher and start the "
+                                                     "game from the launcher.")))
         else:
             self.result = None
             status = "abgebrochen" if code in (3, -2) else "fehlgeschlagen"
             reason = job.protocol_error or (terminal or {}).get("text") or {
-                2: tr("Prüffehler · Paket verworfen"), -2: tr("Zeitlimit beim Abbruch · Prozessbaum beendet; temporäre Pakete entfernt"),
-                3: tr("Bau abgebrochen"), -1: text,
+                2: tr("Check error · package discarded"), -2: tr(("Timeout while cancelling · process tree ended; "
+                                                               "temporary packages removed")),
+                3: tr("Build cancelled"), -1: text,
             }.get(code, "Bau fehlgeschlagen oder vollständiges Ergebnis fehlt")
             self.phase.setText(reason)
-            self.result_text.setPlainText(tr("{status} · Exitcode {code}\n{reason}", status=tr(status).capitalize(), code=code, reason=reason))
+            self.result_text.setPlainText(tr("{status} · exit code {code}\n{reason}", status=tr(status).capitalize(), code=code, reason=reason))
             self.record.update(bau_status=status, bau_fehler=reason)
         self.record["exitcode"] = code
         try:
             self.project.save_playtests()
         except (ValueError, OSError) as error:
-            self.phase.setText(self.phase.text() + tr(" · Protokoll nicht gespeichert: {error}", error=error))
+            self.phase.setText(self.phase.text() + tr(" · log not saved: {error}", error=error))
         self.busy(False)
         job.deleteLater()
         if success:
@@ -749,7 +757,7 @@ class BuildDialog(QDialog):
         if (record.get("optionen") or {}).get("ziel") == "swofty":  # Addon, kein Paket für den Schnellaustausch
             self.inject_record = None
             self.inject_button.setEnabled(False)
-            self.inject_button.setToolTip(tr("Swofty-Addons kommen über den Launcher ins Spiel."))
+            self.inject_button.setToolTip(tr("Swofty addons reach the game through the launcher."))
             self.launcher_record = record
             self.install_button.setEnabled(self.job is None)
             self.play_button.setEnabled(self.job is None)
@@ -762,7 +770,8 @@ class BuildDialog(QDialog):
         name = Path(record["paket"]).name
         self.inject_button.setEnabled(self.job is None)
         self._update_buttons()
-        self.inject_button.setToolTip(tr("{name} per Schnellaustausch in F1 25 schreiben: erst Plan anzeigen, dann nach deiner Bestätigung schreiben (vorher Sicherung der betroffenen Spieldateien).", name=name))
+        self.inject_button.setToolTip(tr(("Write {name} to F1 25 via quick swap: show the plan first, then write "
+                                          "after your confirmation (affected game files are backed up first)."), name=name))
 
     # ------------------------------------------------------------------ Swofty Launcher
     def launcher_program(self):
@@ -770,11 +779,11 @@ class BuildDialog(QDialog):
         settings = self.project.manifest.get("bauen", {})
         program = swofty_programm(settings.get("swofty_programm"))
         if program is None:
-            value, _ = QFileDialog.getOpenFileName(self, tr("swofty.exe wählen (Ordner bin des Launchers)"), "", "swofty.exe")
+            value, _ = QFileDialog.getOpenFileName(self, tr("Choose swofty.exe (the launcher's bin folder)"), "", "swofty.exe")
             if not value:
                 return None
             program = Path(value)
-            self.main.document.edit(tr("Baueinstellungen ändern"),
+            self.main.document.edit(tr("Change build settings"),
                                     lambda raw, meta: meta.setdefault("bauen", {}).update(swofty_programm=str(program)))
             self.main.save_project()
         return program
@@ -786,7 +795,7 @@ class BuildDialog(QDialog):
         try:
             carrier = next((p.get("traeger") for p in self.launcher_record.get("pakete") or [] if p.get("traeger")), None)
             if carrier and not Path(carrier).is_file():
-                raise ValueError(tr("Träger-Addon fehlt: {pfad}", pfad=carrier))
+                raise ValueError(tr("Carrier addon missing: {pfad}", pfad=carrier))
             steps = swofty_installieren(program, self.launcher_record["paket"], carrier,
                                         swofty_installierte(program) if carrier else ())
         except (OSError, KeyError, ValueError, zipfile.BadZipFile) as error:
@@ -826,11 +835,11 @@ class BuildDialog(QDialog):
             self._launcher_report(text)
         elif code and step[1:2] != ["run"]:      # Installation gescheitert; ein Absturz endet in der Auswertung
             self.launcher_steps, self.launcher_diagnose = [], []
-            self.phase.setText(tr("Swofty Launcher: Fehler · {text}", text=text.strip()[-300:]))
+            self.phase.setText(tr("Swofty Launcher: error · {text}", text=text.strip()[-300:]))
         if self.launcher_steps or self.launcher_diagnose:
             self._launcher_next()
         elif step[1:2] != ["logs"] and not code:
-            self.phase.setText(tr("Im Launcher installiert. Dort oder hier starten."))
+            self.phase.setText(tr("Installed in the launcher. Start it there or from here."))
         self.busy(self.job is not None)
 
     def _launcher_report(self, text):
@@ -838,8 +847,8 @@ class BuildDialog(QDialog):
         # „swofty logs“ druckt erst das ganze Protokoll, ab „[info] game exited“ folgt die Zusammenfassung
         start = re.search(r"^\[info\] game exited.*$", text, re.M)
         crash = bool(re.search(r"^\[crash\] reason\s+unhandled", text, re.M)) or bool(start and "(crash)" in start.group())
-        self.phase.setText(tr("Absturz in der letzten Sitzung · Details im Ergebnis") if crash
-                           else tr("Letzte Sitzung ausgewertet · kein Absturz gemeldet"))
+        self.phase.setText(tr("Crash in the last session · details under Result") if crash
+                           else tr("Last session read · no crash reported"))
         self.result_text.setPlainText(text[start.start() if start else 0:].strip())
         record = self.launcher_record
         if record and record.get("ausgabe"):
@@ -849,7 +858,7 @@ class BuildDialog(QDialog):
                 record.setdefault("spielsitzungen", []).append({"datei": str(path), "absturz": crash})
                 self.project.save_playtests()
             except (OSError, ValueError) as error:
-                self.phase.setText(self.phase.text() + tr(" · Protokoll nicht gespeichert: {error}", error=error))
+                self.phase.setText(self.phase.text() + tr(" · log not saved: {error}", error=error))
 
     def _run_injector(self, action, finished):
         try:
@@ -857,7 +866,7 @@ class BuildDialog(QDialog):
             output, _ = build_folders(self.project, self.output.text(), self.packages.text())
             command = self.injector(root, action, self.inject_record["paket"], backup_folder(output))
         except (ValueError, OSError) as error:
-            self.phase.setText(tr("Schnellaustausch nicht möglich: {error}", error=error))
+            self.phase.setText(tr("Quick swap not possible: {error}", error=error))
             return
         self.log.appendPlainText("$ " + " ".join(map(str, command)))
         self.inject_job = ProcessJob(self)
@@ -869,7 +878,7 @@ class BuildDialog(QDialog):
     def inject_start(self):
         if self.job or self.inject_job or not self.inject_record:
             return
-        self.phase.setText(tr("Schnellaustausch: Plan für {name} wird erstellt …", name=Path(self.inject_record['paket']).name))
+        self.phase.setText(tr("Quick swap: creating plan for {name} …", name=Path(self.inject_record['paket']).name))
         self._run_injector("plan", self.plan_done)
 
     def _finish_injector(self):
@@ -881,30 +890,30 @@ class BuildDialog(QDialog):
     def plan_done(self, code, text):
         self._finish_injector()
         if code != 0:
-            self.phase.setText(tr("Schnellaustausch nicht möglich: ") + _tool_error(text, code))
+            self.phase.setText(tr("Quick swap not possible: ") + _tool_error(text, code))
             return
         if "Nichts zu tun" in text:
-            self.phase.setText(tr("Dieses Paket ist bereits im Spiel · nichts übertragen."))
+            self.phase.setText(tr("This package is already in the game · nothing transferred."))
             return
         if not self.confirm_injection(text):
-            self.phase.setText(tr("Schnellaustausch abgebrochen · nichts geändert."))
+            self.phase.setText(tr("Quick swap cancelled · nothing changed."))
             return
-        self.phase.setText(tr("Schreibe ins Spiel … (Sicherung der betroffenen Dateien, dann Austausch)"))
+        self.phase.setText(tr("Writing to the game … (backing up the affected files, then swapping)"))
         self._run_injector("injizieren", self.inject_done)
 
     def confirm_injection(self, plan_text):
         """Eigene Bestätigung je Übertragung (schreibt in den Spielordner)."""
         box = QMessageBox(self)
         box.setIcon(QMessageBox.Warning)
-        box.setWindowTitle(tr("Ins Spiel übertragen?"))
-        box.setText(tr("<b>{name}</b> jetzt in F1 25 schreiben?", name=Path(self.inject_record['paket']).name))
-        box.setInformativeText(tr("Der Schnellaustausch ersetzt Strecken-ERP, Mipmaps, ERS- und Minimap-Werte des schon "
-                               "installierten Streckencodes und aktiviert bei deaktiviertem Mod die Spieldatenbank aus "
-                               "der gemerkten Aktivierung. Vorher werden die betroffenen Spieldateien gesichert; "
-                               "das Spiel muss beendet sein. Details: „Details anzeigen“."))
+        box.setWindowTitle(tr("Transfer to game?"))
+        box.setText(tr("Write <b>{name}</b> to F1 25 now?", name=Path(self.inject_record['paket']).name))
+        box.setInformativeText(tr("The quick swap replaces track ERP, mipmaps, ERS and minimap values of the already "
+                                  "installed track code and, if the mod is deactivated, activates the game database "
+                                  "from the remembered activation. The affected game files are backed up first; the "
+                                  "game must be closed. Details: “Show Details”."))
         box.setDetailedText(plan_text)
-        write = box.addButton(tr("Ins Spiel schreiben"), QMessageBox.AcceptRole)
-        box.addButton(tr("Abbrechen"), QMessageBox.RejectRole)
+        write = box.addButton(tr("Write to game"), QMessageBox.AcceptRole)
+        box.addButton(tr("Cancel"), QMessageBox.RejectRole)
         box.setDefaultButton(QMessageBox.Cancel)
         box.exec()
         return box.clickedButton() is write
@@ -912,15 +921,15 @@ class BuildDialog(QDialog):
     def inject_done(self, code, text):
         self._finish_injector()
         if code != 0:
-            self.phase.setText(tr("Schnellaustausch fehlgeschlagen: ") + _tool_error(text, code))
+            self.phase.setText(tr("Quick swap failed: ") + _tool_error(text, code))
             return
         record = self.inject_record
         record["injiziert"] = datetime.now().astimezone().isoformat(timespec="seconds")
         try:
             self.project.save_playtests()
         except (ValueError, OSError) as error:
-            self.log.appendPlainText(tr("Protokoll nicht gespeichert: {error}", error=error))
-        self.phase.setText(tr("{name} ist im Spiel · Spieltest eintragen", name=Path(record['paket']).name))
+            self.log.appendPlainText(tr("Log not saved: {error}", error=error))
+        self.phase.setText(tr("{name} is in the game · record the playtest", name=Path(record['paket']).name))
         self.refresh_game_status()
         self.open_playtest(record)
 
@@ -933,10 +942,10 @@ class BuildDialog(QDialog):
             try:
                 self.job.cancel()
                 self.cancel_button.setEnabled(False)
-                self.cancel_button.setText(tr("Wird abgebrochen …"))
-                self.phase.setText(tr("Wird abgebrochen … nächste Phasengrenze, spätestens nach 120 s beenden."))
+                self.cancel_button.setText(tr("Cancelling …"))
+                self.phase.setText(tr("Cancelling … next phase boundary, ends after 120 s at the latest."))
             except OSError as error:
-                self.phase.setText(tr("Abbruchdatei konnte nicht angelegt werden: {error}", error=error))
+                self.phase.setText(tr("Could not create cancel file: {error}", error=error))
 
     def show_package(self):
         if self.result:
@@ -964,7 +973,7 @@ class BuildDialog(QDialog):
 def _tool_error(text, code):
     lines = [line.strip() for line in (text or "").splitlines() if line.strip()]
     error = next((line for line in reversed(lines) if line.startswith("FEHLER")), None)
-    return error or (lines[-1] if lines else tr("Exitcode {code}", code=code))
+    return error or (lines[-1] if lines else tr("Exit code {code}", code=code))
 
 
 class CleanupDialog(QDialog):
@@ -977,14 +986,16 @@ class CleanupDialog(QDialog):
         super().__init__(parent)
         self.project = project
         self.output, self.packages = Path(output).resolve(), Path(packages).resolve()
-        self.setWindowTitle(tr("Alte Bauten aufräumen"))
+        self.setWindowTitle(tr("Clean up old builds"))
         self.resize(860, 520)
         layout = QVBoxLayout(self)
-        info = QLabel(tr("Arbeitsordner: {output}\nPaketordner: {packages}\nVorausgewählt: alles außer dem jüngsten Bau, dem jüngsten Bau mit Spieltest „ok“ und dem zuletzt ins Spiel übertragenen Paket.", output=self.output, packages=self.packages))
+        info = QLabel(tr(("Working folder: {output}\nPackage folder: {packages}\nPreselected: everything except the "
+                          "newest build, the newest build with playtest “ok” and the package last transferred to the "
+                          "game."), output=self.output, packages=self.packages))
         info.setWordWrap(True)
         layout.addWidget(info)
         self.table = QTableWidget(0, 6)
-        self.table.setHorizontalHeaderLabels([tr("Löschen"), tr("Bau"), tr("Datum"), tr("Größe"), tr("Bau-Status"), tr("Spieltest")])
+        self.table.setHorizontalHeaderLabels([tr("Delete"), tr("Build run"), tr("Date"), tr("Size"), tr("Build status"), tr("Playtest")])
         self.table.verticalHeader().hide()
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setSelectionMode(QAbstractItemView.NoSelection)
@@ -995,9 +1006,9 @@ class CleanupDialog(QDialog):
         self.total = QLabel()
         layout.addWidget(self.total)
         row = QHBoxLayout()
-        self.delete_button = QPushButton(tr("Ausgewählte löschen …"))
+        self.delete_button = QPushButton(tr("Delete selected …"))
         self.delete_button.clicked.connect(self.delete_selected)
-        close = QPushButton(tr("Schließen"))
+        close = QPushButton(tr("Close"))
         close.clicked.connect(self.accept)
         row.addStretch(1)
         row.addWidget(self.delete_button)
@@ -1052,7 +1063,7 @@ class CleanupDialog(QDialog):
             check.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             check.setCheckState(Qt.Unchecked if e["name"] in keep else Qt.Checked)
             self.table.setItem(r, 0, check)
-            status = tr(record.get("status", "–")) + (tr(" · im Spiel") if record.get("injiziert") else "")
+            status = tr(record.get("status", "–")) + (tr(" · in game") if record.get("injiziert") else "")
             for c, value in enumerate((e["name"], datetime.fromtimestamp(e["datum"]).strftime("%d.%m.%Y %H:%M"),
                                        zahl(e["groesse"] / 1e9, 2, "GB"), tr(record.get("bau_status", "–")), status), 1):
                 self.table.setItem(r, c, QTableWidgetItem(value))
@@ -1065,14 +1076,15 @@ class CleanupDialog(QDialog):
     def _update_total(self, *args):
         chosen = self.selected()
         total = sum(e["groesse"] for e in self.items)
-        self.total.setText(tr("{anzahl} von {gesamt} ausgewählt · {groesse} von {total}", anzahl=len(chosen), gesamt=len(self.items),
+        self.total.setText(tr("{anzahl} of {gesamt} selected · {groesse} of {total}", anzahl=len(chosen), gesamt=len(self.items),
                               groesse=zahl(sum(e['groesse'] for e in chosen) / 1e9, 1, 'GB'), total=zahl(total / 1e9, 1, 'GB')))
         self.delete_button.setEnabled(bool(chosen))
 
     def confirm(self, chosen):
         size = sum(e["groesse"] for e in chosen)
         answer = QMessageBox.warning(
-            self, tr("Bauten löschen?"), tr("{anzahl} Bauten mit zusammen {size} endgültig löschen?\nDas lässt sich nicht rückgängig machen. Das Spieltest-Protokoll behält die Einträge (als gelöscht markiert).", anzahl=len(chosen), size=zahl(size / 1000000000.0, 1, 'GB')),
+            self, tr("Delete builds?"), tr(("Permanently delete {anzahl} builds totalling {size}?\nThis cannot be "
+                                             "undone. The playtest log keeps the entries (marked as deleted)."), anzahl=len(chosen), size=zahl(size / 1000000000.0, 1, 'GB')),
             QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
         return answer == QMessageBox.Yes
 
@@ -1085,7 +1097,7 @@ class CleanupDialog(QDialog):
             for path in e["pfade"]:
                 target = Path(path).resolve()
                 if target.parent not in (self.output, self.packages):
-                    errors.append(tr("{target}: liegt nicht direkt im Arbeits- oder Paketordner", target=target))
+                    errors.append(tr("{target}: not directly inside the working or package folder", target=target))
                     continue
                 try:
                     if target.is_dir():
@@ -1101,24 +1113,24 @@ class CleanupDialog(QDialog):
             if any(r.get("geloescht") == stamp for r in self.project.playtests):
                 self.project.save_playtests()
         except (ValueError, OSError) as error:
-            errors.append(tr("Spieltest-Protokoll: {error}", error=error))
+            errors.append(tr("Playtest log: {error}", error=error))
         self.reload()
         if errors:
-            QMessageBox.warning(self, tr("Nicht alles gelöscht"), "\n".join(errors[:12]))
+            QMessageBox.warning(self, tr("Not everything deleted"), "\n".join(errors[:12]))
 
 
 class PlaytestDialog(QDialog):
     def __init__(self, project, parent=None, select=None):
         super().__init__(parent)
         self.project = project
-        self.setWindowTitle(tr("Spieltest-Protokoll"))
+        self.setWindowTitle(tr("Playtest log"))
         self.resize(850, 550)
         layout = QVBoxLayout(self)
         self.entries = QListWidget()
         for entry in project.playtests:
             self.entries.addItem(self._title(entry))
         layout.addWidget(self.entries)
-        self.package = QLabel(tr("Noch kein Bau im Projekt."))
+        self.package = QLabel(tr("No build in the project yet."))
         self.package.setWordWrap(True)
         self.package.setTextInteractionFlags(Qt.TextSelectableByMouse)
         layout.addWidget(self.package)
@@ -1127,11 +1139,11 @@ class PlaytestDialog(QDialog):
             self.status.addItem(tr(state), state)
         layout.addWidget(self.status)
         self.text = QPlainTextEdit()
-        self.text.setPlaceholderText(tr("Ergebnis des Spieltests: Strecke, Slot, Beobachtung …"))
+        self.text.setPlaceholderText(tr("Playtest result: track, slot, observation …"))
         layout.addWidget(self.text)
         self.message = QLabel()
         layout.addWidget(self.message)
-        self.save_button = QPushButton(tr("Spieltest speichern"))
+        self.save_button = QPushButton(tr("Save playtest"))
         self.save_button.setEnabled(bool(project.playtests) and not project.readonly)
         self.save_button.clicked.connect(self.save)
         layout.addWidget(self.save_button)
@@ -1144,16 +1156,16 @@ class PlaytestDialog(QDialog):
     @staticmethod
     def _title(entry):
         note = f" · „{entry['beschreibung']}“" if entry.get("beschreibung") else ""
-        game = tr(" · im Spiel") if entry.get("injiziert") else ""
-        return tr("{datum} · {name}{note} · Bau: {bau}{game} · Spieltest: {spieltest}", datum=entry['datum'],
+        game = tr(" · in game") if entry.get("injiziert") else ""
+        return tr("{datum} · {name}{note} · build: {bau}{game} · playtest: {spieltest}", datum=entry['datum'],
                   name=entry.get('name', ''), note=note, bau=tr(str(entry.get('bau_status'))), game=game,
                   spieltest=tr(entry.get('status', 'offen')))
 
     def select(self, index):
         if index >= 0:
             entry = self.project.playtests[index]
-            self.package.setText((entry.get("paket") or tr("Kein fertiges Paket in diesem Bau."))
-                                 + (tr("\nWas ist neu: {beschreibung}", beschreibung=entry['beschreibung']) if entry.get("beschreibung") else ""))
+            self.package.setText((entry.get("paket") or tr("No finished package in this build."))
+                                 + (tr("\nWhat's new: {beschreibung}", beschreibung=entry['beschreibung']) if entry.get("beschreibung") else ""))
             found = self.status.findData(entry.get("status", "offen"))
             if found >= 0:
                 self.status.setCurrentIndex(found)
@@ -1171,7 +1183,7 @@ class PlaytestDialog(QDialog):
                      spieltest_datum=datetime.now().astimezone().isoformat(timespec="seconds"))
         try:
             self.project.save_playtests()
-            self.message.setText(tr("Spieltest gespeichert."))
+            self.message.setText(tr("Playtest saved."))
             self.entries.item(index).setText(self._title(entry))
         except (OSError, ValueError) as error:
             entry.clear()

@@ -18,12 +18,12 @@ def segment_shape(segment):
     if kind == "bogen":
         radius = float(segment["radius"])
         if radius <= 0:
-            raise ValueError(tr("Radius muss positiv sein."))
+            raise ValueError(tr("Radius must be positive."))
         length = radius * math.radians(float(segment["winkel"])) if segment.get("winkel") is not None else float(segment["laenge"])
         return length, sign / radius, sign / radius
     if kind == "klothoide":
         return float(segment["laenge"]), sign / float(segment["radius_anfang"]) if segment.get("radius_anfang") else 0., sign / float(segment["radius_ende"]) if segment.get("radius_ende") else 0.
-    raise ValueError(tr("Unbekannte Segmentart: {kind}", kind=kind))
+    raise ValueError(tr("Unknown segment type: {kind}", kind=kind))
 
 
 # Klothoiden-Übergänge: gleiche Regeln wie strecke.definition.segmente_mit_uebergaengen
@@ -131,7 +131,7 @@ def input_geometry(document):
             try:
                 length, k0, k1 = segment_shape(segment)
                 if not math.isfinite(length) or length <= 0:
-                    raise ValueError(tr("Länge muss positiv und endlich sein."))
+                    raise ValueError(tr("Length must be positive and finite."))
                 objects.append((x, y, z))
                 object_s.append(station)
                 first = len(positions) - 1

@@ -1,67 +1,67 @@
-﻿id;kurz;de;en
-DEF_UNGUELTIG;IN-01;Definition kann nicht geladen werden;Definition cannot be loaded
-DEF_WARNUNG;IN-02;Hinweis des Definitionsladers/der Mittellinie (z. B. Schließfehler verteilt);Note from the definition loader/centreline (e.g. closing error distributed)
-GEO_RAND_FALTUNG;GE-01;Fahrbahnrand faltet sich (Radius kleiner als Halbbreite);Track edge folds over (radius smaller than half-width)
-GEO_RAENDER_SCHNITT;GE-01;Fahrbahnränder schneiden sich in der Draufsicht;Track edges intersect in plan view
-LAGE_AUSSERHALB_AO;KO-01;Strecke/Logik außerhalb X/Z ±1024 m (AO-Abdeckung des Trägers);Track/logic outside X/Z ±1024 m (AO coverage of the carrier package)
-LAGE_AUSSERHALB_LOCH;KO-02;Strecke liegt nicht vollständig im Loch des Außenterrains;Track does not lie completely inside the hole of the outer terrain
-DRS_ANZAHL;DR-01;Weniger DRS-Zonen als gewünscht;Fewer DRS zones than requested
-DRS_ZONE_UNGUELTIG;DR-02;Eigene DRS-Zone unbrauchbar (zu kurz, länger als die halbe Runde oder Erkennung nicht vor der Aktivierung);Custom DRS zone unusable (too short, longer than half a lap, or detection not before activation)
-DRS_ZONEN_UEBERLAPPEN;DR-03;Eigene DRS-Aktivierungszonen überlappen sich;Custom DRS activation zones overlap
-XMODE_ZONE_UNGUELTIG;XM-01;Straight-Mode-Zone unbrauchbar (kürzer als 50 m oder länger als die halbe Runde);Straight Mode zone unusable (shorter than 50 m or longer than half a lap)
-XMODE_ZONEN_UEBERLAPPEN;XM-02;Straight-Mode-Zonen überlappen sich;Straight Mode zones overlap
-XMODE_IN_KURVE;XM-03;Straight-Mode-Zone reicht in eine enge Kurve (Radius < 250 m);Straight Mode zone reaches into a tight corner (radius < 250 m)
-XMODE_EIGENE_UNGETESTET;XM-04;Eigene Straight-Mode-Zonen ersetzen die Träger-Zonen – Spielwirkung noch nicht im Spiel bestätigt;Custom Straight Mode zones replace the carrier zones – in-game effect not yet confirmed
-GEO_RADIUS_KLEIN;GE-02;Kurvenradius kleiner als bei jeder Originalstrecke (7,5 m, Bahrain);Corner radius smaller than on any original track (7.5 m, Bahrain)
-GEO_KRUEMMUNG_SPRUNG;GE-03;Krümmung ändert sich abrupter als bei jeder Originalstrecke (Knick) – Approximation/Klothoiden nutzen;Curvature changes more abruptly than on any original track (kink) – use approximation/clothoids
-LAENGE_UEBER_ORIGINALEN;GE-04;Strecke länger als jede Originalstrecke (7.007 m, Spa);Track longer than any original track (7,007 m, Spa)
-FIA_KENNWERT;FI-01;Abweichung von FIA-Grade-1-Kennwerten (Breite, Gridbreite, Länge, Gerade, Querneigung, Start-Steigung);Deviation from FIA Grade 1 values (width, grid width, length, straight, banking, start gradient)
-EINGABE_PUNKTLUECKE;IN-03;Große Lücke zwischen zwei Kontrollpunkten (Spline überbrückt sie frei, z. B. nach Rahmen-Löschen);Large gap between two control points (the spline bridges it freely, e.g. after box deletion)
-KI_GATES_VIELE;KI-05;Mehr KI-Gates als jede Originalstrecke (max. 571, Madrid);More AI gates than any original track (max. 571, Madrid)
-KI_KURVEN_ZUSAMMENGELEGT;KI-06;Mehr Hauptkurven als Bremslinien-IDs des Trägers (15) – der Bau legt die dichtesten Kurven zusammen;More main corners than carrier braking-line IDs (15) – the build merges the closest corners
-PVS_ZELLEN_VIELE;PV-01;Mehr PVS-Zellen (Korridor) als jede Originalstrecke (max. 36.409, Losail);More PVS cells (corridor) than any original track (max. 36,409, Losail)
-BOX_FEHLT;BO-00;Keine Boxengasse (offene Boxen-Spline) in der Generatorlogik;No pit lane (open pit spline) in the generator logic
-KI_KURVEN_FUER_BREMSLINIEN;KI-04;Zu wenige Kurven-Gates für alle Haupt-Bremslinien des Trägers;Too few corner gates for all main braking lines of the carrier package
-BOX_MAUER_AUF_BOXENLINIE;BO-02;Mauerdreiecke auf der Boxenlinie (werden beim Bau entfernt);Wall triangles on the pit line (removed during the build)
-STRECKENCODE_UNZULAESSIG;CO-01;Streckencode unzulässig;Track code not allowed
-STRECKENCODE_NICHT_IN_DB;CO-02;Streckencode nicht in der Spieldatenbank – Strecke im Spiel nicht auswählbar;Track code not in the game database – track cannot be selected in game
-STRECKENCODE_TRAEGER;CO-03;Paket behält den Trägercode portimao (kollidiert mit einer installierten Portimão-Mod);Package keeps the carrier code portimao (collides with an installed Portimão mod)
-PVS_PROFIL;PL-01;PVS nicht entlang der Strecke (Original-PVS bzw. „alles sichtbar“);PVS not along the track (original PVS or “everything visible”)
-GEOMETRIE_ABGESCHALTET;PK-03;Bau ohne neue Geometrie bzw. Minimap – kein vollständiges Fahrpaket;Build without new geometry or minimap – not a complete driving package
-KI_BREMSLINIE_AUSSERHALB_KURVE;KI-01;Haupt-Bremslinie liegt nicht innerhalb einer Kurve (corner_start … nächstes corner_end);Main braking line is not inside a corner (corner_start … next corner_end)
-KI_BREMSLINIEN_ABSTAND;KI-02;Haupt-Bremslinien zu dicht (gleiches Gate bzw. < 3 Gates Abstand);Main braking lines too close (same gate or < 3 gates apart)
-KI_BREMSLINIEN_ID_SATZ;KI-02;Bremslinien-IDs doppelt oder nicht gleich dem ID-Satz der .brakelinesettings;Braking-line IDs duplicated or not equal to the ID set of the .brakelinesettings
-KI_VERWEIS_UNGUELTIG;KI-05;KI-Linie verweist auf ein nicht vorhandenes Gate;AI line refers to a gate that does not exist
-KI_BOX_KURVEN_FEHLEN;KI-03;KI-Boxenroute ohne Kurvenlinien (R4);AI pit route without corner lines (R4)
-KI_BOX_BREMSLINIE_AUSSERHALB_KURVE;KI-03;Box-Bremslinie nicht innerhalb einer Kurve der Boxenroute (R4);Pit braking line not inside a corner of the pit route (R4)
-KI_BOX_PAIR_ID_FEHLT;KI-03;Kein pair_id zwischen Boxenausfahrts- und Streckenkurve (R5);No pair_id between pit exit corner and track corner (R5)
-KI_ROUTE_OHNE_RAUMWECHSEL;KI-07;KI-Route ohne Wechsel des Überholraums;AI route without a change of passing space
-ZONE_ZEITFAHR_TRIGGER_AUSSERHALB;ZO-01;ai_flying_lap_trigger überlappt rollingstart_tt nicht;ai_flying_lap_trigger does not overlap rollingstart_tt
-ZONE_ZEITFAHR_ABSTAND;ZO-01;Zeitfahr-/ERS-/X-Mode-Zone nicht im Meterabstand der Vorlage zur Ziellinie;Time trial/ERS/X-mode zone not at the template's distance from the finish line
-ZONE_BEREICH_UNGUELTIG;ZO-03;Zone mit Fortschritt außerhalb 0…1 oder unbekannter Spline;Zone with progress outside 0…1 or unknown spline
-ZONE_NAME_MEHRDEUTIG;ZO-02;Gleicher Zonenname mit verschiedenen Bereichen;Same zone name with different ranges
-ZONE_DRS_PAARE;ZO-02;DRS-Erkennung/-Aktivierung ohne eindeutiges ID-Paar;DRS detection/activation without a unique ID pair
-ZONE_DRL_UEBERLAPPUNG;ZO-04;drl-Zonen der Hauptlinie überlappen sich;drl zones of the main line overlap
-TRACKSPACE_FORM;ZO-03;TrackSpace braucht genau eine geschlossene Hauptlinie (ohne Doppelpunkt) und eine offene Boxenlinie;TrackSpace needs exactly one closed main line (without duplicate point) and one open pit line
-BOX_SPLINE_NICHT_VERLAENGERT;BO-01;Boxen-Spline reicht nicht weit genug vor die Einfahrt/hinter die Ausfahrt bzw. beginnt/endet neben der Hauptlinie;Pit spline does not reach far enough before the entry/after the exit, or starts/ends beside the main line
-BOX_SPLINE_SPRUNG;BO-03;Boxen-Spline springt quer (nicht stetig, R3);Pit spline jumps sideways (not continuous, R3)
-BOX_TS_ABDECKUNG;BO-04;TS-Box-Volumes decken die Boxen-Spline nicht ganz ab (R1);TS pit volumes do not fully cover the pit spline (R1)
-BOX_IN_HAUPT_TS;BO-05;Boxengasse (Limiterbereich) liegt in den Haupt-TS-Volumes (R2);Pit lane (limiter area) lies inside the main TS volumes (R2)
-LOGIK_HOEHE_KONVENTION;PH-02;Logik liegt auf der Fahrphysik (Portimão: +0,20 m, Plätze +0,03 m);Logic lies on the driving physics (Portimão: +0.20 m, grid slots +0.03 m)
-PLATZ_NICHT_AUF_FLAECHE;PH-01;Fahrzeugplatz liegt nicht auf passender Fläche des neuen Netzes;Car slot does not lie on a matching surface of the new mesh
-TRN_HOEHE_ABWEICHEND;PH-03;Fahrphysik weicht auf der Fahrbahn > 1 m vom Generatornetz ab;Driving physics deviates > 1 m from the generator mesh on the track surface
-PHYSIK_VERBLIEBEN;PH-04;Verbliebene Träger-Instanzen mit Kollision;Remaining carrier instances with collision
-ERP_PARSE_FEHLER;PK-01;Geänderte Ressource lässt sich nicht neu lesen;Changed resource cannot be read back
-ERP_MD5_FALSCH;PK-02;Ressource mit falschem MD5;Resource with wrong MD5
-ERP_MD5_TRAEGER_ALTLAST;PK-02;Bekannte falsche MD5 des unveränderten Portimão-Trägers („mit Trägerabweichung geprüft“);Known wrong MD5 of the unchanged Portimão carrier (“checked with carrier deviation”)
-MINIMAP_ECKEN_UNGERUNDET;MM-01;Minimap-Eckpunkte nicht auf mm gerundet;Minimap corner points not rounded to mm
-ZONE_MANIFEST_ERS;ZO-02;Manifest-ERS-Werte passen nicht zu den ERS-Zonen;Manifest ERS values do not match the ERS zones
-PAKET_PRUEFUNG;PK-01;Tiefe Paketprüfung meldet einen Fehler;Deep package check reports an error
-UMG_DATEI;UM-01;umgebung.json nicht lesbar oder ungültig;umgebung.json unreadable or invalid
-UMG_MODELL_UNBEKANNT;UM-02;Umgebungsmodell nicht im Katalog;Environment model not in the catalogue
-UMG_AUSSERHALB;UM-03;Umgebungsobjekt außerhalb des Streckenbereichs (Loch des Außenterrains);Environment object outside the track area (hole of the outer terrain)
-UMG_AUF_FAHRBAHN;UM-04;Umgebungsobjekt auf der Fahrbahn, Randstein, Kies oder nahe an der Mauer;Environment object on the road, kerb, gravel or close to the wall
-UMG_VIELE;UM-05;Sehr viele Umgebungsobjekte (mehr als 3.000, Leistung);Very many environment objects (more than 3,000, performance)
-UMG_HUEGEL_LAGE;UM-06;Hügel/Senke mit Mitte außerhalb des Streckenbereichs;Hill/hollow with its centre outside the track area
-UMG_BERG_LAGE;UM-07;Berg mit Mitte im Streckenbereich oder mehr als 12 km von der Mitte entfernt;Mountain with its centre inside the track area or more than 12 km from the centre
-UMG_BERG_RAND;UM-08;Berg reicht an den Rand des Streckenbereichs und wird dort abgeschnitten;Mountain reaches the edge of the track area and is cut off there
+﻿id;kurz;en;de
+DEF_UNGUELTIG;IN-01;Definition cannot be loaded;Definition kann nicht geladen werden
+DEF_WARNUNG;IN-02;Note from the definition loader/centreline (e.g. closing error distributed);Hinweis des Definitionsladers/der Mittellinie (z. B. Schließfehler verteilt)
+GEO_RAND_FALTUNG;GE-01;Track edge folds over (radius smaller than half-width);Fahrbahnrand faltet sich (Radius kleiner als Halbbreite)
+GEO_RAENDER_SCHNITT;GE-01;Track edges intersect in plan view;Fahrbahnränder schneiden sich in der Draufsicht
+LAGE_AUSSERHALB_AO;KO-01;Track/logic outside X/Z ±1024 m (AO coverage of the carrier package);Strecke/Logik außerhalb X/Z ±1024 m (AO-Abdeckung des Trägers)
+LAGE_AUSSERHALB_LOCH;KO-02;Track does not lie completely inside the hole of the outer terrain;Strecke liegt nicht vollständig im Loch des Außenterrains
+DRS_ANZAHL;DR-01;Fewer DRS zones than requested;Weniger DRS-Zonen als gewünscht
+DRS_ZONE_UNGUELTIG;DR-02;Custom DRS zone unusable (too short, longer than half a lap, or detection not before activation);Eigene DRS-Zone unbrauchbar (zu kurz, länger als die halbe Runde oder Erkennung nicht vor der Aktivierung)
+DRS_ZONEN_UEBERLAPPEN;DR-03;Custom DRS activation zones overlap;Eigene DRS-Aktivierungszonen überlappen sich
+XMODE_ZONE_UNGUELTIG;XM-01;Straight Mode zone unusable (shorter than 50 m or longer than half a lap);Straight-Mode-Zone unbrauchbar (kürzer als 50 m oder länger als die halbe Runde)
+XMODE_ZONEN_UEBERLAPPEN;XM-02;Straight Mode zones overlap;Straight-Mode-Zonen überlappen sich
+XMODE_IN_KURVE;XM-03;Straight Mode zone reaches into a tight corner (radius < 250 m);Straight-Mode-Zone reicht in eine enge Kurve (Radius < 250 m)
+XMODE_EIGENE_UNGETESTET;XM-04;Custom Straight Mode zones replace the carrier zones – in-game effect not yet confirmed;Eigene Straight-Mode-Zonen ersetzen die Träger-Zonen – Spielwirkung noch nicht im Spiel bestätigt
+GEO_RADIUS_KLEIN;GE-02;Corner radius smaller than on any original track (7.5 m, Bahrain);Kurvenradius kleiner als bei jeder Originalstrecke (7,5 m, Bahrain)
+GEO_KRUEMMUNG_SPRUNG;GE-03;Curvature changes more abruptly than on any original track (kink) – use approximation/clothoids;Krümmung ändert sich abrupter als bei jeder Originalstrecke (Knick) – Approximation/Klothoiden nutzen
+LAENGE_UEBER_ORIGINALEN;GE-04;Track longer than any original track (7,007 m, Spa);Strecke länger als jede Originalstrecke (7.007 m, Spa)
+FIA_KENNWERT;FI-01;Deviation from FIA Grade 1 values (width, grid width, length, straight, banking, start gradient);Abweichung von FIA-Grade-1-Kennwerten (Breite, Gridbreite, Länge, Gerade, Querneigung, Start-Steigung)
+EINGABE_PUNKTLUECKE;IN-03;Large gap between two control points (the spline bridges it freely, e.g. after box deletion);Große Lücke zwischen zwei Kontrollpunkten (Spline überbrückt sie frei, z. B. nach Rahmen-Löschen)
+KI_GATES_VIELE;KI-05;More AI gates than any original track (max. 571, Madrid);Mehr KI-Gates als jede Originalstrecke (max. 571, Madrid)
+KI_KURVEN_ZUSAMMENGELEGT;KI-06;More main corners than carrier braking-line IDs (15) – the build merges the closest corners;Mehr Hauptkurven als Bremslinien-IDs des Trägers (15) – der Bau legt die dichtesten Kurven zusammen
+PVS_ZELLEN_VIELE;PV-01;More PVS cells (corridor) than any original track (max. 36,409, Losail);Mehr PVS-Zellen (Korridor) als jede Originalstrecke (max. 36.409, Losail)
+BOX_FEHLT;BO-00;No pit lane (open pit spline) in the generator logic;Keine Boxengasse (offene Boxen-Spline) in der Generatorlogik
+KI_KURVEN_FUER_BREMSLINIEN;KI-04;Too few corner gates for all main braking lines of the carrier package;Zu wenige Kurven-Gates für alle Haupt-Bremslinien des Trägers
+BOX_MAUER_AUF_BOXENLINIE;BO-02;Wall triangles on the pit line (removed during the build);Mauerdreiecke auf der Boxenlinie (werden beim Bau entfernt)
+STRECKENCODE_UNZULAESSIG;CO-01;Track code not allowed;Streckencode unzulässig
+STRECKENCODE_NICHT_IN_DB;CO-02;Track code not in the game database – track cannot be selected in game;Streckencode nicht in der Spieldatenbank – Strecke im Spiel nicht auswählbar
+STRECKENCODE_TRAEGER;CO-03;Package keeps the carrier code portimao (collides with an installed Portimão mod);Paket behält den Trägercode portimao (kollidiert mit einer installierten Portimão-Mod)
+PVS_PROFIL;PL-01;PVS not along the track (original PVS or “everything visible”);PVS nicht entlang der Strecke (Original-PVS bzw. „alles sichtbar“)
+GEOMETRIE_ABGESCHALTET;PK-03;Build without new geometry or minimap – not a complete driving package;Bau ohne neue Geometrie bzw. Minimap – kein vollständiges Fahrpaket
+KI_BREMSLINIE_AUSSERHALB_KURVE;KI-01;Main braking line is not inside a corner (corner_start … next corner_end);Haupt-Bremslinie liegt nicht innerhalb einer Kurve (corner_start … nächstes corner_end)
+KI_BREMSLINIEN_ABSTAND;KI-02;Main braking lines too close (same gate or < 3 gates apart);Haupt-Bremslinien zu dicht (gleiches Gate bzw. < 3 Gates Abstand)
+KI_BREMSLINIEN_ID_SATZ;KI-02;Braking-line IDs duplicated or not equal to the ID set of the .brakelinesettings;Bremslinien-IDs doppelt oder nicht gleich dem ID-Satz der .brakelinesettings
+KI_VERWEIS_UNGUELTIG;KI-05;AI line refers to a gate that does not exist;KI-Linie verweist auf ein nicht vorhandenes Gate
+KI_BOX_KURVEN_FEHLEN;KI-03;AI pit route without corner lines (R4);KI-Boxenroute ohne Kurvenlinien (R4)
+KI_BOX_BREMSLINIE_AUSSERHALB_KURVE;KI-03;Pit braking line not inside a corner of the pit route (R4);Box-Bremslinie nicht innerhalb einer Kurve der Boxenroute (R4)
+KI_BOX_PAIR_ID_FEHLT;KI-03;No pair_id between pit exit corner and track corner (R5);Kein pair_id zwischen Boxenausfahrts- und Streckenkurve (R5)
+KI_ROUTE_OHNE_RAUMWECHSEL;KI-07;AI route without a change of passing space;KI-Route ohne Wechsel des Überholraums
+ZONE_ZEITFAHR_TRIGGER_AUSSERHALB;ZO-01;ai_flying_lap_trigger does not overlap rollingstart_tt;ai_flying_lap_trigger überlappt rollingstart_tt nicht
+ZONE_ZEITFAHR_ABSTAND;ZO-01;Time trial/ERS/X-mode zone not at the template's distance from the finish line;Zeitfahr-/ERS-/X-Mode-Zone nicht im Meterabstand der Vorlage zur Ziellinie
+ZONE_BEREICH_UNGUELTIG;ZO-03;Zone with progress outside 0…1 or unknown spline;Zone mit Fortschritt außerhalb 0…1 oder unbekannter Spline
+ZONE_NAME_MEHRDEUTIG;ZO-02;Same zone name with different ranges;Gleicher Zonenname mit verschiedenen Bereichen
+ZONE_DRS_PAARE;ZO-02;DRS detection/activation without a unique ID pair;DRS-Erkennung/-Aktivierung ohne eindeutiges ID-Paar
+ZONE_DRL_UEBERLAPPUNG;ZO-04;drl zones of the main line overlap;drl-Zonen der Hauptlinie überlappen sich
+TRACKSPACE_FORM;ZO-03;TrackSpace needs exactly one closed main line (without duplicate point) and one open pit line;TrackSpace braucht genau eine geschlossene Hauptlinie (ohne Doppelpunkt) und eine offene Boxenlinie
+BOX_SPLINE_NICHT_VERLAENGERT;BO-01;Pit spline does not reach far enough before the entry/after the exit, or starts/ends beside the main line;Boxen-Spline reicht nicht weit genug vor die Einfahrt/hinter die Ausfahrt bzw. beginnt/endet neben der Hauptlinie
+BOX_SPLINE_SPRUNG;BO-03;Pit spline jumps sideways (not continuous, R3);Boxen-Spline springt quer (nicht stetig, R3)
+BOX_TS_ABDECKUNG;BO-04;TS pit volumes do not fully cover the pit spline (R1);TS-Box-Volumes decken die Boxen-Spline nicht ganz ab (R1)
+BOX_IN_HAUPT_TS;BO-05;Pit lane (limiter area) lies inside the main TS volumes (R2);Boxengasse (Limiterbereich) liegt in den Haupt-TS-Volumes (R2)
+LOGIK_HOEHE_KONVENTION;PH-02;Logic lies on the driving physics (Portimão: +0.20 m, grid slots +0.03 m);Logik liegt auf der Fahrphysik (Portimão: +0,20 m, Plätze +0,03 m)
+PLATZ_NICHT_AUF_FLAECHE;PH-01;Car slot does not lie on a matching surface of the new mesh;Fahrzeugplatz liegt nicht auf passender Fläche des neuen Netzes
+TRN_HOEHE_ABWEICHEND;PH-03;Driving physics deviates > 1 m from the generator mesh on the track surface;Fahrphysik weicht auf der Fahrbahn > 1 m vom Generatornetz ab
+PHYSIK_VERBLIEBEN;PH-04;Remaining carrier instances with collision;Verbliebene Träger-Instanzen mit Kollision
+ERP_PARSE_FEHLER;PK-01;Changed resource cannot be read back;Geänderte Ressource lässt sich nicht neu lesen
+ERP_MD5_FALSCH;PK-02;Resource with wrong MD5;Ressource mit falschem MD5
+ERP_MD5_TRAEGER_ALTLAST;PK-02;Known wrong MD5 of the unchanged Portimão carrier (“checked with carrier deviation”);Bekannte falsche MD5 des unveränderten Portimão-Trägers („mit Trägerabweichung geprüft“)
+MINIMAP_ECKEN_UNGERUNDET;MM-01;Minimap corner points not rounded to mm;Minimap-Eckpunkte nicht auf mm gerundet
+ZONE_MANIFEST_ERS;ZO-02;Manifest ERS values do not match the ERS zones;Manifest-ERS-Werte passen nicht zu den ERS-Zonen
+PAKET_PRUEFUNG;PK-01;Deep package check reports an error;Tiefe Paketprüfung meldet einen Fehler
+UMG_DATEI;UM-01;umgebung.json unreadable or invalid;umgebung.json nicht lesbar oder ungültig
+UMG_MODELL_UNBEKANNT;UM-02;Environment model not in the catalogue;Umgebungsmodell nicht im Katalog
+UMG_AUSSERHALB;UM-03;Environment object outside the track area (hole of the outer terrain);Umgebungsobjekt außerhalb des Streckenbereichs (Loch des Außenterrains)
+UMG_AUF_FAHRBAHN;UM-04;Environment object on the road, kerb, gravel or close to the wall;Umgebungsobjekt auf der Fahrbahn, Randstein, Kies oder nahe an der Mauer
+UMG_VIELE;UM-05;Very many environment objects (more than 3,000, performance);Sehr viele Umgebungsobjekte (mehr als 3.000, Leistung)
+UMG_HUEGEL_LAGE;UM-06;Hill/hollow with its centre outside the track area;Hügel/Senke mit Mitte außerhalb des Streckenbereichs
+UMG_BERG_LAGE;UM-07;Mountain with its centre inside the track area or more than 12 km from the centre;Berg mit Mitte im Streckenbereich oder mehr als 12 km von der Mitte entfernt
+UMG_BERG_RAND;UM-08;Mountain reaches the edge of the track area and is cut off there;Berg reicht an den Rand des Streckenbereichs und wird dort abgeschnitten

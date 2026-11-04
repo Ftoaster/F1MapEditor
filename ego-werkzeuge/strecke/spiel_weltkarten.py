@@ -56,7 +56,7 @@ def textur_kennung(a, name):
         # Mod 1.0.2 legt für die Sponsorenfläche Kopien unter stageN/<hash>/ an; die Bodenkarte liegt in terrain/textures/
         treffer = [k for k in treffer if "/terrain/textures/" in k] or treffer
     if len(treffer) != 1:
-        raise KeyError("Textur %s: %d Treffer" % (name, len(treffer)))
+        raise KeyError("Texture %s: %d matches" % (name, len(treffer)))
     return treffer[0]
 
 
@@ -65,10 +65,10 @@ def material_textur_kennung(a, material, slot="me_macroMap"):
     Außenterrain-Karten ``stage24_<hash>.tif`` statt ``por_terrain_a_02_m.tif``; das Material kennt den echten Namen."""
     treffer = [x for x in a if x.resource_type == "GfxMaterialRes" and x.identifier.endswith("/" + material)]
     if len(treffer) != 1:
-        raise KeyError("Material %s: %d Treffer" % (material, len(treffer)))
+        raise KeyError("Material %s: %d matches" % (material, len(treffer)))
     textur = grafik.Material.aus_bytes(treffer[0].data()).texturen().get(slot)
     if not textur or a.find(textur + ".image") is None:
-        raise KeyError("Material %s: Textur im Slot %s fehlt (%s)" % (material, slot, textur))
+        raise KeyError("Material %s: texture in slot %s is missing (%s)" % (material, slot, textur))
     return textur + ".image"
 
 
@@ -231,7 +231,7 @@ def ideallinie_stationen(a, ideal):
                 pos.append(n.positionen)
                 zus.append(n.uv_zusatz)
     if not pos:
-        raise KeyError("kein Asphaltnetz por_track_a")
+        raise KeyError("no asphalt mesh por_track_a")
     pos, zus = np.concatenate(pos), np.concatenate(zus)
     pz = np.asarray(ideal["position"], float)[:, (0, 2)]
     pr = np.asarray(ideal["progress"], float)
@@ -420,7 +420,7 @@ def biom_wueste(a, code, spielordner=None):
         geaendert.append(r.identifier.rsplit("/", 1)[-1])
     fehlend = [k for k in set(tausch.values()) if a.find(k) is None]
     if fehlend:
-        raise RuntimeError("Biom Wüste: Texturen fehlen nach dem Kopieren: %s" % fehlend)
+        raise RuntimeError("Desert biome: textures are missing after copying: %s" % fehlend)
     return {"grasmaterialien": len(geaendert), "ressourcen_neu": len(neu), "mipmaps": len(mips), "offen": fehlt}, list(mips)
 
 
@@ -443,9 +443,9 @@ def weltkarten_einsetzen(a, code, npz, ideallinie, biom="standard", farbton="sta
 
     Muss nach Geometrie und Bergen laufen; die Strecke braucht echte Welt-UV. Rückgabe: (Bericht, Mip-Dateien fürs Paket)."""
     if biom not in BIOME:
-        raise ValueError("Biom %r unbekannt" % biom)
+        raise ValueError("Biome %r unknown" % biom)
     if farbton not in FARBTOENE:
-        raise ValueError("Farbton %r unbekannt" % farbton)
+        raise ValueError("Colour tone %r unknown" % farbton)
     bericht = {"biom": biom, "farbton": farbton}
     bericht["innen"] = innenkarten(a, arbeit, npz, flecken_bis_m=40.0, bewuchs=biom != "wueste")
     z, w, breite = ideallinie_stationen(a, ideallinie)

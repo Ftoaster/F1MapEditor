@@ -34,7 +34,7 @@ def setzen(versatz) -> tuple:
         versatz = [t for t in versatz.replace(";", ",").split(",") if t.strip()]
     v = tuple(float(x) for x in versatz)
     if len(v) != 3 or not all(np.isfinite(v)):
-        raise ValueError("Versatz braucht drei endliche Zahlen (dx, dy, dz): %r" % (versatz,))
+        raise ValueError("Offset needs three finite numbers (dx, dy, dz): %r" % (versatz,))
     VERSATZ = v
     return VERSATZ
 
@@ -49,7 +49,7 @@ def matrix(m: Sequence[float]) -> list:
     den Elementen 12–14, siehe docs/formate/pkg.md)."""
     m = list(m)
     if len(m) != 16:
-        raise ValueError("4×4-Matrix mit 16 Werten erwartet")
+        raise ValueError("4×4 matrix with 16 values expected")
     for i in range(3):
         m[12 + i] += VERSATZ[i]
     return m

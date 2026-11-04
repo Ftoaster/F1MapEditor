@@ -35,7 +35,7 @@ DATEI = "bildvorlage.png"
 TREFFER_PX = 10
 #: Stützpunkte, die aus einer Ein-Klick-Runde entstehen
 EIN_KLICK_PUNKTE = 10
-MODI = {"linie": N_("Kartenansicht (Linien)"), "farbe": N_("Luftbild (Farbe)")}
+MODI = {"linie": N_("Map view (lines)"), "farbe": N_("Satellite (colour)")}
 FARBE_WEG, FARBE_GUELTIG, FARBE_B, FARBE_FEHLER, FARBE_MESSEN = "#FF4FD8", "#5BD08A", "#FFB347", "#E5484D", "#FFD184"
 
 
@@ -47,9 +47,9 @@ def bild_png(daten):
         bild = Image.open(io.BytesIO(daten))
         bild.load()
     except (UnidentifiedImageError, OSError) as error:
-        raise ValueError(tr("Bild nicht lesbar: {error}", error=error)) from None
+        raise ValueError(tr("Image cannot be read: {error}", error=error)) from None
     if bild.width < 50 or bild.height < 50:
-        raise ValueError(tr("Bild zu klein ({breite} × {hoehe} Pixel).", breite=bild.width, hoehe=bild.height))
+        raise ValueError(tr("Image too small ({breite} × {hoehe} pixels).", breite=bild.width, hoehe=bild.height))
     puffer = io.BytesIO()
     bild.convert("RGB").save(puffer, "PNG")
     return puffer.getvalue(), bild.size
@@ -204,7 +204,7 @@ class Nachzeichner(QObject):
                     self.rgb, self.faktor, _ = nz.bild_laden(daten)
                     self.pixmap = QPixmap.fromImage(QImage.fromData(daten))
                 except (OSError, ValueError) as error:
-                    self.fehler = tr("Bild nicht lesbar: {error}", error=error)
+                    self.fehler = tr("Image cannot be read: {error}", error=error)
         if self._kb_key is not None and self._kb_key != self._soll_kb():
             self._gen += 1                       # Erkennung oder Start geändert: alles neu
             self.kb = self._kb_key = self.pruefung = self.vorschau = None
@@ -297,7 +297,7 @@ class Nachzeichner(QObject):
                 self.kb, self._kb_key = (None if fehler else ergebnis), key
                 self.wege, self.alternativen, self.pruefung, self.vorschau = {}, {}, None, None
                 if fehler:
-                    self.fehler = tr("Bild nicht auswertbar: {error}", error=ergebnis)
+                    self.fehler = tr("Image cannot be analysed: {error}", error=ergebnis)
             elif art == "weg":
                 self.wege[key] = None if fehler else ergebnis
             elif art == "alt":
@@ -305,12 +305,12 @@ class Nachzeichner(QObject):
             elif art == "pruefen":
                 self.pruefung = (key, None, None) if fehler else (key, ergebnis[0], ergebnis[1])
                 if fehler:
-                    self.fehler = tr("Prüfung fehlgeschlagen: {error}", error=ergebnis)
+                    self.fehler = tr("Check failed: {error}", error=ergebnis)
             elif art == "vorschau":
                 self.vorschau = (key, None if fehler else ergebnis[0])
             elif art == "ein_klick":
                 if fehler:
-                    self.fehler = tr("Keine Runde gefunden – bitte weitere Stützpunkte in Fahrtrichtung setzen")
+                    self.fehler = tr("No lap found – please set more guide points in driving direction")
                 else:
                     self._ein_klick_uebernehmen(ergebnis)
         self.geaendert.emit()
@@ -324,19 +324,19 @@ class Nachzeichner(QObject):
         def setzen(v):
             v["punkte"] = [[round(p[0] / self.faktor, 2), round(p[1] / self.faktor, 2)] for p in punkte]
             v["geschlossen"] = True
-        self.document.edit_bild(tr("Runde automatisch suchen"), setzen)
+        self.document.edit_bild(tr("Find lap automatically"), setzen)
 
     # ------------------------------------------------------------------ Befehle (je ein Undo-Schritt)
     def anhaengen(self, u, w):
-        self.document.edit_bild(tr("Stützpunkt setzen"), lambda v: v.setdefault("punkte", []).append([round(u, 2), round(w, 2)]))
+        self.document.edit_bild(tr("Set guide point"), lambda v: v.setdefault("punkte", []).append([round(u, 2), round(w, 2)]))
 
     def einfuegen(self, index, u, w):
-        self.document.edit_bild(tr("Stützpunkt einfügen"), lambda v: v["punkte"].insert(index, [round(u, 2), round(w, 2)]))
+        self.document.edit_bild(tr("Insert guide point"), lambda v: v["punkte"].insert(index, [round(u, 2), round(w, 2)]))
 
     def verschieben(self, index, u, w):
         def change(v):
             v["punkte"][index] = [round(u, 2), round(w, 2)]
-        self.document.edit_bild(tr("Stützpunkt verschieben"), change)
+        self.document.edit_bild(tr("Move guide point"), change)
 
     def loeschen(self, index=None):
         if not self.punkte:
@@ -346,14 +346,14 @@ class Nachzeichner(QObject):
             v["punkte"].pop(len(v["punkte"]) - 1 if index is None else index)
             if len(v["punkte"]) < 3:
                 v["geschlossen"] = False
-        self.document.edit_bild(tr("Stützpunkt löschen"), change)
+        self.document.edit_bild(tr("Delete guide point"), change)
 
     def alle_loeschen(self):
-        self.document.edit_bild(tr("Alle Stützpunkte löschen"), lambda v: v.update(punkte=[], geschlossen=False))
+        self.document.edit_bild(tr("Delete all guide points"), lambda v: v.update(punkte=[], geschlossen=False))
 
     def schliessen(self):
         if len(self.punkte) >= 3 and not self.geschlossen:
-            self.document.edit_bild(tr("Runde schließen"), lambda v: v.update(geschlossen=True))
+            self.document.edit_bild(tr("Close lap"), lambda v: v.update(geschlossen=True))
 
     def ein_klick(self):
         """Ganze Runde vom ersten Stützpunkt aus suchen (ersetzt die Punkte durch Punkte entlang der Runde)."""
@@ -368,7 +368,7 @@ class Nachzeichner(QObject):
         self.document.edit_bild(text, change)
 
     def massstab(self, m_pro_px, geprueft):
-        self.document.edit_bild(tr("Maßstab festlegen"), lambda v: massstab_setzen(v, m_pro_px, geprueft))
+        self.document.edit_bild(tr("Set scale"), lambda v: massstab_setzen(v, m_pro_px, geprueft))
 
     def messen_starten(self):
         self.messen = []
@@ -523,30 +523,31 @@ class Nachzeichner(QObject):
         if self.fehler:
             return self.fehler
         if self.vorlage is not None and not self.bereit:
-            return tr("Das Bild der Vorlage fehlt im Projektordner ({datei}) · Projekt → „Bildvorlage laden …“",
+            return tr(("The reference image is missing in the project folder ({datei}) · Project → “Load reference "
+                       "image …”"),
                       datei=self.vorlage.get("datei", "bildvorlage.png"))
         if self.messen is not None:
-            return (tr("Maßstab: Anfang der Maßstabsleiste anklicken (1/2) · Esc: abbrechen") if not self.messen else
-                    tr("Maßstab: Ende der Maßstabsleiste anklicken (2/2) · Esc: abbrechen"))
+            return (tr("Scale: click the start of the scale bar (1/2) · Esc: cancel") if not self.messen else
+                    tr("Scale: click the end of the scale bar (2/2) · Esc: cancel"))
         n = len(self.punkte)
-        rechnet = tr(" · rechnet …") if self.rechnet else ""
+        rechnet = tr(" · computing …") if self.rechnet else ""
         if self.ohne_weg():
-            return tr("Zwischen zwei Stützpunkten wurde kein Weg gefunden – Punkt näher an die Fahrbahn ziehen") + rechnet
+            return tr("No route found between two guide points – drag the point closer to the road") + rechnet
         if n == 0:
-            text = tr("Klicke auf die Start-Ziel-Linie der Strecke (erster Stützpunkt)")
+            text = tr("Click the start/finish line of the track (first guide point)")
         elif n == 1:
-            text = tr("Nächsten Punkt in Fahrtrichtung anklicken · rechts: „Runde automatisch suchen“")
+            text = tr("Click the next point in driving direction · right: “Find lap automatically”")
         elif not self.geschlossen:
-            text = tr("Nächsten Punkt in Fahrtrichtung anklicken · Klick auf den Start oder Enter schließt die Runde · "
-                      "Rücktaste: letzten Punkt löschen")
+            text = tr("Click the next point in driving direction · click the start or press Enter to close the lap · "
+                      "Backspace: delete last point")
         elif self.befund is not None and self.befund["fehler"]:
-            text = tr("Rote Ringe: hier stimmt die Runde nicht – klicke auf die Fahrbahn, wo sie weitergeht")
+            text = tr("Red rings: the lap is wrong here – click the road where it continues")
         elif self.befund is not None:
-            text = tr("Runde gültig · rechts „Als Strecke übernehmen“ · Punkte ziehen passt sie an")
+            text = tr("Lap valid · right: “Use as track” · drag points to adjust it")
         else:
-            text = tr("Runde wird geprüft")
+            text = tr("Checking lap")
         if any(self.alternativen.get(self._paar_key(i, j)) is not None for i, j in self.paare()):
-            text += tr(" · orange „B“: zweiter möglicher Weg, Klick darauf wählt ihn")
+            text += tr(" · orange “B”: second possible route, click it to choose it")
         return text + rechnet
 
     # ------------------------------------------------------------------ Karte: Zeichnen
@@ -620,7 +621,7 @@ class Nachzeichner(QObject):
             if erster:
                 painter.setPen(QColor("#F1F5F9"))
                 painter.drawText(QPointF(x + 10, y - 8), tr("Start") if self.geschlossen or len(self.punkte) < 3
-                                 else tr("Start · Klick schließt"))
+                                 else tr("Start · click closes"))
         if self.messen:
             painter.setPen(QPen(QColor(FARBE_MESSEN), 2))
             a = to_view(*szene(v, *self.messen[0]))
@@ -646,62 +647,63 @@ class NachzeichnenPanel(QWidget):
         self.info.setWordWrap(True)
         layout.addWidget(self.info)
         grid = QGridLayout()
-        grid.addWidget(QLabel(tr("Deckkraft")), 0, 0)
+        grid.addWidget(QLabel(tr("Opacity")), 0, 0)
         self.deckkraft = QSlider(Qt.Horizontal)
         self.deckkraft.setRange(10, 100)
-        self.deckkraft.setToolTip(tr("Wie stark das Bild unter der Strecke zu sehen ist"))
+        self.deckkraft.setToolTip(tr("How strongly the image shows under the track"))
         self.deckkraft.sliderReleased.connect(self._deckkraft)
         grid.addWidget(self.deckkraft, 0, 1)
-        grid.addWidget(QLabel(tr("Bildart")), 1, 0)
+        grid.addWidget(QLabel(tr("Image type")), 1, 0)
         self.modus = QComboBox()
         for key, text in MODI.items():
             self.modus.addItem(tr(text), key)
-        self.modus.setToolTip(tr("Kartenansicht: Strecke als gezeichnete Linie (empfohlen). Luftbild: Fahrbahn nach "
-                                 "ihrer Farbe am ersten Stützpunkt."))
+        self.modus.setToolTip(tr("Map view: track drawn as a line (recommended). Satellite: road surface by its colour "
+                                 "at the first guide point."))
         self.modus.activated.connect(self._modus)
         grid.addWidget(self.modus, 1, 1)
-        grid.addWidget(QLabel(tr("Meter je Pixel")), 2, 0)
+        grid.addWidget(QLabel(tr("Metres per pixel")), 2, 0)
         self.m_pro_px = QDoubleSpinBox()
         self.m_pro_px.setDecimals(4)
         self.m_pro_px.setRange(0.01, 100.0)
-        self.m_pro_px.setToolTip(tr("Maßstab des Bilds. Am sichersten über „Maßstab messen“ an der Maßstabsleiste."))
+        self.m_pro_px.setToolTip(tr("Scale of the image. Most reliable via “Measure scale” on the scale bar."))
         self.m_pro_px.editingFinished.connect(self._m_pro_px)
         grid.addWidget(self.m_pro_px, 2, 1)
-        grid.addWidget(QLabel(tr("Soll-Länge")), 3, 0)
+        grid.addWidget(QLabel(tr("Target length")), 3, 0)
         self.laenge = QDoubleSpinBox()
         self.laenge.setDecimals(0)
         self.laenge.setRange(0, 30000)
         self.laenge.setSuffix(" m")
-        self.laenge.setSpecialValueText(tr("unbekannt"))
-        self.laenge.setToolTip(tr("Offizielle Streckenlänge. Mit gemessenem Maßstab prüft der Editor damit, ob die Runde "
-                                  "vollständig ist."))
+        self.laenge.setSpecialValueText(tr("unknown"))
+        self.laenge.setToolTip(tr("Official track length. With a measured scale the editor uses it to check that the "
+                                  "lap is complete."))
         self.laenge.editingFinished.connect(self._laenge)
         grid.addWidget(self.laenge, 3, 1)
         layout.addLayout(grid)
         row = QHBoxLayout()
-        self.messen = QPushButton(tr("Maßstab messen"))
-        self.messen.setToolTip(tr("Zwei Klicks auf Anfang und Ende der Maßstabsleiste im Bild, dann ihre Länge eingeben"))
+        self.messen = QPushButton(tr("Measure scale"))
+        self.messen.setToolTip(tr(("Two clicks on the start and end of the scale bar in the image, then enter its "
+                                   "length")))
         self.messen.clicked.connect(werkzeug.messen_starten)
-        self.aus_soll = QPushButton(tr("Maßstab aus Soll-Länge"))
-        self.aus_soll.setToolTip(tr("Maßstab so, dass die erkannte Runde die Soll-Länge hat. Ob die Runde vollständig ist, "
-                                    "lässt sich dann nicht mehr prüfen."))
+        self.aus_soll = QPushButton(tr("Scale from target length"))
+        self.aus_soll.setToolTip(tr("Scale so that the detected lap has the target length. Whether the lap is complete "
+                                    "can then no longer be checked."))
         self.aus_soll.clicked.connect(self._aus_soll)
         row.addWidget(self.messen)
         row.addWidget(self.aus_soll)
         layout.addLayout(row)
         row = QHBoxLayout()
-        self.automatisch = QPushButton(tr("Runde automatisch suchen"))
-        self.automatisch.setToolTip(tr("Vom ersten Stützpunkt aus die ganze Runde suchen (klappt bei klaren Kartenbildern)"))
+        self.automatisch = QPushButton(tr("Find lap automatically"))
+        self.automatisch.setToolTip(tr("Find the whole lap from the first guide point (works on clear map images)"))
         self.automatisch.clicked.connect(werkzeug.ein_klick)
-        self.schliessen = QPushButton(tr("Runde schließen"))
+        self.schliessen = QPushButton(tr("Close lap"))
         self.schliessen.clicked.connect(werkzeug.schliessen)
         row.addWidget(self.automatisch)
         row.addWidget(self.schliessen)
         layout.addLayout(row)
         row = QHBoxLayout()
-        self.letzter = QPushButton(tr("Letzten Punkt löschen"))
+        self.letzter = QPushButton(tr("Delete last point"))
         self.letzter.clicked.connect(lambda: werkzeug.loeschen())
-        self.alle = QPushButton(tr("Alle Punkte löschen"))
+        self.alle = QPushButton(tr("Delete all points"))
         self.alle.clicked.connect(werkzeug.alle_loeschen)
         row.addWidget(self.letzter)
         row.addWidget(self.alle)
@@ -710,11 +712,11 @@ class NachzeichnenPanel(QWidget):
         self.pruefliste.setTextFormat(Qt.RichText)
         self.pruefliste.setWordWrap(True)
         layout.addWidget(self.pruefliste)
-        self.uebernehmen_button = QPushButton(tr("Als Strecke übernehmen"))
+        self.uebernehmen_button = QPushButton(tr("Use as track"))
         self.uebernehmen_button.setObjectName("primary")
         self.uebernehmen_button.clicked.connect(self.uebernehmen)
         layout.addWidget(self.uebernehmen_button)
-        self.entfernen_button = QPushButton(tr("Bildvorlage entfernen"))
+        self.entfernen_button = QPushButton(tr("Remove reference image"))
         self.entfernen_button.clicked.connect(self.entfernen)
         layout.addWidget(self.entfernen_button)
         layout.addStretch(1)
@@ -723,11 +725,11 @@ class NachzeichnenPanel(QWidget):
 
     def _deckkraft(self):
         if not self._laden:
-            self.werkzeug.einstellen(tr("Deckkraft der Bildvorlage"), deckkraft=self.deckkraft.value() / 100.0)
+            self.werkzeug.einstellen(tr("Opacity of the reference image"), deckkraft=self.deckkraft.value() / 100.0)
 
     def _modus(self):
         if not self._laden:
-            self.werkzeug.einstellen(tr("Bildart der Vorlage"), modus=self.modus.currentData())
+            self.werkzeug.einstellen(tr("Image type of the reference image"), modus=self.modus.currentData())
 
     def _m_pro_px(self):
         v = self.werkzeug.vorlage
@@ -738,7 +740,7 @@ class NachzeichnenPanel(QWidget):
         v = self.werkzeug.vorlage
         wert = self.laenge.value() or None
         if not self._laden and v and wert != v.get("laenge_soll_m"):
-            self.werkzeug.einstellen(tr("Soll-Länge der Bildvorlage"), laenge_soll_m=wert)
+            self.werkzeug.einstellen(tr("Target length of the reference image"), laenge_soll_m=wert)
 
     def _aus_soll(self):
         m = self.werkzeug.laenge_aus_soll()
@@ -750,8 +752,8 @@ class NachzeichnenPanel(QWidget):
         v = w.vorlage
         self.setEnabled(v is not None)
         if v is None:
-            self.info.setText(tr("Keine Bildvorlage. Projekt → „Bildvorlage laden …“ oder ein Bildschirmfoto mit Strg+V "
-                                 "einfügen."))
+            self.info.setText(tr("No reference image. Project → “Load reference image …” or paste a screenshot with "
+                                 "Ctrl+V."))
             self.pruefliste.setText("")
             return
         self._laden = True
@@ -766,8 +768,8 @@ class NachzeichnenPanel(QWidget):
         finally:
             self._laden = False
         breite, hoehe, m = v["breite_px"], v["hoehe_px"], v["m_pro_px"]
-        massstab = (tr("Maßstab gemessen") if v.get("massstab_geprueft") else tr("Maßstab ungeprüft"))
-        self.info.setText(tr("Bild {breite} × {hoehe} Pixel = {mb} × {mh} · {massstab}", breite=breite, hoehe=hoehe,
+        massstab = (tr("Scale measured") if v.get("massstab_geprueft") else tr("Scale not checked"))
+        self.info.setText(tr("Image {breite} × {hoehe} pixels = {mb} × {mh} · {massstab}", breite=breite, hoehe=hoehe,
                              mb=zahl(breite * m, 0, "m"), mh=zahl(hoehe * m, 0, "m"), massstab=massstab))
         n = len(w.punkte)
         self.automatisch.setEnabled(n == 1 and w.bereit)
@@ -788,20 +790,20 @@ class NachzeichnenPanel(QWidget):
             return f"<span style='color:{farbe}'><b>{zeichen}</b> {text}</span>"
         regeln = {f["regel"] for f in befund["fehler"]} if befund else set()
         geprueft = befund is not None
-        zeilen = [zeile(True if w.geschlossen else None, tr("Runde geschlossen")),
-                  zeile(("ueberschneidung" not in regeln) if geprueft else None, tr("Keine Überschneidung")),
-                  zeile(("doppelt" not in regeln) if geprueft else None, tr("Kein Stück doppelt befahren"))]
+        zeilen = [zeile(True if w.geschlossen else None, tr("Lap closed")),
+                  zeile(("ueberschneidung" not in regeln) if geprueft else None, tr("No crossing")),
+                  zeile(("doppelt" not in regeln) if geprueft else None, tr("No section driven twice"))]
         soll = v.get("laenge_soll_m")
         if geprueft:
             laenge = zahl(befund["laenge_m"], 0, "m")
             if soll and v.get("massstab_geprueft"):
-                zeilen.append(zeile("laenge" not in regeln, tr("Vollständig: Länge {laenge} (Soll {soll})", laenge=laenge,
+                zeilen.append(zeile("laenge" not in regeln, tr("Complete: length {laenge} (target {soll})", laenge=laenge,
                                                                soll=zahl(soll, 0, "m"))))
             else:
-                zeilen.append(zeile(None, tr("Länge {laenge} · Vollständigkeit ungeprüft (Maßstab messen und Soll-Länge "
-                                             "eintragen)", laenge=laenge)))
+                zeilen.append(zeile(None, tr("Length {laenge} · completeness not checked (measure the scale and enter "
+                                             "the target length)", laenge=laenge)))
         else:
-            zeilen.append(zeile(None, tr("Länge und Vollständigkeit")))
+            zeilen.append(zeile(None, tr("Length and completeness")))
         if w.rechnet:
-            zeilen.append("<span style='color:#8D9BA9'>" + tr("rechnet …") + "</span>")
+            zeilen.append("<span style='color:#8D9BA9'>" + tr("computing …") + "</span>")
         return "<br>".join(zeilen)

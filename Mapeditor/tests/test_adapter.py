@@ -135,4 +135,4 @@ def test_grosser_ring_hat_kurven_fuer_alle_bremslinien(tmp_path):
 def test_strecke_ausserhalb_des_aussenterrains_nennt_den_versatz(tmp_path):
     ergebnis = calculate_analysis({"raw": ring(950.0, 300), "basis": str(tmp_path), "shift": [0, 0, 0]})
     meldungen = [i for i in ergebnis["issues"] if i["kurz"] == "KO-02"]
-    assert len(meldungen) == 1 and meldungen[0]["level"] == "Fehler" and "Spielweltversatz auf [" in meldungen[0]["text"]
+    assert len(meldungen) == 1 and meldungen[0]["level"] == "Fehler" and "game world offset to [" in meldungen[0]["text"]

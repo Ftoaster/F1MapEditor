@@ -402,15 +402,16 @@ class BauAbbruch(Exception):
 
 #: Phasen des Baus mit Anteil am Gesamtfortschritt (gemessen am Bau `--profil empfohlen`, 16.10.2026: 149 s;
 #: Fortschritt = Anteil beim Phasenbeginn, keine Zeitprognose).
-PHASEN = (("vorbereiten", "Eingabe und Optionen", 0.005), ("pruefen_vorab", "Prüfung ohne Bau", 0.005),
-          ("generator", "Generator", 0.04), ("traeger", "Träger entpacken/erfassen", 0.03),
-          ("geometrie", "Geometrie und Fahrphysik", 0.08), ("minimap", "Minimap", 0.04),
-          ("umgebung", "Umgebung (Bäume, Objekte)", 0.01), ("welt", "Welt aufräumen", 0.01),
-          ("logik", "Streckenlogik", 0.01), ("pruefen_logik", "Prüfung der Logik", 0.005), ("licht", "Licht", 0.005),
-          ("erp_schreiben", "ERP schreiben", 0.04), ("pvs", "PVS", 0.25), ("pruefen_bau", "ERP neu lesen und prüfen", 0.06),
-          ("draufsichten", "Draufsichten", 0.01), ("paket", "Paket schreiben", 0.36),
-          ("paket_pruefen", "Tiefe Paketprüfung", 0.015), ("swofty", "Swofty-Addon", 0.005),
-          ("abschluss", "Abschluss", 0.02))
+PHASEN = (("vorbereiten", "Input and options", 0.005), ("pruefen_vorab", "Check without build", 0.005),
+          ("generator", "Generator", 0.04), ("traeger", "Unpacking and reading the carrier", 0.03),
+          ("geometrie", "Geometry and driving physics", 0.08), ("minimap", "Minimap", 0.04),
+          ("umgebung", "Environment (trees, objects)", 0.01), ("welt", "Cleaning up the world", 0.01),
+          ("logik", "Track logic", 0.01), ("pruefen_logik", "Checking the logic", 0.005), ("licht", "Lighting", 0.005),
+          ("erp_schreiben", "Writing the ERP", 0.04), ("pvs", "PVS", 0.25), ("pruefen_bau", ("Re-reading and checking the "
+                                                                                           "ERP"), 0.06),
+          ("draufsichten", "Top views", 0.01), ("paket", "Writing the package", 0.36),
+          ("paket_pruefen", "Deep package check", 0.015), ("swofty", "Swofty addon", 0.005),
+          ("abschluss", "Finishing", 0.02))
 _PHASE_START = {}
 _s = 0.0
 for _n, _t, _w in PHASEN:

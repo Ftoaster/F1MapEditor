@@ -57,7 +57,7 @@ def box_qp(band, q, lo, hi, max_iter=60000, toleranz=1e-7, toleranz_min=0.0):
     überschrittenem KKT-Rest wird abgebrochen statt still eine Näherung auszugeben.
     """
     if np.any(lo > hi):
-        raise ValueError("Fahrbahn für den Sicherheitsabstand zu schmal")
+        raise ValueError("Road too narrow for the safety margin")
     lip = float(np.max(np.sum(np.abs(band), axis=0)))
     diag = float(np.mean(band[2]))
     x = np.clip(np.zeros(len(q)), lo, hi)
@@ -76,7 +76,9 @@ def box_qp(band, q, lo, hi, max_iter=60000, toleranz=1e-7, toleranz_min=0.0):
         x += schub
     y, tk = x.copy(), 1.0
     rest = np.inf
-    for it in range(1, max_iter + 1):
+    # Bis zum Vierfachen von max_iter, bevor abgebrochen wird (4.11.2026: Catalunya, Las Vegas, Losail blieben nach
+    # 60.000 Schritten knapp über der Toleranz und konvergierten danach). Wer früher konvergiert, bricht wie bisher ab.
+    for it in range(1, 4 * max_iter + 1):
         neu = np.clip(y - (_bandprodukt(band, y) + q) / lip, lo, hi)
         tn = 0.5 * (1 + math.sqrt(1 + 4 * tk * tk))
         # Gradient-Neustart verhindert Schwingungen an aktiven Schranken.
@@ -92,7 +94,7 @@ def box_qp(band, q, lo, hi, max_iter=60000, toleranz=1e-7, toleranz_min=0.0):
     rest = float(np.max(np.abs(x - np.clip(
         x - (_bandprodukt(band,x)+q)/diag,lo,hi))))
     if rest >= toleranz:
-        raise RuntimeError("Ideallinie konvergiert nicht: KKT-Rest %.3g" % rest)
+        raise RuntimeError("Racing line does not converge: KKT residual %.3g" % rest)
     return x, {"verfahren": "zyklische_fuenf_diagonalen_projektion",
                "iterationen": it, "kkt_rest": rest, "kkt_toleranz": toleranz,
                "aktiv_unten": int(np.sum(x <= lo + 1e-6)),
@@ -111,7 +113,7 @@ def kruemmung_qp_admm(mitte, quelle, h, lo, hi, kmax, x0=None, max_iter=20000, t
     """
     n = len(mitte)
     if np.any(lo > hi):
-        raise ValueError("Fahrbahn für den Sicherheitsabstand zu schmal")
+        raise ValueError("Road too narrow for the safety margin")
     def op(x):
         return np.roll(x, 1) + mitte * x + np.roll(x, -1)
     A = np.zeros((n, n))
@@ -159,7 +161,7 @@ def kruemmung_qp_admm(mitte, quelle, h, lo, hi, kmax, x0=None, max_iter=20000, t
                 stuetz = (np.sum(hi*np.maximum(d1, 0) + lo*np.minimum(d1, 0))
                           + np.sum(u2*np.maximum(d2, 0) + l2*np.minimum(d2, 0)))
                 if ct < 1e-5*dn and stuetz < -1e-5*dn:
-                    raise ValueError("Krümmungsgrenze %.4g 1/m mit dieser Fahrbahn nicht einhaltbar"
+                    raise ValueError("Curvature limit %.4g 1/m cannot be met on this road"
                                      % kmax)
             # Adaptives rho (selten, jede Änderung kostet eine Inversion).
             if it % 200 == 0 and neuberechnet < 12:
@@ -171,7 +173,7 @@ def kruemmung_qp_admm(mitte, quelle, h, lo, hi, kmax, x0=None, max_iter=20000, t
                     Minv = matrix(rho)
                     neuberechnet += 1
     else:
-        raise RuntimeError("Krümmungsgrenze %.4g 1/m: ADMM konvergiert nicht (Rest primal %.3g, dual %.3g)"
+        raise RuntimeError("Curvature limit %.4g 1/m: ADMM does not converge (residual primal %.3g, dual %.3g)"
                            % (kmax, prim, dual))
     x = np.clip(x, lo, hi)
     kappa_lin = (op(x) + quelle)/(h*h)
@@ -394,7 +396,7 @@ def minimale_kruemmung(ml, schritt=3.0, sicherheit=1.5, iterationen=1, kruemmung
         j0 = np.searchsorted(s_auf, stat.s) % len(fein)
         a = strahl_schnitt(stat.pos[:, [0, 2]], stat.nl, fein, j0, 40)
         if not np.all(np.isfinite(a)):
-            raise RuntimeError("Iterierte Ideallinie: Rückprojektion auf die Mittellinie fehlgeschlagen")
+            raise RuntimeError("Iterated racing line: back-projection onto the centreline failed")
         return a
     a_neu = rueck(st)
     alpha = np.clip(a_neu, lo, hi)
@@ -493,12 +495,12 @@ def parametersatz_laden(name):
     pfad = FAHRZEUG_ORDNER / ("%s.json" % name)
     if not pfad.exists():
         verfuegbar = sorted(p.stem for p in FAHRZEUG_ORDNER.glob("*.json"))
-        raise ValueError("Fahrzeug-Parametersatz %r unbekannt (vorhanden: %s)"
+        raise ValueError("Vehicle parameter set %r unknown (available: %s)"
                          % (name, ", ".join(verfuegbar) or "keine"))
     with open(pfad, encoding="utf-8") as f:
         satz = json.load(f)
     if not isinstance(satz.get("fahrzeug"), dict):
-        raise ValueError("%s ist kein Fahrzeug-Parametersatz (Schlüssel 'fahrzeug' fehlt)" % pfad.name)
+        raise ValueError("%s is not a vehicle parameter set (key 'fahrzeug' is missing)" % pfad.name)
     return satz
 
 
@@ -524,7 +526,7 @@ def fahrzeug_erzeugen(p):
         return Fahrzeug(p)
     if modell == "ggv":
         return FahrzeugGGV(p)
-    raise ValueError("fahrzeug.modell muss punktmasse oder ggv sein, nicht %r" % modell)
+    raise ValueError("fahrzeug.modell must be punktmasse or ggv, not %r" % modell)
 
 
 class FahrzeugGGV:
@@ -695,7 +697,7 @@ def geschwindigkeitsprofil_ggv(kappa, ds, fahrzeug, hoehe=None):
         if max(a - b for a, b in zip(vorher, v)) < 1e-6:
             break
     else:
-        raise RuntimeError("g-g-v-Profil konvergiert nicht")
+        raise RuntimeError("g-g-v profile does not converge")
     v = np.asarray(v)
     v_next = np.roll(v, -1)
     a_laengs = (v_next ** 2 - v ** 2) / (2.0 * ds)
@@ -775,7 +777,7 @@ def geschwindigkeitsprofil(kappa, ds, fahrzeug):
         if np.max(vorher-v) < 1e-6:
             break
     else:
-        raise RuntimeError("Geschwindigkeitshüllkurve konvergiert nicht")
+        raise RuntimeError("Speed envelope does not converge")
     vollgas = np.zeros(n, dtype=bool)
     v_next = np.roll(v, -1)
     a_laengs = (v_next ** 2 - v ** 2) / (2.0 * ds)
@@ -955,7 +957,7 @@ def ideallinie_berechnen(ml, param):
     if pi.get("kruemmung_max") is not None:
         zusatz["kruemmung_max"] = float(pi["kruemmung_max"])
         if not zusatz["kruemmung_max"] > 0:
-            raise ValueError("ideallinie.kruemmung_max muss > 0 sein")
+            raise ValueError("ideallinie.kruemmung_max must be > 0")
     opt = minimale_kruemmung(ml, schritt=pi["schritt_m"], sicherheit=pi["sicherheitsabstand_m"],
                              **zusatz)
     st = ml.ref
@@ -969,7 +971,7 @@ def ideallinie_berechnen(ml, param):
     lo = -(st.wr - pi["sicherheitsabstand_m"])
     hi = st.wl - pi["sicherheitsabstand_m"]
     if np.any(lo > hi):
-        raise ValueError("Fahrbahn für den Sicherheitsabstand zu schmal")
+        raise ValueError("Road too narrow for the safety margin")
     if "alpha_fein" not in opt:
         alpha = np.clip(alpha, lo, hi)
     if pi.get("mindestzeit"):
