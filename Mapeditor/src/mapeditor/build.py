@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from .adapter import (BUILD_PVS, TRACK_CODES, BuildJob, ProcessJob, build_command, swofty_auswerten,
-                      swofty_installieren, swofty_installierte, swofty_programm, swofty_starten, check_key, default_carrier,
+                      swofty_installieren, swofty_installierte, swofty_programm, swofty_traeger_ids, swofty_traeger_plan, swofty_starten, check_key, default_carrier,
                       game_status_command, injector_command, parse_game_status, toolkit_path, worker_command)
 from .i18n import N_, meldung, tr, trn
 from .paths import writable_path
@@ -1155,16 +1155,17 @@ class BuildDialog(QDialog):
     # ------------------------------------------------------------------ Swofty Launcher
     def launcher_program(self):
         """``swofty.exe`` finden; beim ersten Mal wählen und in den Baueinstellungen merken."""
+        # Programmweit gemerkt (QSettings), damit nicht jedes Projekt neu fragt; der Projektwert bleibt als Rückfall
+        from .ansicht import settings as app_settings
+        store = app_settings()
         settings = self.project.manifest.get("bauen", {})
-        program = swofty_programm(settings.get("swofty_programm"))
+        program = swofty_programm(store.value("swofty/programm") or None) or swofty_programm(settings.get("swofty_programm"))
         if program is None:
             value, _ = QFileDialog.getOpenFileName(self, tr("Choose swofty.exe (the launcher's bin folder)"), "", "swofty.exe")
             if not value:
                 return None
             program = Path(value)
-            self.main.document.edit(tr("Change build settings"),
-                                    lambda raw, meta: meta.setdefault("bauen", {}).update(swofty_programm=str(program)))
-            self.main.save_project()
+        store.setValue("swofty/programm", str(program))
         return program
 
     def launcher_start(self, play):
@@ -1172,11 +1173,13 @@ class BuildDialog(QDialog):
         if program is None or self.launcher_record is None:
             return
         try:
+            # Träger aus dem Baubericht oder aus „requires“ des Addons; fehlt er im Launcher, wird er mitinstalliert
+            package = self.launcher_record["paket"]
             carrier = next((p.get("traeger") for p in self.launcher_record.get("pakete") or [] if p.get("traeger")), None)
-            if carrier and not Path(carrier).is_file():
-                raise ValueError(tr("Carrier addon missing: {pfad}", pfad=carrier))
-            steps = swofty_installieren(program, self.launcher_record["paket"], carrier,
-                                        swofty_installierte(program) if carrier else ())
+            installed = swofty_installierte(program) if (carrier or swofty_traeger_ids(package)) else set()
+            carrier, enable_only = swofty_traeger_plan(package, carrier, installed)
+            steps = [[str(program), "addons", "enable", k] for k in enable_only] + \
+                swofty_installieren(program, package, carrier, installed)
         except (OSError, KeyError, ValueError, zipfile.BadZipFile) as error:
             self.phase.setText(meldung(error))
             return

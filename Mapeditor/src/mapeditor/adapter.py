@@ -94,6 +94,31 @@ def swofty_installieren(programm, paket, traeger=None, installiert=()):
                        [str(programm), "addons", "enable", swofty_addon_id(paket)]]
 
 
+def swofty_traeger_ids(paket):
+    """Ids der Träger-Addons, die ein Strecken-Addon über ``requires`` braucht (``mapeditor.traeger_<hash>``)."""
+    with zipfile.ZipFile(paket) as z:
+        daten = json.loads(z.read("swofty.json").decode("utf-8"))
+    return [r["id"] for r in daten.get("requires") or [] if str(r.get("id", "")).startswith("mapeditor.traeger_")]
+
+
+def swofty_traeger_plan(paket, traeger=None, installiert=()):
+    """Träger für die Installation bestimmen: aus dem Baubericht oder aus ``requires`` des Addons, gesucht neben dem
+    Paket (``mapeditor_traeger_<hash>.zip``). Rückgabe (ZIP oder None, Ids nur einzuschalten); ValueError, wenn ein
+    benötigter Träger weder als Datei da noch im Launcher installiert ist."""
+    zip_pfad, nur_ein = None, []
+    for kennung in swofty_traeger_ids(paket):
+        datei = Path(paket).with_name(kennung.replace(".", "_", 1) + ".zip")
+        if traeger and Path(traeger).is_file() and swofty_addon_id(traeger) == kennung:
+            datei = Path(traeger)
+        if datei.is_file():
+            zip_pfad = datei
+        elif kennung in installiert:
+            nur_ein.append(kennung)
+        else:
+            raise ValueError(tr("Carrier addon missing: {pfad}", pfad=datei))
+    return zip_pfad, nur_ein
+
+
 def swofty_installierte(programm):
     """Ids der installierten Addons (``swofty addons list``); leer, wenn der Launcher nicht antwortet."""
     try:

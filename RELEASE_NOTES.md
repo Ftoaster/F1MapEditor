@@ -1,5 +1,10 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.3.5
+
+- **Easier Swofty install:** "Install in launcher" installs the shared carrier (shown as "type: files" in Swofty) together with your track if it is missing. The carrier holds only textures; your track is the other ZIP and needs it
+- **swofty.exe remembered** for all projects
+
 ## New in 0.3.4
 
 - **Smoother zoom:** the mouse wheel zooms around the point under the cursor, at the same pace on every wheel and touchpad
@@ -29,7 +34,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.4-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.5-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need

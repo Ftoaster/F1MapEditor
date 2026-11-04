@@ -172,3 +172,37 @@ def test_sprachwechsel_mit_offenem_baudialog(window, tmp_path):
     assert "is not in the game yet" in neu.code_info.text()
     window.change_language("de")
     assert window.build_dialog.code.currentData() == "paul_ricard"
+
+
+def test_swofty_programm_programmweit_gemerkt(window, tmp_path, monkeypatch):
+    """Gewählte swofty.exe gilt für alle Projekte (QSettings), nicht nur für das Projekt, in dem sie gewählt wurde."""
+    from PySide6.QtWidgets import QFileDialog
+    from mapeditor.build import BuildDialog
+    programm = tmp_path / "swofty.exe"
+    programm.write_bytes(b"")
+    monkeypatch.setattr("mapeditor.build.swofty_programm",
+                        lambda p=None: __import__("pathlib").Path(p) if p and __import__("pathlib").Path(p).is_file() else None)
+    gefragt = []
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *a, **k: (gefragt.append(1), (str(programm), ""))[1])
+    assert BuildDialog(window).launcher_program() == programm and len(gefragt) == 1
+    window.document.project.manifest.pop("bauen", None)      # anderes Projekt ohne gemerkten Pfad
+    assert BuildDialog(window).launcher_program() == programm and len(gefragt) == 1
+
+
+def test_traeger_aus_requires(tmp_path):
+    """Träger ohne Baubericht: aus „requires“ des Strecken-Addons, neben dem Paket gesucht; schon im Launcher → nur
+    einschalten; weder Datei noch installiert → klare Meldung."""
+    import zipfile
+    import pytest
+    from mapeditor.adapter import swofty_traeger_plan
+    paket = tmp_path / "strecke.zip"
+    with zipfile.ZipFile(paket, "w") as z:
+        z.writestr("swofty.json", json.dumps({"id": "mapeditor.strecke",
+                                              "requires": [{"id": "mapeditor.traeger_1234abcd"}]}))
+    with pytest.raises(ValueError):
+        swofty_traeger_plan(paket)
+    assert swofty_traeger_plan(paket, None, {"mapeditor.traeger_1234abcd"}) == (None, ["mapeditor.traeger_1234abcd"])
+    traeger = tmp_path / "mapeditor_traeger_1234abcd.zip"
+    with zipfile.ZipFile(traeger, "w") as z:
+        z.writestr("swofty.json", json.dumps({"id": "mapeditor.traeger_1234abcd"}))
+    assert swofty_traeger_plan(paket) == (traeger, [])

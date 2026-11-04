@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5
+
+- Install in launcher: the shared carrier addon is found from the track addon itself and installed along with it when
+  Swofty does not have it yet (if Swofty already has it, it is only switched on)
+- The chosen swofty.exe is remembered for all projects, not only the one it was picked in
+
 ## 0.3.4
 
 - Smoother mouse wheel zoom on the map: zooms around the point under the cursor, one wheel notch is always the same step
