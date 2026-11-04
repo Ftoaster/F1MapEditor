@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3
+
+- World maps: the ground blend map no longer puts dirt patches on asphalt, kerbs and the pit lane (tracks built with
+  world maps showed brown-green blotches on the road). Rebuild a track to get the fix
+
 ## 0.3.2
 
 - Replays work on your own tracks: the build moves the carrier's replay, TV and pit stop cameras and their trigger zones

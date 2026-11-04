@@ -182,6 +182,8 @@ def innenkarten(a, arbeit, npz, tag="bau", flecken_bis_m=None, bewuchs=True):
     flecken = np.clip((n1 - 0.72) * 5, 0, 1)
     if flecken_bis_m is not None:
         flecken = flecken * np.clip((flecken_bis_m - d_hart) / (flecken_bis_m / 2.0), 0, 1)
+    # Flecken nie auf harten Flächen (Tutorial-Video 4.11.2026: braun-grüne Wolken auf dem Asphalt der Speedway-Strecke)
+    flecken = flecken * ~hart
     erde = np.maximum(erde, flecken)
     g2, g3, g4 = n2, 1.0 - n2, n3
     blend = np.stack([erde, g2 * (1 - erde), g3 * (1 - erde), g4 * (1 - erde)], axis=2)
