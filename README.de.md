@@ -13,6 +13,7 @@ English version: [README.md](README.md)
 
 - Strecke aus Kontrollpunkten oder Geraden und Bögen zeichnen, Höhe, Querneigung und Breite bearbeiten
 - Strecke auf einem Kartenbild nachzeichnen: wenige Klicks in Fahrtrichtung, der Editor findet die Fahrbahn dazwischen und prüft die Runde
+- Live-Karte unter die Strecke legen: Satellit oder Straße in echten Metern, ohne Verzerrung beim Zoomen
 - Strecken kombinieren und in der Größe ändern: Punkte zwischen Fenstern kopieren und einfügen, um einen Faktor oder auf eine Länge skalieren
 - Ideallinie, Bremspunkte, Kurven, Sektoren, DRS- und Straight-Mode-Zonen berechnen
 - Querschnitt je Bereich einstellen: Randsteine, Gras, Auslauf, Barrieren und Randwinkel

@@ -151,6 +151,7 @@ class MapView(QGraphicsView):
         # Bildvorlage (Werkzeug Nachzeichnen, ``bildvorlage.Nachzeichner``; vom Fenster gesetzt) und ihre Sichtbarkeit
         self.trace = None
         self.show_bild = True
+        self.livemap = None          # Live map in true metres (``livemap.LiveMap``; set by the window)
         self.setMouseTracking(True)
         self.document.selection_changed.connect(self._selection)
         self.scale(0.5, 0.5)
@@ -327,6 +328,8 @@ class MapView(QGraphicsView):
     # ------------------------------------------------------------------ Malen
     def drawBackground(self, painter, rect):
         painter.fillRect(rect, QColor("#101820" if self.dark else "#F3F6F8"))
+        if self.livemap is not None:
+            self.livemap.paint(painter, rect, self.transform().m11())
         if self.grid:
             scale = max(self.transform().m11(), 0.0001)
             step = 10 ** math.ceil(math.log10(45 / scale))
@@ -467,6 +470,8 @@ class MapView(QGraphicsView):
                 painter.drawText(corner + QPointF(6, 16), tr("Play area ±1024 m"))
         if self.show_scale:
             self._scale_bar(painter, width, height, text_color)
+        if self.livemap is not None:
+            self.livemap.chrome(painter, width, height)
         if self.overlap_marks and self.overlap_revision == self.document.revision:
             painter.setPen(QPen(QColor("#E5484D"), 3))
             painter.setBrush(Qt.NoBrush)
@@ -1073,6 +1078,13 @@ class MapView(QGraphicsView):
 
     # ------------------------------------------------------------------ Eingaben
     def wheelEvent(self, event):
+        if (event.modifiers() & Qt.AltModifier and event.modifiers() & Qt.ShiftModifier
+                and self.livemap is not None):
+            delta = event.angleDelta().y() or event.pixelDelta().y()
+            scene = self.mapToScene(event.position().toPoint())
+            if self.livemap.wheel(delta, scene.x(), scene.y()):
+                event.accept()
+                return
         # Stufenlos nach Raddrehung (120 = eine Raste = Faktor 1,2): Touchpads und feine Räder melden viele kleine
         # Schritte, die früher je 1,2 zoomten (eine Raste ≈ Faktor 4). Untergrenze: Szene füllt das Fenster, sonst
         # zentriert Qt sie und der Punkt unter der Maus springt weg.
@@ -1112,6 +1124,12 @@ class MapView(QGraphicsView):
 
     def mousePressEvent(self, event):
         self.setFocus()
+        if (self.livemap is not None and event.button() == Qt.LeftButton
+                and event.modifiers() & Qt.AltModifier):
+            scene = self.mapToScene(event.position().toPoint())
+            if self.livemap.begin_drag(scene.x(), scene.y()):
+                event.accept()
+                return
         if event.button() == Qt.MiddleButton or (event.button() == Qt.LeftButton and self.space):
             self.pan_origin = event.position()
             self.setCursor(Qt.ClosedHandCursor)
@@ -1431,6 +1449,11 @@ class MapView(QGraphicsView):
         return False
 
     def mouseMoveEvent(self, event):
+        if self.livemap is not None and self.livemap.drag is not None:
+            scene = self.mapToScene(event.position().toPoint())
+            self.livemap.update_drag(scene.x(), scene.y())
+            self.viewport().update()
+            return
         if self.mode == "kameras" and self.camera_drag is not None and self.pan_origin is None:
             d = self.camera_drag
             if not d["aktiv"] and (event.position() - d["start"]).manhattanLength() > 4:
@@ -1505,6 +1528,9 @@ class MapView(QGraphicsView):
             super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
+        if self.livemap is not None and self.livemap.finish_drag():
+            self.viewport().update()
+            return
         if self.pan_origin is not None:
             self.pan_origin = None
             self.unsetCursor()
@@ -1600,6 +1626,8 @@ class MapView(QGraphicsView):
 
     def keyPressEvent(self, event):
         key = event.key()
+        if key == Qt.Key_Escape and self.livemap is not None and self.livemap.cancel_drag():
+            return
         if self.mode in ENV_MODES and key != Qt.Key_Space and self._env_key(event):
             return
         if self.mode == "nachzeichnen" and key != Qt.Key_Space and self.trace is not None and self.trace.taste(key):

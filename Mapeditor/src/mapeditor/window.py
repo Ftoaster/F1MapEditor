@@ -32,6 +32,7 @@ from .paths import writable_path
 from . import ansicht, neigung, querschnitt, umgebung
 from .neigung import BankPanel
 from .bildvorlage import Nachzeichner, NachzeichnenPanel
+from .livemap import LiveMap
 from .querschnitt import CrossPanel
 from .umgebung_ui import EnvironmentPanel
 from .ux import (BOOL_WORDS, CHOICES, ChoiceDelegate, HelpDialog, Section, WelcomePanel, choice_text, choice_value, edit_text,
@@ -362,6 +363,8 @@ class MainWindow(QMainWindow):
         # Bildvorlage (Werkzeug Nachzeichnen): bleibt beim Sprachwechsel bestehen, Karte und Seitenleiste werden neu verbunden
         self.werkzeug_bild = Nachzeichner(self.document, self)
         self.werkzeug_bild.geaendert.connect(lambda: self.map.viewport().update())
+        self.livemap = LiveMap(self.document, self)
+        self.livemap.changed.connect(self._livemap_refresh)
         self.werkzeug_bild.massstab_gemessen.connect(self._massstab_gemessen)
         self.resize(1440, 940)
         self.setMinimumSize(1100, 720)
@@ -409,6 +412,7 @@ class MainWindow(QMainWindow):
         self.action(file_menu, tr("Generate suggestion …"), self.new_from_suggestion)
         self.action(file_menu, tr("Load reference image …"), self.load_bildvorlage)
         self.action(file_menu, tr("Reference image from clipboard"), self.paste_bildvorlage)
+        self.action(file_menu, tr("Live map …"), self.open_livemap)
         self.action(file_menu, tr("Open definition / manifest …"), self.open_dialog, "Ctrl+O")
         self.action(file_menu, tr("Open project folder …"), self.open_folder_dialog)
         self.action(file_menu, tr("Save"), self.save_project, "Ctrl+S")
@@ -631,6 +635,7 @@ class MainWindow(QMainWindow):
 
         self.map = MapView(self.document)
         self.map.trace = self.werkzeug_bild
+        self.map.livemap = self.livemap
         self.bild_panel = NachzeichnenPanel(self.werkzeug_bild)
         self.bild_panel.uebernehmen.connect(self.bildvorlage_uebernehmen)
         self.bild_panel.entfernen.connect(self.remove_bildvorlage)
@@ -3364,6 +3369,17 @@ class MainWindow(QMainWindow):
         self._update_bild_action()
         self._update_welcome()
         self.map.viewport().update()
+
+    def open_livemap(self):
+        if self.document.project.readonly:
+            QMessageBox.information(self, tr("Live map"), tr("Unknown project version: read-only."))
+            return
+        self.livemap.open_dialog(self, self.map)
+
+    def _livemap_refresh(self):
+        view = getattr(self, "map", None)
+        if view is not None:
+            view.viewport().update()
 
     def load_bildvorlage(self):
         if self.document.project.readonly:

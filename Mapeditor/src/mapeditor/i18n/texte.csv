@@ -1339,3 +1339,31 @@ Zoom out of the map;Herauszoomen;window.py
 {name} at {s} m from the finish · Ctrl+Z: undo;{name} bei {s} m ab Ziel · Strg+Z: rückgängig;window.py
 {name} “{id}” placed ({hoehe} m, radius {radius} m) · Ctrl+Z undoes.;{name} „{id}“ gesetzt ({hoehe} m, Radius {radius} m) · Strg+Z macht rückgängig.;window.py
 {n} object banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.|{n} objects banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.;{n} Objekt zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.|{n} Objekte zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.;window.py
+Could not load the map. Check the internet connection.;Karte konnte nicht geladen werden. Internetverbindung prüfen.;livemap.py
+Place live map;Live-Karte legen;livemap.py
+Hide live map;Live-Karte ausblenden;livemap.py
+Move live map;Live-Karte verschieben;livemap.py
+Rotate live map;Live-Karte drehen;livemap.py
+Streets: OpenStreetMap;Straßen: OpenStreetMap;livemap.py
+Satellite: Esri;Satellit: Esri;livemap.py
+Live map;Live-Karte;livemap.py
+Place name, for example Songdo;Ortsname, zum Beispiel Songdo;livemap.py
+Find place;Ort suchen;livemap.py
+Latitude;Breitengrad;livemap.py
+Longitude;Längengrad;livemap.py
+Rotation (°);Drehung (°);livemap.py
+Satellite;Satellit;livemap.py
+Street map;Straßenkarte;livemap.py
+Map type;Kartenart;livemap.py
+Place at centre of view;In die Bildmitte legen;livemap.py
+Hide map;Karte ausblenden;livemap.py
+Satellite or street map in true metres. It does not stretch when you zoom. Alt+drag moves it. Shift+Alt+wheel rotates it.;Satelliten- oder Straßenkarte in echten Metern. Sie verzerrt sich beim Zoomen nicht. Alt+Ziehen verschiebt sie. Umschalt+Alt+Rad dreht sie.;livemap.py
+A reference image, if loaded, is drawn on top of this map.;Ein geladenes Kartenbild liegt über dieser Karte.;livemap.py
+Searching…;Suche …;livemap.py
+Live map placed at the centre of the view. Distances stay in true metres. Alt+drag moves it, Shift+Alt+wheel rotates it.;Live-Karte liegt in der Bildmitte. Abstände bleiben echte Meter. Alt+Ziehen verschiebt sie, Umschalt+Alt+Rad dreht sie.;livemap.py
+Loading the map;Karte wird geladen;livemap.py
+Search failed. Enter latitude and longitude.;Suche fehlgeschlagen. Breiten- und Längengrad eingeben.;livemap.py
+No place found.;Kein Ort gefunden.;livemap.py
+Latitude must be between -85 and 85, longitude between -180 and 180.;Breitengrad zwischen -85 und 85, Längengrad zwischen -180 und 180.;livemap.py
+Enter latitude and longitude as numbers.;Breiten- und Längengrad als Zahlen eingeben.;livemap.py
+Live map …;Live-Karte …;window.py

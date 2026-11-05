@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Live map under the track, in true metres: Project → Live map. Satellite (Esri) or street (OpenStreetMap).
+  The map does not stretch when you zoom. Alt+drag moves it, Shift+Alt+wheel rotates it. Tiles are cached in
+  %LOCALAPPDATA%\Mapeditor\tiles and are not stored in the project
+
 ## 0.3.6
 
 - Carrier package setup: if the Portimão mod is missing, Check and build asks whether you saved it elsewhere or still need
