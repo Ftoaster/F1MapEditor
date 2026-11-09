@@ -1080,7 +1080,13 @@ class MapView(QGraphicsView):
     def wheelEvent(self, event):
         if (event.modifiers() & Qt.AltModifier and event.modifiers() & Qt.ShiftModifier
                 and self.livemap is not None):
-            delta = event.angleDelta().y() or event.pixelDelta().y()
+            # Windows meldet Umschalt+Rad als waagerechtes Rad: angleDelta.x ist gesetzt, y bleibt 0.
+            point = event.angleDelta()
+            if point.x() == 0 and point.y() == 0:
+                point = event.pixelDelta()
+            delta = point.y() if abs(point.y()) >= abs(point.x()) else point.x()
+            if event.inverted():
+                delta = -delta
             scene = self.mapToScene(event.position().toPoint())
             if self.livemap.wheel(delta, scene.x(), scene.y()):
                 event.accept()

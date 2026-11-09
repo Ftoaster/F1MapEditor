@@ -1,8 +1,8 @@
 """Live map: true metres, undo, and painting without a network."""
 
 import pytest
-from PySide6.QtCore import QRectF
-from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, QTransform
+from PySide6.QtCore import QPoint, QPointF, QRectF, Qt
+from PySide6.QtGui import QColor, QImage, QPainter, QPixmap, QWheelEvent
 
 from mapeditor.document import Document
 from mapeditor.livemap import LiveMap, paint_map, pin, scene_to_ll, tile_span, zoom_for, _pix
@@ -65,6 +65,18 @@ def test_tiles_paint_in_scene_metres_without_network():
     assert drawn >= 1
     center = image.pixelColor(200, 150)
     assert (center.red(), center.green(), center.blue()) != (16, 24, 32)
+
+
+def test_shift_alt_horizontal_wheel_rotates_the_map():
+    """Windows delivers Shift+wheel on the horizontal axis. The map still rotates."""
+    window = MainWindow(auto_preview=False)
+    window.livemap.place(37.5, 127.0, 0.0, "street", 0.0, 0.0)
+    view = window.map
+    center = QPointF(view.viewport().rect().center())
+    event = QWheelEvent(center, view.mapToGlobal(center), QPoint(0, 0), QPoint(120, 0),
+                        Qt.NoButton, Qt.ShiftModifier | Qt.AltModifier, Qt.NoScrollPhase, False)
+    view.wheelEvent(event)
+    assert window.document.project.manifest["livemap"]["rotation"] == 0.5
 
 
 def test_window_menu_places_a_live_map():
