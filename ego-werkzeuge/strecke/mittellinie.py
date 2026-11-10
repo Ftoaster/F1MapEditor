@@ -222,6 +222,106 @@ def approximieren(punkte, sigma_m, schritt_m=1.0, knoten_m=4.0, basis="spline"):
     return knoten, voll
 
 
+#: Toleranz, ab der ein Kontrollpunkt auf der Linie seiner Nachbarn liegt (Werkzeug „Align to line“)
+GERADE_TOLERANZ_M = 0.02
+#: Abtastschritt der Geraden und Eckbögen vor dem Spline
+ECKEN_SCHRITT_M = 2.0
+
+
+def gerade_punkte(p):
+    """True für Punkte, die (fast) genau zwischen ihren beiden Nachbarn auf deren Verbindungslinie liegen."""
+    p = np.asarray(p, dtype=float)[:, [0, 2]]
+    a, b = np.roll(p, 1, axis=0), np.roll(p, -1, axis=0)
+    ab = b - a
+    lang = np.einsum("ij,ij->i", ab, ab)
+    t = np.einsum("ij,ij->i", p - a, ab) / np.maximum(lang, 1e-12)
+    abstand = np.abs(ab[:, 0] * (p - a)[:, 1] - ab[:, 1] * (p - a)[:, 0]) / np.sqrt(np.maximum(lang, 1e-12))
+    return (abstand <= GERADE_TOLERANZ_M) & (t > 0.0) & (t < 1.0) & (lang > 1e-6)
+
+
+def ecken_verdichten(punkte, radien=None, schritt_m=ECKEN_SCHRITT_M):
+    """Eckpunkte und Geraden einer geschlossenen Kontrollpunktfolge vor dem Spline auflösen.
+
+    - Eckpunkt (``radien[i]`` > 0): die Strecke läuft gerade auf den Punkt zu und biegt mit einem Kreisbogen dieses
+      Radius ab (tangential an beide Geraden). Ist zu wenig Platz, wird der Radius verkleinert (Warnung).
+    - Strecken zwischen zwei Punkten, die beide Eckpunkte sind oder auf der Linie ihrer Nachbarn liegen, werden
+      exakt gerade (dicht abgetastet, damit der kubische Spline nicht ausbeult). Neben einem gewöhnlichen Punkt
+      rundet weiter der Spline (sonst entstünde dort ein Knick).
+    - Alle anderen Stücke bleiben dem Spline überlassen.
+
+    Rückgabe: (Punkte (m, 3), Index je Eingabepunkt in den neuen Punkten (Eckpunkt: Bogenmitte), Warnungen) oder
+    None, wenn es weder Ecken noch gerade Punkte gibt (Form bleibt wie bisher)."""
+    p = np.asarray(punkte, dtype=float)
+    n = len(p)
+    r = np.zeros(n) if radien is None else np.nan_to_num(np.asarray(radien, dtype=float), nan=0.0)
+    ecke = r > 0
+    gerade = gerade_punkte(p) & ~ecke
+    if not ecke.any() and not gerade.any():
+        return None
+    warnungen = []
+    seg = np.linalg.norm(np.roll(p, -1, axis=0)[:, [0, 2]] - p[:, [0, 2]], axis=1)    # i -> i+1
+    boegen = {}
+    for i in np.flatnonzero(ecke):
+        vor, nach = (i - 1) % n, (i + 1) % n
+        u = p[i, [0, 2]] - p[vor, [0, 2]]
+        v = p[nach, [0, 2]] - p[i, [0, 2]]
+        lu, lv = np.linalg.norm(u), np.linalg.norm(v)
+        if lu < 1e-6 or lv < 1e-6:
+            continue
+        u, v = u / lu, v / lv
+        kreuz = u[0] * v[1] - u[1] * v[0]
+        theta = math.atan2(abs(kreuz), float(np.dot(u, v)))
+        if theta < math.radians(0.5):
+            continue                                              # keine Richtungsänderung: nur Gerade
+        tan_h = math.tan(theta / 2)
+        # Platz je Seite: halbe Strecke, wenn der Nachbar ebenfalls eine Ecke ist, sonst 90 %
+        platz = min(seg[vor] * (0.5 if ecke[vor] else 0.9), seg[i] * (0.5 if ecke[nach] else 0.9))
+        radius = float(r[i])
+        if radius * tan_h > platz:
+            neu = max(platz / tan_h, 0.01)
+            warnungen.append("Corner at point %d: radius reduced from %.0f m to %.1f m, the neighbouring points are "
+                             "too close" % (i + 1, radius, neu))
+            radius = neu
+        t = radius * tan_h
+        a = p[i] + (p[vor] - p[i]) * (t / lu)
+        b = p[i] + (p[nach] - p[i]) * (t / lv)
+        vorzeichen = 1.0 if kreuz > 0 else -1.0
+        mitte = a[[0, 2]] + np.array([-u[1], u[0]]) * vorzeichen * radius
+        anz = max(2, int(math.ceil(radius * theta / schritt_m)))
+        w = np.linspace(0.0, 1.0, anz + 1)
+        start = a[[0, 2]] - mitte
+        phi = w * theta * vorzeichen
+        c, s = np.cos(phi), np.sin(phi)
+        xz = mitte + np.stack([start[0] * c - start[1] * s, start[0] * s + start[1] * c], axis=1)
+        y = a[1] + (b[1] - a[1]) * w
+        boegen[i] = np.stack([xz[:, 0], y, xz[:, 1]], axis=1)
+    aus, index = [], np.zeros(n, dtype=int)
+    for i in range(n):
+        if i in boegen:
+            index[i] = len(aus) + len(boegen[i]) // 2
+            aus.extend(boegen[i])
+            ende = boegen[i][-1]
+        else:
+            index[i] = len(aus)
+            aus.append(p[i])
+            ende = p[i]
+        j = (i + 1) % n
+        if (ecke[i] or gerade[i]) and (ecke[j] or gerade[j]):
+            ziel = boegen[j][0] if j in boegen else p[j]
+            k = int(float(np.linalg.norm((ziel - ende)[[0, 2]])) // schritt_m)
+            for w in np.arange(1, k) / max(k, 1):
+                aus.append(ende + (ziel - ende) * w)
+    aus = np.asarray(aus, dtype=float)
+    # Zusammenfallende Nachbarpunkte (Tangentenpunkt = Kontrollpunkt) entfernen, Indizes nachführen
+    d = np.linalg.norm(np.roll(aus, -1, axis=0) - aus, axis=1)
+    behalten = d > 0.05
+    if not behalten.all():
+        neu_index = np.cumsum(behalten) - 1
+        index = np.clip(neu_index[index], 0, None)
+        aus = aus[behalten]
+    return aus, index, warnungen
+
+
 class PeriodischerSpline:
     """Geschlossener kubischer Interpolationsspline durch Punkte (n, d).
 
@@ -337,7 +437,16 @@ class Mittellinie:
         self.warnungen = list(defn.warnungen)
         pts = defn.punkte.copy()
         approx = float(mp.get("approximation_m") or 0.0)
-        if approx > 0:
+        verdichtet = None
+        if approx <= 0 and not defn.dicht and not mp.get("glaettung_m", 0) > 0:
+            verdichtet = ecken_verdichten(pts, defn.attribute.get("ecke_radius_m"))
+        if verdichtet is not None:
+            # Eckpunkte und Geraden (``ecken_verdichten``): Spline durch die dicht abgetasteten Stücke
+            dicht_pts, idx, w = verdichtet
+            self.warnungen += w
+            self.spline = PeriodischerSpline(dicht_pts)
+            s_knoten = self.spline.bogenlaenge(self.spline.t[idx])
+        elif approx > 0:
             # Glättende Approximation (Recherche 24.10.2026, TUM-Vorgehen): Punktdichte/Lücken bestimmen die Form nicht.
             knoten, eingabe_param = approximieren(pts, approx)
             self.spline = PeriodischerSpline(knoten)

@@ -1,11 +1,15 @@
 """Spielordner und geschützte Ordner, ohne feste Laufwerke oder Benutzernamen.
 
-    kandidaten()      mögliche Spielordner: Umgebungsvariable ``EGO_SPIELORDNER``, dann Steam-Orte auf allen Laufwerken
+    kandidaten()      mögliche Spielordner: Umgebungsvariable ``EGO_SPIELORDNER``, dann die Steam-Bibliotheken
+                      (Registry + ``libraryfolders.vdf``), zuletzt übliche Steam-Orte auf allen Laufwerken
+    steam_bibliotheken()  alle Steam-Bibliotheksordner des Benutzers
+    ist_spielordner(p) True, wenn ``p`` eine F1-25-Installation ist
     finden()          erster vorhandener Spielordner oder None
     geschuetzt(pfad)  True für Spielordner und den Downloads-Ordner des Benutzers: dorthin schreibt der Bau nie
 """
 
 import os
+import re
 import string
 from pathlib import Path
 from typing import List, Optional
@@ -17,10 +21,65 @@ STEAM_ORTE = ("SteamLibrary", "Steam", os.path.join("Program Files (x86)", "Stea
 STANDARD = os.path.join(r"C:\Program Files (x86)\Steam", SPIEL_REL)
 
 
+#: Unterordner, an dem eine F1-25-Installation erkannt wird
+ERKENNUNG = os.path.join("2025_asset_groups", "environment_package", "tracks")
+
+
+def ist_spielordner(pfad) -> bool:
+    return bool(pfad) and os.path.isdir(os.path.join(pfad, ERKENNUNG))
+
+
+def _steam_wurzeln() -> List[str]:
+    """Steam-Installationsordner aus der Registry (Benutzer- und Maschinenschlüssel)."""
+    if os.name != "nt":
+        return []
+    try:
+        import winreg
+    except ImportError:
+        return []
+    wurzeln = []
+    for haupt, schluessel, wert in ((winreg.HKEY_CURRENT_USER, r"Software\Valve\Steam", "SteamPath"),
+                                    (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath"),
+                                    (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Valve\Steam", "InstallPath")):
+        try:
+            with winreg.OpenKey(haupt, schluessel) as k:
+                pfad = winreg.QueryValueEx(k, wert)[0]
+        except OSError:
+            continue
+        if isinstance(pfad, str) and pfad:
+            wurzeln.append(os.path.normpath(pfad))
+    return wurzeln
+
+
+def bibliotheken_aus_vdf(text: str) -> List[str]:
+    """``"path"``-Einträge aus ``libraryfolders.vdf`` (Valve-KeyValues, Backslashes doppelt maskiert)."""
+    return [os.path.normpath(m.replace("\\\\", "\\")) for m in re.findall(r'"path"\s+"([^"]+)"', text)]
+
+
+def steam_bibliotheken() -> List[str]:
+    """Alle Steam-Bibliotheken: Steam-Ordner aus der Registry und die Einträge seiner ``libraryfolders.vdf``."""
+    gesehen, aus = set(), []
+    for wurzel in _steam_wurzeln():
+        orte = [wurzel]
+        for vdf in (os.path.join(wurzel, "steamapps", "libraryfolders.vdf"), os.path.join(wurzel, "config", "libraryfolders.vdf")):
+            try:
+                with open(vdf, encoding="utf-8", errors="replace") as f:
+                    orte += bibliotheken_aus_vdf(f.read())
+            except OSError:
+                continue
+        for ort in orte:
+            schluessel = os.path.normcase(ort)
+            if schluessel not in gesehen:
+                gesehen.add(schluessel)
+                aus.append(ort)
+    return aus
+
+
 def kandidaten() -> List[str]:
     gefunden = [os.environ["EGO_SPIELORDNER"]] if os.environ.get("EGO_SPIELORDNER") else []
     if os.name != "nt":
         return gefunden
+    gefunden += [os.path.join(b, SPIEL_REL) for b in steam_bibliotheken()]
     for laufwerk in string.ascii_uppercase[2:]:      # A und B sind Disketten-Reservierungen und bremsen die Suche
         wurzel = laufwerk + ":\\"
         if os.path.isdir(wurzel):

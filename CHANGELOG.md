@@ -1,10 +1,21 @@
 # Changelog
 
-## Unreleased
+## 0.3.7
 
-- Live map under the track, in true metres: Project → Live map. Satellite (Esri) or street (OpenStreetMap).
+- Live map under the track, in true metres (contributed by [Ftoaster](https://github.com/Ftoaster), PR #3): Project → Live map. Satellite (Esri) or street (OpenStreetMap).
   The map does not stretch when you zoom. Alt+drag moves it, Shift+Alt+wheel rotates it. Tiles are cached in
   %LOCALAPPDATA%\Mapeditor\tiles and are not stored in the project
+- F1 25 is found in every Steam library (read from Steam's own library list), not only in the usual folder names. If
+  the game is still not found, the editor asks for the folder once and remembers it (Tools → Set F1 25 game folder …).
+  The environment catalogue and the game-track templates then work without setting EGO_SPIELORDNER
+- Straight lines and corners: Edit → Make corner turns control points into corners with a fixed radius (15 m by default,
+  editable in the point properties). The track runs dead straight between corners, also when the lap is closed between two
+  corners, instead of bulging or swinging out. Edit → Align to line puts the inner points of a selection exactly on a line
+- New check SA-01: warns when the starting grid reaches into a corner or onto banking, and says how many slots fit on the
+  straight
+- The pit lane is limited to the straight automatically (no longer into banked corners, at most 45 % of the lap, always
+  room for all pit boxes); hint BO-06 says when it was shortened
+- Fix: corner zones of the racing line (drl) that overlap across the finish line are merged instead of reported as ZO-04
 
 ## 0.3.6
 

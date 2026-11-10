@@ -262,6 +262,12 @@ class MapView(QGraphicsView):
                 path.addPath(path_for(pts[entry["first"]:entry["last"] + 1]))
         self._input_items["selection"].setPath(path)
 
+    def corner_indices(self):
+        """Kontrollpunkte mit Eckradius (eckig gezeichnet)."""
+        if self.document.ml.get("art") != "kontrollpunkte":
+            return set()
+        return {i for i, p in enumerate(self.document.points) if isinstance(p, dict) and p.get("ecke_radius_m")}
+
     def object_positions(self):
         if self.document.ml.get("art") in ("segmente", "kontrollpunkte"):
             if self.input["segments"]:
@@ -366,6 +372,7 @@ class MapView(QGraphicsView):
         if self.trace is not None and self.mode == "nachzeichnen":
             self.trace.zeichne(painter, to_view)
         selected_set = self.document.selected_indices
+        corners = self.corner_indices()
         chosen, plain = [], []
         for i, point in enumerate(self.object_positions()):
             x, y = to_view(point[0], point[2])
@@ -373,19 +380,22 @@ class MapView(QGraphicsView):
                 if i in selected_set:
                     chosen.append((i, QPointF(x, y)))
                 else:
-                    plain.append(QPointF(x, y))
+                    plain.append((i, QPointF(x, y)))
         if not self.show_points:
             plain = []                   # Eingabepunkte ausgeblendet; gewählte bleiben sichtbar
         # Punkte gesammelt zeichnen (ein Aufruf je Farbe statt einer Ellipse je Punkt):
-        # dicker runder Stift = Ring, dünnerer dunkler Stift = Füllung.
+        # dicker Stift = Ring, dünnerer dunkler Stift = Füllung; Eckpunkte eckig.
         many = len(chosen) > 8           # bei größeren Gruppen keine Einzelbeschriftung
-        for points, outer, inner, colors in ((plain, 8, 5, ("#67D9F5", "#101820")),
-                                             ([xy for _, xy in chosen], 10 if many else 14, 6 if many else 10, ("#F1F5F9", "#005C73"))):
-            if points:
+        for group, outer, inner, colors in ((plain, 8, 5, ("#67D9F5", "#101820")),
+                                            (chosen, 10 if many else 14, 6 if many else 10, ("#F1F5F9", "#005C73"))):
+            for cap, points in ((Qt.RoundCap, [xy for i, xy in group if i not in corners]),
+                                (Qt.SquareCap, [xy for i, xy in group if i in corners])):
+                if not points:
+                    continue
                 polygon = QPolygonF(points)
                 for size, color in zip((outer, inner), colors):
                     pen = QPen(QColor(color), size)
-                    pen.setCapStyle(Qt.RoundCap)
+                    pen.setCapStyle(cap)
                     painter.setPen(pen)
                     painter.drawPoints(polygon)
         for i, xy in chosen:

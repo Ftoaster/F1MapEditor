@@ -53,6 +53,8 @@ def main(argv=None):
     from . import ansicht
     from .i18n import setze_sprache, tr
     setze_sprache(args.sprache or ansicht.load_language())     # setzt auch QLocale (Zahlen, Eingabefelder)
+    from . import spielordner
+    spielordner.anwenden()          # gemerkter Spielordner → EGO_SPIELORDNER für alle Arbeitsprozesse
     start = args.projekt
     if not start and ansicht.load_state().get("letztes_projekt"):
         start = next((p for p in ansicht.recent_projects() if Path(p).exists()), None)

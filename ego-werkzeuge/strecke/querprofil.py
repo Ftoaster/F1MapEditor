@@ -111,6 +111,54 @@ def garagen_u(pbox, U):
     return float(us[0] - pbox["box_abstand_m"] / 2), float(ende)
 
 
+#: Boxengasse höchstens bis hierher in überhöhte Kurven und höchstens dieser Anteil der Runde (Issue #5, Bristol:
+#: Oval 1.668 m, Gasse ±400 m reichte in beide 17°-Steilkurven und über 84 % der Runde; Spiel hing beim Start)
+BOX_MAX_QUERNEIGUNG_GRAD = 4.0
+BOX_ABSTAND_STEILKURVE_M = 20.0
+BOX_MAX_ANTEIL_RUNDE = 0.45
+
+
+def boxen_begrenzen(pbox, s, bank, L):
+    """Einfahrt vor und Ausfahrt nach der Startlinie (m), auf die Gerade begrenzt.
+
+    Kürzt beide Seiten so, dass die Gasse ``BOX_ABSTAND_STEILKURVE_M`` vor der ersten Station mit mehr als
+    ``BOX_MAX_QUERNEIGUNG_GRAD`` Querneigung endet und zusammen höchstens ``BOX_MAX_ANTEIL_RUNDE`` der Runde lang ist.
+    Wird die Gasse dadurch kürzer als Anlauf und Übergänge brauchen, bleibt es bei den Eingaben (dann meldet die
+    Prüfung den Konflikt). Rückgabe ``(vor, nach, grund)``, ``grund`` None = unverändert."""
+    vor0, nach0 = float(pbox["einfahrt_vor_start_m"]), float(pbox["ausfahrt_nach_start_m"])
+    vor, nach, gruende = vor0, nach0, []
+    s = np.mod(np.asarray(s, float), L)
+    steil = np.abs(np.asarray(bank, float)) > math.radians(BOX_MAX_QUERNEIGUNG_GRAD)
+    if steil.any():
+        rueck = float(np.min(np.mod(L - s[steil], L))) - BOX_ABSTAND_STEILKURVE_M
+        vorw = float(np.min(s[steil])) - BOX_ABSTAND_STEILKURVE_M
+        if rueck < vor or vorw < nach:
+            vor, nach = min(vor, max(rueck, 0.0)), min(nach, max(vorw, 0.0))
+            gruende.append("banking")
+    grenze = BOX_MAX_ANTEIL_RUNDE * L
+    if vor + nach > grenze:
+        f = grenze / (vor + nach)
+        vor, nach = vor * f, nach * f
+        gruende.append("lap share")
+    if not gruende:
+        return vor0, nach0, None
+    # nie kürzer, als Anlauf, Übergänge und alle Boxen brauchen (``boxen_u``): fehlende Meter auf beide Seiten verteilen
+    a = pbox.get("anlauf_m", 0.0) + pbox.get("uebergang_m", 0.0)
+    # alle Boxen plus die zusätzliche MyTeam-Garage dahinter (``garagen_u``, spiel_welt) und je eine Box Luft
+    spanne = (pbox.get("boxen", 0) + 2) * pbox.get("box_abstand_m", 0.0) if pbox.get("boxen") else 0.0
+    minimum = max(2 * a + 20, 2 * a + spanne + 10)
+    if vor + nach < minimum:
+        fehlt = minimum - (vor + nach)
+        dazu = min(fehlt / 2, vor0 - vor)
+        vor += dazu
+        nach = min(nach0, nach + fehlt - dazu)
+        vor = min(vor0, vor + max(0.0, minimum - vor - nach))
+        if vor + nach < minimum - 1e-6:
+            return vor0, nach0, None
+        gruende.append("room for the pit boxes")
+    return round(vor, 1), round(nach, 1), ", ".join(gruende)
+
+
 def querprofil_berechnen(ml, param, kurven):
     st = ml.ref
     n = st.anzahl
@@ -177,8 +225,9 @@ def querprofil_berechnen(ml, param, kurven):
     box_info = None
     if pbox.get("aktiv"):
         seite = pbox["seite"]
-        s_ein = (L - pbox["einfahrt_vor_start_m"]) % L
-        U = pbox["einfahrt_vor_start_m"] + pbox["ausfahrt_nach_start_m"]
+        vor, nach, _grund = boxen_begrenzen(pbox, st.s, ml.bank, L)
+        s_ein = (L - vor) % L
+        U = vor + nach
         if not 0 < U < L:
             raise ValueError("Pit lane must be shorter than one lap")
         an, ue = pbox["anlauf_m"], pbox["uebergang_m"]
@@ -200,7 +249,7 @@ def querprofil_berechnen(ml, param, kurven):
             garage = box_bereich & (u >= gu[0]) & (u <= gu[1])
             ausserhalb = np.maximum(gu[0] - u, u - gu[1])
             garage_gewicht = np.where(box_bereich, np.clip(1 - ausserhalb / 20.0, 0, 1), 0)
-        box_info = {"seite": seite, "s_einfahrt": float(s_ein), "laenge_entlang_strecke": float(U),
+        box_info = {"seite": seite, "s_einfahrt": float(s_ein), "laenge_entlang_strecke": float(U), "begrenzt": _grund, "einfahrt_vor_start_m": vor, "ausfahrt_nach_start_m": nach,
                     "u": u, "bereich": box_bereich, "garagen_u": gu}
 
     # ---- Randwinkel: Höhenänderung je Meter nach außen, je Seite; ohne Eintrag bleibt der Rand waagerecht

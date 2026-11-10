@@ -619,15 +619,28 @@ def tm_aufbauen(lg, original, protokoll):
     # zusammengefasst: Im Original überlappen sich drl-Zonen nie; überlappende Zonen zusammen mit der
     # neuen aispline ließen das Spiel beim Start der fliegenden Runde abstürzen (Spieltest 15.10.2026).
     if "drl" not in gen_hl_typen:
-        bereiche = sorted(((s - 150.0 / L) % 1.0, e % 1.0) for s, e in zip(starts, ecken_ende))
+        # Rundherum zusammenfassen: Ende ≥ Anfang (Zonen über die Ziellinie enden > 1), danach die letzte Zone mit der
+        # ersten verbinden, wenn sie über die Ziellinie in sie hineinreicht (ZO-04 an der Ziellinie, 5.11.2026)
+        bereiche = []
+        for s, e in zip(starts, ecken_ende):
+            s = (s - 150.0 / L) % 1.0
+            e = e % 1.0
+            bereiche.append((s, e + 1.0 if e < s else e))
+        bereiche.sort()
         zusammen = []
         for s, e in bereiche:
             if zusammen and s <= zusammen[-1][1] + 0.002:
                 zusammen[-1][1] = max(zusammen[-1][1], e)
             else:
                 zusammen.append([s, e])
+        while len(zusammen) > 1 and zusammen[-1][1] - 1.0 >= zusammen[0][0] - 0.002:
+            s, e = zusammen.pop()
+            zusammen[0] = [s, max(e, zusammen[0][1] + 1.0)]
+            zusammen.sort()
+        if len(zusammen) == 1 and zusammen[0][1] - zusammen[0][0] >= 1.0:
+            zusammen = [[0.0, 1.0]]
         for i, (s, e) in enumerate(zusammen):
-            out.append(_zone("drl_%d" % (i * 10), "drl", hl, s, e))
+            out.append(_zone("drl_%d" % (i * 10), "drl", hl, s, e if e <= 1.0 else e - 1.0))
     gen_typen |= {"spch_vo_trig", "ers_over_det", "ers_over_act", "first_corner_zone", "x_mode", "spd_trp", "drl"}
     # übrige Vorlagentypen
     entfernt = Counter()

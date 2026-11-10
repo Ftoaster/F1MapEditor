@@ -809,7 +809,10 @@ def kruemmung_punkte(punkte):
 
 # --------------------------------------------------------------------------- Kontrollpunkte
 def kontrollpunkte_lesen(liste):
-    """Kontrollpunkte: [x, z], [x, z, y] oder {"x", "z", "y", "breite"…}."""
+    """Kontrollpunkte: [x, z], [x, z, y] oder {"x", "z", "y", "breite"…, "ecke_radius_m"}.
+
+    ``ecke_radius_m``: Eckpunkt; die Strecke läuft gerade auf ihn zu und biegt mit diesem Radius ab
+    (``mittellinie.ecken_verdichten``)."""
     pts = []
     attr = _leere_attribute(len(liste))
     for i, p in enumerate(liste):
@@ -819,6 +822,11 @@ def kontrollpunkte_lesen(liste):
             bl, br, qn = _breiten_aus_angabe(p)
             attr["breite_links"][i], attr["breite_rechts"][i] = bl, br
             attr["querneigung_grad"][i] = qn
+            if p.get("ecke_radius_m") is not None:
+                r = float(p["ecke_radius_m"])
+                if not math.isfinite(r) or r <= 0:
+                    raise ValueError("Control point %d: ecke_radius_m must be > 0" % i)
+                attr.setdefault("ecke_radius_m", np.full(len(liste), np.nan))[i] = r
         else:
             if len(p) not in (2, 3):
                 raise ValueError("Control point %d: [x, z] or [x, z, y] expected" % i)

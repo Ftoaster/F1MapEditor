@@ -31,7 +31,7 @@ from PySide6.QtWidgets import (
 
 from .i18n import tr
 
-_UA = "Mapeditor livemap (https://github.com/sticktor/F1MapEditor)"
+_UA = "Mapeditor-livemap/1.0 (F1 25 track editor)"
 _pix = {}
 _pending = set()
 _failed = set()

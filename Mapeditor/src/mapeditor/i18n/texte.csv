@@ -1367,3 +1367,25 @@ No place found.;Kein Ort gefunden.;livemap.py
 Latitude must be between -85 and 85, longitude between -180 and 180.;Breitengrad zwischen -85 und 85, Längengrad zwischen -180 und 180.;livemap.py
 Enter latitude and longitude as numbers.;Breiten- und Längengrad als Zahlen eingeben.;livemap.py
 Live map …;Live-Karte …;window.py
+Set F1 25 game folder …;F1-25-Spielordner festlegen …;window.py
+Game folder: {ordner};Spielordner: {ordner};window.py
+Choose the F1 25 game folder;F1-25-Spielordner wählen;spielordner.py
+Not an F1 25 folder;Kein F1-25-Ordner;spielordner.py
+{ordner} does not contain an F1 25 installation (2025_asset_groups is missing). Choose the folder that contains F1_25.exe, for example …\steamapps\common\F1 25.;{ordner} enthält keine F1-25-Installation (2025_asset_groups fehlt). Wähle den Ordner mit F1_25.exe, zum Beispiel …\steamapps\common\F1 25.;spielordner.py
+F1 25 not found;F1 25 nicht gefunden;spielordner.py
+The editor could not find F1 25 in your Steam libraries. Choose the game folder now? The editor remembers it.;Der Editor hat F1 25 in deinen Steam-Bibliotheken nicht gefunden. Spielordner jetzt wählen? Der Editor merkt ihn sich.;spielordner.py
+Align to line;Auf Linie ausrichten;document.py
+Corner radius · m (empty = smooth);Eckradius · m (leer = rund);window.py
+Corners only work with control points.;Ecken gehen nur mit Kontrollpunkten.;document.py
+Make corner;Zur Ecke machen;document.py
+Make corner (straight lines, fixed radius);Zur Ecke machen (gerade Linien, fester Radius);window.py
+Make smooth;Rund machen;document.py
+Make smooth (remove corner);Rund machen (Ecke entfernen);window.py
+Select at least three connected points (not the whole lap) to align them.;Mindestens drei zusammenhängende Punkte wählen (nicht die ganze Runde), um sie auszurichten.;document.py
+Select the points that should become corners first.;Zuerst die Punkte wählen, die Ecken werden sollen.;document.py
+The corner radius must be greater than 0 m.;Der Eckradius muss größer als 0 m sein.;document.py
+The first and last selected point are at the same place.;Erster und letzter gewählter Punkt liegen an derselben Stelle.;document.py
+{anzahl} points aligned, the track is straight between them · Ctrl+Z: undo.;{anzahl} Punkte ausgerichtet, die Strecke ist dazwischen gerade · Strg+Z: rückgängig.;window.py
+{anzahl} points are corners now (radius in the properties) · Ctrl+Z: undo.;{anzahl} Punkte sind jetzt Ecken (Radius in den Eigenschaften) · Strg+Z: rückgängig.;window.py
+{anzahl} points are smooth again · Ctrl+Z: undo.;{anzahl} Punkte sind wieder rund · Strg+Z: rückgängig.;window.py
+“Align to line” only works with control points.;„Auf Linie ausrichten“ geht nur mit Kontrollpunkten.;document.py

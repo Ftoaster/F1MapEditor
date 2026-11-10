@@ -25,6 +25,7 @@ from .adapter import (ProcessJob, camera_auto, camera_plan, camera_station, carr
 from .appearance import ensure_fonts
 from .document import Document
 from .i18n import N_, SPRACHEN, meldung, rule_title, setze_sprache, sprache, tr, trn
+from . import spielordner
 from .input_geometry import input_geometry
 from .project import Project, point_xyz, read_json, set_point
 from .views import CrossSection, MapView, ProfileView, SpeedView
@@ -45,7 +46,7 @@ LABELS = {
     "richtung": N_("Corner direction"), "radius_anfang": N_("Start radius · m"), "radius_ende": N_("End radius · m"),
     "hoehe_ende": N_("End height · m"), "steigung_prozent": N_("Gradient · %"), "name": N_("Name"),
     "breite": N_("Total width · m"), "breite_links": N_("Half-width left · m"), "breite_rechts": N_("Half-width right · m"),
-    "asymmetrisch": N_("Asymmetric width"),
+    "asymmetrisch": N_("Asymmetric width"), "ecke_radius_m": N_("Corner radius · m (empty = smooth)"),
     "querneigung_grad": N_("Banking · ° (+ = left higher)"), "uebergang_m": N_("Transition · m"),
     "randlinie_breite": N_("Edge line · m"), "abtastung_m": N_("Sampling · m"), "glaettung_m": N_("Smoothing · m"),
     "hoehen_glaettung_m": N_("Height smoothing · m"), "schliessen": N_("Closing rule (verteilen/fehler)"),
@@ -197,6 +198,8 @@ def parse_value(text, template, key):
     number = float(text.replace(",", "."))
     if not math.isfinite(number):
         raise ValueError(tr("Please enter a finite number."))
+    if key == "ecke_radius_m" and number <= 0:
+        raise ValueError(tr("The corner radius must be greater than 0 m."))
     if isinstance(template, int) and key in ("anzahl", "boxen"):
         if number != int(number):
             raise ValueError(tr("Please enter a whole number."))
@@ -443,6 +446,10 @@ class MainWindow(QMainWindow):
         self.action(edit_menu, tr("Reverse order of selection"), self.reverse_selection)
         self.action(edit_menu, tr("Cut overlap"), self.cut_overhang)
         edit_menu.addSeparator()
+        self.action(edit_menu, tr("Make corner (straight lines, fixed radius)"), self.make_corner)
+        self.action(edit_menu, tr("Make smooth (remove corner)"), self.make_smooth)
+        self.action(edit_menu, tr("Align to line"), self.align_to_line)
+        edit_menu.addSeparator()
         self.action(edit_menu, tr("Scale track …"), self.scale_track)
         edit_menu.addSeparator()
         self.action(edit_menu, tr("Banking: all corners automatically"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
@@ -487,6 +494,7 @@ class MainWindow(QMainWindow):
         self.action(tools, tr("Check current draft"), self.request_check, "Ctrl+Return")
         self.action(tools, tr("Build / package …"), self.open_build)
         self.action(tools, tr("Set up carrier package …"), self.setup_carrier)
+        self.action(tools, tr("Set F1 25 game folder …"), self.choose_game_folder)
         self.action(tools, tr("Playtest log …"), self.open_playtests)
         self.action(tools, tr("Clean up old builds …"), self.open_cleanup)
         help_menu = self.menuBar().addMenu(tr("&Help"))
@@ -1287,7 +1295,7 @@ class MainWindow(QMainWindow):
                 x, y, z = point_xyz(point)
                 values = dict(point) if isinstance(point, dict) else {}
                 values.update(x=x, y=y, z=z)
-                keys = ["x", "z", "y"] + self._width_keys(values)
+                keys = ["x", "z", "y", "ecke_radius_m"] + self._width_keys(values)
             elif ml.get("art") == "segmente" and 0 <= index < len(ml.get("segmente", [])):
                 values = dict(ml["segmente"][index])
                 shape_keys = {"gerade": ["laenge"], "bogen": ["radius", "winkel", "richtung"] if values.get("winkel") is not None else ["radius", "laenge", "richtung"], "klothoide": ["laenge", "richtung", "radius_anfang", "radius_ende"]}
@@ -2961,6 +2969,15 @@ class MainWindow(QMainWindow):
             self.results.setTabText(self.issue_tab, tr("Check ({anzahl})", anzahl=errors + warnings) if errors + warnings
                                     else tr("Check · ok"))
 
+    def choose_game_folder(self):
+        """Spielordner von F1 25 wählen (programmweit gemerkt) und den Umgebungskatalog neu laden."""
+        pfad = spielordner.waehlen(self)
+        if not pfad:
+            return
+        self.status_label.setText(tr("Game folder: {ordner}", ordner=pfad))
+        if self.env_catalog is None or self.env_panel.isVisible():
+            self.load_env_catalog()
+
     def setup_carrier(self):
         """Portimão-Mod als Träger einrichten (Datei suchen, Download öffnen, prüfen, ablegen)."""
         from .ansicht import settings
@@ -3198,7 +3215,15 @@ class MainWindow(QMainWindow):
         if not self.confirm_discard():
             return
         toolkit = self.document.project.manifest.get("werkzeugkasten")
-        dialog = TemplateDialog(self, game_tracks=lambda: spielstrecken(toolkit))
+        def game_tracks():
+            try:
+                return spielstrecken(toolkit)
+            except (ValueError, OSError, RuntimeError) as error:
+                # Spiel nicht gefunden: einmal den Ordner wählen lassen, dann erneut
+                if not (self.interactive and spielordner.ist_fehlt_meldung(error) and spielordner.anbieten(self)):
+                    raise
+                return spielstrecken(toolkit)
+        dialog = TemplateDialog(self, game_tracks=game_tracks)
         if dialog.exec() != QDialog.Accepted:
             return
         values = dialog.values()
@@ -3557,6 +3582,42 @@ class MainWindow(QMainWindow):
         self.set_mode("auswahl")
         self.status_label.setText(tr("Order reversed · Ctrl+Z: undo."))
 
+    def make_corner(self):
+        """Gewählte Punkte zu Eckpunkten: gerade Linien auf den Punkt zu, Bogen mit festem Radius."""
+        try:
+            anzahl = self.document.set_corners(self._selected_corner_radius() or self.document.ECKE_RADIUS_M)
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.status_label.setText(tr("{anzahl} points are corners now (radius in the properties) · Ctrl+Z: undo.",
+                                     anzahl=anzahl))
+
+    def _selected_corner_radius(self):
+        """Radius eines schon gewählten Eckpunkts übernehmen (mehrere Ecken gleich groß machen)."""
+        for i in sorted(self.document.selected_indices):
+            p = self.document.points[i] if 0 <= i < len(self.document.points) else None
+            if isinstance(p, dict) and p.get("ecke_radius_m"):
+                return p["ecke_radius_m"]
+        return None
+
+    def make_smooth(self):
+        try:
+            anzahl = self.document.set_corners(None)
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.status_label.setText(tr("{anzahl} points are smooth again · Ctrl+Z: undo.", anzahl=anzahl))
+
+    def align_to_line(self):
+        try:
+            anzahl = self.document.align_to_line()
+        except ValueError as error:
+            self.status_label.setText(meldung(error))
+            return
+        self.set_mode("auswahl")
+        self.status_label.setText(tr("{anzahl} points aligned, the track is straight between them · Ctrl+Z: undo.",
+                                     anzahl=anzahl))
+
     def cut_overhang(self):
         try:
             anzahl = self.document.cut_overhang()
@@ -3619,6 +3680,8 @@ class MainWindow(QMainWindow):
             self.set_env_catalog(result)
         except (ValueError, TypeError) as error:
             self.env_panel.set_catalog(self.env_catalog, tr("Catalogue not available: {error}", error=str(error)[:300]))
+            if self.interactive and spielordner.ist_fehlt_meldung(error) and spielordner.anbieten(self):
+                self.load_env_catalog()
 
     def _env_model_chosen(self, modell):
         """Ein Modell im Katalog gewählt: die Karte platziert es mit dem nächsten Klick."""

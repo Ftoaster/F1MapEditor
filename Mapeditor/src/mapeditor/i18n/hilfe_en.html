@@ -48,6 +48,15 @@ is active, and the piece can be moved and rotated. When it is added at the start
 the lap there. Red rings show where a pasted piece overlaps the track; <b>Cut overlap</b> shortens the selected piece at an open
 end from the first overlap on. <b>Reverse order of selection</b> turns a piece round. Finally <b>Close lap</b> and
 <b>Fill gaps</b>. The check rejects crossings and bridges (GE-01).</p>
+<h3>Straight lines and corners</h3>
+<p>Control points are joined by a smooth curve, which bulges a little on long straights and swings out at sharp corners.
+<b>Edit → Make corner</b> turns the selected points into corners (drawn square): the track runs dead straight towards the
+point and turns with a fixed radius, 15 m by default (with a corner already selected, its radius is used). The radius is in
+the point properties (<i>Corner radius</i>, empty = smooth again); if the neighbouring points are too close for it, the check
+reports the smaller radius. Between two corners the track is always straight, also across the lap closure, so a lap closed
+between two corners has no unwanted bend. <b>Edit → Align to line</b> puts the inner points of a selected piece exactly on the
+line between its first and last point; the track is straight between them, and rounds off at the ends as before.
+<b>Make smooth</b> removes the corner again.</p>
 <h3>Trace a track on an image</h3>
 <p><b>Project → Load reference image …</b>, or a screenshot via <b>Reference image from clipboard</b>, puts a map picture under
 the map as a template; it is saved as <i>bildvorlage.png</i> in the project folder. In the <b>Trace</b> tool (N), first

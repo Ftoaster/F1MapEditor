@@ -1,5 +1,12 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.3.7
+
+- **Straight lines and corners:** Edit → Make corner gives control points a fixed radius (15 m by default); the track runs dead straight between corners and closes the lap without an unwanted bend. Edit → Align to line lines up a row of points exactly
+- **Live map under the track** in true metres, satellite or street: Project → Live map. Contributed by [Ftoaster](https://github.com/Ftoaster) in PR #3, thank you!
+- **F1 25 found in every Steam library**; otherwise the editor asks for the game folder once and remembers it (Tools → Set F1 25 game folder …)
+- **Better checks for ovals and short straights:** warning when the starting grid reaches into a corner (SA-01), pit lane limited to the straight automatically (BO-06), no more false ZO-04 warning at the finish line
+
 ## New in 0.3.6
 
 - **Carrier package setup:** if the Portimão mod is missing, the editor asks and guides you: it opens the Overtake download page (a free account is needed; the editor never asks for your login), watches your Downloads folder read-only, checks the finished ZIP and keeps one copy for all projects. Also under Tools → Set up carrier package …
@@ -40,7 +47,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.6-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.3.7-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need

@@ -35,19 +35,19 @@ def test_object_width_and_bank_shown_once(app):
     try:
         w.document.select(2)
         QTest.qWait(10)
-        assert keys(w) == ["x", "z", "y", "breite", "asymmetrisch"]      # Querneigung nur im Querneigungsfeld
+        assert keys(w) == ["x", "z", "y", "ecke_radius_m", "breite", "asymmetrisch"]      # Querneigung nur im Querneigungsfeld
         assert w.bank_panel.isVisible()
         base = ROAD_WIDTH                                                 # ohne Vorschau: Standardbreite
         set_property(w, "asymmetrisch", "ja")
         point = w.document.project.raw["mittellinie"]["punkte"][2]
         assert point["breite_links"] == point["breite_rechts"] == base / 2
-        assert keys(w) == ["x", "z", "y", "asymmetrisch", "breite_links", "breite_rechts"]
+        assert keys(w) == ["x", "z", "y", "ecke_radius_m", "asymmetrisch", "breite_links", "breite_rechts"]
         set_property(w, "breite_links", "8")
         set_property(w, "asymmetrisch", "nein")
         point = w.document.project.raw["mittellinie"]["punkte"][2]
         assert "breite_links" not in point and "breite_rechts" not in point
         assert point["breite"] == 8 + base / 2                            # Gesamtbreite bleibt erhalten
-        assert keys(w) == ["x", "z", "y", "breite", "asymmetrisch"]
+        assert keys(w) == ["x", "z", "y", "ecke_radius_m", "breite", "asymmetrisch"]
         w.apply_feature("querneigungsfeld", False, save=False)
         assert keys(w)[-1] == "querneigung_grad"                          # ohne Feld wieder als Zeile
         w.apply_feature("querneigungsfeld", True, save=False)

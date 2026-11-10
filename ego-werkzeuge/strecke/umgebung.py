@@ -417,7 +417,7 @@ def katalog(spielordner=None, neu=False, traeger="standard", cache=None, protoko
     t0 = time.time()
     so = spielordner_finden(spielordner)
     if so is None:
-        raise UmgebungFehler("Game folder not found (specify it or set the environment variable EGO_SPIELORDNER)")
+        raise UmgebungFehler("Game folder not found (choose it under Tools → Set F1 25 game folder, or set the environment variable EGO_SPIELORDNER)")
     if traeger == "standard":
         traeger = standard_traeger()
     tracks = os.path.join(so, TRACKS_REL)

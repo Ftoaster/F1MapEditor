@@ -176,6 +176,12 @@ _R = [
     Regel("FIA_KENNWERT", "FI-01", HINWEIS, "eingabe",
           "Deviation from FIA Grade 1 values (width, grid width, length, straight, banking, start gradient)",
           QUELLEN["recherche"], "Fachpresse; für das Spiel nicht nötig, nur Realismus"),
+    Regel("GRID_IN_KURVE", "SA-01", WARNUNG, "eingabe",
+          "Starting grid is longer than the straight: grid slots lie in a corner or on banking",
+          "docs/issue5_bristol.md", "Issue #5 (Bristol, 8.11.2026): Plätze 19–24 in der 17°-Steilkurve, Start kam nie"),
+    Regel("BOX_BEGRENZT", "BO-06", HINWEIS, "eingabe",
+          "Pit lane shortened to stay on the straight",
+          "docs/issue5_bristol.md", "Gasse endet 20 m vor Querneigung > 4°, höchstens 45 % der Runde"),
     Regel("EINGABE_PUNKTLUECKE", "IN-03", WARNUNG, "eingabe",
           "Large gap between two control points (the spline bridges it freely, e.g. after box deletion)",
           QUELLEN["definition"], "Editor-Bau 16.10.2026: 392 m / 693 m Lücken zwischen sonst 5 m Abstand"),
@@ -1132,6 +1138,11 @@ def geometrie_kennwerte(pos_xz, sigma_m=6.0, ds=1.0):
     return 1.0 / max(abs(k[i]), 1e-9), float(dk[j]), float(s[i]), float(s[j])
 
 
+#: Startplätze nur auf gerader, nicht überhöhter Fahrbahn (Issue #5)
+GRID_MAX_QUERNEIGUNG_GRAD = 2.0
+GRID_MIN_RADIUS_M = 200.0
+
+
 def _geometrie_pruefen(ml, param, m, welt_bei):
     """Radius/Krümmungsänderung gegen die Originale, Länge, FIA-Kennwerte (Hinweise)."""
     from .mittellinie import laeufe
@@ -1181,6 +1192,37 @@ def _geometrie_pruefen(ml, param, m, welt_bei):
         s = float(st.s[int(np.argmax(np.abs(ml.bank)))])
         m.append(meldung("FIA_KENNWERT", "Banking %.1f° at %.0f m (FIA ≤ %.1f°)" % (q, s, FIA_MAX_QUERNEIGUNG_GRAD),
                          ort(hl, s, welt_bei(s)), ist=_r(q), soll=FIA_MAX_QUERNEIGUNG_GRAD))
+    # Startaufstellung: alle Plätze auf der Geraden, ohne Querneigung (Issue #5)
+    gp |= {"GRID_IN_KURVE", "BOX_BEGRENZT"}
+    if pg:
+        laenge = float(pg.get("fahrzeuglaenge_m", 5.6))
+        schlimm = None
+        for i in range(int(pg.get("anzahl", 22))):
+            s_p = (-float(pg.get("abstand_pole_m", 6.0)) - i * float(pg.get("abstand_m", 8.0))) % L
+            fenster = np.abs(((st.s - s_p + L / 2) % L) - L / 2) <= laenge / 2 + 1.0
+            if not fenster.any():
+                continue
+            neig = float(np.degrees(np.abs(ml.bank[fenster])).max())
+            kr = float(np.abs(ml.kappa_glatt[fenster]).max())
+            if neig > GRID_MAX_QUERNEIGUNG_GRAD or kr > 1.0 / GRID_MIN_RADIUS_M:
+                schlimm = (i + 1, s_p, neig, 1.0 / max(kr, 1e-9))
+                break
+        if schlimm is not None:
+            n_ok = schlimm[0] - 1
+            m.append(meldung("GRID_IN_KURVE", "Grid slot %d (at %.0f m) lies in a corner (radius %.0f m, banking %.1f°) - "
+                                              "only %d slots fit on the straight: fewer slots, smaller spacing or move "
+                                              "the finish line" % (schlimm[0], schlimm[1], schlimm[3], schlimm[2], n_ok),
+                             ort(hl, schlimm[1], welt_bei(schlimm[1])), ist=schlimm[0], soll="<= %d" % n_ok))
+    pbox = param.get("boxengasse") or {}
+    if pbox.get("aktiv"):
+        from .querprofil import boxen_begrenzen
+        vor, nach, grund = boxen_begrenzen(pbox, st.s, ml.bank, L)
+        if grund:
+            m.append(meldung("BOX_BEGRENZT", "Pit lane shortened (%s): entry %.0f m before the line instead of %.0f m, "
+                                             "exit %.0f m after instead of %.0f m" % (grund, vor, pbox["einfahrt_vor_start_m"],
+                                                                                     nach, pbox["ausfahrt_nach_start_m"]),
+                             ort(hl, 0.0, welt_bei(0.0)), ist=[vor, nach],
+                             soll=[pbox["einfahrt_vor_start_m"], pbox["ausfahrt_nach_start_m"]]))
     nahe = (st.s <= 150.0) | (st.s >= L - 150.0)
     steig = float(np.abs(ml.steigung[nahe]).max()) if nahe.any() else 0.0
     if steig > FIA_MAX_START_STEIGUNG:

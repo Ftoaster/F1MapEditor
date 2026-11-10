@@ -643,6 +643,60 @@ class Document(QObject):
         self.edit(tr("Open lap here"), operation)
         self.select(len(punkte) - 1)
 
+    #: Standardradius neuer Eckpunkte (Stadtkurs-Ecke)
+    ECKE_RADIUS_M = 15.0
+
+    def set_corners(self, radius):
+        """Gewählte Kontrollpunkte zu Eckpunkten mit ``radius`` machen (None = wieder rund)."""
+        self._nur_punkte(tr("Corners only work with control points."))
+        auswahl = sorted(i for i in self.selected_indices if 0 <= i < len(self.points))
+        if not auswahl:
+            raise ValueError(tr("Select the points that should become corners first."))
+        if radius is not None and not radius > 0:
+            raise ValueError(tr("The corner radius must be greater than 0 m."))
+        def operation(raw, meta):
+            punkte = raw["mittellinie"]["punkte"]
+            for i in auswahl:
+                p = punkte[i]
+                if not isinstance(p, dict):
+                    x, y, z = point_xyz(p)
+                    p = {"x": x, "y": y, "z": z}
+                if radius is None:
+                    p.pop("ecke_radius_m", None)
+                else:
+                    p["ecke_radius_m"] = round(float(radius), 2)
+                punkte[i] = p
+        self.edit(tr("Make corner") if radius is not None else tr("Make smooth"), operation)
+        return len(auswahl)
+
+    def align_to_line(self):
+        """Innere Punkte eines gewählten, zusammenhängenden Stücks exakt auf die Linie zwischen seinem ersten und
+        letzten Punkt legen; die Strecke wird dort gerade. Rückgabe: Anzahl verschobener Punkte."""
+        from . import kopieren
+        self._nur_punkte(tr("“Align to line” only works with control points."))
+        n = len(self.points)
+        folge = kopieren.kette(self.selected_indices, n, self.project.closed)
+        if folge is None or len(folge) < 3 or len(folge) >= n:
+            raise ValueError(tr("Select at least three connected points (not the whole lap) to align them."))
+        ax, _, az = point_xyz(self.points[folge[0]])
+        bx, _, bz = point_xyz(self.points[folge[-1]])
+        dx, dz = bx - ax, bz - az
+        laenge2 = dx * dx + dz * dz
+        if laenge2 < 1e-6:
+            raise ValueError(tr("The first and last selected point are at the same place."))
+        # Lage entlang der Linie: Anteil der Wegstrecke entlang der Auswahl (bewahrt Reihenfolge und Abstände)
+        wege = [0.0]
+        for a, b in zip(folge, folge[1:]):
+            pa, pb = point_xyz(self.points[a]), point_xyz(self.points[b])
+            wege.append(wege[-1] + math.hypot(pb[0] - pa[0], pb[2] - pa[2]))
+        def operation(raw, meta):
+            punkte = raw["mittellinie"]["punkte"]
+            for k, i in enumerate(folge[1:-1], start=1):
+                t = wege[k] / wege[-1]
+                punkte[i] = set_point(punkte[i], x=round(ax + dx * t, 4), z=round(az + dz * t, 4))
+        self.edit(tr("Align to line"), operation)
+        return len(folge) - 2
+
     def reverse_selection(self):
         """Reihenfolge eines zusammenhängenden Stücks umkehren (z. B. ein falsch herum angebundenes Stück)."""
         from . import kopieren

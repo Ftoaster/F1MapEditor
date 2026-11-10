@@ -389,7 +389,7 @@ Duplicate ID {};ID {} doppelt;umgebung.py
 Duplicate object ID {};Objekt-ID {} doppelt;umgebung.py
 Environment file must be in the project folder: {};Umgebungsdatei muss im Projektordner liegen: {};umgebung.py
 ERP in the package is stored compressed: {};ERP im Paket ist komprimiert gespeichert: {};umgebung.py
-Game folder not found (specify it or set the environment variable EGO_SPIELORDNER);Spielordner nicht gefunden (Angabe oder Umgebungsvariable EGO_SPIELORDNER);umgebung.py
+Game folder not found (choose it under Tools → Set F1 25 game folder, or set the environment variable EGO_SPIELORDNER);Spielordner nicht gefunden (unter Werkzeuge → F1-25-Spielordner festlegen wählen oder Umgebungsvariable EGO_SPIELORDNER setzen);umgebung.py
 Game folder without {}: {};Spielordner ohne {}: {};umgebung.py
 gelaende.{} {}: id is missing or empty;gelaende.{} {}: id fehlt oder ist leer;umgebung.py
 gelaende.{} {}: object ({}) expected;gelaende.{} {}: Objekt ({}) erwartet;umgebung.py
@@ -450,3 +450,7 @@ x_mode.zonen[{}].partial_versatz_m must be ≥ 0 (empty = no partial);x_mode.zon
 {}.zonen must be a list;{}.zonen muss eine Liste sein;zonen.py
 {}.zonen[{}] must be an object;{}.zonen[{}] muss ein Objekt sein;zonen.py
 {}.zonen[{}].{} is missing or not a number;{}.zonen[{}].{} fehlt oder ist keine Zahl;zonen.py
+Grid slot {} (at {} m) lies in a corner (radius {} m, banking {}°) - only {} slots fit on the straight: fewer slots, smaller spacing or move the finish line;Startplatz {} (bei {} m) liegt in einer Kurve (Radius {} m, Querneigung {}°) – nur {} Plätze passen auf die Gerade: weniger Plätze, kleinerer Abstand oder Ziellinie verschieben;pruefregeln.py
+Pit lane shortened ({}): entry {} m before the line instead of {} m, exit {} m after instead of {} m;Boxengasse gekürzt ({}): Einfahrt {} m vor der Linie statt {} m, Ausfahrt {} m danach statt {} m;pruefregeln.py
+Corner at point {}: radius reduced from {} m to {} m, the neighbouring points are too close;Ecke an Punkt {}: Radius von {} m auf {} m verkleinert, die Nachbarpunkte liegen zu nah;mittellinie.py
+Control point {}: ecke_radius_m must be > 0;Kontrollpunkt {}: ecke_radius_m muss > 0 sein;definition.py

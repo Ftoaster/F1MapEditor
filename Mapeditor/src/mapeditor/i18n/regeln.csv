@@ -65,3 +65,5 @@ UMG_VIELE;UM-05;Very many environment objects (more than 3,000, performance);Seh
 UMG_HUEGEL_LAGE;UM-06;Hill/hollow with its centre outside the track area;Hügel/Senke mit Mitte außerhalb des Streckenbereichs
 UMG_BERG_LAGE;UM-07;Mountain with its centre inside the track area or more than 12 km from the centre;Berg mit Mitte im Streckenbereich oder mehr als 12 km von der Mitte entfernt
 UMG_BERG_RAND;UM-08;Mountain reaches the edge of the track area and is cut off there;Berg reicht an den Rand des Streckenbereichs und wird dort abgeschnitten
+GRID_IN_KURVE;SA-01;Starting grid is longer than the straight: grid slots lie in a corner or on banking;Startaufstellung länger als die Gerade: Startplätze liegen in einer Kurve oder auf Querneigung
+BOX_BEGRENZT;BO-06;Pit lane shortened to stay on the straight;Boxengasse gekürzt, damit sie auf der Geraden bleibt
