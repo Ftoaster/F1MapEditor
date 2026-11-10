@@ -26,8 +26,8 @@ class Change(QUndoCommand):
         raw, manifest, env = copy.deepcopy(state)
         # Änderte sich nur die Umgebung, bleiben Vorschau und Fahrlinie gültig (Revision zählt nicht weiter).
         document.env_only = raw == project.raw and manifest == project.manifest
-        # Ebenso nur die Bildvorlage (Stützpunkte, Maßstab, Deckkraft im Manifest unter ``bildvorlage``).
-        ohne_bild = lambda m: {k: v for k, v in m.items() if k != "bildvorlage"}
+        # Ebenso nur die Bildvorlage oder die Live-Karte (Manifest ``bildvorlage`` / ``livemap``).
+        ohne_bild = lambda m: {k: v for k, v in m.items() if k not in ("bildvorlage", "livemap")}
         document.bild_only = (not document.env_only and raw == project.raw and env == project.umgebung
                               and ohne_bild(manifest) == ohne_bild(project.manifest))
         project.raw, project.manifest, project.umgebung = raw, manifest, env
