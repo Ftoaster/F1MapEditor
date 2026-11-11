@@ -24,8 +24,8 @@ from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
 TABELLE = HIER / "texte.csv"
-SPALTEN = ("en", "de", "ort")
-SPRACHEN = {"en": "English", "de": "Deutsch"}
+SPALTEN = ("en", "de", "ko", "ort")
+SPRACHEN = {"en": "English", "de": "Deutsch", "ko": "한국어"}
 #: Quell- und Standardsprache (English First): Schlüssel im Code, Rückfall für fehlende Übersetzungen
 STANDARD = "en"
 MEHRZAHL_TRENNER = "|"
@@ -65,12 +65,14 @@ def _woerterbuch(sprache):
         if sprache == STANDARD:
             _cache[sprache] = {z["de"]: z["en"] for z in zeilen if z.get("de") and z.get("en")}
         else:
-            _cache[sprache] = {z["en"]: z.get(sprache) or "" for z in zeilen if z.get("en")}
+            # deutsche Datenwerte („rechts“, „Fehler“) ebenfalls, englische Schlüssel haben Vorrang
+            _cache[sprache] = {z["de"]: z[sprache] for z in zeilen if z.get("de") and z.get(sprache)}
+            _cache[sprache].update({z["en"]: z.get(sprache) or "" for z in zeilen if z.get("en")})
     return _cache[sprache]
 
 
 def sprache():
-    """Aktive Oberflächensprache (``de`` oder ``en``)."""
+    """Aktive Oberflächensprache (``en``, ``de`` oder ``ko``)."""
     return _sprache
 
 
@@ -94,12 +96,14 @@ def qlocale():
     from PySide6.QtCore import QLocale
     if _sprache == "en":
         return QLocale(QLocale.English, QLocale.UnitedStates)
+    if _sprache == "ko":
+        return QLocale(QLocale.Korean, QLocale.SouthKorea)
     return QLocale(QLocale.German, QLocale.Germany)
 
 
 def dezimal(text):
-    """Mit ``f"{x:.1f}"`` formatierten Text in die Sprache bringen: deutsch Dezimalkomma, englisch unverändert."""
-    return text if _sprache == "en" else text.replace(".", ",")
+    """Mit ``f"{x:.1f}"`` formatierten Text in die Sprache bringen: deutsch Dezimalkomma, sonst unverändert."""
+    return text.replace(".", ",") if _sprache == "de" else text
 
 
 def _nachschlagen(text):
