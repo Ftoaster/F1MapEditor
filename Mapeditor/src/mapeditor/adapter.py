@@ -210,6 +210,16 @@ def _option_args(options):
         if farbton not in BUILD_FARBTOENE:
             raise ValueError(tr("Unknown colour tone {wert!r}.", wert=farbton))
         args += ["--biom", biom, "--farbton", farbton]
+    asphalt = (options.get("asphalt_vorlage") or "").strip()
+    if asphalt and asphalt != "traeger":
+        if not re.fullmatch(r"[A-Za-z0-9_]+", asphalt):
+            raise ValueError(tr("Unknown track surface {wert!r}.", wert=asphalt))
+        args += ["--asphalt-vorlage", asphalt]
+    skid = (options.get("skid_vorlage") or "").strip()
+    if skid and skid != "traeger":
+        if not re.fullmatch(r"[A-Za-z0-9_]+", skid):
+            raise ValueError(tr("Unknown tyre marks {wert!r}.", wert=skid))
+        args += ["--skid-vorlage", skid]
     return args
 
 

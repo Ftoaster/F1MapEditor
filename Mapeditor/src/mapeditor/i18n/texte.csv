@@ -1389,3 +1389,21 @@ The first and last selected point are at the same place.;Erster und letzter gew�
 {anzahl} points are corners now (radius in the properties) · Ctrl+Z: undo.;{anzahl} Punkte sind jetzt Ecken (Radius in den Eigenschaften) · Strg+Z: rückgängig.;window.py
 {anzahl} points are smooth again · Ctrl+Z: undo.;{anzahl} Punkte sind wieder rund · Strg+Z: rückgängig.;window.py
 “Align to line” only works with control points.;„Auf Linie ausrichten“ geht nur mit Kontrollpunkten.;document.py
+Replaces the asphalt textures with the chosen circuit. The pit lane stays Portimão. Bahrain, Imola, Madrid, Melbourne and Suzuka supply only the base texture.;Ersetzt die Asphalttexturen durch die der gewählten Strecke. Die Boxengasse bleibt Portimão. Bahrain, Imola, Madrid, Melbourne und Suzuka liefern nur die Basiskarte.;build.py
+Replaces the dark tyre marks along the track. The picture is a strip wrapped along the road, not a map of the corners.;Ersetzt die dunklen Reifenspuren entlang der Strecke. Das Bild ist ein Streifen, der der Straße folgt, keine Karte der Kurven.;build.py
+Track surface;Fahrbahnoberfläche;build.py
+Tyre marks;Reifenspuren;build.py
+Type 1;Typ 1;build.py
+Type 2;Typ 2;build.py
+Type 3;Typ 3;build.py
+Type 4;Typ 4;build.py
+Type 5;Typ 5;build.py
+Type 6;Typ 6;build.py
+Type 7;Typ 7;build.py
+Type 8;Typ 8;build.py
+Type 9;Typ 9;build.py
+Type 10;Typ 10;build.py
+Type 11;Typ 11;build.py
+Type 12;Typ 12;build.py
+Unknown track surface {wert!r}.;Fahrbahnoberfläche {wert!r} unbekannt.;adapter.py
+Unknown tyre marks {wert!r}.;Reifenspuren {wert!r} unbekannt.;adapter.py

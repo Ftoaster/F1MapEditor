@@ -601,7 +601,9 @@ def cmd_bauen(args):
                                           hoehe_versatz=args.geometrie_dy, physik_umfang=args.physik_umfang,
                                           physik_kante_max=args.physik_kante_max,
                                           grundflaeche=getattr(args, "grundflaeche", "raster"),
-                                          huegel=huegel or None, welt_uv=getattr(args, "welt_uv", "konstant"))
+                                          huegel=huegel or None, welt_uv=getattr(args, "welt_uv", "konstant"),
+                                          asphalt_vorlage=getattr(args, "asphalt_vorlage", None),
+                                          skid_vorlage=getattr(args, "skid_vorlage", None))
             bericht["schritte"]["geometrie"] = _kurz(geo)
     # --- Minimap (AP11c)
     _phase("minimap")
@@ -1434,6 +1436,12 @@ def argumente(argv):
     s.add_argument("--weltkarten", action=argparse.BooleanOptionalAction, default=None,
                    help="eigene Boden-, TrackInfo- und Außenterrain-Karten (setzt --welt-uv echt; docs/welt_texturen.md); "
                         "im Profil empfohlen an, --no-weltkarten schaltet sie ab")
+    s.add_argument("--asphalt-vorlage", dest="asphalt_vorlage", default=None, metavar="TYP",
+                   help="Fahrbahntexturen aus asphalt_texturen/katalog.json (type1 …); "
+                        "traeger = unverändert")
+    s.add_argument("--skid-vorlage", dest="skid_vorlage", default=None, metavar="TYP",
+                   help="Reifenspuren aus asphalt_texturen/skid/katalog.json (type1 …); "
+                        "traeger = unverändert")
     s.add_argument("--biom", choices=("standard", "wueste"), default="standard",
                    help="mit --weltkarten: standard = Gras, wueste = Bahrains Sand und Fels, kein Bodenbewuchs")
     s.add_argument("--farbton", choices=("standard", "trocken", "saftig", "herbst"), default="standard",
