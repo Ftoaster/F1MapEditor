@@ -145,7 +145,7 @@ def issue_order(issue):
 
 def german_numbers(text):
     """Dezimalpunkt in Zahlen von Werkzeugmeldungen als Komma anzeigen („989.0 m“ → „989,0 m“); englisch unverändert."""
-    if sprache() == "en":
+    if sprache() != "de":
         return str(text)
     return re.sub(r"(?<![\w.])(-?\d+)\.(\d+)(?![\w.])", r"\1,\2", str(text))
 
@@ -154,7 +154,7 @@ def lap_text(seconds):
     """Rundenzeit „1:44,7“ (englisch „1:44.7“)."""
     minutes, rest = divmod(float(seconds), 60.0)
     text = f"{int(minutes)}:{rest:04.1f}"
-    return text if sprache() == "en" else text.replace(".", ",")
+    return text.replace(".", ",") if sprache() == "de" else text
 
 
 def value_text(value):
@@ -2535,7 +2535,7 @@ class MainWindow(QMainWindow):
                 f"{kmh(min((k['v_min'] for k in group if k['v_min'] is not None), default=None))} km/h"
                 + (tr(" · braking distance {bremsweg_m:.0f} m", bremsweg_m=curve['bremsweg_m']) if curve.get("bremsweg_m") else "")
                 + (tr(" · boards {tafeln}", tafeln='/'.join(str(m) for m in curve['tafeln'])) if curve.get("tafeln") else ""))
-        self.map.focus_curve = dict(curve, info=info if sprache() == "en" else info.replace(".", ","))
+        self.map.focus_curve = dict(curve, info=info.replace(".", ",") if sprache() == "de" else info)
         self.set_station(curve["s_scheitel"])
         for row in range(self.curve_table.rowCount()):
             item = self.curve_table.item(row, 0)

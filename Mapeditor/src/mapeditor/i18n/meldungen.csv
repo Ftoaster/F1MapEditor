@@ -1,456 +1,456 @@
-﻿en;de;ort
-boxengasse.tempolimit_kmh must be {} (the values of the game's tracks);boxengasse.tempolimit_kmh muss {} sein (Werte der Spielstrecken);definition.py
-Centreline needs at least 4 points (has {});Mittellinie braucht mindestens 4 Punkte (hat {});definition.py
-Centreline points must be finite;Mittellinienpunkte müssen endlich sein;definition.py
-Closing error {} m (x {}, z {}) was spread over {} m;Schließfehler {} m (x {}, z {}) wurde über {} m verteilt;definition.py
-Clothoid transition shortened to max_anteil after segment {};Klothoiden-Übergang auf max_anteil gekürzt nach Segment {};definition.py
-Clothoid transition too short (< {} m), curvature jump remains after segment {};Klothoiden-Übergang zu kurz (< {} m), Krümmungssprung bleibt nach Segment {};definition.py
-Control point {}: [x, z] or [x, z, y] expected;Kontrollpunkt {}: [x, z] oder [x, z, y] erwartet;definition.py
-CSV {} is empty;CSV {} ist leer;definition.py
-CSV {}: at least 3 columns (x, y, z) expected;CSV {}: mindestens 3 Spalten (x, y, z) erwartet;definition.py
-CSV {}: column '{}' is missing (header: {});CSV {}: Spalte '{}' fehlt (Kopf: {});definition.py
-Definition values must be finite;Definitionswerte müssen endlich sein;definition.py
-Direction error when closing: {}°;Richtungsfehler beim Schließen: {}°;definition.py
-fahrzeug.ggv must be an object;fahrzeug.ggv muss ein Objekt sein;definition.py
-fahrzeug.ggv.ellipse_exponent must be within [1, 10];fahrzeug.ggv.ellipse_exponent muss in [1, 10] liegen;definition.py
-fahrzeug.ggv.hoehe_glaettung_m must not be negative;fahrzeug.ggv.hoehe_glaettung_m darf nicht negativ sein;definition.py
-fahrzeug.ggv.hoeheneinfluss must be true or false;fahrzeug.ggv.hoeheneinfluss muss true oder false sein;definition.py
-fahrzeug.ggv.{} must be > 0 (or empty);fahrzeug.ggv.{} muss > 0 sein (oder leer);definition.py
-fahrzeug.modell must be punktmasse or ggv;fahrzeug.modell muss punktmasse oder ggv sein;definition.py
-fahrzeug.parametersatz must be a name from strecke/fahrzeuge/;fahrzeug.parametersatz muss ein Name aus strecke/fahrzeuge/ sein;definition.py
-fahrzeug.traktion_anteil must be within (0, 1];fahrzeug.traktion_anteil muss in (0, 1] liegen;definition.py
-ideallinie.iterationen must be a whole number ≥ 1;ideallinie.iterationen muss eine ganze Zahl ≥ 1 sein;definition.py
-ideallinie.iterationen_toleranz_m must be > 0;ideallinie.iterationen_toleranz_m muss > 0 sein;definition.py
-ideallinie.kruemmung_max must be > 0 (or empty);ideallinie.kruemmung_max muss > 0 sein (oder leer);definition.py
-Line widths must not be negative;Linienbreiten dürfen nicht negativ sein;definition.py
-mittellinie.art must be 'segmente', 'kontrollpunkte' or 'csv' (given: {});mittellinie.art muss 'segmente', 'kontrollpunkte' oder 'csv' sein (angegeben: {});definition.py
-mittellinie.datei is missing (art = csv);mittellinie.datei fehlt (art = csv);definition.py
-mittellinie.uebergaenge must be an object;mittellinie.uebergaenge muss ein Objekt sein;definition.py
-mittellinie.uebergaenge.aktiv must be true or false;mittellinie.uebergaenge.aktiv muss true oder false sein;definition.py
-mittellinie.uebergaenge.laenge_m must be empty or > 0;mittellinie.uebergaenge.laenge_m muss leer oder > 0 sein;definition.py
-mittellinie.uebergaenge.max_anteil must be within (0, 0.9];mittellinie.uebergaenge.max_anteil muss in (0, 0.9] liegen;definition.py
-mittellinie.uebergaenge.max_laenge_m must be >= min_laenge_m;mittellinie.uebergaenge.max_laenge_m muss >= min_laenge_m sein;definition.py
-mittellinie.uebergaenge.{} must be a number > 0;mittellinie.uebergaenge.{} muss eine Zahl > 0 sein;definition.py
-No segments given;Keine Segmente angegeben;definition.py
-Safety margin must not be negative;Sicherheitsabstand darf nicht negativ sein;definition.py
-Segment {} has length <= 0;Segment {} hat Länge <= 0;definition.py
-Segment {}: direction must be 'links' or 'rechts';Segment {}: richtung muss 'links' oder 'rechts' sein;definition.py
-Segment {}: radius must be > 0;Segment {}: Radius muss > 0 sein;definition.py
-Segment {}: transition must be true, false, a length > 0 or {};Segment {}: uebergang muss true, false, eine Länge > 0 oder {} sein;definition.py
-Segments do not close exactly ({} m);Segmente schließen nicht exakt ({} m);definition.py
-Segments do not close: end point is {} m from the start (allowed {} m);Segmente schließen nicht: Endpunkt {} m vom Start entfernt (erlaubt {} m);definition.py
-seitenraum.abschnitte must be a list;seitenraum.abschnitte muss eine Liste sein;definition.py
-Surface code for {} must contain four ASCII characters;Oberflächencode für {} muss vier ASCII-Zeichen enthalten;definition.py
-Total turning {}° instead of ±360°: the track does not close in direction;Gesamtdrehung {}° statt ±360° – Strecke schließt in der Richtung nicht;definition.py
-Unknown axis system '{}' (possible: {});Unbekanntes Achsensystem '{}' (möglich: {});definition.py
-Unknown segment type {} (gerade | bogen | klothoide);Unbekannter Segmenttyp {} (gerade | bogen | klothoide);definition.py
-{} needs von_s and bis_s;{} braucht von_s und bis_s;definition.py
-{}.auslauf must be gras, kies or asphalt;{}.auslauf muss gras, kies oder asphalt sein;definition.py
-"{}.rand_neigung must be ""strecke"" or an angle up to ±{}°";"{}.rand_neigung muss ""strecke"" oder ein Winkel bis ±{}° sein";definition.py
-{}.seite must be links, rechts or beide;{}.seite muss links, rechts oder beide sein;definition.py
-{}.{} must be a valid whole number;{}.{} muss eine gültige ganze Anzahl sein;definition.py
-{}.{} must be finite and > 0;{}.{} muss endlich und > 0 sein;definition.py
-{}.{} must be links or rechts;{}.{} muss links oder rechts sein;definition.py
-{}.{} must be ≥ {};{}.{} muss ≥ {} sein;definition.py
-Output would overwrite the input: {};Ausgabe würde Eingabe überschreiben: {};erzeugung.py
-Protected output folder: {};Geschützter Ausgabeordner: {};erzeugung.py
-Track edges folded or intersecting: {};Fahrbahnränder gefaltet oder geschnitten: {};erzeugung.py
-Constraint edge cannot be found;Zwangskante nicht auffindbar;gelaende.py
-Constraint edge: flipping does not converge;Zwangskante: Kippen läuft nicht zusammen;gelaende.py
-Constraint edges intersect (does the track edge overlap itself?);Zwangskanten schneiden sich (Streckenrand überlappt sich selbst?);gelaende.py
-Edge not in triangle;Kante nicht im Dreieck;gelaende.py
-Hole edge {} m is not a power of two;Lochkante {} m ist keine Zweierpotenz;gelaende.py
-Legalisation does not converge;Legalisieren läuft nicht zusammen;gelaende.py
-No track edge found;Kein Streckenrand gefunden;gelaende.py
-Point lies on a constraint edge (does the track edge touch itself?);Punkt liegt auf einer Zwangskante (Streckenrand berührt sich?);gelaende.py
-Point on the hull boundary;Punkt auf dem Hüllrand;gelaende.py
-Point search does not converge;Punktsuche läuft nicht zusammen;gelaende.py
-Region parity contradictory (open chain of constraint edges);Gebietsparität widersprüchlich (offene Zwangskantenkette);gelaende.py
-Track comes within {} m of the edge of the outer terrain hole;Strecke reicht bis {} m an den Rand des Außenterrain-Lochs;gelaende.py
-Track edge ambiguous: {} vertices with degree != 2 (e.g. at {});Streckenrand nicht eindeutig: {} Vertices mit Grad != 2 (z. B. bei {});gelaende.py
-Track edge: loop not closed;Streckenrand: Schleife nicht geschlossen;gelaende.py
-Triangulation inconsistent (neighbour);Triangulierung inkonsistent (Nachbar);gelaende.py
-Triangulation inconsistent (rotation);Triangulierung inkonsistent (Drehung);gelaende.py
-Vertex on the hull boundary;Vertex auf dem Hüllrand;gelaende.py
-Vertex-triangle mapping out of date;Vertex-Dreieck-Zuordnung veraltet;gelaende.py
-{} duplicate points in the ground surface;{} doppelte Punkte in der Grundfläche;gelaende.py
-Edge lines are wider than the road;Randlinien sind breiter als die Fahrbahn;geometrie.py
-"Extent {} × {} m (plus track edge) does not fit into the track area of the game world ({} × {} m); make the track smaller (import with fit) or move points in the editor.";"Ausdehnung {} × {} m (plus Fahrbahnrand) passt nicht in den Streckenbereich der Spielwelt ({} × {} m); Strecke verkleinern (Import mit Einpassen) oder Punkte im Editor verschieben.";importe.py
-File not found: {};Datei nicht gefunden: {};importe.py
-Game track {} cannot be read: {};Spielstrecke {} nicht lesbar: {};importe.py
-Game world offset set to [{}, 0, {}] so the track lies in the hole of the outer terrain.;Spielweltversatz auf [{}, 0, {}] gestellt, damit die Strecke im Loch des Außengeländes liegt.;importe.py
-GPX cannot be read: {};GPX nicht lesbar: {};importe.py
-GPX contains fewer than 8 track points (trkpt/rtept).;GPX enthält weniger als 8 Spurpunkte (trkpt/rtept).;importe.py
-GPX point without valid lat/lon.;GPX-Punkt ohne gültige lat/lon.;importe.py
-The source contains invalid coordinates.;Die Quelle enthält ungültige Koordinaten.;importe.py
-The trace barely moves (fewer than 8 different points).;Die Spur bewegt sich kaum (weniger als 8 verschiedene Punkte).;importe.py
-The trace is not a closed circuit: start and end are {} m apart (allowed {} m).;Die Spur ist kein Rundkurs: Anfang und Ende liegen {} m auseinander (erlaubt {} m).;importe.py
-"The track crosses itself on a bridge; the generator has no bridges, the check reports the crossing as an error.";"Die Strecke kreuzt sich auf einer Brücke; der Generator kennt keine Brücken, die Prüfung meldet die Kreuzung als Fehler.";importe.py
-Too few points ({}) for a track.;Zu wenige Punkte ({}) für eine Strecke.;importe.py
-Track logic of {} not in this ERP: {};Streckenlogik von {} nicht in dieser ERP: {};importe.py
-Track rotated by {}° so it fits into the track area of the game world ({} × {} m).;Strecke um {}° gedreht, damit sie in den Streckenbereich der Spielwelt ({} × {} m) passt.;importe.py
-Track rotated by {}° so it needs to be scaled down as little as possible.;Strecke um {}° gedreht, damit sie möglichst wenig verkleinert werden muss.;importe.py
-"Track scaled down to {} % (extent {} × {} m did not fit into the track area of the game world, {} × {} m); widths and heights unchanged.";"Strecke auf {} % verkleinert (Ausdehnung {} × {} m passte nicht in den Streckenbereich der Spielwelt, {} × {} m); Breiten und Höhen unverändert.";importe.py
-Track width limited at {} points in tight corners to {} % of the radius (otherwise the edge folds).;Fahrbahnbreite an {} Punkten enger Kurven auf {} % des Radius begrenzt (sonst faltet sich der Rand).;importe.py
-TUM CSV cannot be read: {};TUM-CSV nicht lesbar: {};importe.py
-TUM CSV needs the columns x_m, y_m, w_tr_right_m, w_tr_left_m and at least 8 rows.;TUM-CSV braucht die Spalten x_m, y_m, w_tr_right_m, w_tr_left_m und mindestens 8 Zeilen.;importe.py
-TUM CSV: column {} is missing.;TUM-CSV: Spalte {} fehlt.;importe.py
-Vehicle slot layer of {} is missing in this ERP.;Fahrzeugplatz-Layer von {} fehlt in dieser ERP.;importe.py
-ziel_abstand_m must be at least 1 m.;ziel_abstand_m muss mindestens 1 m sein.;importe.py
-AI gate does not cross a track limit;KI-Gate schneidet eine Streckengrenze nicht;logik.py
-Grid is longer than the track;Startaufstellung ist länger als die Strecke;logik.py
-Grid slot lies outside the road;Startplatz liegt außerhalb der Fahrbahn;logik.py
-sektoren.grenzen_m needs two values 0 < a < b < length (metres from the finish);sektoren.grenzen_m braucht zwei Werte 0 < a < b < Länge (Meter ab Ziel);logik.py
-The game formats expect three sectors;Die Spielformate erwarten drei Sektoren;logik.py
-TrackSpace step must be 7–11 m;TrackSpace-Schritt muss 7–11 m betragen;logik.py
-Approximation needs at least 4 different points;Approximation braucht mindestens 4 verschiedene Punkte;mittellinie.py
-derivative 0, 1 or 2;ableitung 0, 1 oder 2;mittellinie.py
-Duplicate consecutive points in the centreline;Doppelte aufeinanderfolgende Punkte in der Mittellinie;mittellinie.py
-Road width per side must be > 0.5 m;Fahrbahnbreite je Seite muss > 0,5 m sein;mittellinie.py
-Spline needs at least 3 points;Spline braucht mindestens 3 Punkte;mittellinie.py
-Check without build;Prüfung ohne Bau;neue_strecke_tool.py
-Checking the logic;Prüfung der Logik;neue_strecke_tool.py
-Cleaning up the world;Welt aufräumen;neue_strecke_tool.py
-Deep package check;Tiefe Paketprüfung;neue_strecke_tool.py
-Environment (trees, objects);Umgebung (Bäume, Objekte);neue_strecke_tool.py
-Finishing;Abschluss;neue_strecke_tool.py
-Generator;Generator;neue_strecke_tool.py
-Geometry and driving physics;Geometrie und Fahrphysik;neue_strecke_tool.py
-Input and options;Eingabe und Optionen;neue_strecke_tool.py
-Lighting;Licht;neue_strecke_tool.py
-Minimap;Minimap;neue_strecke_tool.py
-PVS;PVS;neue_strecke_tool.py
-Re-reading and checking the ERP;ERP neu lesen und prüfen;neue_strecke_tool.py
-Swofty addon;Swofty-Addon;neue_strecke_tool.py
-Top views;Draufsichten;neue_strecke_tool.py
-Track logic;Streckenlogik;neue_strecke_tool.py
-Unpacking and reading the carrier;Träger entpacken/erfassen;neue_strecke_tool.py
-Writing the ERP;ERP schreiben;neue_strecke_tool.py
-Writing the package;Paket schreiben;neue_strecke_tool.py
-4×4 matrix with 16 values expected;4×4-Matrix mit 16 Werten erwartet;platzierung.py
-Offset needs three finite numbers (dx, dy, dz): {};Versatz braucht drei endliche Zahlen (dx, dy, dz): {};platzierung.py
-AI pit route has no corner lines (originals: 1–5 corners);KI-Boxenroute ohne Kurvenlinien (Originale: 1–5 Kurven);pruefregeln.py
-AI route {}: the passing space does not change at any of its {} gates. The game crashes as soon as an AI car drives it (Swofty Launcher fixes this when it builds);KI-Route {}: Der Überholraum ändert sich auf keinem der {} Tore. Das Spiel stürzt ab, sobald ein KI-Auto sie fährt (der Swofty Launcher korrigiert das beim Bau);pruefregeln.py
-ai_flying_lap_trigger ({}…{}) does not overlap rollingstart_tt ({}…{});ai_flying_lap_trigger ({}…{}) überlappt rollingstart_tt ({}…{}) nicht;pruefregeln.py
-At {} × {} m the track is larger than the hole of the outer terrain (edge {} m): the build will stop, make the track smaller;Strecke ist mit {} × {} m größer als das Loch des Außenterrains (Kante {} m): Der Bau bricht ab, Strecke verkleinern;pruefregeln.py
-Banking {}° at {} m (FIA ≤ {}°);Querneigung {}° bei {} m (FIA ≤ {}°);pruefregeln.py
-Braking line IDs ≠ ID set of .brakelinesettings (missing {}, surplus {});Bremslinien-IDs ≠ ID-Satz der .brakelinesettings (fehlen {}, überzählig {});pruefregeln.py
-Braking lines {} and {} are only {} gates apart (at least {});Bremslinien {} und {} nur {} Gates auseinander (mind. {});pruefregeln.py
-Build {}: diagnostics only, not a complete driving package;Bau {} – nur Diagnose, kein vollständiges Fahrpaket;pruefregeln.py
-Closed main line repeats the first node at the end;Geschlossene Hauptlinie wiederholt den ersten Knoten am Ende;pruefregeln.py
-"Code {} is kept; an installed Portimão mod will be replaced. Recommended: --streckencode sochi";"Code {} bleibt; eine installierte Portimão-Mod wird ersetzt. Empfohlen: --streckencode sochi";pruefregeln.py
-Curvature change {} /m² at {} m (originals ≤ {}): use mittellinie.approximation_m (e.g. 6–8) or clothoid transitions;Krümmungsänderung {} /m² bei {} m (Originale ≤ {}) – mittellinie.approximation_m (z. B. 6–8) oder Klothoiden-Übergänge verwenden;pruefregeln.py
-drl zones {} and {} overlap;drl-Zonen {} und {} überlappen;pruefregeln.py
-DRS IDs detection {} / activation {}: detection ID duplicated or without activation;DRS-IDs Erkennung {} / Aktivierung {}: Erkennungs-ID doppelt oder ohne Aktivierung;pruefregeln.py
-DRS zone {}: activation {} m long, detection {} m before it;DRS-Zone {}: Aktivierung {} m lang, Erkennung {} m davor;pruefregeln.py
-DRS zones {} and {} overlap;DRS-Zonen {} und {} überlappen;pruefregeln.py
-Duplicate braking line IDs: {};Bremslinien-IDs doppelt: {};pruefregeln.py
-Edge {} at {} m intersects edge {} at {} m;Rand {} bei {} m schneidet Rand {} bei {} m;pruefregeln.py
-ERP {}: wrong MD5 {};ERP {}: falscher MD5 {};pruefregeln.py
-ERP {}: {};ERP {}: {};pruefregeln.py
-ERP {}: {} known wrong MD5 of the carrier;ERP {}: {} bekannte falsche MD5 des Trägers;pruefregeln.py
-Gap of {} m between points {} and {} (otherwise ~{} m);Lücke von {} m zwischen Punkt {} und {} (sonst ~{} m);pruefregeln.py
-"Generator logic has no pit lane; the carrier needs a pit line and pit zones";"Generatorlogik ohne Boxengasse; der Träger braucht Boxenlinie und Boxenzonen";pruefregeln.py
-Generator mesh: {} vertices outside X/Z ±{} m (including offset);Generatornetz: {} Vertices außerhalb X/Z ±{} m (inkl. Versatz);pruefregeln.py
-Generator: {};Generator: {};pruefregeln.py
-Gradient at start/finish {} % (FIA ≤ {} %);Steigung an Start/Ziel {} % (FIA ≤ {} %);pruefregeln.py
-Grid only {} m wide (FIA ≥ {} m up to the first corner);Startaufstellung nur {} m breit (FIA ≥ {} m bis zur ersten Kurve);pruefregeln.py
-Link {} connects a missing gate ({} → {});Link {} verbindet fehlendes Gate ({} → {});pruefregeln.py
-Main braking line {} (gate {}) is outside every corner, {} m before the next corner start (gate {}). F1 25 expects main braking lines inside corner_start … corner_end.;Haupt-Bremslinie {} (Gate {}) liegt außerhalb jeder Kurve, {} m vor dem nächsten Kurvenanfang (Gate {}). F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end.;pruefregeln.py
-Main braking line {} (gate {}) is outside every corner. F1 25 expects main braking lines inside corner_start … corner_end.;Haupt-Bremslinie {} (Gate {}) liegt außerhalb jeder Kurve. F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end.;pruefregeln.py
-Main line has only {} nodes;Hauptlinie hat nur {} Knoten;pruefregeln.py
-manifest.ers.{} = {}, zone {} starts at {};manifest.ers.{} = {}, Zone {} beginnt bei {};pruefregeln.py
-Minimap {}.{} = {} not rounded to mm;Minimap {}.{} = {} nicht auf mm gerundet;pruefregeln.py
-No corner of the pit route has a pair_id to a track corner (25 of 30 originals have one);Keine Kurve der Boxenroute mit pair_id zur Streckenkurve (25/30 Originale haben eine);pruefregeln.py
-Only {} of {} DRS zones created: no further suitable straight;Nur {} von {} DRS-Zonen erzeugt: keine weitere geeignete Gerade;pruefregeln.py
-Package check “{}”: {};Paketprüfung „{}“: {};pruefregeln.py
-Package: {} known wrong MD5 of the Portimão carrier;Paket: {} bekannte falsche MD5 des Portimão-Trägers;pruefregeln.py
-Pit braking line {} (gate {}) is not in any corner of the pit route;Box-Bremslinie {} (Gate {}) liegt in keiner Kurve der Boxenroute;pruefregeln.py
-"Pit spline ends only {} m after the exit zone (at least {} m; build {} m)";"Boxen-Spline endet nur {} m hinter der Ausfahrtszone (mind. {} m; Bau {} m)";pruefregeln.py
-Pit spline jumps sideways from the main line at {} point(s), up to {} m over {} m;Boxen-Spline springt an {} Stelle(n) von der Hauptlinie quer, max. {} m auf {} m Länge;pruefregeln.py
-"Pit spline starts only {} m before the entry zone (at least {} m; build {} m)";"Boxen-Spline beginnt nur {} m vor der Einfahrtszone (mind. {} m; Bau {} m)";pruefregeln.py
-Pit spline {} lies {} m beside the main line;Boxen-Spline-{} liegt {} m neben der Hauptlinie;pruefregeln.py
-"PVS variant {}: new objects in the old Portimão area may be invisible or flicker; recommended --pvs-variante strecke (v20)";"PVS-Variante {}: neue Objekte im alten Portimão-Bereich können unsichtbar sein/flackern; empfohlen --pvs-variante strecke (v20)";pruefregeln.py
-Smallest radius {} m at {} m (originals ≥ {} m);Kleinster Radius {} m bei {} m (Originale ≥ {} m);pruefregeln.py
-Straight Mode zones {} and {} overlap;Straight-Mode-Zonen {} und {} überlappen;pruefregeln.py
-Straight of {} m from {} m (FIA ≤ {} m);Gerade von {} m ab {} m (FIA ≤ {} m);pruefregeln.py
-Track code {}: {};Streckencode {}: {};pruefregeln.py
-Track edge folds over at {} m (radius smaller than half width);Fahrbahnrand faltet sich bei {} m (Radius kleiner als Halbbreite);pruefregeln.py
-Track edge outside X/Z ±{} m at {} stations (including offset {});Fahrbahnrand an {2} Stationen außerhalb X/Z ±{1} m (inkl. Versatz {3});pruefregeln.py
-Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the game world offset to [{}, {}, {}];Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den Spielweltversatz auf [{}, {}, {}] stellen;pruefregeln.py
-Track length {} m (FIA {}–{} km);Streckenlänge {} m (FIA {}–{} km);pruefregeln.py
-Track length {} m (longest original track {} m);Streckenlänge {} m (längste Originalstrecke {} m);pruefregeln.py
-Track width {} m at {} m (FIA ≥ {} m);Fahrbahnbreite {} m bei {} m (FIA ≥ {} m);pruefregeln.py
-TrackSpace has {} closed and {} open splines (expected 1 and 1);TrackSpace hat {} geschlossene und {} offene Splines (erwartet 1 und 1);pruefregeln.py
-"TrackSpace/AI gates/TS lie {} m above the driving physics (Portimão +0.20 m); drivable up to v20, effect of +0.20 m not tested in game.";"TrackSpace/KI-Gates/TS liegen {} m über der Fahrphysik (Portimão +0,20 m); fahrbar bis v20, Wirkung von +0,20 m im Spiel ungeprüft.";pruefregeln.py
-TS pit volumes only cover {}…{} m of the {} m long pit spline;TS-Box-Volumes decken nur {}…{} m der {} m langen Boxen-Spline ab;pruefregeln.py
-Zone name {} with different ranges;Zonenname {} mit verschiedenen Bereichen;pruefregeln.py
-Zone {} ({}): spline {}, range {}…{};Zone {} ({}): Spline {}, Bereich {}…{};pruefregeln.py
-Zone {}.{}: {} m to the finish line, template {} m;Zone {}.{}: {} m zur Ziellinie, Vorlage {} m;pruefregeln.py
-{} % of the pit spline in the limiter area lies in main TS volumes (originals mostly 0 %, at most 20.5 %);{} % der Boxen-Spline im Limiterbereich liegen in Haupt-TS-Volumes (Originale meist 0 %, max. 20,5 %);pruefregeln.py
-{} (Portimão carrier: {} main braking lines);{} (Träger Portimão: {} Haupt-Bremslinien);pruefregeln.py
-{} ({}) lies on {}, {} m from the centreline;{} ({}) liegt auf {}, {} m von der Mittellinie;pruefregeln.py
-{} AI gates (originals at most {}): make the track shorter or logik.gate_schritt_m larger;{} KI-Gates (Originale höchstens {}) – Strecke kürzer oder logik.gate_schritt_m größer;pruefregeln.py
-{} corners, the carrier has {} braking lines: the build merges {} corner pairs with the shortest straight between them (like chicanes in the originals);{} Kurven, der Träger hat {} Bremslinien – der Bau legt {} Kurvenpaare mit der kürzesten Geraden dazwischen zusammen (wie Schikanen im Original);pruefregeln.py
-{} custom Straight Mode zone(s) instead of the carrier zones;{} eigene Straight-Mode-Zone(n) statt der Träger-Zonen;pruefregeln.py
-{} driving physics triangles on the road are > 1 m away from the mesh;{} Fahrphysik-Dreiecke auf der Fahrbahn > 1 m vom Netz entfernt;pruefregeln.py
-{} id {} refers to missing gate {};{} id {} verweist auf fehlendes Gate {};pruefregeln.py
-{} id {}: pair_id {} is not a gate;{} id {}: pair_id {} ist kein Gate;pruefregeln.py
-"{} logic points outside X/Z ±{} m; outermost: {}";"{} Logikpunkte außerhalb X/Z ±{} m; äußerster: {}";pruefregeln.py
-{} PVS cells with a 60 m corridor (originals at most {}): build with a smaller --pvs-korridor;{} PVS-Zellen bei 60-m-Korridor (Originale höchstens {}) – Bau mit kleinerem --pvs-korridor;pruefregeln.py
-{} reaches into a corner with radius {} m at {} m;{1} reicht bei {3} m in eine Kurve mit Radius {2} m;pruefregeln.py
-"{} wall triangles lie on the pit line; the build removes them (playtest v6)";"{} Mauerdreiecke liegen auf der Boxenlinie; der Bau entfernt sie (Spieltest v6)";pruefregeln.py
-{}: {} m long;{}: {} m lang;pruefregeln.py
-Pit boxes do not fit into the full-width section;Boxenplätze passen nicht in den vollbreiten Abschnitt;querprofil.py
-Pit lane must be shorter than one lap;Boxengasse muss kürzer als eine Runde sein;querprofil.py
-Pit lane too short: entry and exit ({} m) need at least {} m;Boxengasse zu kurz: Ein- und Ausfahrt ({} m) brauchen mindestens {} m;querprofil.py
-Pit lane: not enough space beside the track at {} stations (may overlap another part of the track);Boxengasse: an {} Stationen reicht der Platz neben der Strecke nicht (Überlappung mit anderem Streckenteil möglich);querprofil.py
-{}: less than {} m of space to the next part of the track at {} stations (barrier set to minimum distance);{1}: an {3} Stationen weniger als {2} m Platz bis zum nächsten Streckenteil (Barriere auf Mindestabstand gesetzt);querprofil.py
-Curvature limit {} 1/m cannot be met on this road;Krümmungsgrenze {} 1/m mit dieser Fahrbahn nicht einhaltbar;rennlinie.py
-Curvature limit {} 1/m: ADMM does not converge (residual primal {}, dual {});Krümmungsgrenze {} 1/m: ADMM konvergiert nicht (Rest primal {}, dual {});rennlinie.py
-fahrzeug.modell must be punktmasse or ggv, not {};fahrzeug.modell muss punktmasse oder ggv sein, nicht {};rennlinie.py
-g-g-v profile does not converge;g-g-v-Profil konvergiert nicht;rennlinie.py
-ideallinie.kruemmung_max must be > 0;ideallinie.kruemmung_max muss > 0 sein;rennlinie.py
-Iterated racing line: back-projection onto the centreline failed;Iterierte Ideallinie: Rückprojektion auf die Mittellinie fehlgeschlagen;rennlinie.py
-Racing line does not converge: KKT residual {};Ideallinie konvergiert nicht: KKT-Rest {};rennlinie.py
-Road too narrow for the safety margin;Fahrbahn für den Sicherheitsabstand zu schmal;rennlinie.py
-Speed envelope does not converge;Geschwindigkeitshüllkurve konvergiert nicht;rennlinie.py
-Vehicle parameter set {} unknown (available: {});Fahrzeug-Parametersatz {} unbekannt (vorhanden: {});rennlinie.py
-{} is not a vehicle parameter set (key 'fahrzeug' is missing);{} ist kein Fahrzeug-Parametersatz (Schlüssel 'fahrzeug' fehlt);rennlinie.py
-Adaptive ground surface: {} (way out: grundflaeche=raster);Adaptive Grundfläche: {} (Ausweg: grundflaeche=raster);spiel_geometrie.py
-Carrier does not fit: the Portimão mod (version {}) has no {}. Tested versions: {} (mod download page, History tab).;Träger passt nicht: In der Portimão-Mod (Version {}) fehlt {}. Getestet sind die Versionen {} (Download-Seite der Mod, Reiter „History“).;spiel_geometrie.py
-Generator mesh without classes: {};Generatornetz ohne Klassen: {};spiel_geometrie.py
-grundflaeche: raster, adaptiv or keine;grundflaeche: raster, adaptiv oder keine;spiel_geometrie.py
-mauer_physik: senkrecht, alle or keine;mauer_physik: senkrecht, alle oder keine;spiel_geometrie.py
-physik_umfang: voll, ohne_grund or fahrbahn;physik_umfang: voll, ohne_grund oder fahrbahn;spiel_geometrie.py
-Placed track does not lie completely inside the hole of the outer terrain;Platzierte Strecke liegt nicht vollständig im Loch des Außenterrains;spiel_geometrie.py
-Terrain material is missing or ambiguous: {};Terrainmaterial fehlt oder ist mehrdeutig: {};spiel_geometrie.py
-Track reaches the edge of the outer terrain hole;Strecke reicht bis an den Rand des Außenterrain-Lochs;spiel_geometrie.py
-trn_flags: kanten or alle7;trn_flags: kanten oder alle7;spiel_geometrie.py
-TRN~ must have exactly one fragment;TRN~ muss genau ein Fragment haben;spiel_geometrie.py
-welt_uv: konstant or echt;welt_uv: konstant oder echt;spiel_geometrie.py
-Field {}/{} has an unexpected type {};Feld {}/{} hat einen unerwarteten Typ {};spiel_kameras.py
-Line needs at least 2 points;Linie braucht mindestens 2 Punkte;spiel_kameras.py
-No ERP in the carrier package;Keine ERP im Trägerpaket;spiel_kameras.py
-AI adapter needs metres, Y up and right-handed coordinates;KI-Adapter benötigt Meter, Y oben und rechtshändige Koordinaten;spiel_ki.py
-AI output fails the repeated round trip;KI-Ausgabe besteht erneuten Rundlauf nicht;spiel_ki.py
-AI template resource is missing: {};KI-Vorlagenressource fehlt: {};spiel_ki.py
-AP12 supports exactly one main and one pit spline;AP12 unterstützt genau eine Haupt- und eine Boxenspline;spiel_ki.py
-"Brake ID sets differ; profile mode or consistent logic needed";"Brems-ID-Sätze verschieden; profil-Modus oder konsistente Logik nötig";spiel_ki.py
-Brake settings have no tyre groups;Bremssettings ohne Reifengruppen;spiel_ki.py
-Duplicate brake ID in tyre group;Doppelte Brems-ID in Reifengruppe;spiel_ki.py
-Duplicate brake ID or invalid brake gate reference;Doppelte Brems-ID oder ungültiger Bremsgate-Bezug;spiel_ki.py
-Duplicate points in the speed profile;Doppelte Punkte im Geschwindigkeitsprofil;spiel_ki.py
-Exactly one AISplineData resource required;Genau eine AISplineData-Ressource erforderlich;spiel_ki.py
-Granular table needs at least two finite samples;Granulartabelle benötigt mindestens zwei endliche Samples;spiel_ki.py
-granular_samples must be a whole number between 2 and 100000;granular_samples muss eine Ganzzahl zwischen 2 und 100000 sein;spiel_ki.py
-Invalid curvature sequence;Ungültige Krümmungsfolge;spiel_ki.py
-Invalid speed profile (ring without duplicate end point expected);Ungültiges Geschwindigkeitsprofil (Ring ohne doppelten Endpunkt erwartet);spiel_ki.py
-Mismatched template routes;Unpassende Vorlagenrouten;spiel_ki.py
-Mismatched tyre sample sequences;Unpassende Reifen-Samplefolgen;spiel_ki.py
-No vehicle AI in the target archive;Keine Fahrzeug-KI im Zielarchiv;spiel_ki.py
-Positive finite reference time required;Positive endliche Referenzzeit erforderlich;spiel_ki.py
-Positive vehicle mass required;Positive Fahrzeugmasse erforderlich;spiel_ki.py
-Profile mode needs a racing line with progress, position, geschwindigkeit_m_s;Profilmodus benötigt Ideallinie mit progress, position, geschwindigkeit_m_s;spiel_ki.py
-Source and target fragments differ;Quell-/Zielfragmente verschieden;spiel_ki.py
-Target aispline does not match the logic spatially (write the logic first);Ziel-aispline passt räumlich nicht zur Logik (zuerst Logik schreiben);spiel_ki.py
-Template must contain exactly one TrackSpace;Vorlage muss genau einen TrackSpace enthalten;spiel_ki.py
-TrackSpace and aispline must use the same placement offset;TrackSpace und aispline müssen denselben Platzierungsversatz verwenden;spiel_ki.py
-TrackSpace length must be positive;TrackSpace-Länge muss positiv sein;spiel_ki.py
-TrackSpace needs finite XYZ points;TrackSpace benötigt endliche XYZ-Punkte;spiel_ki.py
-Unknown additional AI fragments;Unbekannte KI-Zusatzfragmente;spiel_ki.py
-Unknown AI options: {};Unbekannte KI-Optionen: {};spiel_ki.py
-Unknown AI/brake mode;Unbekannter KI-/Bremsmodus;spiel_ki.py
-Unknown ERS strategy;Unbekannte ERS-Strategie;spiel_ki.py
-VP reference time is missing;VP-Referenzzeit fehlt;spiel_ki.py
-VP target sampling too large;VP-Zielabtastung zu groß;spiel_ki.py
-VP template needs two route tables;VP-Vorlage benötigt zwei Routentabellen;spiel_ki.py
-vp_abtastung: auto, skaliert or original;vp_abtastung: auto, skaliert oder original;spiel_ki.py
-Write the target aispline first: gate IDs or count differ;Zuerst die Ziel-aispline schreiben: Gate-IDs/-Zahl weichen ab;spiel_ki.py
-Write the target TrackSpace first: spline points differ;Zuerst den Ziel-TrackSpace schreiben: Splinepunkte weichen ab;spiel_ki.py
-Centreline has no spatial extent;Mittellinie ohne räumliche Ausdehnung;spiel_minimap.py
-Closed TrackSpace must have no duplicate end point;Geschlossener TrackSpace muss ohne doppelten Endpunkt vorliegen;spiel_minimap.py
-Exactly one main sector zone {} expected;Genau eine Haupt-Sektorzone {} erwartet;spiel_minimap.py
-Generator logic with coordinate system y_oben_rechtshaendig expected;Generator-Logik mit Koordinatensystem y_oben_rechtshaendig erwartet;spiel_minimap.py
-Invalid TrackSpace line: {};Ungültige TrackSpace-Linie: {};spiel_minimap.py
-Margin factor must be at least 1.05;Randfaktor muss mindestens 1,05 sein;spiel_minimap.py
-Minimap view is missing: {};Minimap-Sicht fehlt: {};spiel_minimap.py
-Only an unrotated minimap with zoom factor 1 is supported;Nur ungedrehte Minimap mit Zoomfaktor 1 unterstützt;spiel_minimap.py
-Open TrackSpace must end at progress 1;Offener TrackSpace muss bei Fortschritt 1 enden;spiel_minimap.py
-Sectors must cover the lap from 0 to 1 without gaps;Sektoren müssen die Runde lückenlos von 0 bis 1 abdecken;spiel_minimap.py
-Unknown minimap options: {};Unbekannte Minimap-Optionen: {};spiel_minimap.py
-Unsuitable minimap texture: {};Ungeeignete Minimap-Textur: {};spiel_minimap.py
-Archive needs exactly one PVS pair;Archiv braucht genau ein PVS-Paar;spiel_pvs.py
-Cell coordinate outside i16;Zellkoordinate außerhalb i16;spiel_pvs.py
-Anchor zone {} is missing;Ankerzone {} fehlt;spiel_welt.py
-Braking line ID set incomplete;Bremslinien-ID-Satz unvollständig;spiel_welt.py
-Carrier has no layer {}: no template for distance boards;Träger ohne Ebene {} – keine Vorlage für Entfernungstafeln;spiel_welt.py
-empty layer is faulty: {};leerer Layer fehlerhaft: {};spiel_welt.py
-expected exactly one PVSVisRes, found {};erwartet genau eine PVSVisRes, gefunden {};spiel_welt.py
-invalid layer name {};ungültiger Layername {};spiel_welt.py
-Layer {}: EventGraph refers to {};Layer {}: EventGraph verweist auf {};spiel_welt.py
-Logic resource is missing: {};Logikressource fehlt: {};spiel_welt.py
-Moving garages: no new box {};Garagen versetzen: keine neue Box {};spiel_welt.py
-Moving garages: pit boxes are missing (old {}, new {});Garagen versetzen: Boxenplätze fehlen (alt {}, neu {});spiel_welt.py
-no box {} for {};keine Box {} für {};spiel_welt.py
-no corner lines for braking lines;keine Kurvenlinien für Bremslinien;spiel_welt.py
-no new grid slot {};kein neuer Startplatz {};spiel_welt.py
-Pit anchors not monotonic: {} / {};Boxenanker nicht monoton: {} / {};spiel_welt.py
-Pit route too short for three corners: {};Boxenroute zu kurz für drei Kurven: {};spiel_welt.py
-Spline names differ from the template: {};Splinenamen weichen von der Vorlage ab: {};spiel_welt.py
-Terrain$PhysicsTerrain not found;Terrain$PhysicsTerrain nicht gefunden;spiel_welt.py
-TM name {} with different ranges;TM-Name {} mit verschiedenen Bereichen;spiel_welt.py
-too few corner gates for {} braking lines;zu wenige Kurven-Gates für {} Bremslinien;spiel_welt.py
-Biome {} unknown;Biom {} unbekannt;spiel_weltkarten.py
-Colour tone {} unknown;Farbton {} unbekannt;spiel_weltkarten.py
-Desert biome: textures are missing after copying: {};Biom Wüste: Texturen fehlen nach dem Kopieren: {};spiel_weltkarten.py
-Material {}: texture in slot {} is missing ({});Material {}: Textur im Slot {} fehlt ({});spiel_weltkarten.py
-Material {}: {} matches;Material {}: {} Treffer;spiel_weltkarten.py
-no asphalt mesh por_track_a;kein Asphaltnetz por_track_a;spiel_weltkarten.py
-Texture {}: {} matches;Textur {}: {} Treffer;spiel_weltkarten.py
-AI gate needs nine or seven unique waypoints;KI-Gate benötigt neun bzw. sieben eindeutige Wegpunkte;spielformat.py
-Brake IDs are missing in {}/{};Brems-IDs fehlen in {}/{};spielformat.py
-Duplicate gate ID;Doppelte Gate-ID;spielformat.py
-Duplicate vehicle slot;Doppelter Fahrzeugplatz;spielformat.py
-Game adapter needs Y up, right-handed;Spieladapter benötigt Y oben, rechtshändig;spielformat.py
-Invalid gate position or unit normal;Ungültige Gateposition/Einheitsnormale;spielformat.py
-Invalid placement matrix;Ungültige Platzierungsmatrix;spielformat.py
-Invalid placement name or WOID;Ungültiger Placementname oder WOID;spielformat.py
-Invalid TM spline or progress;Ungültige TM-Spline/Fortschritt;spielformat.py
-lade() TS gates cannot be assigned at volume {};lade()-TS-Tore lassen sich bei Volume {} nicht zuordnen;spielformat.py
-Link IDs must be consecutive;Link-IDs müssen fortlaufend sein;spielformat.py
-Link refers to a missing gate;Link verweist auf fehlendes Gate;spielformat.py
-Main route is not closed;Hauptroute ist nicht geschlossen;spielformat.py
-Neighbouring TS volumes do not share the gate;TS-Nachbarvolumes teilen das Tor nicht;spielformat.py
-New brake IDs require consistently new car settings;Neue Brems-IDs erfordern konsistent neue Auto-Settings;spielformat.py
-New garages need consistent external placement references;Neue Garagen benötigen konsistente externe Placement-Verweise;spielformat.py
-New vehicle slot needs a template, matrix and VehPlacement;Neuer Fahrzeugplatz benötigt Vorlage, Matrix und VehPlacement;spielformat.py
-No AIBrakeSettings in the template;Keine AIBrakeSettings in der Vorlage;spielformat.py
-Non-finite logic value;Nichtendlicher Logikwert;spielformat.py
-Placement group is too long;Placement-Gruppe ist zu lang;spielformat.py
-Placement matrix is not affine;Platzierungsmatrix ist nicht affin;spielformat.py
-Placement name or WOID already in use;Placementname oder WOID bereits belegt;spielformat.py
-Placement override {} is missing in the template;Placement-Override {} fehlt in Vorlage;spielformat.py
-Protected output path: {};Geschützter Ausgabepfad: {};spielformat.py
-Repeated TM properties cannot be changed unambiguously in the lade() model;Wiederholte TM-Properties lassen sich im lade()-Modell nicht eindeutig ändern;spielformat.py
-Resource or fragment structure is missing: {};Ressource/Fragmentaufbau fehlt: {};spielformat.py
-Route is not contiguous;Route ist nicht zusammenhängend;spielformat.py
-Route refers to a missing link;Route verweist auf fehlenden Link;spielformat.py
-Spline point needs XYZ;Splinepunkt benötigt XYZ;spielformat.py
-Template braking line needs a missing pit route;Vorlagen-Bremslinie benötigt fehlende Boxenroute;spielformat.py
-Template does not contain all six logic resources;Vorlage enthält nicht alle sechs Logikressourcen;spielformat.py
-TM zone name {} has contradictory ranges;TM-Zonenname {} hat widersprüchliche Bereiche;spielformat.py
-Too few spline nodes;Zu wenige Splineknoten;spielformat.py
-TrackSpace needs unique names and a main ring;TrackSpace benötigt eindeutige Namen und einen Hauptring;spielformat.py
-TS gate needs four XYZ points;TS-Tor benötigt vier XYZ-Punkte;spielformat.py
-TS main route is not closed;TS-Hauptroute ist nicht geschlossen;spielformat.py
-TS volume counter is wrong;TS-Volumezähler stimmt nicht;spielformat.py
-TS volume IDs must be consecutive;TS-Volume-IDs müssen fortlaufend sein;spielformat.py
-TS volume needs two gates;TS-Volume benötigt zwei Tore;spielformat.py
-Unknown braking line mode;Unbekannter Bremslinienmodus;spielformat.py
-Unknown placement name: {};Unbekannter Platzierungsname: {};spielformat.py
-Vector needs three finite values;Vektor benötigt drei endliche Werte;spielformat.py
-{} refers to a missing gate;{} verweist auf fehlendes Gate;spielformat.py
-Game folder not found;Spielordner nicht gefunden;spielimport.py
-Game track without driving physics (TRN~): side areas automatic.;Spielstrecke ohne Fahrphysik (TRN~): Seitenbereiche automatisch.;spielimport.py
-No pit line in the game track.;Keine Boxenlinie in der Spielstrecke.;spielimport.py
-"Pit lane does not span the start/finish line ({} m before, {} m after); the generator only knows pit lanes across the finish line, it stays automatic.";"Boxengasse liegt nicht um die Start-Ziel-Linie ({} m davor, {} m danach); der Generator kennt nur Boxengassen über die Ziellinie, sie bleibt automatisch.";spielimport.py
-"Pit lane too short ({} m) for the generator; it stays automatic.";"Boxengasse zu kurz ({} m) für den Generator; sie bleibt automatisch.";spielimport.py
-"Pit line does not run beside the track; pit lane stays automatic as before.";"Boxenlinie liegt nicht neben der Strecke; Boxengasse wie bisher automatisch.";spielimport.py
-Start/finish line placed at the starting grid ({} m after the game's timing line).;Start-Ziel-Linie an die Startaufstellung gelegt ({} m nach der Zeitlinie des Spiels).;spielimport.py
-, all files in the package;, alle Dateien im Paket;streckencode.py
-, missing in the package: {};, fehlen im Paket: {};streckencode.py
-Duplicate ID after renaming: {};Kennung nach Umbenennung doppelt: {};streckencode.py
-GfxMaterialRes: heap offset {} invalid;GfxMaterialRes: Heap-Offset {} ungültig;streckencode.py
-GfxMaterialRes: texture offset {} invalid;GfxMaterialRes: Texturoffset {} ungültig;streckencode.py
-GfxMaterialRes: unexpected section order;GfxMaterialRes: unerwartete Bereichsfolge;streckencode.py
-GfxModelRes with undecoded remainder;GfxModelRes mit nicht entschlüsseltem Rest;streckencode.py
-GfxModelRes: round trip not bit-identical;GfxModelRes: Rundlauf nicht bitgleich;streckencode.py
-Invalid metadata key {};Ungültiger Metadaten-Schlüssel {};streckencode.py
-Invalid track code: {};Ungültiger Streckencode: {};streckencode.py
-Manifest has track_code {} instead of {};Manifest hat track_code {} statt {};streckencode.py
-Mip path longer than 255 bytes: {};Mip-Pfad länger als 255 Byte: {};streckencode.py
-Mip reference without null byte;Mip-Verweis ohne Nullbyte;streckencode.py
-Old and new code are the same ({});Alter und neuer Code sind gleich ({});streckencode.py
-pkg string longer than 255 bytes;pkg-Zeichenkette länger als 255 Byte;streckencode.py
-pkg: !sbi is not a plain string sequence;pkg: !sbi ist keine reine Zeichenkettenfolge;streckencode.py
-pkg: reference does not point to the start of a string;pkg: Verweis zeigt nicht auf einen Zeichenkettenanfang;streckencode.py
-String section does not end cleanly;Zeichenkettenbereich endet nicht sauber;streckencode.py
-Target file already exists: {};Zieldatei existiert bereits: {};streckencode.py
-Target must not be the source;Ziel darf nicht die Quelle sein;streckencode.py
-Unexpected copy target {};Unerwartetes Kopierziel {};streckencode.py
-{} ({}): unsupported reference with {} remains;{} ({}): nicht unterstützter Verweis mit {} bleibt übrig;streckencode.py
-{} textures -> {};{} Texturen -> {};streckencode.py
-{}: round trip not bit-identical, renaming is not safe;{}: Rundlauf nicht bitgleich – Umbenennen nicht sicher;streckencode.py
-Archive has no unique TRN~;Archiv ohne eindeutige TRN~;umgebung.py
-Carrier has no layer {};Träger ohne Layer {};umgebung.py
-Catalogue has no carrier, model {} only exists in the carrier;Katalog ohne Träger, Modell {} nur im Träger;umgebung.py
-Duplicate ID {};ID {} doppelt;umgebung.py
-Duplicate object ID {};Objekt-ID {} doppelt;umgebung.py
-Environment file must be in the project folder: {};Umgebungsdatei muss im Projektordner liegen: {};umgebung.py
-ERP in the package is stored compressed: {};ERP im Paket ist komprimiert gespeichert: {};umgebung.py
-Game folder not found (choose it under Tools → Set F1 25 game folder, or set the environment variable EGO_SPIELORDNER);Spielordner nicht gefunden (unter Werkzeuge → F1-25-Spielordner festlegen wählen oder Umgebungsvariable EGO_SPIELORDNER setzen);umgebung.py
-Game folder without {}: {};Spielordner ohne {}: {};umgebung.py
-gelaende.{} {}: id is missing or empty;gelaende.{} {}: id fehlt oder ist leer;umgebung.py
-gelaende.{} {}: object ({}) expected;gelaende.{} {}: Objekt ({}) erwartet;umgebung.py
-Hill {}: centre at world x {}, z {} is outside the track area (mountains outside belong under “berge”);Hügel {}: Mitte bei Welt x {}, z {} liegt außerhalb des Streckenbereichs (Berge außerhalb gehören unter „berge“);umgebung.py
-is {} km from the centre (at most {} km);ist {} km von der Mitte entfernt (höchstens {} km);umgebung.py
-Layer {} has no template (RenderModel without collision);Layer {} ohne Vorlage (RenderModel ohne Kollision);umgebung.py
-lies in the track area (only hills work there);liegt im Streckenbereich (dort wirken nur Hügel);umgebung.py
-Mip file is missing in the game folder: {};Mip-Datei fehlt im Spielordner: {};umgebung.py
-Model not in the catalogue: {};Modell nicht im Katalog: {};umgebung.py
-Model {} copied incompletely: {} is missing;Modell {} unvollständig kopiert: {} fehlt;umgebung.py
-Models neither in the carrier nor in the catalogue: {};Modelle weder im Träger noch im Katalog: {};umgebung.py
-Mountain {} at world x {}, z {} {};Berg {} bei Welt x {}, z {} {};umgebung.py
-"Mountain {} reaches the track area; the terrain stays flat at the edge and the mountain is cut off there (centre {} m from the edge, radius {} m)";"Berg {} reicht bis an den Streckenbereich; am Rand bleibt das Gelände flach, der Berg wird dort abgeschnitten (Mitte {} m vor dem Rand, Radius {} m)";umgebung.py
-Normal buffer of the outer terrain has stride {} (expected 8);Normalenpuffer des Außenterrains mit Stride {} (erwartet 8);umgebung.py
-Object ID {} too long or contains a null character;Objekt-ID {} zu lang oder mit Nullzeichen;umgebung.py
-Object {} at world x {}, z {} is outside the track area (x {}…{}, z {}…{});Objekt {} bei Welt x {}, z {} liegt außerhalb des Streckenbereichs (x {}…{}, z {}…{});umgebung.py
-"Object {} stands on the road ({} m from the centreline; approximation without generator mesh)";"Objekt {} steht auf der Fahrbahn ({} m von der Mittellinie; Näherung ohne Generatornetz)";umgebung.py
-Object {} stands {};Objekt {} steht {};umgebung.py
-Object {}: field {} must be a finite number ({});Objekt {}: Feld {} muss eine endliche Zahl sein ({});umgebung.py
-Object {}: id is missing or empty;Objekt {}: id fehlt oder ist leer;umgebung.py
-Object {}: model must be a base ID eaid://… without extension ({});Objekt {}: modell muss eine Basis-Kennung eaid://… ohne Endung sein ({});umgebung.py
-Object {}: model {} not in the catalogue;Objekt {}: Modell {} nicht im Katalog;umgebung.py
-Object {}: object ({}) expected;Objekt {}: Objekt ({}) erwartet;umgebung.py
-Object {}: scale {} outside {}–{};Objekt {}: skala {} außerhalb {}–{};umgebung.py
-Outer terrain (TerrainRes *outer_terrain*) is missing in the carrier;Außenterrain (TerrainRes *outer_terrain*) fehlt im Träger;umgebung.py
-projekt.json names {}, the file is missing;projekt.json nennt {}, die Datei fehlt;umgebung.py
-umgebung.json cannot be read: {};umgebung.json nicht lesbar: {};umgebung.py
-umgebung.json is not valid JSON: {};umgebung.json ist kein gültiges JSON: {};umgebung.py
-umgebung.json: bodenbewuchs must be true/false ({});umgebung.json: bodenbewuchs muss true/false sein ({});umgebung.py
-umgebung.json: gelaende must be an object ({});umgebung.json: gelaende muss ein Objekt ({}) sein;umgebung.py
-umgebung.json: gelaende.{} must be a list;umgebung.json: gelaende.{} muss eine Liste sein;umgebung.py
-umgebung.json: object ({}) expected, not {};umgebung.json: Objekt ({}) erwartet, nicht {};umgebung.py
-umgebung.json: objekte must be a list;umgebung.json: objekte muss eine Liste sein;umgebung.py
-umgebung.json: schema {} is not supported (only {});umgebung.json: Schema {} wird nicht unterstützt (nur {});umgebung.py
-"{} environment objects (guide value ≤ {}; Portimão has 1,274 trees)";"{} Umgebungsobjekte (Richtwert ≤ {}; Portimão hat 1.274 Bäume)";umgebung.py
-{} m beside a wall;{} m neben einer Mauer;umgebung.py
-{} {}: hoehe_m {} outside {}…{};{} {}: hoehe_m {} außerhalb {}…{};umgebung.py
-{} {}: radius_m {} outside {}…{};{} {}: radius_m {} außerhalb {}…{};umgebung.py
-Carrier contains no Portimão terrain or no TRN~;Träger enthält kein Portimão-Terrain bzw. keine TRN~;unbenutzt
-on {};auf {};unbenutzt
-Length {} m outside {}–{} m.;Länge {} m außerhalb {}–{} m.;vorschlag.py
-Minimum radius {} m outside {}–{} m.;Mindestradius {} m außerhalb {}–{} m.;vorschlag.py
-No valid track after {} attempts (reasons: {}). Reduce the minimum radius or change the length or number of corners.;Nach {} Versuchen keine gültige Strecke (Gründe: {}). Mindestradius verkleinern oder Länge/Kurvenzahl ändern.;vorschlag.py
-Number of corners {} outside {}–{}.;Kurvenzahl {} außerhalb {}–{}.;vorschlag.py
-asphalt;asphalt;wort
-gravel;kies;wort
-grid box;startbox;wort
-Hill;Hügel;wort
-kerb;randstein;wort
-left;links;wort
-line;linie;wort
-marking;markierung;wort
-Mountain;Berg;wort
-pit lane;boxengasse;wort
-right;rechts;wort
-x_mode.zonen[{}].partial must be true or false;x_mode.zonen[{}].partial muss true oder false sein;zonen.py
-x_mode.zonen[{}].partial_versatz_m must be ≥ 0 (empty = no partial);x_mode.zonen[{}].partial_versatz_m muss ≥ 0 sein (leer = ohne Partial);zonen.py
-{}.zonen must be a list;{}.zonen muss eine Liste sein;zonen.py
-{}.zonen[{}] must be an object;{}.zonen[{}] muss ein Objekt sein;zonen.py
-{}.zonen[{}].{} is missing or not a number;{}.zonen[{}].{} fehlt oder ist keine Zahl;zonen.py
-Grid slot {} (at {} m) lies in a corner (radius {} m, banking {}°) - only {} slots fit on the straight: fewer slots, smaller spacing or move the finish line;Startplatz {} (bei {} m) liegt in einer Kurve (Radius {} m, Querneigung {}°) – nur {} Plätze passen auf die Gerade: weniger Plätze, kleinerer Abstand oder Ziellinie verschieben;pruefregeln.py
-Pit lane shortened ({}): entry {} m before the line instead of {} m, exit {} m after instead of {} m;Boxengasse gekürzt ({}): Einfahrt {} m vor der Linie statt {} m, Ausfahrt {} m danach statt {} m;pruefregeln.py
-Corner at point {}: radius reduced from {} m to {} m, the neighbouring points are too close;Ecke an Punkt {}: Radius von {} m auf {} m verkleinert, die Nachbarpunkte liegen zu nah;mittellinie.py
-Control point {}: ecke_radius_m must be > 0;Kontrollpunkt {}: ecke_radius_m muss > 0 sein;definition.py
+﻿en;de;ko;ort
+boxengasse.tempolimit_kmh must be {} (the values of the game's tracks);boxengasse.tempolimit_kmh muss {} sein (Werte der Spielstrecken);boxengasse.tempolimit_kmh는 {} 이어야 합니다 (게임 트랙들의 값);definition.py
+Centreline needs at least 4 points (has {});Mittellinie braucht mindestens 4 Punkte (hat {});중심선에는 점이 4개 이상 필요합니다 (현재 {});definition.py
+Centreline points must be finite;Mittellinienpunkte müssen endlich sein;중심선 점은 유한해야 합니다;definition.py
+Closing error {} m (x {}, z {}) was spread over {} m;Schließfehler {} m (x {}, z {}) wurde über {} m verteilt;닫힘 오차 {} m (x {}, z {})을(를) {} m에 걸쳐 나누었습니다;definition.py
+Clothoid transition shortened to max_anteil after segment {};Klothoiden-Übergang auf max_anteil gekürzt nach Segment {};세그먼트 {} 뒤에서 클로소이드 전환이 max_anteil 로 줄었습니다;definition.py
+Clothoid transition too short (< {} m), curvature jump remains after segment {};Klothoiden-Übergang zu kurz (< {} m), Krümmungssprung bleibt nach Segment {};클로소이드 전환이 너무 짧습니다 ({} m 미만). 세그먼트 {} 뒤에 곡률 점프가 남습니다;definition.py
+Control point {}: [x, z] or [x, z, y] expected;Kontrollpunkt {}: [x, z] oder [x, z, y] erwartet;제어점 {}: [x, z] 또는 [x, z, y] 가 필요합니다;definition.py
+CSV {} is empty;CSV {} ist leer;CSV {}이(가) 비어 있습니다;definition.py
+CSV {}: at least 3 columns (x, y, z) expected;CSV {}: mindestens 3 Spalten (x, y, z) erwartet;CSV {}: 열이 3개 이상이어야 합니다 (x, y, z);definition.py
+CSV {}: column '{}' is missing (header: {});CSV {}: Spalte '{}' fehlt (Kopf: {});CSV {}: 열 '{}'이(가) 없습니다 (머리글: {});definition.py
+Definition values must be finite;Definitionswerte müssen endlich sein;정의 값은 유한해야 합니다;definition.py
+Direction error when closing: {}°;Richtungsfehler beim Schließen: {}°;닫을 때 방향 오차: {}°;definition.py
+fahrzeug.ggv must be an object;fahrzeug.ggv muss ein Objekt sein;fahrzeug.ggv 는 객체여야 합니다;definition.py
+fahrzeug.ggv.ellipse_exponent must be within [1, 10];fahrzeug.ggv.ellipse_exponent muss in [1, 10] liegen;fahrzeug.ggv.ellipse_exponent 는 [1, 10] 안이어야 합니다;definition.py
+fahrzeug.ggv.hoehe_glaettung_m must not be negative;fahrzeug.ggv.hoehe_glaettung_m darf nicht negativ sein;fahrzeug.ggv.hoehe_glaettung_m 는 음수일 수 없습니다;definition.py
+fahrzeug.ggv.hoeheneinfluss must be true or false;fahrzeug.ggv.hoeheneinfluss muss true oder false sein;fahrzeug.ggv.hoeheneinfluss 는 true 또는 false 여야 합니다;definition.py
+fahrzeug.ggv.{} must be > 0 (or empty);fahrzeug.ggv.{} muss > 0 sein (oder leer);fahrzeug.ggv.{} 는 0보다 커야 합니다 (또는 비움);definition.py
+fahrzeug.modell must be punktmasse or ggv;fahrzeug.modell muss punktmasse oder ggv sein;fahrzeug.modell 은 punktmasse 또는 ggv 여야 합니다;definition.py
+fahrzeug.parametersatz must be a name from strecke/fahrzeuge/;fahrzeug.parametersatz muss ein Name aus strecke/fahrzeuge/ sein;fahrzeug.parametersatz 은 strecke/fahrzeuge/ 의 이름이어야 합니다;definition.py
+fahrzeug.traktion_anteil must be within (0, 1];fahrzeug.traktion_anteil muss in (0, 1] liegen;fahrzeug.traktion_anteil 은 (0, 1] 안이어야 합니다;definition.py
+ideallinie.iterationen must be a whole number ≥ 1;ideallinie.iterationen muss eine ganze Zahl ≥ 1 sein;ideallinie.iterationen 은 1 이상의 정수여야 합니다;definition.py
+ideallinie.iterationen_toleranz_m must be > 0;ideallinie.iterationen_toleranz_m muss > 0 sein;ideallinie.iterationen_toleranz_m 은 0보다 커야 합니다;definition.py
+ideallinie.kruemmung_max must be > 0 (or empty);ideallinie.kruemmung_max muss > 0 sein (oder leer);ideallinie.kruemmung_max 은 0보다 커야 합니다 (또는 비움);definition.py
+Line widths must not be negative;Linienbreiten dürfen nicht negativ sein;선 너비는 음수일 수 없습니다;definition.py
+mittellinie.art must be 'segmente', 'kontrollpunkte' or 'csv' (given: {});mittellinie.art muss 'segmente', 'kontrollpunkte' oder 'csv' sein (angegeben: {});mittellinie.art 는 'segmente', 'kontrollpunkte' 또는 'csv' 여야 합니다 (지정: {});definition.py
+mittellinie.datei is missing (art = csv);mittellinie.datei fehlt (art = csv);mittellinie.datei 가 없습니다 (art = csv);definition.py
+mittellinie.uebergaenge must be an object;mittellinie.uebergaenge muss ein Objekt sein;mittellinie.uebergaenge 는 객체여야 합니다;definition.py
+mittellinie.uebergaenge.aktiv must be true or false;mittellinie.uebergaenge.aktiv muss true oder false sein;mittellinie.uebergaenge.aktiv 는 true 또는 false 여야 합니다;definition.py
+mittellinie.uebergaenge.laenge_m must be empty or > 0;mittellinie.uebergaenge.laenge_m muss leer oder > 0 sein;mittellinie.uebergaenge.laenge_m 은 비우거나 0보다 커야 합니다;definition.py
+mittellinie.uebergaenge.max_anteil must be within (0, 0.9];mittellinie.uebergaenge.max_anteil muss in (0, 0.9] liegen;mittellinie.uebergaenge.max_anteil 은 (0, 0.9] 안이어야 합니다;definition.py
+mittellinie.uebergaenge.max_laenge_m must be >= min_laenge_m;mittellinie.uebergaenge.max_laenge_m muss >= min_laenge_m sein;mittellinie.uebergaenge.max_laenge_m 은 min_laenge_m 이상이어야 합니다;definition.py
+mittellinie.uebergaenge.{} must be a number > 0;mittellinie.uebergaenge.{} muss eine Zahl > 0 sein;mittellinie.uebergaenge.{} 는 0보다 큰 숫자여야 합니다;definition.py
+No segments given;Keine Segmente angegeben;세그먼트가 지정되지 않았습니다;definition.py
+Safety margin must not be negative;Sicherheitsabstand darf nicht negativ sein;안전 여백은 음수일 수 없습니다;definition.py
+Segment {} has length <= 0;Segment {} hat Länge <= 0;세그먼트 {}의 길이가 0 이하입니다;definition.py
+Segment {}: direction must be 'links' or 'rechts';Segment {}: richtung muss 'links' oder 'rechts' sein;세그먼트 {}: richtung 은 'links' 또는 'rechts' 여야 합니다;definition.py
+Segment {}: radius must be > 0;Segment {}: Radius muss > 0 sein;세그먼트 {}: 반경은 0보다 커야 합니다;definition.py
+Segment {}: transition must be true, false, a length > 0 or {};Segment {}: uebergang muss true, false, eine Länge > 0 oder {} sein;세그먼트 {}: 전환은 true, false, 0보다 큰 길이, 또는 {} 여야 합니다;definition.py
+Segments do not close exactly ({} m);Segmente schließen nicht exakt ({} m);세그먼트가 정확히 닫히지 않습니다 ({} m);definition.py
+Segments do not close: end point is {} m from the start (allowed {} m);Segmente schließen nicht: Endpunkt {} m vom Start entfernt (erlaubt {} m);세그먼트가 닫히지 않습니다. 끝점이 시작에서 {} m 떨어져 있습니다 (허용 {} m);definition.py
+seitenraum.abschnitte must be a list;seitenraum.abschnitte muss eine Liste sein;seitenraum.abschnitte 는 목록이어야 합니다;definition.py
+Surface code for {} must contain four ASCII characters;Oberflächencode für {} muss vier ASCII-Zeichen enthalten;{}의 표면 코드는 ASCII 문자 4개여야 합니다;definition.py
+Total turning {}° instead of ±360°: the track does not close in direction;Gesamtdrehung {}° statt ±360° – Strecke schließt in der Richtung nicht;총회전이 ±360°가 아니라 {}°입니다. 트랙이 방향으로 닫히지 않습니다;definition.py
+Unknown axis system '{}' (possible: {});Unbekanntes Achsensystem '{}' (möglich: {});알 수 없는 축 체계 '{}' (가능: {});definition.py
+Unknown segment type {} (gerade | bogen | klothoide);Unbekannter Segmenttyp {} (gerade | bogen | klothoide);알 수 없는 세그먼트 종류 {} (gerade | bogen | klothoide);definition.py
+{} needs von_s and bis_s;{} braucht von_s und bis_s;{}에는 von_s 와 bis_s 가 필요합니다;definition.py
+{}.auslauf must be gras, kies or asphalt;{}.auslauf muss gras, kies oder asphalt sein;{}.auslauf 은 gras, kies 또는 asphalt 여야 합니다;definition.py
+"{}.rand_neigung must be ""strecke"" or an angle up to ±{}°";"{}.rand_neigung muss ""strecke"" oder ein Winkel bis ±{}° sein";"{}.rand_neigung 은 ""strecke"" 이거나 ±{}° 까지의 각도여야 합니다";definition.py
+{}.seite must be links, rechts or beide;{}.seite muss links, rechts oder beide sein;{}.seite 는 links, rechts 또는 beide 여야 합니다;definition.py
+{}.{} must be a valid whole number;{}.{} muss eine gültige ganze Anzahl sein;{}.{} 은(는) 올바른 정수여야 합니다;definition.py
+{}.{} must be finite and > 0;{}.{} muss endlich und > 0 sein;{}.{} 은(는) 유한하고 0보다 커야 합니다;definition.py
+{}.{} must be links or rechts;{}.{} muss links oder rechts sein;{}.{} 은(는) links 또는 rechts 여야 합니다;definition.py
+{}.{} must be ≥ {};{}.{} muss ≥ {} sein;{}.{} 은(는) {} 이상이어야 합니다;definition.py
+Output would overwrite the input: {};Ausgabe würde Eingabe überschreiben: {};출력이 입력을 덮어씁니다: {};erzeugung.py
+Protected output folder: {};Geschützter Ausgabeordner: {};보호된 출력 폴더: {};erzeugung.py
+Track edges folded or intersecting: {};Fahrbahnränder gefaltet oder geschnitten: {};트랙 가장자리가 접히거나 교차합니다: {};erzeugung.py
+Constraint edge cannot be found;Zwangskante nicht auffindbar;구속 변을 찾을 수 없습니다;gelaende.py
+Constraint edge: flipping does not converge;Zwangskante: Kippen läuft nicht zusammen;구속 변: 뒤집기가 수렴하지 않습니다;gelaende.py
+Constraint edges intersect (does the track edge overlap itself?);Zwangskanten schneiden sich (Streckenrand überlappt sich selbst?);구속 변이 교차합니다 (트랙 가장자리가 스스로 겹치나요?);gelaende.py
+Edge not in triangle;Kante nicht im Dreieck;변이 삼각형에 없습니다;gelaende.py
+Hole edge {} m is not a power of two;Lochkante {} m ist keine Zweierpotenz;구멍 변 {} m 이(가) 2의 거듭제곱이 아닙니다;gelaende.py
+Legalisation does not converge;Legalisieren läuft nicht zusammen;적법화가 수렴하지 않습니다;gelaende.py
+No track edge found;Kein Streckenrand gefunden;트랙 가장자리를 찾지 못했습니다;gelaende.py
+Point lies on a constraint edge (does the track edge touch itself?);Punkt liegt auf einer Zwangskante (Streckenrand berührt sich?);점이 구속 변 위에 있습니다 (트랙 가장자리가 스스로 닿나요?);gelaende.py
+Point on the hull boundary;Punkt auf dem Hüllrand;점이 외곽 경계 위에 있습니다;gelaende.py
+Point search does not converge;Punktsuche läuft nicht zusammen;점 탐색이 수렴하지 않습니다;gelaende.py
+Region parity contradictory (open chain of constraint edges);Gebietsparität widersprüchlich (offene Zwangskantenkette);영역 패리티가 모순됩니다 (구속 변의 열린 사슬);gelaende.py
+Track comes within {} m of the edge of the outer terrain hole;Strecke reicht bis {} m an den Rand des Außenterrain-Lochs;트랙이 바깥 지형 구멍의 가장자리에서 {} m 안쪽까지 옵니다;gelaende.py
+Track edge ambiguous: {} vertices with degree != 2 (e.g. at {});Streckenrand nicht eindeutig: {} Vertices mit Grad != 2 (z. B. bei {});트랙 가장자리가 모호합니다. 차수가 2가 아닌 꼭짓점 {}개 (예: {});gelaende.py
+Track edge: loop not closed;Streckenrand: Schleife nicht geschlossen;트랙 가장자리: 고리가 닫히지 않음;gelaende.py
+Triangulation inconsistent (neighbour);Triangulierung inkonsistent (Nachbar);삼각분할이 일치하지 않습니다 (이웃);gelaende.py
+Triangulation inconsistent (rotation);Triangulierung inkonsistent (Drehung);삼각분할이 일치하지 않습니다 (회전);gelaende.py
+Vertex on the hull boundary;Vertex auf dem Hüllrand;꼭짓점이 외곽 경계 위에 있습니다;gelaende.py
+Vertex-triangle mapping out of date;Vertex-Dreieck-Zuordnung veraltet;꼭짓점-삼각형 대응이 오래되었습니다;gelaende.py
+{} duplicate points in the ground surface;{} doppelte Punkte in der Grundfläche;바닥면에 중복 점 {}개;gelaende.py
+Edge lines are wider than the road;Randlinien sind breiter als die Fahrbahn;가장자리 선이 노면보다 넓습니다;geometrie.py
+"Extent {} × {} m (plus track edge) does not fit into the track area of the game world ({} × {} m); make the track smaller (import with fit) or move points in the editor.";"Ausdehnung {} × {} m (plus Fahrbahnrand) passt nicht in den Streckenbereich der Spielwelt ({} × {} m); Strecke verkleinern (Import mit Einpassen) oder Punkte im Editor verschieben.";범위 {} × {} m (트랙 가장자리 포함)가 게임 월드의 트랙 영역 ({} × {} m)에 맞지 않습니다. 트랙을 줄이거나 (맞춤 가져오기) 에디터에서 점을 옮기세요.;importe.py
+File not found: {};Datei nicht gefunden: {};파일을 찾을 수 없습니다: {};importe.py
+Game track {} cannot be read: {};Spielstrecke {} nicht lesbar: {};게임 트랙 {}을(를) 읽을 수 없습니다: {};importe.py
+Game world offset set to [{}, 0, {}] so the track lies in the hole of the outer terrain.;Spielweltversatz auf [{}, 0, {}] gestellt, damit die Strecke im Loch des Außengeländes liegt.;트랙이 바깥 지형의 구멍 안에 놓이도록 게임 월드 오프셋을 [{}, 0, {}]로 정했습니다.;importe.py
+GPX cannot be read: {};GPX nicht lesbar: {};GPX를 읽을 수 없습니다: {};importe.py
+GPX contains fewer than 8 track points (trkpt/rtept).;GPX enthält weniger als 8 Spurpunkte (trkpt/rtept).;GPX의 트랙 점이 8개 미만입니다 (trkpt/rtept).;importe.py
+GPX point without valid lat/lon.;GPX-Punkt ohne gültige lat/lon.;위도/경도가 없는 GPX 점입니다.;importe.py
+The source contains invalid coordinates.;Die Quelle enthält ungültige Koordinaten.;원본에 잘못된 좌표가 있습니다.;importe.py
+The trace barely moves (fewer than 8 different points).;Die Spur bewegt sich kaum (weniger als 8 verschiedene Punkte).;궤적이 거의 움직이지 않습니다 (서로 다른 점이 8개 미만).;importe.py
+The trace is not a closed circuit: start and end are {} m apart (allowed {} m).;Die Spur ist kein Rundkurs: Anfang und Ende liegen {} m auseinander (erlaubt {} m).;궤적이 닫힌 서킷이 아닙니다. 시작과 끝이 {} m 떨어져 있습니다 (허용 {} m).;importe.py
+"The track crosses itself on a bridge; the generator has no bridges, the check reports the crossing as an error.";"Die Strecke kreuzt sich auf einer Brücke; der Generator kennt keine Brücken, die Prüfung meldet die Kreuzung als Fehler.";이 트랙은 다리에서 스스로 교차합니다. 생성기는 다리를 만들지 못하므로 검사에서 교차를 오류로 보고합니다.;importe.py
+Too few points ({}) for a track.;Zu wenige Punkte ({}) für eine Strecke.;트랙으로 쓰기에는 점이 너무 적습니다 ({}).;importe.py
+Track logic of {} not in this ERP: {};Streckenlogik von {} nicht in dieser ERP: {};이 ERP에 {}의 트랙 로직이 없습니다: {};importe.py
+Track rotated by {}° so it fits into the track area of the game world ({} × {} m).;Strecke um {}° gedreht, damit sie in den Streckenbereich der Spielwelt ({} × {} m) passt.;트랙을 {}° 회전했습니다 (게임 월드의 트랙 영역 {} × {} m에 맞도록).;importe.py
+Track rotated by {}° so it needs to be scaled down as little as possible.;Strecke um {}° gedreht, damit sie möglichst wenig verkleinert werden muss.;축소가 가장 적게 필요하도록 트랙을 {}° 회전했습니다.;importe.py
+"Track scaled down to {} % (extent {} × {} m did not fit into the track area of the game world, {} × {} m); widths and heights unchanged.";"Strecke auf {} % verkleinert (Ausdehnung {} × {} m passte nicht in den Streckenbereich der Spielwelt, {} × {} m); Breiten und Höhen unverändert.";트랙을 {} %로 축소했습니다 (범위 {} × {} m가 게임 월드의 트랙 영역 {} × {} m에 맞지 않았음). 폭과 높이는 그대로입니다.;importe.py
+Track width limited at {} points in tight corners to {} % of the radius (otherwise the edge folds).;Fahrbahnbreite an {} Punkten enger Kurven auf {} % des Radius begrenzt (sonst faltet sich der Rand).;좁은 코너의 {}곳에서 트랙 폭을 반경의 {} %로 제한했습니다 (아니면 가장자리가 접힘).;importe.py
+TUM CSV cannot be read: {};TUM-CSV nicht lesbar: {};TUM CSV를 읽을 수 없습니다: {};importe.py
+TUM CSV needs the columns x_m, y_m, w_tr_right_m, w_tr_left_m and at least 8 rows.;TUM-CSV braucht die Spalten x_m, y_m, w_tr_right_m, w_tr_left_m und mindestens 8 Zeilen.;TUM CSV에는 x_m, y_m, w_tr_right_m, w_tr_left_m 열과 8행 이상이 필요합니다.;importe.py
+TUM CSV: column {} is missing.;TUM-CSV: Spalte {} fehlt.;TUM CSV: 열 {}이(가) 없습니다.;importe.py
+Vehicle slot layer of {} is missing in this ERP.;Fahrzeugplatz-Layer von {} fehlt in dieser ERP.;이 ERP에 {}의 차량 슬롯 레이어가 없습니다.;importe.py
+ziel_abstand_m must be at least 1 m.;ziel_abstand_m muss mindestens 1 m sein.;ziel_abstand_m 은 1 m 이상이어야 합니다.;importe.py
+AI gate does not cross a track limit;KI-Gate schneidet eine Streckengrenze nicht;AI 게이트가 트랙 한계를 가로지르지 않습니다;logik.py
+Grid is longer than the track;Startaufstellung ist länger als die Strecke;그리드가 트랙보다 깁니다;logik.py
+Grid slot lies outside the road;Startplatz liegt außerhalb der Fahrbahn;그리드 슬롯이 노면 밖에 있습니다;logik.py
+sektoren.grenzen_m needs two values 0 < a < b < length (metres from the finish);sektoren.grenzen_m braucht zwei Werte 0 < a < b < Länge (Meter ab Ziel);sektoren.grenzen_m 에는 0 < a < b < 길이 인 값 두 개가 필요합니다 (결승선에서의 미터);logik.py
+The game formats expect three sectors;Die Spielformate erwarten drei Sektoren;게임 형식은 섹터 세 개를 기대합니다;logik.py
+TrackSpace step must be 7–11 m;TrackSpace-Schritt muss 7–11 m betragen;TrackSpace 간격은 7–11 m 여야 합니다;logik.py
+Approximation needs at least 4 different points;Approximation braucht mindestens 4 verschiedene Punkte;근사에는 서로 다른 점이 4개 이상 필요합니다;mittellinie.py
+derivative 0, 1 or 2;ableitung 0, 1 oder 2;미분 차수 0, 1 또는 2;mittellinie.py
+Duplicate consecutive points in the centreline;Doppelte aufeinanderfolgende Punkte in der Mittellinie;중심선에 연속된 중복 점이 있습니다;mittellinie.py
+Road width per side must be > 0.5 m;Fahrbahnbreite je Seite muss > 0,5 m sein;한쪽 노면 너비는 0.5 m보다 커야 합니다;mittellinie.py
+Spline needs at least 3 points;Spline braucht mindestens 3 Punkte;스플라인에는 점이 3개 이상 필요합니다;mittellinie.py
+Check without build;Prüfung ohne Bau;빌드 없이 검사;neue_strecke_tool.py
+Checking the logic;Prüfung der Logik;로직 검사;neue_strecke_tool.py
+Cleaning up the world;Welt aufräumen;세계 정리;neue_strecke_tool.py
+Deep package check;Tiefe Paketprüfung;패키지 정밀 검사;neue_strecke_tool.py
+Environment (trees, objects);Umgebung (Bäume, Objekte);환경 (나무, 오브젝트);neue_strecke_tool.py
+Finishing;Abschluss;마무리;neue_strecke_tool.py
+Generator;Generator;생성기;neue_strecke_tool.py
+Geometry and driving physics;Geometrie und Fahrphysik;기하와 주행 물리;neue_strecke_tool.py
+Input and options;Eingabe und Optionen;입력과 옵션;neue_strecke_tool.py
+Lighting;Licht;조명;neue_strecke_tool.py
+Minimap;Minimap;미니맵;neue_strecke_tool.py
+PVS;PVS;PVS;neue_strecke_tool.py
+Re-reading and checking the ERP;ERP neu lesen und prüfen;ERP를 다시 읽고 검사;neue_strecke_tool.py
+Swofty addon;Swofty-Addon;Swofty 애드온;neue_strecke_tool.py
+Top views;Draufsichten;위에서 본 그림;neue_strecke_tool.py
+Track logic;Streckenlogik;트랙 로직;neue_strecke_tool.py
+Unpacking and reading the carrier;Träger entpacken/erfassen;캐리어를 풀고 읽기;neue_strecke_tool.py
+Writing the ERP;ERP schreiben;ERP 쓰기;neue_strecke_tool.py
+Writing the package;Paket schreiben;패키지 쓰기;neue_strecke_tool.py
+4×4 matrix with 16 values expected;4×4-Matrix mit 16 Werten erwartet;값 16개의 4×4 행렬이 필요합니다;platzierung.py
+Offset needs three finite numbers (dx, dy, dz): {};Versatz braucht drei endliche Zahlen (dx, dy, dz): {};오프셋에는 유한한 숫자 세 개가 필요합니다 (dx, dy, dz): {};platzierung.py
+AI pit route has no corner lines (originals: 1–5 corners);KI-Boxenroute ohne Kurvenlinien (Originale: 1–5 Kurven);AI 피트 경로에 코너 라인이 없습니다 (오리지널: 코너 1–5개);pruefregeln.py
+AI route {}: the passing space does not change at any of its {} gates. The game crashes as soon as an AI car drives it (Swofty Launcher fixes this when it builds);KI-Route {}: Der Überholraum ändert sich auf keinem der {} Tore. Das Spiel stürzt ab, sobald ein KI-Auto sie fährt (der Swofty Launcher korrigiert das beim Bau);AI 경로 {}: {}개 게이트 어디에서도 추월 공간이 바뀌지 않습니다. AI 차가 이 경로를 달리면 게임이 충돌합니다 (Swofty Launcher는 빌드할 때 고칩니다);pruefregeln.py
+ai_flying_lap_trigger ({}…{}) does not overlap rollingstart_tt ({}…{});ai_flying_lap_trigger ({}…{}) überlappt rollingstart_tt ({}…{}) nicht;ai_flying_lap_trigger ({}…{})이(가) rollingstart_tt ({}…{})와(과) 겹치지 않습니다;pruefregeln.py
+At {} × {} m the track is larger than the hole of the outer terrain (edge {} m): the build will stop, make the track smaller;Strecke ist mit {} × {} m größer als das Loch des Außenterrains (Kante {} m): Der Bau bricht ab, Strecke verkleinern;트랙이 {} × {} m이라 바깥 지형 구멍(변 {} m)보다 큽니다. 빌드가 멈춥니다. 트랙을 줄이세요;pruefregeln.py
+Banking {}° at {} m (FIA ≤ {}°);Querneigung {}° bei {} m (FIA ≤ {}°);{} m에서 뱅킹 {}° (FIA ≤ {}°);pruefregeln.py
+Braking line IDs ≠ ID set of .brakelinesettings (missing {}, surplus {});Bremslinien-IDs ≠ ID-Satz der .brakelinesettings (fehlen {}, überzählig {});브레이킹 라인 ID가 .brakelinesettings 의 ID 집합과 다릅니다 (없음 {}, 남음 {});pruefregeln.py
+Braking lines {} and {} are only {} gates apart (at least {});Bremslinien {} und {} nur {} Gates auseinander (mind. {});브레이킹 라인 {}와(과) {}의 간격이 게이트 {}개뿐입니다 (최소 {});pruefregeln.py
+Build {}: diagnostics only, not a complete driving package;Bau {} – nur Diagnose, kein vollständiges Fahrpaket;빌드 {}: 진단만 하며, 완전한 주행 패키지가 아닙니다;pruefregeln.py
+Closed main line repeats the first node at the end;Geschlossene Hauptlinie wiederholt den ersten Knoten am Ende;닫힌 메인 라인이 끝에 첫 노드를 반복합니다;pruefregeln.py
+"Code {} is kept; an installed Portimão mod will be replaced. Recommended: --streckencode sochi";"Code {} bleibt; eine installierte Portimão-Mod wird ersetzt. Empfohlen: --streckencode sochi";코드 {}을(를) 유지합니다. 설치된 포르티망 모드가 바뀝니다. 권장: --streckencode sochi;pruefregeln.py
+Curvature change {} /m² at {} m (originals ≤ {}): use mittellinie.approximation_m (e.g. 6–8) or clothoid transitions;Krümmungsänderung {} /m² bei {} m (Originale ≤ {}) – mittellinie.approximation_m (z. B. 6–8) oder Klothoiden-Übergänge verwenden;{} m에서 곡률 변화 {} /m² (오리지널 ≤ {}): mittellinie.approximation_m (예: 6–8) 또는 클로소이드 전환을 쓰세요;pruefregeln.py
+drl zones {} and {} overlap;drl-Zonen {} und {} überlappen;drl 존 {}와(과) {}이(가) 겹칩니다;pruefregeln.py
+DRS IDs detection {} / activation {}: detection ID duplicated or without activation;DRS-IDs Erkennung {} / Aktivierung {}: Erkennungs-ID doppelt oder ohne Aktivierung;DRS ID 감지 {} / 활성화 {}: 감지 ID가 중복되거나 활성화가 없습니다;pruefregeln.py
+DRS zone {}: activation {} m long, detection {} m before it;DRS-Zone {}: Aktivierung {} m lang, Erkennung {} m davor;DRS 존 {}: 활성화 {} m, 그 앞 감지 {} m;pruefregeln.py
+DRS zones {} and {} overlap;DRS-Zonen {} und {} überlappen;DRS 존 {}와(과) {}이(가) 겹칩니다;pruefregeln.py
+Duplicate braking line IDs: {};Bremslinien-IDs doppelt: {};브레이킹 라인 ID가 중복됩니다: {};pruefregeln.py
+Edge {} at {} m intersects edge {} at {} m;Rand {} bei {} m schneidet Rand {} bei {} m;{} m의 가장자리 {}이(가) {} m의 가장자리 {}와(과) 교차합니다;pruefregeln.py
+ERP {}: wrong MD5 {};ERP {}: falscher MD5 {};ERP {}: 잘못된 MD5 {};pruefregeln.py
+ERP {}: {};ERP {}: {};ERP {}: {};pruefregeln.py
+ERP {}: {} known wrong MD5 of the carrier;ERP {}: {} bekannte falsche MD5 des Trägers;ERP {}: 캐리어의 알려진 잘못된 MD5 {};pruefregeln.py
+Gap of {} m between points {} and {} (otherwise ~{} m);Lücke von {} m zwischen Punkt {} und {} (sonst ~{} m);점 {}와(과) {} 사이 간격 {} m (그 외에는 약 {} m);pruefregeln.py
+"Generator logic has no pit lane; the carrier needs a pit line and pit zones";"Generatorlogik ohne Boxengasse; der Träger braucht Boxenlinie und Boxenzonen";생성기 로직에 피트 레인이 없습니다. 캐리어에는 피트 라인과 피트 존이 필요합니다;pruefregeln.py
+Generator mesh: {} vertices outside X/Z ±{} m (including offset);Generatornetz: {} Vertices außerhalb X/Z ±{} m (inkl. Versatz);생성기 메시: 꼭짓점 {}개가 X/Z ±{} m 밖입니다 (오프셋 포함);pruefregeln.py
+Generator: {};Generator: {};생성기: {};pruefregeln.py
+Gradient at start/finish {} % (FIA ≤ {} %);Steigung an Start/Ziel {} % (FIA ≤ {} %);스타트/결승 경사 {} % (FIA ≤ {} %);pruefregeln.py
+Grid only {} m wide (FIA ≥ {} m up to the first corner);Startaufstellung nur {} m breit (FIA ≥ {} m bis zur ersten Kurve);그리드 너비가 {} m뿐입니다 (첫 코너까지 FIA ≥ {} m);pruefregeln.py
+Link {} connects a missing gate ({} → {});Link {} verbindet fehlendes Gate ({} → {});링크 {}이(가) 없는 게이트를 잇습니다 ({} → {});pruefregeln.py
+Main braking line {} (gate {}) is outside every corner, {} m before the next corner start (gate {}). F1 25 expects main braking lines inside corner_start … corner_end.;Haupt-Bremslinie {} (Gate {}) liegt außerhalb jeder Kurve, {} m vor dem nächsten Kurvenanfang (Gate {}). F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end.;메인 브레이킹 라인 {} (게이트 {})이(가) 모든 코너 밖에 있고, 다음 코너 시작(게이트 {})보다 {} m 앞입니다. F1 25는 메인 브레이킹 라인이 corner_start … corner_end 안에 있기를 기대합니다.;pruefregeln.py
+Main braking line {} (gate {}) is outside every corner. F1 25 expects main braking lines inside corner_start … corner_end.;Haupt-Bremslinie {} (Gate {}) liegt außerhalb jeder Kurve. F1 25 erwartet Haupt-Bremslinien innerhalb corner_start … corner_end.;메인 브레이킹 라인 {} (게이트 {})이(가) 모든 코너 밖에 있습니다. F1 25는 메인 브레이킹 라인이 corner_start … corner_end 안에 있기를 기대합니다.;pruefregeln.py
+Main line has only {} nodes;Hauptlinie hat nur {} Knoten;메인 라인의 노드가 {}개뿐입니다;pruefregeln.py
+manifest.ers.{} = {}, zone {} starts at {};manifest.ers.{} = {}, Zone {} beginnt bei {};manifest.ers.{} = {}, 존 {}의 시작은 {};pruefregeln.py
+Minimap {}.{} = {} not rounded to mm;Minimap {}.{} = {} nicht auf mm gerundet;미니맵 {}.{} = {} 이(가) mm 단위로 반올림되지 않았습니다;pruefregeln.py
+No corner of the pit route has a pair_id to a track corner (25 of 30 originals have one);Keine Kurve der Boxenroute mit pair_id zur Streckenkurve (25/30 Originale haben eine);피트 경로의 어떤 코너도 트랙 코너와 pair_id 가 없습니다 (오리지널 30개 중 25개에는 있습니다);pruefregeln.py
+Only {} of {} DRS zones created: no further suitable straight;Nur {} von {} DRS-Zonen erzeugt: keine weitere geeignete Gerade;DRS 존 {}개 중 {}개만 만들었습니다. 적당한 직선이 더 없습니다;pruefregeln.py
+Package check “{}”: {};Paketprüfung „{}“: {};패키지 검사 “{}”: {};pruefregeln.py
+Package: {} known wrong MD5 of the Portimão carrier;Paket: {} bekannte falsche MD5 des Portimão-Trägers;패키지: 포르티망 캐리어의 알려진 잘못된 MD5 {};pruefregeln.py
+Pit braking line {} (gate {}) is not in any corner of the pit route;Box-Bremslinie {} (Gate {}) liegt in keiner Kurve der Boxenroute;피트 브레이킹 라인 {} (게이트 {})이(가) 피트 경로의 어떤 코너에도 없습니다;pruefregeln.py
+"Pit spline ends only {} m after the exit zone (at least {} m; build {} m)";"Boxen-Spline endet nur {} m hinter der Ausfahrtszone (mind. {} m; Bau {} m)";피트 스플라인이 출구 존보다 {} m 뒤에서 끝나야 하는데 (최소 {} m, 빌드 {} m) 그렇지 않습니다;pruefregeln.py
+Pit spline jumps sideways from the main line at {} point(s), up to {} m over {} m;Boxen-Spline springt an {} Stelle(n) von der Hauptlinie quer, max. {} m auf {} m Länge;피트 스플라인이 메인 라인에서 옆으로 뜁니다. {}곳, 최대 {} m / {} m;pruefregeln.py
+"Pit spline starts only {} m before the entry zone (at least {} m; build {} m)";"Boxen-Spline beginnt nur {} m vor der Einfahrtszone (mind. {} m; Bau {} m)";피트 스플라인이 입구 존보다 {} m 앞에서야 시작하는데 (최소 {} m, 빌드 {} m) 그렇지 않습니다;pruefregeln.py
+Pit spline {} lies {} m beside the main line;Boxen-Spline-{} liegt {} m neben der Hauptlinie;피트 스플라인 {}이(가) 메인 라인 옆 {} m에 있습니다;pruefregeln.py
+"PVS variant {}: new objects in the old Portimão area may be invisible or flicker; recommended --pvs-variante strecke (v20)";"PVS-Variante {}: neue Objekte im alten Portimão-Bereich können unsichtbar sein/flackern; empfohlen --pvs-variante strecke (v20)";PVS 변형 {}: 예전 포르티망 영역의 새 오브젝트가 안 보이거나 깜빡일 수 있습니다. 권장 --pvs-variante strecke (v20);pruefregeln.py
+Smallest radius {} m at {} m (originals ≥ {} m);Kleinster Radius {} m bei {} m (Originale ≥ {} m);{} m 지점의 최소 반경 {} m (오리지널 ≥ {} m);pruefregeln.py
+Straight Mode zones {} and {} overlap;Straight-Mode-Zonen {} und {} überlappen;스트레이트 모드 존 {}와(과) {}이(가) 겹칩니다;pruefregeln.py
+Straight of {} m from {} m (FIA ≤ {} m);Gerade von {} m ab {} m (FIA ≤ {} m);{} m부터 직선 {} m (FIA ≤ {} m);pruefregeln.py
+Track code {}: {};Streckencode {}: {};트랙 코드 {}: {};pruefregeln.py
+Track edge folds over at {} m (radius smaller than half width);Fahrbahnrand faltet sich bei {} m (Radius kleiner als Halbbreite);{} m에서 트랙 가장자리가 접힙니다 (반경이 절반 너비보다 작음);pruefregeln.py
+Track edge outside X/Z ±{} m at {} stations (including offset {});Fahrbahnrand an {2} Stationen außerhalb X/Z ±{1} m (inkl. Versatz {3});트랙 가장자리가 X/Z ±{} m 밖에 있음: {}개 지점 (오프셋 {} 포함);pruefregeln.py
+Track extends beyond the hole of the outer terrain: the build will stop. Under Tools, set the game world offset to [{}, {}, {}];Strecke ragt über das Loch des Außenterrains hinaus: Der Bau bricht ab. Unter Werkzeuge den Spielweltversatz auf [{}, {}, {}] stellen;트랙이 바깥 지형 구멍 밖으로 나갑니다. 빌드가 멈춥니다. 도구에서 게임 세계 오프셋을 [{}, {}, {}](으)로 설정하세요;pruefregeln.py
+Track length {} m (FIA {}–{} km);Streckenlänge {} m (FIA {}–{} km);트랙 길이 {} m (FIA {}–{} km);pruefregeln.py
+Track length {} m (longest original track {} m);Streckenlänge {} m (längste Originalstrecke {} m);트랙 길이 {} m (가장 긴 오리지널 트랙 {} m);pruefregeln.py
+Track width {} m at {} m (FIA ≥ {} m);Fahrbahnbreite {} m bei {} m (FIA ≥ {} m);{} m 지점의 트랙 너비 {} m (FIA ≥ {} m);pruefregeln.py
+TrackSpace has {} closed and {} open splines (expected 1 and 1);TrackSpace hat {} geschlossene und {} offene Splines (erwartet 1 und 1);TrackSpace에 닫힌 스플라인 {}개, 열린 스플라인 {}개가 있습니다 (기대: 1과 1);pruefregeln.py
+"TrackSpace/AI gates/TS lie {} m above the driving physics (Portimão +0.20 m); drivable up to v20, effect of +0.20 m not tested in game.";"TrackSpace/KI-Gates/TS liegen {} m über der Fahrphysik (Portimão +0,20 m); fahrbar bis v20, Wirkung von +0,20 m im Spiel ungeprüft.";TrackSpace/AI 게이트/TS가 주행 물리보다 {} m 위에 있습니다 (포르티망 +0.20 m). v20까지는 달릴 수 있으며, +0.20 m의 효과는 게임에서 시험하지 않았습니다.;pruefregeln.py
+TS pit volumes only cover {}…{} m of the {} m long pit spline;TS-Box-Volumes decken nur {}…{} m der {} m langen Boxen-Spline ab;TS 피트 볼륨이 길이 {} m인 피트 스플라인 중 {}…{} m만 덮습니다;pruefregeln.py
+Zone name {} with different ranges;Zonenname {} mit verschiedenen Bereichen;존 이름 {}의 범위가 서로 다릅니다;pruefregeln.py
+Zone {} ({}): spline {}, range {}…{};Zone {} ({}): Spline {}, Bereich {}…{};존 {} ({}): 스플라인 {}, 범위 {}…{};pruefregeln.py
+Zone {}.{}: {} m to the finish line, template {} m;Zone {}.{}: {} m zur Ziellinie, Vorlage {} m;존 {}.{}: 결승선까지 {} m, 템플릿 {} m;pruefregeln.py
+{} % of the pit spline in the limiter area lies in main TS volumes (originals mostly 0 %, at most 20.5 %);{} % der Boxen-Spline im Limiterbereich liegen in Haupt-TS-Volumes (Originale meist 0 %, max. 20,5 %);리미터 구간의 피트 스플라인 중 {} %가 메인 TS 볼륨 안에 있습니다 (오리지널은 대부분 0 %, 최대 20.5 %);pruefregeln.py
+{} (Portimão carrier: {} main braking lines);{} (Träger Portimão: {} Haupt-Bremslinien);{} (포르티망 캐리어: 메인 브레이킹 라인 {});pruefregeln.py
+{} ({}) lies on {}, {} m from the centreline;{} ({}) liegt auf {}, {} m von der Mittellinie;{} ({})이(가) {} 위에 있습니다. 중심선에서 {} m;pruefregeln.py
+{} AI gates (originals at most {}): make the track shorter or logik.gate_schritt_m larger;{} KI-Gates (Originale höchstens {}) – Strecke kürzer oder logik.gate_schritt_m größer;AI 게이트 {}개 (오리지널 최대 {}): 트랙을 줄이거나 logik.gate_schritt_m 을 키우세요;pruefregeln.py
+{} corners, the carrier has {} braking lines: the build merges {} corner pairs with the shortest straight between them (like chicanes in the originals);{} Kurven, der Träger hat {} Bremslinien – der Bau legt {} Kurvenpaare mit der kürzesten Geraden dazwischen zusammen (wie Schikanen im Original);코너 {}개, 캐리어의 브레이킹 라인은 {}개: 빌드가 그 사이 직선이 가장 짧은 코너 쌍 {}개를 합칩니다 (오리지널의 시케인과 같음);pruefregeln.py
+{} custom Straight Mode zone(s) instead of the carrier zones;{} eigene Straight-Mode-Zone(n) statt der Träger-Zonen;캐리어 존 대신 직접 만든 스트레이트 모드 존 {}개;pruefregeln.py
+{} driving physics triangles on the road are > 1 m away from the mesh;{} Fahrphysik-Dreiecke auf der Fahrbahn > 1 m vom Netz entfernt;노면의 주행 물리 삼각형 {}개가 메시에서 1 m보다 멀리 있습니다;pruefregeln.py
+{} id {} refers to missing gate {};{} id {} verweist auf fehlendes Gate {};{} id {}이(가) 없는 게이트 {}을(를) 가리킵니다;pruefregeln.py
+{} id {}: pair_id {} is not a gate;{} id {}: pair_id {} ist kein Gate;{} id {}: pair_id {}은(는) 게이트가 아닙니다;pruefregeln.py
+"{} logic points outside X/Z ±{} m; outermost: {}";"{} Logikpunkte außerhalb X/Z ±{} m; äußerster: {}";로직 점 {}개가 X/Z ±{} m 밖입니다. 가장 바깥: {};pruefregeln.py
+{} PVS cells with a 60 m corridor (originals at most {}): build with a smaller --pvs-korridor;{} PVS-Zellen bei 60-m-Korridor (Originale höchstens {}) – Bau mit kleinerem --pvs-korridor;60 m 복도의 PVS 셀 {}개 (오리지널 최대 {}): 더 작은 --pvs-korridor 로 빌드하세요;pruefregeln.py
+{} reaches into a corner with radius {} m at {} m;{1} reicht bei {3} m in eine Kurve mit Radius {2} m;{}이(가) 반경 {} m 코너로 들어감 ({} m 지점);pruefregeln.py
+"{} wall triangles lie on the pit line; the build removes them (playtest v6)";"{} Mauerdreiecke liegen auf der Boxenlinie; der Bau entfernt sie (Spieltest v6)";벽 삼각형 {}개가 피트 라인 위에 있습니다. 빌드가 제거합니다 (플레이 테스트 v6);pruefregeln.py
+{}: {} m long;{}: {} m lang;{}: 길이 {} m;pruefregeln.py
+Pit boxes do not fit into the full-width section;Boxenplätze passen nicht in den vollbreiten Abschnitt;피트 박스가 전폭 구간에 들어가지 않습니다;querprofil.py
+Pit lane must be shorter than one lap;Boxengasse muss kürzer als eine Runde sein;피트 레인은 한 랩보다 짧아야 합니다;querprofil.py
+Pit lane too short: entry and exit ({} m) need at least {} m;Boxengasse zu kurz: Ein- und Ausfahrt ({} m) brauchen mindestens {} m;피트 레인이 너무 짧습니다. 입구와 출구 ({} m)에는 최소 {} m가 필요합니다;querprofil.py
+Pit lane: not enough space beside the track at {} stations (may overlap another part of the track);Boxengasse: an {} Stationen reicht der Platz neben der Strecke nicht (Überlappung mit anderem Streckenteil möglich);피트 레인: {}개 스테이션에서 트랙 옆에 자리가 부족합니다 (트랙의 다른 부분과 겹칠 수 있음);querprofil.py
+{}: less than {} m of space to the next part of the track at {} stations (barrier set to minimum distance);{1}: an {3} Stationen weniger als {2} m Platz bis zum nächsten Streckenteil (Barriere auf Mindestabstand gesetzt);{}: 트랙의 다른 부분까지 공간이 {} m 미만인 지점 {}개 (방벽을 최소 거리로 둠);querprofil.py
+Curvature limit {} 1/m cannot be met on this road;Krümmungsgrenze {} 1/m mit dieser Fahrbahn nicht einhaltbar;이 노면에서는 곡률 한계 {} 1/m 을 맞출 수 없습니다;rennlinie.py
+Curvature limit {} 1/m: ADMM does not converge (residual primal {}, dual {});Krümmungsgrenze {} 1/m: ADMM konvergiert nicht (Rest primal {}, dual {});곡률 한계 {} 1/m: ADMM이 수렴하지 않습니다 (원시 잔차 {}, 쌍대 잔차 {});rennlinie.py
+fahrzeug.modell must be punktmasse or ggv, not {};fahrzeug.modell muss punktmasse oder ggv sein, nicht {};fahrzeug.modell 은 punktmasse 또는 ggv 여야 하며 {}은(는) 안 됩니다;rennlinie.py
+g-g-v profile does not converge;g-g-v-Profil konvergiert nicht;g-g-v 프로필이 수렴하지 않습니다;rennlinie.py
+ideallinie.kruemmung_max must be > 0;ideallinie.kruemmung_max muss > 0 sein;ideallinie.kruemmung_max 은 0보다 커야 합니다;rennlinie.py
+Iterated racing line: back-projection onto the centreline failed;Iterierte Ideallinie: Rückprojektion auf die Mittellinie fehlgeschlagen;반복 레이싱 라인: 중심선으로의 역투영에 실패했습니다;rennlinie.py
+Racing line does not converge: KKT residual {};Ideallinie konvergiert nicht: KKT-Rest {};레이싱 라인이 수렴하지 않습니다: KKT 잔차 {};rennlinie.py
+Road too narrow for the safety margin;Fahrbahn für den Sicherheitsabstand zu schmal;안전 여백에 비해 노면이 너무 좁습니다;rennlinie.py
+Speed envelope does not converge;Geschwindigkeitshüllkurve konvergiert nicht;속도 포락선이 수렴하지 않습니다;rennlinie.py
+Vehicle parameter set {} unknown (available: {});Fahrzeug-Parametersatz {} unbekannt (vorhanden: {});알 수 없는 차량 파라미터 집합 {} (있는 것: {});rennlinie.py
+{} is not a vehicle parameter set (key 'fahrzeug' is missing);{} ist kein Fahrzeug-Parametersatz (Schlüssel 'fahrzeug' fehlt);{}은(는) 차량 파라미터 집합이 아닙니다 ('fahrzeug' 키가 없음);rennlinie.py
+Adaptive ground surface: {} (way out: grundflaeche=raster);Adaptive Grundfläche: {} (Ausweg: grundflaeche=raster);적응 바닥면: {} (해결: grundflaeche=raster);spiel_geometrie.py
+Carrier does not fit: the Portimão mod (version {}) has no {}. Tested versions: {} (mod download page, History tab).;Träger passt nicht: In der Portimão-Mod (Version {}) fehlt {}. Getestet sind die Versionen {} (Download-Seite der Mod, Reiter „History“).;캐리어가 맞지 않습니다. 포르티망 모드(버전 {})에 {}이(가) 없습니다. 시험한 버전: {} (모드 다운로드 페이지, History 탭).;spiel_geometrie.py
+Generator mesh without classes: {};Generatornetz ohne Klassen: {};분류 없는 생성기 메시: {};spiel_geometrie.py
+grundflaeche: raster, adaptiv or keine;grundflaeche: raster, adaptiv oder keine;grundflaeche: raster, adaptiv 또는 keine;spiel_geometrie.py
+mauer_physik: senkrecht, alle or keine;mauer_physik: senkrecht, alle oder keine;mauer_physik: senkrecht, alle 또는 keine;spiel_geometrie.py
+physik_umfang: voll, ohne_grund or fahrbahn;physik_umfang: voll, ohne_grund oder fahrbahn;physik_umfang: voll, ohne_grund 또는 fahrbahn;spiel_geometrie.py
+Placed track does not lie completely inside the hole of the outer terrain;Platzierte Strecke liegt nicht vollständig im Loch des Außenterrains;놓은 트랙이 바깥 지형 구멍 안에 완전히 있지 않습니다;spiel_geometrie.py
+Terrain material is missing or ambiguous: {};Terrainmaterial fehlt oder ist mehrdeutig: {};지형 재질이 없거나 모호합니다: {};spiel_geometrie.py
+Track reaches the edge of the outer terrain hole;Strecke reicht bis an den Rand des Außenterrain-Lochs;트랙이 바깥 지형 구멍의 가장자리에 닿습니다;spiel_geometrie.py
+trn_flags: kanten or alle7;trn_flags: kanten oder alle7;trn_flags: kanten 또는 alle7;spiel_geometrie.py
+TRN~ must have exactly one fragment;TRN~ muss genau ein Fragment haben;TRN~ 에는 조각이 정확히 하나 있어야 합니다;spiel_geometrie.py
+welt_uv: konstant or echt;welt_uv: konstant oder echt;welt_uv: konstant 또는 echt;spiel_geometrie.py
+Field {}/{} has an unexpected type {};Feld {}/{} hat einen unerwarteten Typ {};필드 {}/{}의 형식 {}이(가) 예상과 다릅니다;spiel_kameras.py
+Line needs at least 2 points;Linie braucht mindestens 2 Punkte;선에는 점이 2개 이상 필요합니다;spiel_kameras.py
+No ERP in the carrier package;Keine ERP im Trägerpaket;캐리어 패키지에 ERP가 없습니다;spiel_kameras.py
+AI adapter needs metres, Y up and right-handed coordinates;KI-Adapter benötigt Meter, Y oben und rechtshändige Koordinaten;AI 어댑터에는 미터, Y 위, 오른손 좌표가 필요합니다;spiel_ki.py
+AI output fails the repeated round trip;KI-Ausgabe besteht erneuten Rundlauf nicht;AI 출력이 반복 왕복 검사를 통과하지 못합니다;spiel_ki.py
+AI template resource is missing: {};KI-Vorlagenressource fehlt: {};AI 템플릿 리소스가 없습니다: {};spiel_ki.py
+AP12 supports exactly one main and one pit spline;AP12 unterstützt genau eine Haupt- und eine Boxenspline;AP12는 메인 스플라인 하나와 피트 스플라인 하나만 지원합니다;spiel_ki.py
+"Brake ID sets differ; profile mode or consistent logic needed";"Brems-ID-Sätze verschieden; profil-Modus oder konsistente Logik nötig";브레이크 ID 집합이 다릅니다. 프로필 모드나 일관된 로직이 필요합니다;spiel_ki.py
+Brake settings have no tyre groups;Bremssettings ohne Reifengruppen;브레이크 설정에 타이어 그룹이 없습니다;spiel_ki.py
+Duplicate brake ID in tyre group;Doppelte Brems-ID in Reifengruppe;타이어 그룹에 브레이크 ID가 중복됩니다;spiel_ki.py
+Duplicate brake ID or invalid brake gate reference;Doppelte Brems-ID oder ungültiger Bremsgate-Bezug;브레이크 ID가 중복되거나 브레이크 게이트 참조가 잘못되었습니다;spiel_ki.py
+Duplicate points in the speed profile;Doppelte Punkte im Geschwindigkeitsprofil;속도 프로필에 중복 점이 있습니다;spiel_ki.py
+Exactly one AISplineData resource required;Genau eine AISplineData-Ressource erforderlich;AISplineData 리소스가 정확히 하나 필요합니다;spiel_ki.py
+Granular table needs at least two finite samples;Granulartabelle benötigt mindestens zwei endliche Samples;세밀 표에는 유한한 샘플이 두 개 이상 필요합니다;spiel_ki.py
+granular_samples must be a whole number between 2 and 100000;granular_samples muss eine Ganzzahl zwischen 2 und 100000 sein;granular_samples 는 2에서 100000 사이의 정수여야 합니다;spiel_ki.py
+Invalid curvature sequence;Ungültige Krümmungsfolge;잘못된 곡률 수열;spiel_ki.py
+Invalid speed profile (ring without duplicate end point expected);Ungültiges Geschwindigkeitsprofil (Ring ohne doppelten Endpunkt erwartet);잘못된 속도 프로필 (끝점 중복이 없는 고리를 기대);spiel_ki.py
+Mismatched template routes;Unpassende Vorlagenrouten;템플릿 경로가 맞지 않습니다;spiel_ki.py
+Mismatched tyre sample sequences;Unpassende Reifen-Samplefolgen;타이어 샘플 수열이 맞지 않습니다;spiel_ki.py
+No vehicle AI in the target archive;Keine Fahrzeug-KI im Zielarchiv;대상 아카이브에 차량 AI가 없습니다;spiel_ki.py
+Positive finite reference time required;Positive endliche Referenzzeit erforderlich;양수인 유한 기준 시간이 필요합니다;spiel_ki.py
+Positive vehicle mass required;Positive Fahrzeugmasse erforderlich;양수인 차량 질량이 필요합니다;spiel_ki.py
+Profile mode needs a racing line with progress, position, geschwindigkeit_m_s;Profilmodus benötigt Ideallinie mit progress, position, geschwindigkeit_m_s;프로필 모드에는 진행, 위치, geschwindigkeit_m_s 가 있는 레이싱 라인이 필요합니다;spiel_ki.py
+Source and target fragments differ;Quell-/Zielfragmente verschieden;원본과 대상 조각이 다릅니다;spiel_ki.py
+Target aispline does not match the logic spatially (write the logic first);Ziel-aispline passt räumlich nicht zur Logik (zuerst Logik schreiben);대상 aispline이 로직과 공간적으로 맞지 않습니다 (먼저 로직을 쓰세요);spiel_ki.py
+Template must contain exactly one TrackSpace;Vorlage muss genau einen TrackSpace enthalten;템플릿에는 TrackSpace가 정확히 하나 있어야 합니다;spiel_ki.py
+TrackSpace and aispline must use the same placement offset;TrackSpace und aispline müssen denselben Platzierungsversatz verwenden;TrackSpace와 aispline은 같은 배치 오프셋을 써야 합니다;spiel_ki.py
+TrackSpace length must be positive;TrackSpace-Länge muss positiv sein;TrackSpace 길이는 양수여야 합니다;spiel_ki.py
+TrackSpace needs finite XYZ points;TrackSpace benötigt endliche XYZ-Punkte;TrackSpace에는 유한한 XYZ 점이 필요합니다;spiel_ki.py
+Unknown additional AI fragments;Unbekannte KI-Zusatzfragmente;알 수 없는 추가 AI 조각;spiel_ki.py
+Unknown AI options: {};Unbekannte KI-Optionen: {};알 수 없는 AI 옵션: {};spiel_ki.py
+Unknown AI/brake mode;Unbekannter KI-/Bremsmodus;알 수 없는 AI/브레이크 모드;spiel_ki.py
+Unknown ERS strategy;Unbekannte ERS-Strategie;알 수 없는 ERS 전략;spiel_ki.py
+VP reference time is missing;VP-Referenzzeit fehlt;VP 기준 시간이 없습니다;spiel_ki.py
+VP target sampling too large;VP-Zielabtastung zu groß;VP 대상 샘플링이 너무 큽니다;spiel_ki.py
+VP template needs two route tables;VP-Vorlage benötigt zwei Routentabellen;VP 템플릿에는 경로 표가 두 개 필요합니다;spiel_ki.py
+vp_abtastung: auto, skaliert or original;vp_abtastung: auto, skaliert oder original;vp_abtastung: auto, skaliert 또는 original;spiel_ki.py
+Write the target aispline first: gate IDs or count differ;Zuerst die Ziel-aispline schreiben: Gate-IDs/-Zahl weichen ab;먼저 대상 aispline을 쓰세요: 게이트 ID 또는 개수가 다릅니다;spiel_ki.py
+Write the target TrackSpace first: spline points differ;Zuerst den Ziel-TrackSpace schreiben: Splinepunkte weichen ab;먼저 대상 TrackSpace를 쓰세요: 스플라인 점이 다릅니다;spiel_ki.py
+Centreline has no spatial extent;Mittellinie ohne räumliche Ausdehnung;중심선에 공간 범위가 없습니다;spiel_minimap.py
+Closed TrackSpace must have no duplicate end point;Geschlossener TrackSpace muss ohne doppelten Endpunkt vorliegen;닫힌 TrackSpace에는 중복된 끝점이 없어야 합니다;spiel_minimap.py
+Exactly one main sector zone {} expected;Genau eine Haupt-Sektorzone {} erwartet;메인 섹터 존 {}이(가) 정확히 하나여야 합니다;spiel_minimap.py
+Generator logic with coordinate system y_oben_rechtshaendig expected;Generator-Logik mit Koordinatensystem y_oben_rechtshaendig erwartet;좌표계 y_oben_rechtshaendig 인 생성기 로직을 기대합니다;spiel_minimap.py
+Invalid TrackSpace line: {};Ungültige TrackSpace-Linie: {};잘못된 TrackSpace 선: {};spiel_minimap.py
+Margin factor must be at least 1.05;Randfaktor muss mindestens 1,05 sein;여백 계수는 1.05 이상이어야 합니다;spiel_minimap.py
+Minimap view is missing: {};Minimap-Sicht fehlt: {};미니맵 보기가 없습니다: {};spiel_minimap.py
+Only an unrotated minimap with zoom factor 1 is supported;Nur ungedrehte Minimap mit Zoomfaktor 1 unterstützt;회전하지 않고 확대 배율이 1인 미니맵만 지원합니다;spiel_minimap.py
+Open TrackSpace must end at progress 1;Offener TrackSpace muss bei Fortschritt 1 enden;열린 TrackSpace는 진행도 1에서 끝나야 합니다;spiel_minimap.py
+Sectors must cover the lap from 0 to 1 without gaps;Sektoren müssen die Runde lückenlos von 0 bis 1 abdecken;섹터는 빈틈 없이 랩을 0에서 1까지 덮어야 합니다;spiel_minimap.py
+Unknown minimap options: {};Unbekannte Minimap-Optionen: {};알 수 없는 미니맵 옵션: {};spiel_minimap.py
+Unsuitable minimap texture: {};Ungeeignete Minimap-Textur: {};맞지 않는 미니맵 텍스처: {};spiel_minimap.py
+Archive needs exactly one PVS pair;Archiv braucht genau ein PVS-Paar;아카이브에는 PVS 쌍이 정확히 하나 필요합니다;spiel_pvs.py
+Cell coordinate outside i16;Zellkoordinate außerhalb i16;셀 좌표가 i16 밖입니다;spiel_pvs.py
+Anchor zone {} is missing;Ankerzone {} fehlt;기준 존 {}이(가) 없습니다;spiel_welt.py
+Braking line ID set incomplete;Bremslinien-ID-Satz unvollständig;브레이킹 라인 ID 집합이 불완전합니다;spiel_welt.py
+Carrier has no layer {}: no template for distance boards;Träger ohne Ebene {} – keine Vorlage für Entfernungstafeln;캐리어에 레이어 {}이(가) 없습니다. 거리 표지판의 템플릿이 없습니다;spiel_welt.py
+empty layer is faulty: {};leerer Layer fehlerhaft: {};빈 레이어가 잘못되었습니다: {};spiel_welt.py
+expected exactly one PVSVisRes, found {};erwartet genau eine PVSVisRes, gefunden {};PVSVisRes 가 정확히 하나여야 하는데 {}개입니다;spiel_welt.py
+invalid layer name {};ungültiger Layername {};잘못된 레이어 이름 {};spiel_welt.py
+Layer {}: EventGraph refers to {};Layer {}: EventGraph verweist auf {};레이어 {}: EventGraph 가 {}을(를) 참조합니다;spiel_welt.py
+Logic resource is missing: {};Logikressource fehlt: {};로직 리소스가 없습니다: {};spiel_welt.py
+Moving garages: no new box {};Garagen versetzen: keine neue Box {};차고 이동: 새 박스 {}이(가) 없습니다;spiel_welt.py
+Moving garages: pit boxes are missing (old {}, new {});Garagen versetzen: Boxenplätze fehlen (alt {}, neu {});차고 이동: 피트 박스가 없습니다 (이전 {}, 새 {});spiel_welt.py
+no box {} for {};keine Box {} für {};{}에 대한 박스 {}이(가) 없습니다;spiel_welt.py
+no corner lines for braking lines;keine Kurvenlinien für Bremslinien;브레이킹 라인용 코너 라인이 없습니다;spiel_welt.py
+no new grid slot {};kein neuer Startplatz {};새 그리드 슬롯 {}이(가) 없습니다;spiel_welt.py
+Pit anchors not monotonic: {} / {};Boxenanker nicht monoton: {} / {};피트 기준이 단조롭지 않습니다: {} / {};spiel_welt.py
+Pit route too short for three corners: {};Boxenroute zu kurz für drei Kurven: {};피트 경로가 코너 세 개에 너무 짧습니다: {};spiel_welt.py
+Spline names differ from the template: {};Splinenamen weichen von der Vorlage ab: {};스플라인 이름이 템플릿과 다릅니다: {};spiel_welt.py
+Terrain$PhysicsTerrain not found;Terrain$PhysicsTerrain nicht gefunden;Terrain$PhysicsTerrain 을 찾을 수 없습니다;spiel_welt.py
+TM name {} with different ranges;TM-Name {} mit verschiedenen Bereichen;TM 이름 {}의 범위가 서로 다릅니다;spiel_welt.py
+too few corner gates for {} braking lines;zu wenige Kurven-Gates für {} Bremslinien;브레이킹 라인 {}개에 비해 코너 게이트가 너무 적습니다;spiel_welt.py
+Biome {} unknown;Biom {} unbekannt;알 수 없는 바이옴 {};spiel_weltkarten.py
+Colour tone {} unknown;Farbton {} unbekannt;알 수 없는 색조 {};spiel_weltkarten.py
+Desert biome: textures are missing after copying: {};Biom Wüste: Texturen fehlen nach dem Kopieren: {};사막 바이옴: 복사 뒤에 텍스처가 없습니다: {};spiel_weltkarten.py
+Material {}: texture in slot {} is missing ({});Material {}: Textur im Slot {} fehlt ({});재질 {}: 슬롯 {}의 텍스처가 없습니다 ({});spiel_weltkarten.py
+Material {}: {} matches;Material {}: {} Treffer;재질 {}: {} 일치;spiel_weltkarten.py
+no asphalt mesh por_track_a;kein Asphaltnetz por_track_a;아스팔트 메시 por_track_a 가 없습니다;spiel_weltkarten.py
+Texture {}: {} matches;Textur {}: {} Treffer;텍스처 {}: {} 일치;spiel_weltkarten.py
+AI gate needs nine or seven unique waypoints;KI-Gate benötigt neun bzw. sieben eindeutige Wegpunkte;AI 게이트에는 고유한 웨이포인트가 9개 또는 7개 필요합니다;spielformat.py
+Brake IDs are missing in {}/{};Brems-IDs fehlen in {}/{};{} / {}에 브레이크 ID가 없습니다;spielformat.py
+Duplicate gate ID;Doppelte Gate-ID;게이트 ID가 중복됩니다;spielformat.py
+Duplicate vehicle slot;Doppelter Fahrzeugplatz;차량 슬롯이 중복됩니다;spielformat.py
+Game adapter needs Y up, right-handed;Spieladapter benötigt Y oben, rechtshändig;게임 어댑터에는 Y 위, 오른손 좌표가 필요합니다;spielformat.py
+Invalid gate position or unit normal;Ungültige Gateposition/Einheitsnormale;게이트 위치 또는 단위 법선이 잘못되었습니다;spielformat.py
+Invalid placement matrix;Ungültige Platzierungsmatrix;배치 행렬이 잘못되었습니다;spielformat.py
+Invalid placement name or WOID;Ungültiger Placementname oder WOID;배치 이름 또는 WOID가 잘못되었습니다;spielformat.py
+Invalid TM spline or progress;Ungültige TM-Spline/Fortschritt;TM 스플라인 또는 진행도가 잘못되었습니다;spielformat.py
+lade() TS gates cannot be assigned at volume {};lade()-TS-Tore lassen sich bei Volume {} nicht zuordnen;lade() TS 게이트를 볼륨 {}에 배치할 수 없습니다;spielformat.py
+Link IDs must be consecutive;Link-IDs müssen fortlaufend sein;링크 ID는 연속이어야 합니다;spielformat.py
+Link refers to a missing gate;Link verweist auf fehlendes Gate;링크가 없는 게이트를 가리킵니다;spielformat.py
+Main route is not closed;Hauptroute ist nicht geschlossen;메인 경로가 닫혀 있지 않습니다;spielformat.py
+Neighbouring TS volumes do not share the gate;TS-Nachbarvolumes teilen das Tor nicht;이웃한 TS 볼륨이 게이트를 공유하지 않습니다;spielformat.py
+New brake IDs require consistently new car settings;Neue Brems-IDs erfordern konsistent neue Auto-Settings;새 브레이크 ID에는 일관되게 새 차량 설정이 필요합니다;spielformat.py
+New garages need consistent external placement references;Neue Garagen benötigen konsistente externe Placement-Verweise;새 차고에는 일관된 외부 배치 참조가 필요합니다;spielformat.py
+New vehicle slot needs a template, matrix and VehPlacement;Neuer Fahrzeugplatz benötigt Vorlage, Matrix und VehPlacement;새 차량 슬롯에는 템플릿, 행렬, VehPlacement 가 필요합니다;spielformat.py
+No AIBrakeSettings in the template;Keine AIBrakeSettings in der Vorlage;템플릿에 AIBrakeSettings 가 없습니다;spielformat.py
+Non-finite logic value;Nichtendlicher Logikwert;유한이 아닌 로직 값;spielformat.py
+Placement group is too long;Placement-Gruppe ist zu lang;배치 그룹이 너무 깁니다;spielformat.py
+Placement matrix is not affine;Platzierungsmatrix ist nicht affin;배치 행렬이 아핀이 아닙니다;spielformat.py
+Placement name or WOID already in use;Placementname oder WOID bereits belegt;배치 이름 또는 WOID가 이미 사용 중입니다;spielformat.py
+Placement override {} is missing in the template;Placement-Override {} fehlt in Vorlage;템플릿에 배치 재정의 {}이(가) 없습니다;spielformat.py
+Protected output path: {};Geschützter Ausgabepfad: {};보호된 출력 경로: {};spielformat.py
+Repeated TM properties cannot be changed unambiguously in the lade() model;Wiederholte TM-Properties lassen sich im lade()-Modell nicht eindeutig ändern;반복되는 TM 속성은 lade() 모델에서 하나로 정할 수 없습니다;spielformat.py
+Resource or fragment structure is missing: {};Ressource/Fragmentaufbau fehlt: {};리소스 또는 조각 구조가 없습니다: {};spielformat.py
+Route is not contiguous;Route ist nicht zusammenhängend;경로가 이어지지 않습니다;spielformat.py
+Route refers to a missing link;Route verweist auf fehlenden Link;경로가 없는 링크를 가리킵니다;spielformat.py
+Spline point needs XYZ;Splinepunkt benötigt XYZ;스플라인 점에는 XYZ가 필요합니다;spielformat.py
+Template braking line needs a missing pit route;Vorlagen-Bremslinie benötigt fehlende Boxenroute;템플릿 브레이킹 라인에 없는 피트 경로가 필요합니다;spielformat.py
+Template does not contain all six logic resources;Vorlage enthält nicht alle sechs Logikressourcen;템플릿에 로직 리소스 6개가 모두 있지 않습니다;spielformat.py
+TM zone name {} has contradictory ranges;TM-Zonenname {} hat widersprüchliche Bereiche;TM 존 이름 {}의 범위가 모순됩니다;spielformat.py
+Too few spline nodes;Zu wenige Splineknoten;스플라인 노드가 너무 적습니다;spielformat.py
+TrackSpace needs unique names and a main ring;TrackSpace benötigt eindeutige Namen und einen Hauptring;TrackSpace에는 고유한 이름과 메인 고리가 필요합니다;spielformat.py
+TS gate needs four XYZ points;TS-Tor benötigt vier XYZ-Punkte;TS 게이트에는 XYZ 점 4개가 필요합니다;spielformat.py
+TS main route is not closed;TS-Hauptroute ist nicht geschlossen;TS 메인 경로가 닫혀 있지 않습니다;spielformat.py
+TS volume counter is wrong;TS-Volumezähler stimmt nicht;TS 볼륨 카운터가 잘못되었습니다;spielformat.py
+TS volume IDs must be consecutive;TS-Volume-IDs müssen fortlaufend sein;TS 볼륨 ID는 연속이어야 합니다;spielformat.py
+TS volume needs two gates;TS-Volume benötigt zwei Tore;TS 볼륨에는 게이트 2개가 필요합니다;spielformat.py
+Unknown braking line mode;Unbekannter Bremslinienmodus;알 수 없는 브레이킹 라인 모드;spielformat.py
+Unknown placement name: {};Unbekannter Platzierungsname: {};알 수 없는 배치 이름: {};spielformat.py
+Vector needs three finite values;Vektor benötigt drei endliche Werte;벡터에는 유한한 값 3개가 필요합니다;spielformat.py
+{} refers to a missing gate;{} verweist auf fehlendes Gate;{}이(가) 없는 게이트를 가리킵니다;spielformat.py
+Game folder not found;Spielordner nicht gefunden;게임 폴더를 찾지 못했습니다;spielimport.py
+Game track without driving physics (TRN~): side areas automatic.;Spielstrecke ohne Fahrphysik (TRN~): Seitenbereiche automatisch.;주행 물리 (TRN~)가 없는 게임 트랙: 옆 구역은 자동.;spielimport.py
+No pit line in the game track.;Keine Boxenlinie in der Spielstrecke.;게임 트랙에 피트 선이 없습니다.;spielimport.py
+"Pit lane does not span the start/finish line ({} m before, {} m after); the generator only knows pit lanes across the finish line, it stays automatic.";"Boxengasse liegt nicht um die Start-Ziel-Linie ({} m davor, {} m danach); der Generator kennt nur Boxengassen über die Ziellinie, sie bleibt automatisch.";피트 레인이 출발/결승선을 가로지르지 않습니다 ({} m 앞, {} m 뒤). 생성기는 결승선을 지나는 피트 레인만 알기 때문에 자동으로 둡니다.;spielimport.py
+"Pit lane too short ({} m) for the generator; it stays automatic.";"Boxengasse zu kurz ({} m) für den Generator; sie bleibt automatisch.";피트 레인이 생성기에 너무 짧습니다 ({} m). 자동으로 둡니다.;spielimport.py
+"Pit line does not run beside the track; pit lane stays automatic as before.";"Boxenlinie liegt nicht neben der Strecke; Boxengasse wie bisher automatisch.";피트 선이 트랙 옆으로 지나지 않습니다. 피트 레인은 전처럼 자동입니다.;spielimport.py
+Start/finish line placed at the starting grid ({} m after the game's timing line).;Start-Ziel-Linie an die Startaufstellung gelegt ({} m nach der Zeitlinie des Spiels).;출발/결승선을 출발 그리드에 놓았습니다 (게임 계측선에서 {} m 뒤).;spielimport.py
+, all files in the package;, alle Dateien im Paket;, 패키지의 모든 파일;streckencode.py
+, missing in the package: {};, fehlen im Paket: {};, 패키지에 없음: {};streckencode.py
+Duplicate ID after renaming: {};Kennung nach Umbenennung doppelt: {};이름을 바꾼 뒤 ID가 중복됩니다: {};streckencode.py
+GfxMaterialRes: heap offset {} invalid;GfxMaterialRes: Heap-Offset {} ungültig;GfxMaterialRes: 힙 오프셋 {}이(가) 잘못되었습니다;streckencode.py
+GfxMaterialRes: texture offset {} invalid;GfxMaterialRes: Texturoffset {} ungültig;GfxMaterialRes: 텍스처 오프셋 {}이(가) 잘못되었습니다;streckencode.py
+GfxMaterialRes: unexpected section order;GfxMaterialRes: unerwartete Bereichsfolge;GfxMaterialRes: 예상과 다른 구역 순서;streckencode.py
+GfxModelRes with undecoded remainder;GfxModelRes mit nicht entschlüsseltem Rest;디코드되지 않은 나머지가 있는 GfxModelRes;streckencode.py
+GfxModelRes: round trip not bit-identical;GfxModelRes: Rundlauf nicht bitgleich;GfxModelRes: 왕복이 비트 단위로 같지 않습니다;streckencode.py
+Invalid metadata key {};Ungültiger Metadaten-Schlüssel {};잘못된 메타데이터 키 {};streckencode.py
+Invalid track code: {};Ungültiger Streckencode: {};잘못된 트랙 코드: {};streckencode.py
+Manifest has track_code {} instead of {};Manifest hat track_code {} statt {};매니페스트의 track_code 가 {}이(가) 아니라 {}입니다;streckencode.py
+Mip path longer than 255 bytes: {};Mip-Pfad länger als 255 Byte: {};밉 경로가 255바이트보다 깁니다: {};streckencode.py
+Mip reference without null byte;Mip-Verweis ohne Nullbyte;널 바이트가 없는 밉 참조;streckencode.py
+Old and new code are the same ({});Alter und neuer Code sind gleich ({});이전 코드와 새 코드가 같습니다 ({});streckencode.py
+pkg string longer than 255 bytes;pkg-Zeichenkette länger als 255 Byte;pkg 문자열이 255바이트보다 깁니다;streckencode.py
+pkg: !sbi is not a plain string sequence;pkg: !sbi ist keine reine Zeichenkettenfolge;pkg: !sbi 가 평범한 문자열 수열이 아닙니다;streckencode.py
+pkg: reference does not point to the start of a string;pkg: Verweis zeigt nicht auf einen Zeichenkettenanfang;pkg: 참조가 문자열의 시작을 가리키지 않습니다;streckencode.py
+String section does not end cleanly;Zeichenkettenbereich endet nicht sauber;문자열 구역이 깨끗하게 끝나지 않습니다;streckencode.py
+Target file already exists: {};Zieldatei existiert bereits: {};대상 파일이 이미 있습니다: {};streckencode.py
+Target must not be the source;Ziel darf nicht die Quelle sein;대상은 원본과 같을 수 없습니다;streckencode.py
+Unexpected copy target {};Unerwartetes Kopierziel {};예상 밖의 복사 대상 {};streckencode.py
+{} ({}): unsupported reference with {} remains;{} ({}): nicht unterstützter Verweis mit {} bleibt übrig;{} ({}): 지원하지 않는 참조 {}이(가) 남았습니다;streckencode.py
+{} textures -> {};{} Texturen -> {};텍스처 {}개 -> {};streckencode.py
+{}: round trip not bit-identical, renaming is not safe;{}: Rundlauf nicht bitgleich – Umbenennen nicht sicher;{}: 왕복이 비트 단위로 같지 않아 이름 변경이 안전하지 않습니다;streckencode.py
+Archive has no unique TRN~;Archiv ohne eindeutige TRN~;아카이브에 고유한 TRN~ 이 없습니다;umgebung.py
+Carrier has no layer {};Träger ohne Layer {};캐리어에 레이어 {}이(가) 없습니다;umgebung.py
+Catalogue has no carrier, model {} only exists in the carrier;Katalog ohne Träger, Modell {} nur im Träger;카탈로그에 캐리어가 없습니다. 모델 {}은(는) 캐리어에만 있습니다;umgebung.py
+Duplicate ID {};ID {} doppelt;중복 ID {};umgebung.py
+Duplicate object ID {};Objekt-ID {} doppelt;오브젝트 ID {}이(가) 중복됩니다;umgebung.py
+Environment file must be in the project folder: {};Umgebungsdatei muss im Projektordner liegen: {};환경 파일은 프로젝트 폴더 안에 있어야 합니다: {};umgebung.py
+ERP in the package is stored compressed: {};ERP im Paket ist komprimiert gespeichert: {};패키지의 ERP가 압축되어 있습니다: {};umgebung.py
+Game folder not found (choose it under Tools → Set F1 25 game folder, or set the environment variable EGO_SPIELORDNER);Spielordner nicht gefunden (unter Werkzeuge → F1-25-Spielordner festlegen wählen oder Umgebungsvariable EGO_SPIELORDNER setzen);게임 폴더를 찾지 못했습니다 (도구 → F1 25 게임 폴더 설정에서 고르거나 환경 변수 EGO_SPIELORDNER를 설정하세요);umgebung.py
+Game folder without {}: {};Spielordner ohne {}: {};{}이(가) 없는 게임 폴더: {};umgebung.py
+gelaende.{} {}: id is missing or empty;gelaende.{} {}: id fehlt oder ist leer;gelaende.{} {}: id가 없거나 비어 있습니다;umgebung.py
+gelaende.{} {}: object ({}) expected;gelaende.{} {}: Objekt ({}) erwartet;gelaende.{} {}: 객체 ({})가 필요합니다;umgebung.py
+Hill {}: centre at world x {}, z {} is outside the track area (mountains outside belong under “berge”);Hügel {}: Mitte bei Welt x {}, z {} liegt außerhalb des Streckenbereichs (Berge außerhalb gehören unter „berge“);언덕 {}: 세계 좌표 x {}, z {}의 중심이 트랙 영역 밖입니다 (밖의 산은 “berge” 아래에 둡니다);umgebung.py
+is {} km from the centre (at most {} km);ist {} km von der Mitte entfernt (höchstens {} km);중심에서 {} km 떨어져 있습니다 (최대 {} km);umgebung.py
+Layer {} has no template (RenderModel without collision);Layer {} ohne Vorlage (RenderModel ohne Kollision);레이어 {}에 템플릿이 없습니다 (충돌 없는 RenderModel);umgebung.py
+lies in the track area (only hills work there);liegt im Streckenbereich (dort wirken nur Hügel);트랙 영역 안에 있습니다 (거기에는 언덕만 됩니다);umgebung.py
+Mip file is missing in the game folder: {};Mip-Datei fehlt im Spielordner: {};게임 폴더에 밉 파일이 없습니다: {};umgebung.py
+Model not in the catalogue: {};Modell nicht im Katalog: {};카탈로그에 없는 모델: {};umgebung.py
+Model {} copied incompletely: {} is missing;Modell {} unvollständig kopiert: {} fehlt;모델 {}을(를) 불완전하게 복사했습니다. {}이(가) 없습니다;umgebung.py
+Models neither in the carrier nor in the catalogue: {};Modelle weder im Träger noch im Katalog: {};캐리어에도 카탈로그에도 없는 모델: {};umgebung.py
+Mountain {} at world x {}, z {} {};Berg {} bei Welt x {}, z {} {};산 {}의 세계 좌표 x {}, z {} {};umgebung.py
+"Mountain {} reaches the track area; the terrain stays flat at the edge and the mountain is cut off there (centre {} m from the edge, radius {} m)";"Berg {} reicht bis an den Streckenbereich; am Rand bleibt das Gelände flach, der Berg wird dort abgeschnitten (Mitte {} m vor dem Rand, Radius {} m)";산 {}이(가) 트랙 영역에 닿습니다. 가장자리의 지형은 평평하게 남고 산은 그 자리에서 잘립니다 (중심이 가장자리에서 {} m, 반경 {} m);umgebung.py
+Normal buffer of the outer terrain has stride {} (expected 8);Normalenpuffer des Außenterrains mit Stride {} (erwartet 8);바깥 지형의 노멀 버퍼 보폭이 {}입니다 (기대 8);umgebung.py
+Object ID {} too long or contains a null character;Objekt-ID {} zu lang oder mit Nullzeichen;오브젝트 ID {}이(가) 너무 길거나 널 문자를 포함합니다;umgebung.py
+Object {} at world x {}, z {} is outside the track area (x {}…{}, z {}…{});Objekt {} bei Welt x {}, z {} liegt außerhalb des Streckenbereichs (x {}…{}, z {}…{});오브젝트 {}의 세계 좌표 x {}, z {}이(가) 트랙 영역 밖입니다 (x {}…{}, z {}…{});umgebung.py
+"Object {} stands on the road ({} m from the centreline; approximation without generator mesh)";"Objekt {} steht auf der Fahrbahn ({} m von der Mittellinie; Näherung ohne Generatornetz)";오브젝트 {}이(가) 노면 위에 있습니다 (중심선에서 {} m, 생성기 메시 없는 근사);umgebung.py
+Object {} stands {};Objekt {} steht {};오브젝트 {}이(가) {}에 있습니다;umgebung.py
+Object {}: field {} must be a finite number ({});Objekt {}: Feld {} muss eine endliche Zahl sein ({});오브젝트 {}: 칸 {}은(는) 유한한 숫자여야 합니다 ({});umgebung.py
+Object {}: id is missing or empty;Objekt {}: id fehlt oder ist leer;오브젝트 {}: id가 없거나 비어 있습니다;umgebung.py
+Object {}: model must be a base ID eaid://… without extension ({});Objekt {}: modell muss eine Basis-Kennung eaid://… ohne Endung sein ({});오브젝트 {}: 모델은 확장자 없는 기본 ID eaid://… 여야 합니다 ({});umgebung.py
+Object {}: model {} not in the catalogue;Objekt {}: Modell {} nicht im Katalog;오브젝트 {}: 모델 {}이(가) 카탈로그에 없습니다;umgebung.py
+Object {}: object ({}) expected;Objekt {}: Objekt ({}) erwartet;오브젝트 {}: 객체 ({})가 필요합니다;umgebung.py
+Object {}: scale {} outside {}–{};Objekt {}: skala {} außerhalb {}–{};오브젝트 {}: 배율 {}이(가) {}–{} 밖입니다;umgebung.py
+Outer terrain (TerrainRes *outer_terrain*) is missing in the carrier;Außenterrain (TerrainRes *outer_terrain*) fehlt im Träger;캐리어에 바깥 지형 (TerrainRes *outer_terrain*) 이 없습니다;umgebung.py
+projekt.json names {}, the file is missing;projekt.json nennt {}, die Datei fehlt;projekt.json 이 {}을(를) 가리키지만 파일이 없습니다;umgebung.py
+umgebung.json cannot be read: {};umgebung.json nicht lesbar: {};umgebung.json 을 읽을 수 없습니다: {};umgebung.py
+umgebung.json is not valid JSON: {};umgebung.json ist kein gültiges JSON: {};umgebung.json 이 올바른 JSON이 아닙니다: {};umgebung.py
+umgebung.json: bodenbewuchs must be true/false ({});umgebung.json: bodenbewuchs muss true/false sein ({});umgebung.json: bodenbewuchs 는 true/false 여야 합니다 ({});umgebung.py
+umgebung.json: gelaende must be an object ({});umgebung.json: gelaende muss ein Objekt ({}) sein;umgebung.json: gelaende 는 객체여야 합니다 ({});umgebung.py
+umgebung.json: gelaende.{} must be a list;umgebung.json: gelaende.{} muss eine Liste sein;umgebung.json: gelaende.{} 는 목록이어야 합니다;umgebung.py
+umgebung.json: object ({}) expected, not {};umgebung.json: Objekt ({}) erwartet, nicht {};umgebung.json: 객체 ({})가 필요한데 {}입니다;umgebung.py
+umgebung.json: objekte must be a list;umgebung.json: objekte muss eine Liste sein;umgebung.json: objekte 는 목록이어야 합니다;umgebung.py
+umgebung.json: schema {} is not supported (only {});umgebung.json: Schema {} wird nicht unterstützt (nur {});umgebung.json: 스키마 {}은(는) 지원하지 않습니다 ({}만);umgebung.py
+"{} environment objects (guide value ≤ {}; Portimão has 1,274 trees)";"{} Umgebungsobjekte (Richtwert ≤ {}; Portimão hat 1.274 Bäume)";환경 오브젝트 {}개 (참고값 ≤ {}, 포르티망에는 나무 1,274그루);umgebung.py
+{} m beside a wall;{} m neben einer Mauer;벽에서 {} m 옆;umgebung.py
+{} {}: hoehe_m {} outside {}…{};{} {}: hoehe_m {} außerhalb {}…{};{} {}: hoehe_m {}이(가) {}…{} 밖입니다;umgebung.py
+{} {}: radius_m {} outside {}…{};{} {}: radius_m {} außerhalb {}…{};{} {}: radius_m {}이(가) {}…{} 밖입니다;umgebung.py
+Carrier contains no Portimão terrain or no TRN~;Träger enthält kein Portimão-Terrain bzw. keine TRN~;캐리어에 포르티망 지형 또는 TRN~ 이 없습니다;unbenutzt
+on {};auf {};{}에서;unbenutzt
+Length {} m outside {}–{} m.;Länge {} m außerhalb {}–{} m.;길이 {} m이(가) {}–{} m 밖입니다.;vorschlag.py
+Minimum radius {} m outside {}–{} m.;Mindestradius {} m außerhalb {}–{} m.;최소 반경 {} m이(가) {}–{} m 밖입니다.;vorschlag.py
+No valid track after {} attempts (reasons: {}). Reduce the minimum radius or change the length or number of corners.;Nach {} Versuchen keine gültige Strecke (Gründe: {}). Mindestradius verkleinern oder Länge/Kurvenzahl ändern.;시도 {}번 뒤에 유효한 트랙이 없습니다 (이유: {}). 최소 반경을 줄이거나 길이나 코너 수를 바꾸세요.;vorschlag.py
+Number of corners {} outside {}–{}.;Kurvenzahl {} außerhalb {}–{}.;코너 수 {}이(가) {}–{} 밖입니다.;vorschlag.py
+asphalt;asphalt;아스팔트;wort
+gravel;kies;자갈;wort
+grid box;startbox;그리드 박스;wort
+Hill;Hügel;언덕;wort
+kerb;randstein;커브;wort
+left;links;왼쪽;wort
+line;linie;선;wort
+marking;markierung;표시;wort
+Mountain;Berg;산;wort
+pit lane;boxengasse;피트 레인;wort
+right;rechts;오른쪽;wort
+x_mode.zonen[{}].partial must be true or false;x_mode.zonen[{}].partial muss true oder false sein;x_mode.zonen[{}].partial 은 true 또는 false 여야 합니다;zonen.py
+x_mode.zonen[{}].partial_versatz_m must be ≥ 0 (empty = no partial);x_mode.zonen[{}].partial_versatz_m muss ≥ 0 sein (leer = ohne Partial);x_mode.zonen[{}].partial_versatz_m 은 0 이상이어야 합니다 (비우면 파셜 없음);zonen.py
+{}.zonen must be a list;{}.zonen muss eine Liste sein;{}.zonen 은 목록이어야 합니다;zonen.py
+{}.zonen[{}] must be an object;{}.zonen[{}] muss ein Objekt sein;{}.zonen[{}] 은 객체여야 합니다;zonen.py
+{}.zonen[{}].{} is missing or not a number;{}.zonen[{}].{} fehlt oder ist keine Zahl;{}.zonen[{}].{} 이(가) 없거나 숫자가 아닙니다;zonen.py
+Grid slot {} (at {} m) lies in a corner (radius {} m, banking {}°) - only {} slots fit on the straight: fewer slots, smaller spacing or move the finish line;Startplatz {} (bei {} m) liegt in einer Kurve (Radius {} m, Querneigung {}°) – nur {} Plätze passen auf die Gerade: weniger Plätze, kleinerer Abstand oder Ziellinie verschieben;그리드 자리 {} ({} m 지점)이 코너에 있습니다 (반경 {} m, 뱅크 {}°) - 직선에는 {}자리만 들어갑니다: 자리를 줄이거나 간격을 줄이거나 결승선을 옮기세요;pruefregeln.py
+Pit lane shortened ({}): entry {} m before the line instead of {} m, exit {} m after instead of {} m;Boxengasse gekürzt ({}): Einfahrt {} m vor der Linie statt {} m, Ausfahrt {} m danach statt {} m;피트 레인을 줄였습니다 ({}): 진입 {} m 앞 ({} m 대신), 출구 {} m 뒤 ({} m 대신);pruefregeln.py
+Corner at point {}: radius reduced from {} m to {} m, the neighbouring points are too close;Ecke an Punkt {}: Radius von {} m auf {} m verkleinert, die Nachbarpunkte liegen zu nah;점 {}의 코너: 이웃 점이 너무 가까워서 반경을 {} m에서 {} m로 줄였습니다;mittellinie.py
+Control point {}: ecke_radius_m must be > 0;Kontrollpunkt {}: ecke_radius_m muss > 0 sein;제어점 {}: ecke_radius_m은 0보다 커야 합니다;definition.py

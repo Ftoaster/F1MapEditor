@@ -42,7 +42,7 @@ def edit_text(value):
         text = f"{value:.3f}".rstrip("0").rstrip(".")
         if text in ("-0",):
             return "0"
-        return text if sprache() == "en" else text.replace(".", ",")
+        return text.replace(".", ",") if sprache() == "de" else text
     return None
 
 

@@ -89,7 +89,7 @@ def save_state(key, value):
 
 
 def load_language():
-    """Gespeicherte Oberflächensprache (``en``/``de``), Standard Englisch (English First, 4.11.2026)."""
+    """Gespeicherte Oberflächensprache (``en``/``de``/``ko``), Standard Englisch (English First, 4.11.2026)."""
     value = str(settings().value("sprache", STANDARD) or STANDARD).lower()
     return value if value in SPRACHEN else STANDARD
 
