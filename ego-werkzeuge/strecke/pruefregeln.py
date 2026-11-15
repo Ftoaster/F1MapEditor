@@ -192,6 +192,10 @@ _R = [
           "More main corners than carrier braking-line IDs (15) – the build merges the closest corners",
           QUELLEN["schritt2"], "Alle 28 Originale: Bremslinien ≥ Kurven; Editor-Strecke mit 16 Kurven stürzte ab, "
           "testedit5_kurven15 (zusammengelegt) läuft (25.10.2026)"),
+    Regel("KI_OHNE_BREMSZONE", "KI-08", FEHLER, "generator",
+          "No braking zone on the lap: the AI drives flat out all the way round", "docs/issue5_bristol.md",
+          "Issue #5 (15.11.2026): alle Bristol-Varianten mit 0–4 km/h Tempospanne hängen 15 s nach dem Rennstart "
+          "(KI-Schleife F1_25.exe+0x64c070); Bristol mit Schikane (71 km/h) läuft, kurz_links 72, Speedway GP 166"),
     Regel("PVS_ZELLEN_VIELE", "PV-01", WARNUNG, "generator",
           "More PVS cells (corridor) than any original track (max. 36,409, Losail)", QUELLEN["schritt2"],
           "Editor-Bau mit 59.557 Zellen stürzte beim Laden ab; v20 lief mit 37.917"),
@@ -314,6 +318,12 @@ _R = [
     Regel("UMG_BERG_RAND", "UM-08", HINWEIS, "eingabe",
           "Mountain reaches the edge of the track area and is cut off there", QUELLEN["umgebung"],
           "Lochrand bleibt fest (10 m + 150 m Übergang), sonst Lücke zur Grundfläche"),
+    Regel("UMG_SCHIEF", "UM-09", WARNUNG, "bau",
+          "Environment object on a slope: the ground under its footprint varies by more than 1 m", QUELLEN["umgebung"],
+          "Bau setzt den Grundriss auf den tiefsten Bodenpunkt (nichts schwebt), die Hangseite versinkt "
+          "(docs/mapeditor/objekte_ausrichtung.md)"),
+    Regel("UMG_OHNE_BODEN", "UM-10", WARNUNG, "bau", "Environment object left out: no ground under it",
+          QUELLEN["umgebung"], "Höhe nur aus den sichtbaren Flächen im Streckenbereich (umgebung.bodenlage)"),
 ]
 REGELN: Dict[str, Regel] = {r.id: r for r in _R}
 assert len(REGELN) == len(_R), "doppelte Regel-ID"
@@ -1215,8 +1225,16 @@ def _geometrie_pruefen(ml, param, m, welt_bei):
                              ort(hl, schlimm[1], welt_bei(schlimm[1])), ist=schlimm[0], soll="<= %d" % n_ok))
     pbox = param.get("boxengasse") or {}
     if pbox.get("aktiv"):
-        from .querprofil import boxen_begrenzen
+        from .querprofil import boxen_begrenzen, boxen_uebergaenge
         vor, nach, grund = boxen_begrenzen(pbox, st.s, ml.bank, L)
+        ue = boxen_uebergaenge(pbox, vor + nach)
+        if ue["verkuerzt"]:
+            m.append(meldung("BOX_BEGRENZT", "Short pit lane (%.0f m): run-up %.0f m, transition %.0f m and grass strip %.0f m "
+                                             "instead of %.0f m, %.0f m and %.0f m"
+                                             % (vor + nach, ue["anlauf_m"], ue["uebergang_m"], ue["abstand_fahrbahn"],
+                                                pbox["anlauf_m"], pbox["uebergang_m"], pbox.get("abstand_fahrbahn", 0.0)),
+                             ort(hl, 0.0, welt_bei(0.0)), ist=[ue["anlauf_m"], ue["uebergang_m"], ue["abstand_fahrbahn"]],
+                             soll=[pbox["anlauf_m"], pbox["uebergang_m"], pbox.get("abstand_fahrbahn", 0.0)]))
         if grund:
             m.append(meldung("BOX_BEGRENZT", "Pit lane shortened (%s): entry %.0f m before the line instead of %.0f m, "
                                              "exit %.0f m after instead of %.0f m" % (grund, vor, pbox["einfahrt_vor_start_m"],
@@ -1285,11 +1303,27 @@ def _zonen_eingabe_pruefen(ml, param, m, welt_bei):
     return gp
 
 
+#: Kleinste Tempospanne der KI auf einer Runde (km/h, KI-08). Hängende Bristol-Varianten 0–4, laufende Strecken ab 71
+KI_MIN_TEMPOSPANNE_KMH = 30.0
+
+
+def ki_tempospanne(logik):
+    """(v_min, v_max) in km/h der Ideallinie mit dem an der Spiel-KI kalibrierten Fahrzeugsatz; None ohne Ideallinie."""
+    if not (logik.get("ideallinie") or {}).get("position"):
+        return None
+    try:
+        from . import spiel_ki
+        p = spiel_ki.geschwindigkeit_neu({"ideallinie": logik["ideallinie"]})["ki_profil"]
+    except Exception:  # noqa: BLE001  (nur Prüfung)
+        return None
+    return p["v_min_kmh"], p["v_max_kmh"]
+
+
 def _generator_pruefen(erg, d, v, m):
     import json
     import os
     gp = {"DRS_ANZAHL", "BOX_FEHLT", "KI_KURVEN_FUER_BREMSLINIEN", "BOX_MAUER_AUF_BOXENLINIE", "LAGE_AUSSERHALB_AO",
-          "LAGE_AUSSERHALB_LOCH"}
+          "LAGE_AUSSERHALB_LOCH", "KI_OHNE_BREMSZONE"}
     netz = None
     if isinstance(erg, (str, os.PathLike)):
         with open(os.path.join(erg, "strecke_logik.json"), encoding="utf-8") as f:
@@ -1319,6 +1353,13 @@ def _generator_pruefen(erg, d, v, m):
                                                      "chicanes in the originals)"
                          % (n_kurven, TRAEGER_BREMSLINIEN, n_kurven - TRAEGER_BREMSLINIEN),
                          ist=n_kurven, soll=TRAEGER_BREMSLINIEN))
+    spanne = ki_tempospanne(logik)
+    if spanne is not None and spanne[1] - spanne[0] < KI_MIN_TEMPOSPANNE_KMH:
+        m.append(meldung("KI_OHNE_BREMSZONE", "The AI never has to brake: speed %.0f–%.0f km/h all the way round (range "
+                                              "%.0f km/h, at least %.0f). The game hangs about 15 s after the race start. "
+                                              "Add a tight corner or a chicane"
+                         % (spanne[0], spanne[1], spanne[1] - spanne[0], KI_MIN_TEMPOSPANNE_KMH),
+                         ist=_r(spanne[1] - spanne[0], 1), soll="≥ %.0f" % KI_MIN_TEMPOSPANNE_KMH))
     n_gates = len(sp["AISplineData"]["gates"])
     if n_gates > ORIGINAL_MAX_GATES:
         m.append(meldung("KI_GATES_VIELE", "%d AI gates (originals at most %d): make the track shorter or "

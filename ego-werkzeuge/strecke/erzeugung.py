@@ -42,6 +42,8 @@ def berechnen(defn):
     kurven = mittellinie.kurven_finden(ml, pk['kruemmung_schwelle'],pk['mindestwinkel_grad'],pk['zusammenfassen_m'])
     qp = querprofil.querprofil_berechnen(ml,defn.param,kurven)
     rl = rennlinie.ideallinie_berechnen(ml,defn.param)
+    # Querprofil (Randsteine, Kiesbetten) bleibt bei den erkannten Kurven; nur die Logik bekommt die geteilten (Issue 5)
+    kurven = mittellinie.kurven_teilen(ml, kurven, pk.get('teilen_ab_grad'))
     daten = logik.logik_berechnen(ml,qp,rl,defn.param,kurven)
     netz = geometrie.netz_erzeugen(ml,qp,defn.param)
     bericht = {'name': defn.name, 'laenge_m': ml.laenge, 'kurven': len(kurven),

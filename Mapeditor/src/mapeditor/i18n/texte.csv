@@ -8,6 +8,7 @@ Carrier addon missing: {pfad};Träger-Addon fehlt: {pfad};캐리어 애드온이
 "Code of the Portimão mod (carrier); a transfer replaces Portimão";"Code des Portimão-Mods (Träger); eine Übertragung ersetzt Portimão";포르티망 모드(캐리어)의 코드. 전송하면 포르티망을 대체합니다;adapter.py
 "Code of the Sepang mod; a transfer replaces Sepang";"Code des Sepang-Mods; eine Übertragung ersetzt Sepang";세팡 모드의 코드. 전송하면 세팡을 대체합니다;adapter.py
 Event after the end of the build;Ereignis nach dem Bauende;빌드가 끝난 뒤의 이벤트;adapter.py
+Flag image missing or not an image file: {pfad};Flaggenbild fehlt oder ist keine Bilddatei: {pfad};깃발 이미지가 없거나 이미지 파일이 아닙니다: {pfad};adapter.py
 good;gut;양호;adapter.py
 Invalid event stream: {error};Ungültiger Ereignisstrom: {error};잘못된 이벤트 스트림: {error};adapter.py
 Layout variant of Bahrain;Layout-Variante von Bahrain;바레인 레이아웃 변형;adapter.py
@@ -66,6 +67,7 @@ Environment;Umgebung;환경;ansicht.py
 Grid;Raster;격자;ansicht.py
 "Guide lines; spacing see scale bottom right";"Hilfslinien; Abstand siehe Maßstab unten rechts";보조선. 간격은 오른쪽 아래 축척 참고;ansicht.py
 Header (project);Kopfzeile (Projekt);머리글 (프로젝트);ansicht.py
+Height as colour;Höhe als Farbe;높이를 색으로;ansicht.py
 Height profile;Höhenprofil;높이 프로파일;ansicht.py
 Hint labels;Hinweisschilder;안내 라벨;ansicht.py
 Input points;Eingabepunkte;입력 점;ansicht.py
@@ -97,6 +99,7 @@ Tabs;Reiter;탭;ansicht.py
 Tabs below the map;Reiter unter der Karte;지도 아래 탭;ansicht.py
 The track must lie completely inside this frame;Die Strecke muss vollständig in diesem Rahmen liegen;트랙이 이 틀 안에 완전히 들어가야 합니다;ansicht.py
 Toolbar;Werkzeugleiste;도구 모음;ansicht.py
+Track coloured by height (blue = lowest, yellow = highest point of the lap) or by gradient – the height profile uses the same colours;Strecke nach Höhe eingefärbt (blau = tiefster, gelb = höchster Punkt der Runde) oder nach Steigung – das Höhenprofil nutzt dieselben Farben;트랙을 높이(파랑 = 랩의 가장 낮은 지점, 노랑 = 가장 높은 지점) 또는 경사에 따라 색칠합니다. 높이 프로파일도 같은 색을 씁니다;ansicht.py
 Track edges;Fahrbahnränder;트랙 가장자리;ansicht.py
 "Trees, bushes, buildings … as circles at catalogue size (colour per category); edit with the “Environment” tool (U)";"Bäume, Büsche, Gebäude … als Kreise in Katalogröße (Farbe je Kategorie); bearbeiten mit Werkzeug „Umgebung“ (U)";나무, 덤불, 건물 …을 카탈로그 크기의 원으로 표시 (분류별 색). “환경” 도구(U)로 편집;ansicht.py
 "Trigger zones across the track and the carrier's replay cameras, as the build moves them to this track; settings under Properties → Cameras";"Auslösezonen quer über der Strecke und die Wiederholungskameras des Trägers, so wie der Bau sie an diese Strecke versetzt; Einstellungen unter Eigenschaften → Kameras";트랙을 가로지르는 트리거 구역과 캐리어의 리플레이 카메라를 빌드가 이 트랙으로 옮긴 위치로 보여 줍니다. 설정은 속성 → 카메라;ansicht.py
@@ -211,6 +214,7 @@ Cancelling …;Wird abgebrochen …;취소하는 중 …;build.py
 Cancelling … next phase boundary, ends after 120 s at the latest.;Wird abgebrochen … nächste Phasengrenze, spätestens nach 120 s beenden.;취소하는 중 … 다음 단계 경계, 늦어도 120초 뒤에 끝납니다.;build.py
 Carrier package (ZIP);Trägerpaket (ZIP);캐리어 패키지 (ZIP);build.py
 Carrier package missing: {carrier};Trägerpaket fehlt: {carrier};캐리어 패키지 없음: {carrier};build.py
+carrier's flag (Portugal);Flagge des Trägers (Portugal);캐리어의 깃발 (포르투갈);build.py
 Change build settings;Baueinstellungen ändern;빌드 설정 변경;build.py
 Check and build;Prüfen und bauen;검사 후 빌드;build.py
 Check error · package discarded;Prüffehler · Paket verworfen;검사 오류 · 패키지를 버렸습니다;build.py
@@ -219,6 +223,7 @@ Check {stufe}: {zusammenfassung};Prüfung {stufe}: {zusammenfassung};검사 {stu
 Checked with carrier deviation;Mit Trägerabweichung geprüft;캐리어 편차를 포함해 검사함;build.py
 Checking;Prüft;검사 중;build.py
 Choose carrier package;Trägerpaket wählen;캐리어 패키지 선택;build.py
+Choose flag picture;Flaggenbild wählen;깃발 그림 선택;build.py
 Choose swofty.exe (the launcher's bin folder);swofty.exe wählen (Ordner bin des Launchers);swofty.exe 선택 (런처의 bin 폴더);build.py
 Choose your own output folder;Eigenen Ausgabeordner wählen;출력 폴더 직접 선택;build.py
 Choose …;Wählen …;선택 …;build.py
@@ -252,6 +257,8 @@ failed;fehlgeschlagen;실패;build.py
 Failed;Fehlgeschlagen;실패;build.py
 "First installation of a track code: install the ZIP once with the Track Installer and activate it in the EGO editor. After that, every new version with “Transfer to game” – without the EGO editor, even with the mod deactivated (backs up the affected game files, writes to the game after your confirmation; quit the game first).";"Erstinstallation eines Streckencodes: ZIP einmalig im Track Installer installieren und im EGO-Editor aktivieren. Danach jede neue Version mit „Ins Spiel übertragen“ – ohne EGO-Editor, auch bei deaktiviertem Mod (sichert die betroffenen Spieldateien, schreibt nach deiner Bestätigung ins Spiel; Spiel vorher beenden).";트랙 코드를 처음 설치할 때: ZIP을 Track Installer로 한 번 설치하고 EGO 편집기에서 활성화하세요. 그 뒤의 새 버전은 “게임으로 전송”으로 넣습니다. EGO 편집기 없이, 모드가 꺼져 있어도 됩니다 (해당 게임 파일을 백업하고, 확인 후 게임에 씁니다. 먼저 게임을 종료하세요).;build.py
 Fixed in the profile: pit lane correction, activation template portimao, main variant only.;Fest im Profil: Boxengassen-Korrektur, Aktivierungsvorlage portimao, nur Hauptvariante.;프로필에 고정: 피트 레인 보정, 활성화 템플릿 portimao, 메인 변형만.;build.py
+Flag;Flagge;깃발;build.py
+"Flag shown with the track in the game menus. Any picture works, ideally about 3:2; it is cropped to fill. Without a picture the track shows the carrier's flag (Portugal).";"Flagge, die das Spiel in den Menüs zur Strecke zeigt. Jedes Bild geht, am besten etwa 3:2; es wird formatfüllend beschnitten. Ohne Bild zeigt die Strecke die Flagge des Trägers (Portugal).";게임 메뉴에서 트랙과 함께 표시되는 깃발입니다. 어떤 그림이든 되며 가로세로 비율 3:2 정도가 좋습니다. 영역을 채우도록 잘립니다. 그림이 없으면 트랙에 캐리어의 깃발(포르투갈)이 표시됩니다.;build.py
 Folders ▸;Ordner ▸;폴더 ▸;build.py
 Folders ▾;Ordner ▾;폴더 ▾;build.py
 from the definition: {name};aus der Definition: {name};정의에서: {name};build.py
@@ -288,6 +295,8 @@ Package folder;Paketordner;패키지 폴더;build.py
 This cannot be undone. The playtest log keeps the entries (marked as deleted).";"{anzahl} Bauten mit zusammen {size} endgültig löschen?
 Das lässt sich nicht rückgängig machen. Das Spieltest-Protokoll behält die Einträge (als gelöscht markiert).";"빌드 {anzahl}개 (합계 {size})를 영구 삭제할까요?
 되돌릴 수 없습니다. 플레이 테스트 기록은 항목을 남깁니다 (삭제됨 표시).";build.py
+Picture cannot be read: {pfad};Bild nicht lesbar: {pfad};그림을 읽을 수 없습니다: {pfad};build.py
+Pictures (*.png *.jpg *.jpeg *.bmp *.webp);Bilder (*.png *.jpg *.jpeg *.bmp *.webp);그림 (*.png *.jpg *.jpeg *.bmp *.webp);build.py
 Playtest;Spieltest;플레이 테스트;build.py
 Playtest log;Spieltest-Protokoll;플레이 테스트 기록;build.py
 Playtest log: {error};Spieltest-Protokoll: {error};플레이 테스트 기록: {error};build.py
@@ -314,6 +323,7 @@ Reading state in the game …;Zustand im Spiel wird gelesen …;게임 안의 �
 Ready;Bereit;준비됨;build.py
 Ready to build.;Bereit zum Bauen.;빌드 준비 완료.;build.py
 Rebuild;Neu bauen;다시 빌드;build.py
+Remove;Entfernen;제거;build.py
 Replaces Portimão's aerial photos: ground from the track surfaces, racing line on the asphalt, surroundings matching hills and mountains.;Ersetzt Portimãos Luftbilder: Boden aus den Flächen der Strecke, Ideallinie auf dem Asphalt, Umland passend zu Hügeln und Bergen.;포르티망 항공 사진을 바꿉니다. 지면은 트랙 면에서, 이상선은 아스팔트 위에, 주변은 언덕과 산에 맞춥니다.;build.py
 Report: ;Bericht: ;보고서: ;build.py
 running;läuft;실행 중;build.py
@@ -378,15 +388,18 @@ ZIP (*.zip);ZIP (*.zip);ZIP (*.zip);build.py
 {reason}";build.py
 {target}: not directly inside the working or package folder;{target}: liegt nicht direkt im Arbeits- oder Paketordner;{target}: 작업 폴더나 패키지 폴더 바로 안이 아닙니다;build.py
 {ziel} · code {streckencode} · PVS {pvs} · {raster} · name “{name}” · {groesse};{ziel} · Code {streckencode} · PVS {pvs} · {raster} · Name „{name}“ · {groesse};{ziel} · 코드 {streckencode} · PVS {pvs} · {raster} · 이름 “{name}” · {groesse};build.py
+Align to line;Auf Linie ausrichten;선에 맞추기;document.py
 At least four control points are needed to close the lap.;Zum Schließen sind mindestens vier Kontrollpunkte erforderlich.;랩을 닫으려면 제어점이 네 개 이상 필요합니다.;document.py
 Change environment object;Umgebungsobjekt ändern;환경 오브젝트 변경;document.py
 Change environment objects;Umgebungsobjekte ändern;환경 오브젝트 여러 개 변경;document.py
 Change ground cover;Bodenbewuchs ändern;지표면 식생 변경;document.py
 Change lap closure;Rundenschluss ändern;랩 닫힘 변경;document.py
+Change model front;Vorderseite des Modells ändern;모델 앞면 변경;document.py
 Change point group;Punktgruppe ändern;점 묶음 변경;document.py
 Change segment type;Segmentart wechseln;세그먼트 종류 변경;document.py
 Change terrain shape;Gelände ändern;지형 변경;document.py
 Convert to control points;In Kontrollpunkte umwandeln;제어점으로 변환;document.py
+Corners only work with control points.;Ecken gehen nur mit Kontrollpunkten.;코너는 제어점에서만 됩니다.;document.py
 Cut overlap;Überstand abschneiden;겹친 부분 잘라내기;document.py
 Delete environment object;Umgebungsobjekt löschen;환경 오브젝트 삭제;document.py
 Delete environment objects;Umgebungsobjekte löschen;환경 오브젝트 여러 개 삭제;document.py
@@ -398,6 +411,8 @@ Drag segment handle;Segmentgriff ziehen;세그먼트 손잡이 끌기;document.p
 Fill gaps;Lücken füllen;간격 채우기;document.py
 Insert point;Punkt einfügen;점 삽입;document.py
 Insert segment;Segment einfügen;세그먼트 삽입;document.py
+Make corner;Zur Ecke machen;코너 만들기;document.py
+Make smooth;Rund machen;부드럽게;document.py
 Move environment object;Umgebungsobjekt verschieben;환경 오브젝트 이동;document.py
 Move environment objects;Umgebungsobjekte verschieben;환경 오브젝트 여러 개 이동;document.py
 Move point;Punkt verschieben;점 이동;document.py
@@ -415,13 +430,20 @@ Plant environment;Umgebung bepflanzen;환경 심기;document.py
 Please choose straight or arc.;Bitte Gerade oder Bogen wählen.;직선 또는 호를 선택하세요.;document.py
 Reverse order;Reihenfolge umkehren;순서 뒤집기;document.py
 Reversing only works with control points.;Umkehren geht nur bei Kontrollpunkten.;뒤집기는 제어점에서만 됩니다.;document.py
+Rotate environment object;Umgebungsobjekt drehen;환경 오브젝트 회전;document.py
+Rotate environment objects;Umgebungsobjekte drehen;환경 오브젝트 여러 개 회전;document.py
 Rotate point group;Punktgruppe drehen;점 묶음 회전;document.py
 Rotate track;Strecke drehen;트랙 회전;document.py
 Scale track;Strecke skalieren;트랙 축척;document.py
+Select at least three connected points (not the whole lap) to align them.;Mindestens drei zusammenhängende Punkte wählen (nicht die ganze Runde), um sie auszurichten.;맞출 연결된 점을 세 개 이상 선택하세요 (랩 전체는 안 됨).;document.py
 Select at least two connected points to reverse.;Zum Umkehren mindestens zwei zusammenhängende Punkte wählen.;뒤집을 연결된 점을 두 개 이상 선택하세요.;document.py
+Select the points that should become corners first.;Zuerst die Punkte wählen, die Ecken werden sollen.;먼저 코너로 만들 점을 선택하세요.;document.py
 Split segment;Segment teilen;세그먼트 나누기;document.py
+The corner radius must be greater than 0 m.;Der Eckradius muss größer als 0 m sein.;코너 반경은 0 m보다 커야 합니다.;document.py
+The first and last selected point are at the same place.;Erster und letzter gewählter Punkt liegen an derselben Stelle.;첫 번째와 마지막 선택한 점이 같은 곳에 있습니다.;document.py
 The lap is already open.;Die Runde ist schon offen.;랩이 이미 열려 있습니다.;document.py
 Unknown project version: read-only.;Unbekannte Projektfassung: nur lesend.;알 수 없는 프로젝트 버전: 읽기 전용.;document.py
+“Align to line” only works with control points.;„Auf Linie ausrichten“ geht nur mit Kontrollpunkten.;“선에 맞추기”는 제어점에서만 됩니다.;document.py
 “Cut overlap” only works with control points.;„Überstand abschneiden“ geht nur bei Kontrollpunkten.;“겹친 부분 잘라내기”는 제어점에서만 됩니다.;document.py
 “Open lap here” only works with control points.;„Runde hier öffnen“ geht nur bei Kontrollpunkten.;“여기서 랩 열기”는 제어점에서만 됩니다.;document.py
 Length must be positive and finite.;Länge muss positiv und endlich sein.;길이는 양수이고 유한해야 합니다.;input_geometry.py
@@ -438,6 +460,33 @@ The selected piece does not overlap the track.;Das gewählte Stück überschneid
 This kind of input cannot be copied.;Diese Eingabeart lässt sich nicht kopieren.;이런 입력은 복사할 수 없습니다.;kopieren.py
 Too few points would be left after cutting.;Nach dem Abschneiden blieben zu wenige Punkte übrig.;잘라내면 점이 너무 적게 남습니다.;kopieren.py
 “Cut overlap” needs an open track and a selected piece at one of its ends.;„Überstand abschneiden“ braucht eine offene Strecke und ein gewähltes Stück an einem ihrer Enden.;“겹친 부분 잘라내기”는 열린 트랙과 그 끝에 있는 선택된 조각이 필요합니다.;kopieren.py
+A reference image, if loaded, is drawn on top of this map.;Ein geladenes Kartenbild liegt über dieser Karte.;참조 그림을 불러왔다면 이 지도 위에 그려집니다.;livemap.py
+Could not load the map. Check the internet connection.;Karte konnte nicht geladen werden. Internetverbindung prüfen.;지도를 불러오지 못했습니다. 인터넷 연결을 확인하세요.;livemap.py
+Enter latitude and longitude as numbers.;Breiten- und Längengrad als Zahlen eingeben.;위도와 경도를 숫자로 입력하세요.;livemap.py
+Find place;Ort suchen;장소 찾기;livemap.py
+Hide live map;Live-Karte ausblenden;실시간 지도 숨기기;livemap.py
+Hide map;Karte ausblenden;지도 숨기기;livemap.py
+Latitude;Breitengrad;위도;livemap.py
+Latitude must be between -85 and 85, longitude between -180 and 180.;Breitengrad zwischen -85 und 85, Längengrad zwischen -180 und 180.;위도는 -85에서 85, 경도는 -180에서 180 사이여야 합니다.;livemap.py
+Live map;Live-Karte;실시간 지도;livemap.py
+Live map placed at the centre of the view. Distances stay in true metres. Alt+drag moves it, Shift+Alt+wheel rotates it.;Live-Karte liegt in der Bildmitte. Abstände bleiben echte Meter. Alt+Ziehen verschiebt sie, Umschalt+Alt+Rad dreht sie.;실시간 지도를 화면 가운데에 놓았습니다. 거리는 실제 미터 그대로입니다. Alt+끌기로 이동, Shift+Alt+휠로 회전.;livemap.py
+Loading the map;Karte wird geladen;지도 불러오는 중;livemap.py
+Longitude;Längengrad;경도;livemap.py
+Map type;Kartenart;지도 종류;livemap.py
+Move live map;Live-Karte verschieben;실시간 지도 이동;livemap.py
+No place found.;Kein Ort gefunden.;장소를 찾지 못했습니다.;livemap.py
+Place at centre of view;In die Bildmitte legen;화면 가운데에 놓기;livemap.py
+Place live map;Live-Karte legen;실시간 지도 놓기;livemap.py
+Place name, for example Songdo;Ortsname, zum Beispiel Songdo;장소 이름, 예: Songdo;livemap.py
+Rotate live map;Live-Karte drehen;실시간 지도 회전;livemap.py
+Rotation (°);Drehung (°);회전 (°);livemap.py
+Satellite;Satellit;위성;livemap.py
+Satellite or street map in true metres. It does not stretch when you zoom. Alt+drag moves it. Shift+Alt+wheel rotates it.;Satelliten- oder Straßenkarte in echten Metern. Sie verzerrt sich beim Zoomen nicht. Alt+Ziehen verschiebt sie. Umschalt+Alt+Rad dreht sie.;실제 미터 크기의 위성 또는 도로 지도. 확대해도 늘어나지 않습니다. Alt+끌기로 이동, Shift+Alt+휠로 회전.;livemap.py
+Satellite: Esri;Satellit: Esri;위성: Esri;livemap.py
+Search failed. Enter latitude and longitude.;Suche fehlgeschlagen. Breiten- und Längengrad eingeben.;검색 실패. 위도와 경도를 입력하세요.;livemap.py
+Searching…;Suche …;찾는 중…;livemap.py
+Street map;Straßenkarte;도로 지도;livemap.py
+Streets: OpenStreetMap;Straßen: OpenStreetMap;도로: OpenStreetMap;livemap.py
  (automatic); (Automatik); (자동);mapview.py
  · drag end; · Ende ziehen; · 끝 끌기;mapview.py
 Asphalt;Asphalt;아스팔트;mapview.py
@@ -460,8 +509,10 @@ Drag radius;Radius ziehen;반경 끌기;mapview.py
 Edge line;Randlinie;가장자리 선;mapview.py
 Environment read-only: umgebung.json is unreadable or the project has an unknown version;Umgebung nur lesend: umgebung.json ist nicht lesbar oder das Projekt hat eine unbekannte Fassung;환경은 읽기 전용입니다. umgebung.json을 읽을 수 없거나 프로젝트 버전을 알 수 없습니다;mapview.py
 FINISH · 0 m;ZIEL · 0 m;결승 · 0 m;mapview.py
+Gradient;Steigung;경사;mapview.py
 Grass;Gras;잔디;mapview.py
 Gravel;Kies;자갈;mapview.py
+Height;Höhe;높이;mapview.py
 Kerb;Randstein;커브;mapview.py
 no track yet;noch keine Strecke;아직 트랙 없음;mapview.py
 Paint with the mouse button held: planting happens there · radius and density in the “Environment” tab · Esc: back;Mit gedrückter Maustaste malen: dort wird bepflanzt · Radius und Dichte im Reiter „Umgebung“ · Esc: zurück;마우스 버튼을 누른 채 칠하면 그 자리에 심습니다 · 반경과 밀도는 “환경” 탭 · Esc: 돌아가기;mapview.py
@@ -479,7 +530,7 @@ Trace;Nachzeichnen;따라 그리기;mapview.py
 Track map: X right, Z down, metres;Streckenkarte: X rechts, Z unten, Meter;트랙 지도: X 오른쪽, Z 아래, 미터;mapview.py
 Wall;Mauer;벽;mapview.py
 whole track;ganze Strecke;트랙 전체;mapview.py
-{anzahl} objects selected · drag: move · Del: delete · double-click: whole group;{anzahl} Objekte gewählt · ziehen: verschieben · Entf: löschen · Doppelklick: ganze Gruppe;오브젝트 {anzahl}개 선택 · 끌기: 이동 · Del: 삭제 · 두 번 클릭: 그룹 전체;mapview.py
+{anzahl} objects selected · drag: move · round handle, R/Shift+R or Ctrl+wheel: rotate · T: face the track · Del: delete;{anzahl} Objekte gewählt · Ziehen: verschieben · runder Griff, R/Umschalt+R oder Strg+Rad: drehen · T: zur Strecke ausrichten · Entf: löschen;오브젝트 {anzahl}개 선택됨 · 끌기: 이동 · 둥근 핸들, R/Shift+R 또는 Ctrl+휠: 회전 · T: 트랙 쪽으로 향하기 · Del: 삭제;mapview.py
 {count} points;{count} Punkte;점 {count}개;mapview.py
 {v_start:.0f}→{v_ende:.0f} km/h;{v_start:.0f}→{v_ende:.0f} km/h;{v_start:.0f}→{v_ende:.0f} km/h;mapview.py
 {what} selected · drag or arrow keys: move · round handle: rotate · Del: delete;{what} gewählt · ziehen oder Pfeiltasten: verschieben · runder Griff: drehen · Entf: löschen;{what} 선택됨 · 끌거나 화살표: 이동 · 둥근 손잡이: 회전 · Del: 삭제;mapview.py
@@ -564,6 +615,11 @@ Scale factor;Skalierungsfaktor;축척 배율;skalieren.py
 Target length in metres;Ziellänge in Metern;목표 길이 (m);skalieren.py
 The whole track grows or shrinks around its centre: points, segment lengths and radii, sections and zones, and the position of the environment. Heights, widths and the size of environment objects stay. Ctrl+Z undoes it.;Die ganze Strecke wird um ihre Mitte größer oder kleiner: Punkte, Segmentlängen und Radien, Abschnitte und Zonen sowie die Lage der Umgebung. Höhen, Breiten und die Größe der Umgebungsobjekte bleiben. Strg+Z macht es rückgängig.;트랙 전체가 중심을 기준으로 커지거나 작아집니다: 점, 구간 길이와 반경, 구간과 구역, 환경 위치. 높이, 폭, 환경 오브젝트 크기는 그대로입니다. Ctrl+Z로 되돌립니다.;skalieren.py
 To length;Auf Länge;길이로;skalieren.py
+Choose the F1 25 game folder;F1-25-Spielordner wählen;F1 25 게임 폴더 선택;spielordner.py
+F1 25 not found;F1 25 nicht gefunden;F1 25를 찾지 못함;spielordner.py
+Not an F1 25 folder;Kein F1-25-Ordner;F1 25 폴더가 아님;spielordner.py
+The editor could not find F1 25 in your Steam libraries. Choose the game folder now? The editor remembers it.;Der Editor hat F1 25 in deinen Steam-Bibliotheken nicht gefunden. Spielordner jetzt wählen? Der Editor merkt ihn sich.;Steam 라이브러리에서 F1 25를 찾지 못했습니다. 지금 게임 폴더를 고를까요? 에디터가 기억합니다.;spielordner.py
+{ordner} does not contain an F1 25 installation (2025_asset_groups is missing). Choose the folder that contains F1_25.exe, for example …\steamapps\common\F1 25.;{ordner} enthält keine F1-25-Installation (2025_asset_groups fehlt). Wähle den Ordner mit F1_25.exe, zum Beispiel …\steamapps\common\F1 25.;{ordner}에 F1 25가 설치되어 있지 않습니다 (2025_asset_groups 없음). F1_25.exe가 있는 폴더를 고르세요, 예: …\steamapps\common\F1 25.;spielordner.py
 "A random, valid track as a starting point. The same seed and values give the same track; a new seed gives a different one.";"Eine zufällige, gültige Strecke als Ausgangspunkt. Gleicher Seed und gleiche Werte ergeben dieselbe Strecke; ein neuer Seed eine andere.";무작위이면서 유효한 트랙을 시작점으로 만듭니다. 시드와 값이 같으면 같은 트랙, 시드가 다르면 다른 트랙입니다.;templates.py
 all points;alle Punkte;모든 점;templates.py
 bridge, cannot be built;Brücke, nicht baubar;다리, 만들 수 없음;templates.py
@@ -642,19 +698,25 @@ This file cannot be used as carrier package.;Diese Datei kann nicht als Trägerp
 Use where it is;Dort belassen;있는 곳에서 사용;traeger_ui.py
 Version {recommended} is recommended (it fixes the AMD crash).;Version {recommended} wird empfohlen (sie behebt den AMD-Absturz).;버전 {recommended}을(를) 권장합니다 (AMD 충돌이 고쳐짐).;traeger_ui.py
 Waiting for the download … the editor watches your Downloads folder ({folder}) read-only and offers the file as soon as it is complete. You can also drag the ZIP onto this window.;Warte auf den Download … der Editor beobachtet deinen Downloads-Ordner ({folder}) nur lesend und bietet die Datei an, sobald sie komplett ist. Du kannst die ZIP auch auf dieses Fenster ziehen.;다운로드 대기 중 … 에디터가 다운로드 폴더 ({folder})를 읽기 전용으로 지켜보다가 파일이 다 받아지면 바로 제안합니다. ZIP을 이 창에 끌어 놓아도 됩니다.;traeger_ui.py
+assumed (long side);angenommen (lange Seite);추정 (긴 변);umgebung.py
+Automatic (lowest point);Automatisch (tiefster Punkt);자동 (가장 낮은 지점);umgebung.py
+Bottom of the model;Unterkante des Modells;모델 바닥;umgebung.py
 Buildings;Gebäude;건물;umgebung.py
 Bushes;Büsche;덤불;umgebung.py
 Centre inside the track area: only hills work here;Mitte im Streckenbereich: hier wirken nur Hügel;중심이 트랙 영역 안: 여기에는 언덕만 됩니다;umgebung.py
 Centre outside the track area;Mitte außerhalb des Streckenbereichs;중심이 트랙 영역 밖;umgebung.py
 Flags;Flaggen;깃발;umgebung.py
+from the game's tracks;aus den Spielstrecken;게임 트랙에서;umgebung.py
 Furniture;Möbel;가구;umgebung.py
 Hill;Hügel;언덕;umgebung.py
 Lights;Lichter;조명;umgebung.py
+Model origin;Modellursprung;모델 원점;umgebung.py
 more than 12 km from the centre;weiter als 12 km von der Mitte entfernt;중심에서 12 km보다 멂;umgebung.py
 Mountain;Berg;산;umgebung.py
 Other;Sonstiges;기타;umgebung.py
 Palms;Palmen;야자수;umgebung.py
 reaches the track area and is cut off there;reicht an den Streckenbereich, wird dort abgeschnitten;트랙 영역에 닿아 그 자리에서 잘립니다;umgebung.py
+set in this project;in diesem Projekt festgelegt;이 프로젝트에서 설정;umgebung.py
 Tents;Zelte;텐트;umgebung.py
 Trees;Bäume;나무;umgebung.py
  per ha; je ha; ha당;umgebung_ui.py
@@ -676,15 +738,19 @@ Density;Dichte;밀도;umgebung_ui.py
 Distance of the base point above the terrain (the build determines the terrain height itself);Abstand des Fußpunkts über dem Gelände (der Bau bestimmt die Geländehöhe selbst);기준점이 지형 위로 떨어진 거리 (지형 높이는 빌드가 정합니다);umgebung_ui.py
 Distance to track;Abstand zur Strecke;트랙까지 거리;umgebung_ui.py
 Environment · selection;Umgebung · Auswahl;환경 · 선택;umgebung_ui.py
+Face the track;Zur Strecke ausrichten;트랙 쪽으로 향하기;umgebung_ui.py
+Front +90°;Vorderseite +90°;앞면 +90°;umgebung_ui.py
+Front: {richtung}° on the map ({quelle});Vorderseite: {richtung}° auf der Karte ({quelle});앞면: 지도상 {richtung}° ({quelle});umgebung_ui.py
+Ground;Boden;지면;umgebung_ui.py
 Ground cover (grass/weeds);Bodenbewuchs (Gras/Unkraut);지표면 식생 (잔디/잡초);umgebung_ui.py
 Group;Gruppe;그룹;umgebung_ui.py
 "Group (scatter); empty = none";"Gruppe (Streuung); leer = keine";그룹 (흩뿌리기). 비우면 없음;umgebung_ui.py
 Group name: a scatter can be selected and deleted together;Name der Gruppe: eine Streuung lässt sich gemeinsam wählen und löschen;그룹 이름: 한 번의 흩뿌리기를 함께 선택하고 지울 수 있습니다;umgebung_ui.py
-Height;Höhe;높이;umgebung_ui.py
 Height above ground;Höhe über Grund;지면 위 높이;umgebung_ui.py
 "Height at the centre; negative = hollow (hills only)";"Höhe in der Mitte; negativ = Senke (nur bei Hügeln)";가운데 높이. 음수 = 움푹한 곳 (언덕만);umgebung_ui.py
 Hill or hollow in the ground surface of the track area: visible and drivable. The build flattens it towards the track (30 m + 40 m transition).;Hügel oder Senke in der Grundfläche des Streckenbereichs: sichtbar und befahrbar. Zur Strecke hin flacht der Bau ihn ab (30 m + 40 m Übergang).;트랙 영역 바닥의 언덕 또는 움푹한 곳: 보이고 달릴 수 있습니다. 빌드가 트랙 쪽으로 평평하게 만듭니다 (30 m + 40 m 전환).;umgebung_ui.py
 Hills lie inside the track area (visible and drivable), mountains outside (scenery only). Press a button, then click on the map.;Hügel liegen im Streckenbereich (sichtbar und befahrbar), Berge außerhalb (nur Kulisse). Knopf drücken, dann auf die Karte klicken.;언덕은 트랙 영역 안(보이고 달릴 수 있음), 산은 밖(배경만)입니다. 버튼을 누른 뒤 지도를 클릭하세요.;umgebung_ui.py
+How the build puts the object on the ground. Automatic: the footprint stands on the lowest ground point below it (nothing floats on slopes) and models whose geometry starts above their origin, e.g. big screens, are lowered onto the ground. Model origin: as before 15 Nov 2026.;Wie der Bau das Objekt auf den Boden setzt. Automatisch: Der Grundriss steht auf dem tiefsten Bodenpunkt darunter (am Hang schwebt nichts), Modelle, deren Geometrie über ihrem Ursprung beginnt (z. B. große Bildschirme), werden auf den Boden abgesenkt. Modellursprung: wie vor dem 15.11.2026.;빌드가 오브젝트를 지면에 놓는 방식입니다. 자동: 바닥면이 그 아래 가장 낮은 지면 지점에 놓이고(경사면에서도 떠 있지 않음), 형상이 원점보다 위에서 시작하는 모델(예: 대형 스크린)은 지면까지 내려놓습니다. 모델 원점: 2026년 11월 15일 이전 방식.;umgebung_ui.py
 Minimum distance between objects (also to existing ones);Mindestabstand der Objekte zueinander (auch zu schon vorhandenen);오브젝트끼리의 최소 거리 (이미 있는 것도 포함);umgebung_ui.py
 "Minimum distance to the wall or outer edge of the track (road, edge bands, wall, pit lane); default 15 m behind the wall";"Mindestabstand zur Mauer bzw. zum äußeren Rand der Strecke (Fahrbahn, Randbänder, Mauer, Boxengasse); Standard 15 m hinter der Mauer";벽 또는 트랙 바깥 가장자리(노면, 가장자리 띠, 벽, 피트 레인)까지의 최소 거리. 기본은 벽 뒤 15 m;umgebung_ui.py
 Model;Modell;모델;umgebung_ui.py
@@ -706,8 +772,9 @@ Rectangle;Rechteck;직사각형;umgebung_ui.py
 Reload;Neu einlesen;다시 읽기;umgebung_ui.py
 Remove the selected hill/mountain (Del);Gewählten Hügel/Berg entfernen (Entf);선택한 언덕/산 제거 (Del);umgebung_ui.py
 Remove the selected objects (Del);Gewählte Objekte entfernen (Entf);선택한 오브젝트 제거 (Del);umgebung_ui.py
+Reset front;Vorderseite zurücksetzen;앞면 초기화;umgebung_ui.py
 Rotation;Drehung;회전;umgebung_ui.py
-Rotation about the vertical axis, mathematically positive in plan view;Drehung um die Hochachse, mathematisch positiv in der Draufsicht;수직축 회전. 위에서 볼 때 수학적으로 양수;umgebung_ui.py
+Rotation about the vertical axis, anticlockwise on the map. The arrow on the map shows the front. Mouse: round handle at the arrow, R/Shift+R or Ctrl+wheel;Drehung um die Hochachse, auf der Karte gegen den Uhrzeigersinn. Der Pfeil auf der Karte zeigt die Vorderseite. Maus: runder Griff am Pfeil, R/Umschalt+R oder Strg+Rad;수직축을 기준으로 지도상 반시계 방향 회전입니다. 지도의 화살표가 앞면을 나타냅니다. 마우스: 화살표의 둥근 핸들, R/Shift+R 또는 Ctrl+휠;umgebung_ui.py
 Scale from – to;Skala von – bis;배율 시작 – 끝;umgebung_ui.py
 Scatter 1, Scatter 2 …;Streuung 1, Streuung 2 …;흩뿌리기 1, 흩뿌리기 2 …;umgebung_ui.py
 Search model …;Modell suchen …;모델 검색 …;umgebung_ui.py
@@ -718,6 +785,9 @@ Size {x} × {z} × {y} m (width × depth × height);Größe {x} × {z} × {y} m 
 Source: {quelle};Quelle: {quelle};원본: {quelle};umgebung_ui.py
 Spacing between objects;Abstand untereinander;오브젝트 사이 간격;umgebung_ui.py
 Terrain;Gelände;지형;umgebung_ui.py
+The arrow does not point at the front of this model? Turn the front by 90° for this model type (stored in umgebung.json, all objects of the model follow);Zeigt der Pfeil nicht zur Vorderseite dieses Modells? Vorderseite für diesen Modelltyp um 90° weiterdrehen (in umgebung.json gespeichert, alle Objekte des Modells folgen);화살표가 이 모델의 앞면을 가리키지 않나요? 이 모델 유형의 앞면을 90° 돌리세요 (umgebung.json에 저장되며 이 모델의 모든 오브젝트가 따라옵니다);umgebung_ui.py
+Turn the selected objects so that their front faces the nearest point of the centreline (T);Gewählte Objekte so drehen, dass ihre Vorderseite zum nächsten Punkt der Mittellinie zeigt (T);선택한 오브젝트의 앞면이 중심선에서 가장 가까운 지점을 향하도록 돌립니다 (T);umgebung_ui.py
+Use the front from the catalogue again for this model type;Für diesen Modelltyp wieder die Vorderseite aus dem Katalog verwenden;이 모델 유형에 카탈로그의 앞면을 다시 사용합니다;umgebung_ui.py
 {anzahl} models in the catalogue;{anzahl} Modelle im Katalog;카탈로그의 모델 {anzahl}개;umgebung_ui.py
 {anzahl} objects in the environment;{anzahl} Objekte in der Umgebung;환경의 오브젝트 {anzahl}개;umgebung_ui.py
 {anzahl} objects · values of the first: {name};{anzahl} Objekte · Werte des ersten: {name};오브젝트 {anzahl}개 · 첫 번째 값: {name};umgebung_ui.py
@@ -728,11 +798,13 @@ Nicht im Katalog.";"{modell}
 {name} “{id}” · X {x} · Z {z};{name} „{id}“ · X {x} · Z {z};{name} “{id}” · X {x} · Z {z};umgebung_ui.py
 Adapt AI driving data to the track (braking points of the driving assist and AI pace);KI-Fahrdaten an die Strecke anpassen (Bremspunkte der Fahrhilfe und KI-Tempo);AI 주행 데이터를 트랙에 맞춥니다 (주행 보조 브레이킹 지점과 AI 페이스);unbenutzt
 Ready · progress shows phase boundaries.;Bereit · Fortschritt zeigt Phasengrenzen.;준비됨 · 진행 막대는 단계 경계를 보여 줍니다.;unbenutzt
+Rotation about the vertical axis, mathematically positive in plan view;Drehung um die Hochachse, mathematisch positiv in der Draufsicht;수직축 회전. 위에서 볼 때 수학적으로 양수;unbenutzt
 "Track code {streckencode} · PVS {pvs} · name “{name}” · pit correction · one main variant.
 Before the build the project is saved and checked (same state: result of the last check). The build creates a snapshot; you can keep working during the build.";"Streckencode {streckencode} · PVS {pvs} · Name „{name}“ · Boxenkorrektur · eine Hauptvariante.
 Vor dem Bau wird das Projekt gespeichert und geprüft (gleicher Stand: Ergebnis der letzten Prüfung). Der Bau erzeugt einen Schnappschuss; während des Baus kann weitergearbeitet werden.";"트랙 코드 {streckencode} · PVS {pvs} · 이름 “{name}” · 피트 보정 · 기본 변형 하나.
 빌드 전에 프로젝트를 저장하고 검사합니다 (같은 상태면 마지막 검사 결과). 빌드는 스냅샷을 만들므로 빌드 중에도 계속 작업할 수 있습니다.";unbenutzt
 Work out race data from the track (laps, fuel, tyres, AI, pit lane);Renndaten aus der Strecke berechnen (Runden, Kraftstoff, Reifen, KI, Boxengasse);트랙에서 레이스 데이터 계산 (랩 수, 연료, 타이어, AI, 피트 레인);unbenutzt
+{anzahl} objects selected · drag: move · Del: delete · double-click: whole group;{anzahl} Objekte gewählt · ziehen: verschieben · Entf: löschen · Doppelklick: ganze Gruppe;오브젝트 {anzahl}개 선택 · 끌기: 이동 · Del: 삭제 · 두 번 클릭: 그룹 전체;unbenutzt
 {groesse:.2f} GB;{groesse:.2f} GB;{groesse:.2f} GB;unbenutzt
 arc;bogen;호;ux.py
 Click points into the map, then “Close lap”;Punkte in die Karte klicken, dann „Runde schließen“;지도에 점을 찍은 뒤 “랩 닫기”;ux.py
@@ -909,7 +981,6 @@ Change game world offset;Spielweltversatz ändern;게임 세계 오프셋 변경
 Change height;Höhe ändern;높이 변경;window.py
 Change height ({count} points);Höhe ändern ({count} Punkte);높이 변경 (점 {count}개);window.py
 Change property;Eigenschaft ändern;속성 변경;window.py
-Change theme;Thema ändern;테마 변경;window.py
 Changed · preview outdated, will be recalculated shortly;Geändert · Vorschau veraltet, wird gleich neu berechnet;변경됨 · 미리보기가 오래되어 곧 다시 계산됩니다;window.py
 Check;Prüfen;검사;window.py
 Check ({anzahl});Prüfung ({anzahl});검사 ({anzahl});window.py
@@ -931,6 +1002,9 @@ Closing rule (verteilen/fehler);Schließregel (verteilen/fehler);닫힘 규칙 (
 Clothoid;Klothoide;클로소이드;window.py
 Clothoid transition (yes/no/length m);Klothoiden-Übergang (ja/nein/Länge m);클로소이드 전환 (yes/no/길이 m);window.py
 Clothoid transitions;Klothoiden-Übergänge;클로소이드 전환;window.py
+Colour the track by height (blue low, yellow high) or by gradient (blue flat, yellow 12 % and steeper);Strecke nach Höhe (blau tief, gelb hoch) oder nach Steigung färben (blau eben, gelb ab 12 %);트랙을 높이(파랑 낮음, 노랑 높음) 또는 경사(파랑 평탄, 노랑 12 % 이상)에 따라 색칠합니다;window.py
+Colour: gradient;Farbe: Steigung;색: 경사;window.py
+Colour: height;Farbe: Höhe;색: 높이;window.py
 Connect the first and last point, or open the lap again;Ersten und letzten Punkt verbinden bzw. die Runde wieder öffnen;첫 점과 마지막 점을 잇거나 랩을 다시 엽니다;window.py
 Control point {i}: X {x} m, Z {z} m, height {y} m;Kontrollpunkt {i}: X {x} m, Z {z} m, Höhe {y} m;제어점 {i}: X {x} m, Z {z} m, 높이 {y} m;window.py
 Control points;Kontrollpunkte;제어점;window.py
@@ -940,6 +1014,7 @@ Corner;Kurve;코너;window.py
 Corner detection;Kurvenerkennung;코너 인식;window.py
 Corner direction;Kurvenrichtung;코너 방향;window.py
 Corner numbers are available after the racing-line run (Check: Ctrl+Enter).;Kurvennummern gibt es nach dem Fahrlinienlauf (Prüfen: Strg+Enter).;코너 번호는 레이싱 라인 계산 뒤에 나옵니다 (검사: Ctrl+Enter).;window.py
+Corner radius · m (empty = smooth);Eckradius · m (leer = rund);코너 반경 · m (비우면 부드럽게);window.py
 Corner {nr};Kurve {nr};코너 {nr};window.py
 Count;Anzahl;개수;window.py
 Create a {noun} first.;Zuerst eine(n) {noun} anlegen.;먼저 {noun}을(를) 만드세요.;window.py
@@ -956,7 +1031,6 @@ Curvature threshold · 1/m;Krümmungsschwelle · 1/m;곡률 문턱 · 1/m;window
 Custom value;Eigener Wert;사용자 값;window.py
 Customise view …;Ansicht anpassen …;보기 사용자 지정 …;window.py
 Cut points;Punkte ausschneiden;점 잘라내기;window.py
-Dark theme;Dunkles Thema;어두운 테마;window.py
 Default value (italic) – only saved once you change it;Standardwert (kursiv) – wird erst gespeichert, wenn du ihn änderst;기본값 (기울임꼴) – 바꿀 때만 저장됩니다;window.py
 Delete {noun};{noun} löschen;{noun} 삭제;window.py
 Design;Entwerfen;설계;window.py
@@ -1023,6 +1097,7 @@ Finish line width · m;Ziellinienbreite · m;결승선 너비 · m;window.py
 Finish or cancel the build before switching projects.;Vor einem Projektwechsel den Bau beenden oder abbrechen.;프로젝트를 바꾸기 전에 빌드를 끝내거나 취소하세요.;window.py
 Fit;Einpassen;맞추기;window.py
 From input s · m;Von Eingabe-s · m;입력 s부터 · m;window.py
+Game folder: {ordner};Spielordner: {ordner};게임 폴더: {ordner};window.py
 Game format data;Spielformatdaten;게임 형식 데이터;window.py
 Game world offset;Spielweltversatz;게임 세계 오프셋;window.py
 Gap · m;Lücke · m;간격 · m;window.py
@@ -1067,15 +1142,17 @@ Lap opened at the selection · Ctrl+V adds copied points to an open end.;Runde a
 Lateral offset · m;Seitlicher Versatz · m;가로 오프셋 · m;window.py
 Lead-in · m;Vorlauf · m;선행 거리 · m;window.py
 Length · m;Länge · m;길이 · m;window.py
-Light theme;Helles Thema;밝은 테마;window.py
 Line width · m;Linienbreite · m;선 너비 · m;window.py
 Lines (speed limit, pit entry/exit);Linien (Tempolimit, Ein-/Ausfahrt);선 (속도 제한, 피트 입구/출구);window.py
+Live map …;Live-Karte …;실시간 지도 …;window.py
 Load a reference image first: Project → “Load reference image …” or Ctrl+V with a screenshot;Erst eine Bildvorlage laden: Projekt → „Bildvorlage laden …“ oder Strg+V mit einem Bildschirmfoto;먼저 참조 그림을 불러오세요: 프로젝트 → “참조 그림 불러오기 …” 또는 스크린샷을 Ctrl+V;window.py
 Load reference image;Bildvorlage laden;참조 그림 불러오기;window.py
 Load reference image …;Bildvorlage laden …;참조 그림 불러오기 …;window.py
 Loading catalogue …;Katalog wird geladen …;카탈로그를 불러오는 중 …;window.py
 Loading the carrier's cameras …;Kameras des Trägers werden geladen …;캐리어의 카메라 불러오는 중 …;window.py
 logic;logik;로직;window.py
+Make corner (straight lines, fixed radius);Zur Ecke machen (gerade Linien, fester Radius);코너 만들기 (직선, 고정 반경);window.py
+Make smooth (remove corner);Rund machen (Ecke entfernen);부드럽게 (코너 없애기);window.py
 Max. closing error · m;Max. Schließfehler · m;최대 닫힘 오차 · m;window.py
 Maximise / restore lower area;Unteren Bereich maximieren / zurück;아래 영역 최대화 / 되돌리기;window.py
 Merge · m;Zusammenfassen · m;합치기 · m;window.py
@@ -1226,6 +1303,7 @@ Select a segment first.;Zuerst ein Segment wählen.;먼저 세그먼트를 선�
 Select an object first.;Zuerst ein Objekt wählen.;먼저 오브젝트를 선택하세요.;window.py
 Select, drag, rotate;Wählen, ziehen, drehen;선택, 끌기, 회전;window.py
 Selected object;Ausgewähltes Objekt;선택한 오브젝트;window.py
+Set F1 25 game folder …;F1-25-Spielordner festlegen …;F1 25 게임 폴더 설정 …;window.py
 Set game world offset …;Spielweltversatz einstellen …;게임 세계 오프셋 설정 …;window.py
 "Set the height for all; — = mixed values. Rotate: round handle above the selection box.";"Höhe für alle setzen; — = gemischte Werte. Drehen: runder Griff über dem Auswahlkasten.";모두의 높이를 설정. — = 값이 섞여 있음. 회전: 선택 상자 위의 둥근 손잡이.;window.py
 Shift along the track · m;Entlang der Strecke verschieben · m;트랙을 따라 이동 · m;window.py
@@ -1335,6 +1413,9 @@ Zoom out of the map;Herauszoomen;축소;window.py
 {anzahl} objects placed in the group “{gruppe}” · Ctrl+Z undoes.;{anzahl} Objekte in der Gruppe „{gruppe}“ gesetzt · Strg+Z macht rückgängig.;그룹 “{gruppe}”에 오브젝트 {anzahl}개를 놓았습니다 · Ctrl+Z로 실행 취소.;window.py
 {anzahl} objects selected. ;{anzahl} Objekte gewählt. ;오브젝트 {anzahl}개 선택. ;window.py
 {anzahl} overlapping points removed · Ctrl+Z: undo.;{anzahl} überstehende Punkte entfernt · Strg+Z: rückgängig.;겹친 점 {anzahl}개 제거 · Ctrl+Z: 되돌리기.;window.py
+{anzahl} points aligned, the track is straight between them · Ctrl+Z: undo.;{anzahl} Punkte ausgerichtet, die Strecke ist dazwischen gerade · Strg+Z: rückgängig.;점 {anzahl}개를 맞췄습니다, 그 사이 트랙은 직선입니다 · Ctrl+Z: 되돌리기.;window.py
+{anzahl} points are corners now (radius in the properties) · Ctrl+Z: undo.;{anzahl} Punkte sind jetzt Ecken (Radius in den Eigenschaften) · Strg+Z: rückgängig.;점 {anzahl}개가 이제 코너입니다 (반경은 속성에서) · Ctrl+Z: 되돌리기.;window.py
+{anzahl} points are smooth again · Ctrl+Z: undo.;{anzahl} Punkte sind wieder rund · Strg+Z: rückgängig.;점 {anzahl}개가 다시 부드러워졌습니다 · Ctrl+Z: 되돌리기.;window.py
 {anzahl} points copied · paste into an open track with Ctrl+V.;{anzahl} Punkte kopiert · in einer offenen Strecke mit Strg+V einfügen.;점 {anzahl}개 복사 · 열린 트랙에 Ctrl+V로 붙여넣기.;window.py
 {anzahl} points cut · Ctrl+Z: undo.;{anzahl} Punkte ausgeschnitten · Strg+Z: rückgängig.;점 {anzahl}개 잘라냄 · Ctrl+Z: 되돌리기.;window.py
 {anzahl} points pasted;{anzahl} Punkte eingefügt;점 {anzahl}개 붙여넣음;window.py
@@ -1353,53 +1434,3 @@ Zoom out of the map;Herauszoomen;축소;window.py
 {name} at {s} m from the finish · Ctrl+Z: undo;{name} bei {s} m ab Ziel · Strg+Z: rückgängig;{name}: 결승선에서 {s} m · Ctrl+Z: 되돌리기;window.py
 {name} “{id}” placed ({hoehe} m, radius {radius} m) · Ctrl+Z undoes.;{name} „{id}“ gesetzt ({hoehe} m, Radius {radius} m) · Strg+Z macht rückgängig.;{name} “{id}”을(를) 놓았습니다 ({hoehe} m, 반경 {radius} m) · Ctrl+Z로 실행 취소.;window.py
 {n} object banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.|{n} objects banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.;{n} Objekt zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.|{n} Objekte zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.;오브젝트 {n}개를 코너 안쪽으로 기울였습니다 (최대 {maximum}°) · Ctrl+Z로 실행 취소.|오브젝트 {n}개를 코너 안쪽으로 기울였습니다 (최대 {maximum}°) · Ctrl+Z로 실행 취소.;window.py
-Could not load the map. Check the internet connection.;Karte konnte nicht geladen werden. Internetverbindung prüfen.;지도를 불러오지 못했습니다. 인터넷 연결을 확인하세요.;livemap.py
-Place live map;Live-Karte legen;실시간 지도 놓기;livemap.py
-Hide live map;Live-Karte ausblenden;실시간 지도 숨기기;livemap.py
-Move live map;Live-Karte verschieben;실시간 지도 이동;livemap.py
-Rotate live map;Live-Karte drehen;실시간 지도 회전;livemap.py
-Streets: OpenStreetMap;Straßen: OpenStreetMap;도로: OpenStreetMap;livemap.py
-Satellite: Esri;Satellit: Esri;위성: Esri;livemap.py
-Live map;Live-Karte;실시간 지도;livemap.py
-Place name, for example Songdo;Ortsname, zum Beispiel Songdo;장소 이름, 예: Songdo;livemap.py
-Find place;Ort suchen;장소 찾기;livemap.py
-Latitude;Breitengrad;위도;livemap.py
-Longitude;Längengrad;경도;livemap.py
-Rotation (°);Drehung (°);회전 (°);livemap.py
-Satellite;Satellit;위성;livemap.py
-Street map;Straßenkarte;도로 지도;livemap.py
-Map type;Kartenart;지도 종류;livemap.py
-Place at centre of view;In die Bildmitte legen;화면 가운데에 놓기;livemap.py
-Hide map;Karte ausblenden;지도 숨기기;livemap.py
-Satellite or street map in true metres. It does not stretch when you zoom. Alt+drag moves it. Shift+Alt+wheel rotates it.;Satelliten- oder Straßenkarte in echten Metern. Sie verzerrt sich beim Zoomen nicht. Alt+Ziehen verschiebt sie. Umschalt+Alt+Rad dreht sie.;실제 미터 크기의 위성 또는 도로 지도. 확대해도 늘어나지 않습니다. Alt+끌기로 이동, Shift+Alt+휠로 회전.;livemap.py
-A reference image, if loaded, is drawn on top of this map.;Ein geladenes Kartenbild liegt über dieser Karte.;참조 그림을 불러왔다면 이 지도 위에 그려집니다.;livemap.py
-Searching…;Suche …;찾는 중…;livemap.py
-Live map placed at the centre of the view. Distances stay in true metres. Alt+drag moves it, Shift+Alt+wheel rotates it.;Live-Karte liegt in der Bildmitte. Abstände bleiben echte Meter. Alt+Ziehen verschiebt sie, Umschalt+Alt+Rad dreht sie.;실시간 지도를 화면 가운데에 놓았습니다. 거리는 실제 미터 그대로입니다. Alt+끌기로 이동, Shift+Alt+휠로 회전.;livemap.py
-Loading the map;Karte wird geladen;지도 불러오는 중;livemap.py
-Search failed. Enter latitude and longitude.;Suche fehlgeschlagen. Breiten- und Längengrad eingeben.;검색 실패. 위도와 경도를 입력하세요.;livemap.py
-No place found.;Kein Ort gefunden.;장소를 찾지 못했습니다.;livemap.py
-Latitude must be between -85 and 85, longitude between -180 and 180.;Breitengrad zwischen -85 und 85, Längengrad zwischen -180 und 180.;위도는 -85에서 85, 경도는 -180에서 180 사이여야 합니다.;livemap.py
-Enter latitude and longitude as numbers.;Breiten- und Längengrad als Zahlen eingeben.;위도와 경도를 숫자로 입력하세요.;livemap.py
-Live map …;Live-Karte …;실시간 지도 …;window.py
-Set F1 25 game folder …;F1-25-Spielordner festlegen …;F1 25 게임 폴더 설정 …;window.py
-Game folder: {ordner};Spielordner: {ordner};게임 폴더: {ordner};window.py
-Choose the F1 25 game folder;F1-25-Spielordner wählen;F1 25 게임 폴더 선택;spielordner.py
-Not an F1 25 folder;Kein F1-25-Ordner;F1 25 폴더가 아님;spielordner.py
-{ordner} does not contain an F1 25 installation (2025_asset_groups is missing). Choose the folder that contains F1_25.exe, for example …\steamapps\common\F1 25.;{ordner} enthält keine F1-25-Installation (2025_asset_groups fehlt). Wähle den Ordner mit F1_25.exe, zum Beispiel …\steamapps\common\F1 25.;{ordner}에 F1 25가 설치되어 있지 않습니다 (2025_asset_groups 없음). F1_25.exe가 있는 폴더를 고르세요, 예: …\steamapps\common\F1 25.;spielordner.py
-F1 25 not found;F1 25 nicht gefunden;F1 25를 찾지 못함;spielordner.py
-The editor could not find F1 25 in your Steam libraries. Choose the game folder now? The editor remembers it.;Der Editor hat F1 25 in deinen Steam-Bibliotheken nicht gefunden. Spielordner jetzt wählen? Der Editor merkt ihn sich.;Steam 라이브러리에서 F1 25를 찾지 못했습니다. 지금 게임 폴더를 고를까요? 에디터가 기억합니다.;spielordner.py
-Align to line;Auf Linie ausrichten;선에 맞추기;document.py
-Corner radius · m (empty = smooth);Eckradius · m (leer = rund);코너 반경 · m (비우면 부드럽게);window.py
-Corners only work with control points.;Ecken gehen nur mit Kontrollpunkten.;코너는 제어점에서만 됩니다.;document.py
-Make corner;Zur Ecke machen;코너 만들기;document.py
-Make corner (straight lines, fixed radius);Zur Ecke machen (gerade Linien, fester Radius);코너 만들기 (직선, 고정 반경);window.py
-Make smooth;Rund machen;부드럽게;document.py
-Make smooth (remove corner);Rund machen (Ecke entfernen);부드럽게 (코너 없애기);window.py
-Select at least three connected points (not the whole lap) to align them.;Mindestens drei zusammenhängende Punkte wählen (nicht die ganze Runde), um sie auszurichten.;맞출 연결된 점을 세 개 이상 선택하세요 (랩 전체는 안 됨).;document.py
-Select the points that should become corners first.;Zuerst die Punkte wählen, die Ecken werden sollen.;먼저 코너로 만들 점을 선택하세요.;document.py
-The corner radius must be greater than 0 m.;Der Eckradius muss größer als 0 m sein.;코너 반경은 0 m보다 커야 합니다.;document.py
-The first and last selected point are at the same place.;Erster und letzter gewählter Punkt liegen an derselben Stelle.;첫 번째와 마지막 선택한 점이 같은 곳에 있습니다.;document.py
-{anzahl} points aligned, the track is straight between them · Ctrl+Z: undo.;{anzahl} Punkte ausgerichtet, die Strecke ist dazwischen gerade · Strg+Z: rückgängig.;점 {anzahl}개를 맞췄습니다, 그 사이 트랙은 직선입니다 · Ctrl+Z: 되돌리기.;window.py
-{anzahl} points are corners now (radius in the properties) · Ctrl+Z: undo.;{anzahl} Punkte sind jetzt Ecken (Radius in den Eigenschaften) · Strg+Z: rückgängig.;점 {anzahl}개가 이제 코너입니다 (반경은 속성에서) · Ctrl+Z: 되돌리기.;window.py
-{anzahl} points are smooth again · Ctrl+Z: undo.;{anzahl} Punkte sind wieder rund · Strg+Z: rückgängig.;점 {anzahl}개가 다시 부드러워졌습니다 · Ctrl+Z: 되돌리기.;window.py
-“Align to line” only works with control points.;„Auf Linie ausrichten“ geht nur mit Kontrollpunkten.;“선에 맞추기”는 제어점에서만 됩니다.;document.py

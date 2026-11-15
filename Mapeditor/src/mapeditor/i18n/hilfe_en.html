@@ -48,6 +48,11 @@ is active, and the piece can be moved and rotated. When it is added at the start
 the lap there. Red rings show where a pasted piece overlaps the track; <b>Cut overlap</b> shortens the selected piece at an open
 end from the first overlap on. <b>Reverse order of selection</b> turns a piece round. Finally <b>Close lap</b> and
 <b>Fill gaps</b>. The check rejects crossings and bridges (GE-01).</p>
+<h3>Seeing heights</h3>
+<p><b>View → Map layers → Height as colour</b> colours the track by height: blue is the lowest, yellow the highest point
+of the lap, with a legend on the map. <b>Colour: gradient</b> above the height profile colours by steepness instead (blue
+flat, yellow 12 % and steeper). With the height profile or banking tab open, the mouse over the profile marks the same
+place on the map and the other way round.</p>
 <h3>Straight lines and corners</h3>
 <p>Control points are joined by a smooth curve, which bulges a little on long straights and swings out at sharp corners.
 <b>Edit → Make corner</b> turns the selected points into corners (drawn square): the track runs dead straight towards the
@@ -147,8 +152,8 @@ map to <b>place</b> it (tool <b>U</b>); clicking an object selects it, dragging 
 deletes, double-click selects the whole group. Tool <b>B</b> <b>plants an area</b>: drag a rectangle or paint with the
 brush, with density (objects per hectare), model mix (choose several models), random rotation, scale range, minimum
 distance to the track (default 15 m behind the wall), spacing between objects and a seed (same value = same scatter).
-Every scatter is a <i>group</i> and one undo step. The objects appear as circles at catalogue size (colour per
-category; View → Environment hides them). <i>Ground cover</i> keeps the grass and weeds of the carrier. The check reports
+Every scatter is a <i>group</i> and one undo step. The objects appear at catalogue size (colour per
+category; View → Environment hides them): trees as circles, buildings, tents, screens … as their turned <b>footprint with an arrow to the front</b>. <b>Rotate:</b> drag the round handle behind the arrow tip (Shift: 15° steps), Ctrl+wheel (5°, with Shift 1°) or R/Shift+R; <b>T</b> or <i>Face the track</i> turns the front towards the centreline. If the arrow is wrong for a model, <i>Front +90°</i> turns it for all objects of that model. The build puts every object on the lowest ground point under its footprint (nothing floats on slopes) and lowers models whose geometry starts above their origin (field <i>Ground</i>). <i>Ground cover</i> keeps the grass and weeds of the carrier. The check reports
 unknown models and objects outside the track area or on the road (click jumps to the object). The build takes the
 project's file <i>umgebung.json</i>.</p>
 <p><b>Terrain:</b> In the <i>Terrain</i> box, <i>Place hill</i> puts a hill into the track area with the next click

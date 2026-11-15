@@ -116,6 +116,45 @@ def garagen_u(pbox, U):
 BOX_MAX_QUERNEIGUNG_GRAD = 4.0
 BOX_ABSTAND_STEILKURVE_M = 20.0
 BOX_MAX_ANTEIL_RUNDE = 0.45
+#: Untergrenzen, auf die Anlauf, Übergang und Grünstreifen bei zu kurzer Gasse schrumpfen (10.11.2026, Möglichkeit A/B
+#: in docs/boxengasse_mindestlaenge.md): Monaco hat etwa 300 m Boxengasse
+BOX_MIN_ANLAUF_M = 25.0
+BOX_MIN_UEBERGANG_M = 40.0
+BOX_MIN_ABSTAND_FAHRBAHN_M = 10.0
+
+
+def _boxen_spanne(pbox):
+    """Länge der Boxenreihe samt MyTeam-Garage und je einer Box Luft (``garagen_u``, spiel_welt)."""
+    return (pbox.get("boxen", 0) + 2) * pbox.get("box_abstand_m", 0.0) if pbox.get("boxen") else 0.0
+
+
+def boxen_mindestlaenge(pbox, verkuerzt=True):
+    """Kürzeste Gasse (m): mit ``verkuerzt`` bei den Untergrenzen von Anlauf und Übergang, sonst mit den Eingaben."""
+    an, ue = float(pbox.get("anlauf_m", 0.0)), float(pbox.get("uebergang_m", 0.0))
+    if verkuerzt:
+        an, ue = min(an, BOX_MIN_ANLAUF_M), min(ue, BOX_MIN_UEBERGANG_M)
+    return max(2 * (an + ue) + 20, 2 * (an + ue) + _boxen_spanne(pbox) + 10)
+
+
+def boxen_uebergaenge(pbox, U):
+    """Anlauf, Übergang und Grünstreifen für eine Gasse der Länge ``U``.
+
+    Reicht ``U`` für die Eingaben, bleiben sie. Sonst schrumpfen Anlauf und Übergang anteilig bis auf
+    ``BOX_MIN_ANLAUF_M``/``BOX_MIN_UEBERGANG_M`` (A) und der Grünstreifen im selben Verhältnis wie der Übergang, nicht
+    unter ``BOX_MIN_ABSTAND_FAHRBAHN_M`` (B: gleicher Winkel beim seitlichen Abwandern).
+    Rückgabe {"anlauf_m", "uebergang_m", "abstand_fahrbahn", "verkuerzt"}."""
+    an, ue = float(pbox["anlauf_m"]), float(pbox["uebergang_m"])
+    abstand = float(pbox.get("abstand_fahrbahn", 0.0))
+    aus = {"anlauf_m": an, "uebergang_m": ue, "abstand_fahrbahn": abstand, "verkuerzt": False}
+    rest = U - (_boxen_spanne(pbox) + 10 if pbox.get("boxen") else 20)
+    platz = rest / 2                                   # je Ende für Anlauf + Übergang
+    if platz >= an + ue:
+        return aus
+    an_neu = max(min(an, BOX_MIN_ANLAUF_M), an * platz / (an + ue))
+    ue_neu = max(min(ue, BOX_MIN_UEBERGANG_M), platz - an_neu)
+    abstand_neu = max(min(abstand, BOX_MIN_ABSTAND_FAHRBAHN_M), abstand * ue_neu / ue) if ue > 0 else abstand
+    return {"anlauf_m": round(an_neu, 1), "uebergang_m": round(ue_neu, 1), "abstand_fahrbahn": round(abstand_neu, 1),
+            "verkuerzt": True}
 
 
 def boxen_begrenzen(pbox, s, bank, L):
@@ -123,8 +162,9 @@ def boxen_begrenzen(pbox, s, bank, L):
 
     Kürzt beide Seiten so, dass die Gasse ``BOX_ABSTAND_STEILKURVE_M`` vor der ersten Station mit mehr als
     ``BOX_MAX_QUERNEIGUNG_GRAD`` Querneigung endet und zusammen höchstens ``BOX_MAX_ANTEIL_RUNDE`` der Runde lang ist.
-    Wird die Gasse dadurch kürzer als Anlauf und Übergänge brauchen, bleibt es bei den Eingaben (dann meldet die
-    Prüfung den Konflikt). Rückgabe ``(vor, nach, grund)``, ``grund`` None = unverändert."""
+    Nie kürzer als ``boxen_mindestlaenge`` (Anlauf und Übergang bei ihren Untergrenzen, alle Boxen); reicht auch das
+    nicht, bleibt es bei den Eingaben (dann meldet die Prüfung den Konflikt). Kürzere Übergänge setzt danach
+    ``boxen_uebergaenge``. Rückgabe ``(vor, nach, grund)``, ``grund`` None = unverändert."""
     vor0, nach0 = float(pbox["einfahrt_vor_start_m"]), float(pbox["ausfahrt_nach_start_m"])
     vor, nach, gruende = vor0, nach0, []
     s = np.mod(np.asarray(s, float), L)
@@ -142,11 +182,8 @@ def boxen_begrenzen(pbox, s, bank, L):
         gruende.append("lap share")
     if not gruende:
         return vor0, nach0, None
-    # nie kürzer, als Anlauf, Übergänge und alle Boxen brauchen (``boxen_u``): fehlende Meter auf beide Seiten verteilen
-    a = pbox.get("anlauf_m", 0.0) + pbox.get("uebergang_m", 0.0)
-    # alle Boxen plus die zusätzliche MyTeam-Garage dahinter (``garagen_u``, spiel_welt) und je eine Box Luft
-    spanne = (pbox.get("boxen", 0) + 2) * pbox.get("box_abstand_m", 0.0) if pbox.get("boxen") else 0.0
-    minimum = max(2 * a + 20, 2 * a + spanne + 10)
+    # nie kürzer, als Anlauf, Übergänge (bei ihren Untergrenzen) und alle Boxen brauchen: fehlende Meter verteilen
+    minimum = boxen_mindestlaenge(pbox)
     if vor + nach < minimum:
         fehlt = minimum - (vor + nach)
         dazu = min(fehlt / 2, vor0 - vor)
@@ -230,9 +267,16 @@ def querprofil_berechnen(ml, param, kurven):
         U = vor + nach
         if not 0 < U < L:
             raise ValueError("Pit lane must be shorter than one lap")
+        uebergaenge = boxen_uebergaenge(pbox, U)
+        if uebergaenge["verkuerzt"]:
+            # kurze Gasse: kürzere Übergänge und schmalerer Grünstreifen (A/B); in die Parameter zurückschreiben, damit
+            # Geometrie, Logik und Boxenplätze dieselben Werte nehmen
+            for key in ("anlauf_m", "uebergang_m", "abstand_fahrbahn"):
+                pbox[key] = uebergaenge[key]
         an, ue = pbox["anlauf_m"], pbox["uebergang_m"]
         if U < 2 * (an + ue) + 20:
-            raise ValueError("Pit lane too short: entry and exit (%.0f m) need at least %.0f m" % (U, 2 * (an + ue) + 20))
+            raise ValueError("Pit lane too short: entry and exit (%.0f m) need at least %.0f m"
+                             % (U, boxen_mindestlaenge(pbox)))
         u = np.mod(st.s - s_ein, L)
         box_bereich = u < U
         v = U - u                                      # Restweg bis zum Ende
@@ -250,6 +294,7 @@ def querprofil_berechnen(ml, param, kurven):
             ausserhalb = np.maximum(gu[0] - u, u - gu[1])
             garage_gewicht = np.where(box_bereich, np.clip(1 - ausserhalb / 20.0, 0, 1), 0)
         box_info = {"seite": seite, "s_einfahrt": float(s_ein), "laenge_entlang_strecke": float(U), "begrenzt": _grund, "einfahrt_vor_start_m": vor, "ausfahrt_nach_start_m": nach,
+                    "uebergaenge_verkuerzt": uebergaenge["verkuerzt"],
                     "u": u, "bereich": box_bereich, "garagen_u": gu}
 
     # ---- Randwinkel: Höhenänderung je Meter nach außen, je Seite; ohne Eintrag bleibt der Rand waagerecht

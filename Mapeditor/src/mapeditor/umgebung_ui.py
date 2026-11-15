@@ -52,6 +52,9 @@ class EnvironmentPanel(QScrollArea):
     select_group_requested = Signal()
     delete_group_requested = Signal()
     delete_requested = Signal()
+    face_track_requested = Signal()          # gewählte Objekte mit der Vorderseite zur Strecke drehen
+    front_turn_requested = Signal(float)     # Vorderseite der gewählten Modelle um Grad weiterdrehen (vorderseiten)
+    front_reset_requested = Signal()         # Korrektur der Vorderseite der gewählten Modelle entfernen
     terrain_armed = Signal(object)           # "huegel"/"berge" zum Setzen per Klick oder None
     terrain_values_changed = Signal(dict)    # Höhe/Radius des gewählten Hügels/Bergs {feld: wert}
     terrain_delete_requested = Signal()
@@ -303,15 +306,45 @@ class EnvironmentPanel(QScrollArea):
                                        "terrain height itself)")))
         self.rotation_box = _spin(0, 360, 0, 15, 1, "°")
         self.rotation_box.setWrapping(True)
-        self.rotation_box.setToolTip(tr("Rotation about the vertical axis, mathematically positive in plan view"))
+        self.rotation_box.setToolTip(tr(("Rotation about the vertical axis, anticlockwise on the map. The arrow on "
+                                         "the map shows the front. Mouse: round handle at the arrow, R/Shift+R or "
+                                         "Ctrl+wheel")))
+        self.ground_box = QComboBox()
+        for modus in umgebung.BODEN_MODI:
+            self.ground_box.addItem(tr(umgebung.BODEN_NAMEN[modus]), modus)
+        self.ground_box.setToolTip(tr(("How the build puts the object on the ground. Automatic: the footprint stands "
+                                       "on the lowest ground point below it (nothing floats on slopes) and models "
+                                       "whose geometry starts above their origin, e.g. big screens, are lowered onto "
+                                       "the ground. Model origin: as before 15 Nov 2026.")))
+        self.ground_box.activated.connect(lambda _i: self._send("boden", self.ground_box.currentData()))
         self.scale_box = _spin(umgebung.SKALA_MIN, umgebung.SKALA_MAX, 1, 0.1, 2)
         self.group = QLineEdit()
         self.group.setToolTip(tr("Group (scatter); empty = none"))
         form.addRow(tr("Height above ground"), self.height_box)
         form.addRow(tr("Rotation"), self.rotation_box)
+        form.addRow(tr("Ground"), self.ground_box)
         form.addRow(tr("Object scale"), self.scale_box)
         form.addRow(tr("Group"), self.group)
         layout.addLayout(form)
+        self.front_text = QLabel()
+        self.front_text.setWordWrap(True)
+        layout.addWidget(self.front_text)
+        front = QGridLayout()
+        self.face_button = QPushButton(tr("Face the track"))
+        self.face_button.setToolTip(tr("Turn the selected objects so that their front faces the nearest point of the "
+                                       "centreline (T)"))
+        self.face_button.clicked.connect(self.face_track_requested)
+        self.front_turn = QPushButton(tr("Front +90°"))
+        self.front_turn.setToolTip(tr(("The arrow does not point at the front of this model? Turn the front by 90° for "
+                                       "this model type (stored in umgebung.json, all objects of the model follow)")))
+        self.front_turn.clicked.connect(lambda: self.front_turn_requested.emit(90.0))
+        self.front_reset = QPushButton(tr("Reset front"))
+        self.front_reset.setToolTip(tr("Use the front from the catalogue again for this model type"))
+        self.front_reset.clicked.connect(self.front_reset_requested)
+        front.addWidget(self.face_button, 0, 0, 1, 2)
+        front.addWidget(self.front_turn, 1, 0)
+        front.addWidget(self.front_reset, 1, 1)
+        layout.addLayout(front)
         self.height_box.editingFinished.connect(lambda: self._send("hoehe_m", self.height_box.value()))
         self.rotation_box.editingFinished.connect(lambda: self._send("drehung_grad", self.rotation_box.value()))
         self.scale_box.editingFinished.connect(lambda: self._send("skala", self.scale_box.value()))
@@ -473,13 +506,25 @@ class EnvironmentPanel(QScrollArea):
                 "seed": self.seed.value(), "gruppe": self.group_name.text().strip()}
 
     # ------------------------------------------------------------------ Auswahl
-    def show_selection(self, objekte, index, anzahl=0, bodenbewuchs=None, editierbar=True):
+    def show_selection(self, objekte, index, anzahl=0, bodenbewuchs=None, editierbar=True, korrekturen=None):
         """Eigenschaften der gewählten Objekte anzeigen (``objekte``: Liste; bei mehreren gelten die Werte des ersten)."""
         self._loading = True
         try:
             first = objekte[0] if objekte else None
-            for widget in (self.height_box, self.rotation_box, self.scale_box, self.group, self.delete_button):
+            for widget in (self.height_box, self.rotation_box, self.scale_box, self.group, self.delete_button,
+                           self.ground_box, self.face_button, self.front_turn):
                 widget.setEnabled(first is not None and editierbar)
+            korrekturen = korrekturen or {}
+            self.front_reset.setEnabled(bool(first and editierbar and first["modell"] in korrekturen))
+            if first is None:
+                self.front_text.setText("")
+            else:
+                grad, quelle = umgebung.vorderseite(first["modell"], index, korrekturen)
+                welt = umgebung.vorne_welt(first, index, korrekturen)
+                self.front_text.setText(tr("Front: {richtung}° on the map ({quelle})", richtung=zahl(welt, 0),
+                                           quelle=tr(umgebung.VORNE_QUELLEN[quelle])))
+                i = self.ground_box.findData(first.get("boden", "auto"))
+                self.ground_box.setCurrentIndex(max(i, 0))
             if first is None:
                 self.selection_text.setText(tr("Nothing selected. Click an object with the “Environment” tool (U)."))
                 self.group.setText("")

@@ -185,7 +185,9 @@ STANDARD = {
         "ausfahrt_spur_m": 250.0,
         "hinter_box_m": 4.0,         # Fläche zwischen Boxengasse und Garagenwand
         "boxen": 11,
-        "box_abstand_m": 14.0,
+        # Boxenabstand (10.11.2026: 14 → 13,2 m, Möglichkeit C): Portimãos Garagenmodul garage_main_a ist 13,1 m breit,
+        # darunter überlappen die Garagen des Trägers
+        "box_abstand_m": 13.2,
         # Tempolimit in der Boxengasse: Die Spielstrecken nutzen nur 60 oder 80 km/h (TrackPitData, 3.11.2026); der Bau
         # schreibt es mit --renndaten in die Spieldatenbank (strecke/renndaten.py), die KI-Fahrdaten rechnen damit
         "tempolimit_kmh": 80.0,
@@ -231,6 +233,9 @@ STANDARD = {
         "kruemmung_schwelle": 1.0 / 500.0,
         "mindestwinkel_grad": 15.0,
         "zusammenfassen_m": 25.0,    # gleichsinnige Abschnitte mit kleinerer Lücke = eine Kurve
+        # Kurven mit größerem Richtungswinkel für die Streckenlogik (Kurvenlinien, Bremslinien, Kurvenzahl) in gleich große
+        # Teile zerlegen; None/0 = aus. Diagnose Issue 5 (Oval mit 2 Kurven): strecke/mittellinie.kurven_teilen
+        "teilen_ab_grad": None,
         "glaettung_m": 20.0,
     },
     "ideallinie": {

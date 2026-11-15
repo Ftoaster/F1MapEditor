@@ -813,3 +813,32 @@ def kurven_finden(ml, schwelle=1.0 / 500.0, mindestwinkel_grad=15.0, zusammenfas
         return kurven_finden(ml, ersatz, mindestwinkel_grad, zusammenfassen_m)
     kurven.sort(key=lambda kv: kv["i_anfang"])
     return kurven
+
+
+def kurven_teilen(ml, kurven, ab_grad, luecke_m=20.0):
+    """Zerlegt Kurven mit |Winkel| > ``ab_grad`` in gleich große Teilkurven (gleicher Winkel je Teil), mit ``luecke_m``
+    Abstand zwischen Ende und nächstem Anfang (mindestens ein KI-Gate). Geometrie bleibt unverändert; nur für die
+    Streckenlogik gedacht (Issue 5: Oval mit 2 Kurven von 171°). Rückgabe wie ``kurven_finden``."""
+    if not ab_grad or ab_grad <= 0:
+        return kurven
+    n = len(ml.kappa_glatt)
+    luecke = max(1, int(round(luecke_m / ml.ds)))
+    out = []
+    for kv in kurven:
+        teile = int(np.ceil(abs(kv["winkel_grad"]) / float(ab_grad) - 1e-9))
+        if teile < 2 or kv["laenge_idx"] < teile * 3 * luecke:
+            out.append(kv)
+            continue
+        a = kv["i_anfang"]
+        idx = (a + np.arange(kv["laenge_idx"])) % n
+        summe = np.cumsum(np.abs(ml.kappa[idx]))
+        grenzen = [0] + [int(np.searchsorted(summe, summe[-1] * j / teile)) for j in range(1, teile)] + [len(idx)]
+        for j in range(teile):
+            lo, hi = grenzen[j], grenzen[j + 1] - (luecke if j < teile - 1 else 0)
+            teil = idx[lo:hi]
+            out.append({"i_anfang": int(teil[0]), "i_ende": int(teil[-1]),
+                        "i_scheitel": int(teil[np.argmax(np.abs(ml.kappa_glatt[teil]))]), "laenge_idx": int(hi - lo),
+                        "richtung": kv["richtung"], "winkel_grad": float(np.degrees(np.sum(ml.kappa[teil]) * ml.ds)),
+                        "min_radius_m": float(1.0 / max(np.max(np.abs(ml.kappa[teil])), 1e-12))})
+    out.sort(key=lambda k: k["i_anfang"])
+    return out

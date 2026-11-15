@@ -1,5 +1,16 @@
 Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
+## New in 0.4.0
+
+- **See which way objects face:** buildings, tents, big screens and grandstands are drawn as their real footprint with an arrow to their front. Rotate them with the round handle, Ctrl+wheel or R; T (Face the track) turns them towards the track. If the arrow is wrong for a model, Front +90° fixes it for all objects of that model
+- **No more floating objects:** the build puts objects on the visible ground, also on slopes, and lowers models that start above their origin (big screens floated up to 2 m). New checks UM-09 and UM-10
+- **Own flag in the game menu:** pick any image in the Build window (Flag row)
+- **Leftovers of the carrier track follow your track:** garage props, intro cameras, podium and cut-scenes move to your track and pit boxes
+- **Korean** as third interface language (View → Language). Contributed by [Ftoaster](https://github.com/Ftoaster) in PR #6, thank you!
+- **New check KI-08:** warns about tracks on which the AI never has to brake (e.g. ovals without tight corners); the game hangs about 15 s after the race start on those (issue #5)
+- **Shorter pit lanes** on short straights (about 310 m instead of 530 m)
+- **Height as colour** (View → Map layers) colours the track by height or gradient; the light theme is gone, the editor is always dark
+
 ## New in 0.3.7
 
 - **Straight lines and corners:** Edit → Make corner gives control points a fixed radius (15 m by default); the track runs dead straight between corners and closes the lap without an unwanted bend. Edit → Align to line lines up a row of points exactly
@@ -47,7 +58,7 @@ Mapeditor is a Windows editor for designing your own tracks for F1 25.
 
 ## Download
 
-`Mapeditor-0.3.7-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
+`Mapeditor-0.4.0-win64.zip`: unpack the whole folder and start `Mapeditor.exe`. The program is not signed, so Windows may
 show a warning.
 
 ## What you need

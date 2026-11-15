@@ -41,12 +41,9 @@ def main():
     window.results.setCurrentWidget(window.cross_page)
     QTest.qWait(30)
     assert window.grab().save(str(target / "querprofil_teststrecke.png"))
-    window.set_theme("hell")
-    QTest.qWait(30)
-    assert window.grab().save(str(target / "hauptansicht_hell.png"))
     window.document.undo.setClean()
     window.close()
-    print(f"Vier Screenshots unter {target}")
+    print(f"Drei Screenshots unter {target}")
 
 
 if __name__ == "__main__":

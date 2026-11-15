@@ -2,6 +2,7 @@
 Baudialog übernimmt die Eingaben."""
 
 import json
+from pathlib import Path
 import sys
 
 import pytest
@@ -206,3 +207,31 @@ def test_traeger_aus_requires(tmp_path):
     with zipfile.ZipFile(traeger, "w") as z:
         z.writestr("swofty.json", json.dumps({"id": "mapeditor.traeger_1234abcd"}))
     assert swofty_traeger_plan(paket) == (traeger, [])
+
+
+def test_flagge_option_und_dialog(window, tmp_path):
+    """Flagge im Menü (docs/flagge.md): Bild wählen, Vorschau, Schalter --flagge, Entfernen."""
+    from PySide6.QtGui import QImage
+    from mapeditor.build import BuildDialog
+    root = Path(__file__).resolve().parents[2] / "ego-werkzeuge"
+    bild = tmp_path / "flagge.png"
+    image = QImage(60, 40, QImage.Format_RGB32)
+    image.fill(0xDD0000)
+    assert image.save(str(bild))
+    befehl = build_command(root, root, tmp_path / "b", tmp_path / "p", "f1", options={"flagge": str(bild)})
+    assert befehl[befehl.index("--flagge") + 1] == str(bild.resolve())
+    assert "--flagge" not in build_command(root, root, tmp_path / "b", tmp_path / "p", "f2", options={"flagge": ""})
+    for falsch in (tmp_path / "fehlt.png", Path(__file__)):
+        with pytest.raises(ValueError):
+            build_command(root, root, tmp_path / "b", tmp_path / "p", "f3", options={"flagge": str(falsch)})
+    dialog = BuildDialog(window)
+    assert dialog.options()["flagge"] == "" and not dialog.flag_clear.isEnabled()
+    assert dialog.flag_preview.pixmap().isNull()
+    dialog.set_flag(str(bild))
+    assert dialog.options()["flagge"] == str(bild) and dialog.flag_clear.isEnabled()
+    assert not dialog.flag_preview.pixmap().isNull() and "flagge.png" in dialog.flag_text.full
+    dialog.set_flag(str(tmp_path / "fehlt.png"))
+    assert dialog.flag_preview.pixmap().isNull() and "fehlt.png" in dialog.flag_text.full
+    dialog.flag_clear.click()
+    assert dialog.options()["flagge"] == "" and dialog.flag_file() is None
+

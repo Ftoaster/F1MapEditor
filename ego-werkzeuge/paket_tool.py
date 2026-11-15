@@ -283,6 +283,15 @@ def cmd_swofty_raster(args):
     return 0
 
 
+def cmd_flagge(args):
+    """Flagge der Strecke im Menü ersetzen. Quelle bleibt unverändert."""
+    from strecke import spiel_flagge
+    _ziel_pruefen(args.ziel)
+    b = spiel_flagge.paket_flagge(args.quelle, args.ziel, args.bild)
+    print("Paket geschrieben: %s (%.2f GB)" % (b["ziel"], b["groesse"] / 1e9))
+    return 0
+
+
 def cmd_umbenennen(args):
     """Paket mit neuem Streckencode (AP16). Quelle bleibt unverändert."""
     from strecke import streckencode
@@ -355,6 +364,11 @@ def main(argv=None):
     s.add_argument("quelle")
     s.add_argument("ziel")
     s.set_defaults(func=lambda a: print(__import__("strecke.streckencode", fromlist=["x"]).swofty_traeger_addon(a.quelle, a.ziel)) or 0)
+    s = sub.add_parser("flagge", help="Flagge im Menü ersetzen (Paket oder Swofty-Addon, docs/flagge.md)")
+    s.add_argument("quelle")
+    s.add_argument("ziel")
+    s.add_argument("--bild", required=True, help="beliebiges Bild (PNG/JPG), wird formatfüllend eingepasst")
+    s.set_defaults(func=cmd_flagge)
     s = sub.add_parser("swofty-raster", help="Test-Addon für 26 Autos schreiben")
     s.add_argument("ziel")
     s.set_defaults(func=cmd_swofty_raster)

@@ -13,7 +13,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen, QPixmap, QPolygonF, QRadialGradient
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 
-from . import umgebung
+from . import hoehenfarbe, umgebung
 from .i18n import N_, tr
 from .project import point_xyz, shifted_point
 from .input_geometry import input_geometry
@@ -30,6 +30,8 @@ ENV_MODES = ("umgebung", "streuen")     # Werkzeuge für die Umgebungsebene (Tas
 #: Farben der Geländeformen auf der Karte
 TERRAIN_FARBEN = {"huegel": "#C08A4A", "senke": "#4F8FD0", "berge": "#9AA3AE"}
 ENV_HIT_PX = 7            # Trefferfläche eines Umgebungsobjekts mindestens (Pixel)
+ENV_TURN_HANDLE_PX = 16   # Drehgriff: so weit hinter der Spitze des Vorderpfeils (Pixel)
+ENV_TURN_STEP = 15.0      # Taste R / Umschalt+R und Einrasten beim Ziehen mit Umschalt (Grad)
 
 
 def path_for(points, close=False):
@@ -62,7 +64,9 @@ class MapView(QGraphicsView):
     env_place_requested = Signal(float, float)    # Klick mit gewähltem Modell: Definitionskoordinaten x, z
     env_scatter_requested = Signal(dict)          # Fläche bepflanzen: {"form": "rechteck"|"pinsel", …}
     env_disarm_requested = Signal()               # Esc: Modell der Platzierung abwählen
+    env_face_track_requested = Signal()           # Taste T: gewählte Objekte mit der Vorderseite zur Strecke drehen
     terrain_place_requested = Signal(str, float, float)   # Klick mit gewählter Geländeform: Art, x, z (Definition)
+    hover_changed = Signal(object)                # Station unter der Maus auf der Strecke oder None
 
     def __init__(self, document):
         super().__init__()
@@ -144,6 +148,7 @@ class MapView(QGraphicsView):
         self.env_rubber = None         # {"a": Ansichtspunkt, "b": Ansichtspunkt, "basis": set, "mods": Modifier}
         self.env_area = None           # Bepflanzen-Geste: {"form", "a", "b", "punkte"} in Szenenkoordinaten
         self.env_hover = None
+        self.env_turn = None           # Drehen am Griff: {"centre": (x, z), "start": Grad, "orig": {id: Grad}, "delta": Grad}
         # Gelände: gewählte Art zum Setzen ("huegel"/"berge"), Radius der Vorschau, Ziehen eines Hügels/Bergs
         self.terrain_armed = None
         self.terrain_radius = 200.0
@@ -152,6 +157,10 @@ class MapView(QGraphicsView):
         self.trace = None
         self.show_bild = True
         self.livemap = None          # Live map in true metres (``livemap.LiveMap``; set by the window)
+        self.height_colors = False   # Strecke nach Höhe einfärben (``hoehenfarbe``)
+        self.color_mode = "hoehe"     # Farbe nach Höhe oder Steigung (``hoehenfarbe.MODI``)
+        self.track_hover = False     # Mausposition auf der Strecke melden (Profil-Reiter)
+        self.hover_station = None    # Station, die das Profil unter der Maus hat (Markierung auf der Karte)
         self.setMouseTracking(True)
         self.document.selection_changed.connect(self._selection)
         self.scale(0.5, 0.5)
@@ -161,7 +170,7 @@ class MapView(QGraphicsView):
         """Generator-Ebene nur bei neuer Vorschau/Darstellung neu aufbauen, Eingabe-Ebene immer."""
         self.preview = preview
         self.input = input_geometry(self.document) if draft is None else draft
-        key = (self.stale, self.bands)
+        key = (self.stale, self.bands, self.height_colors, self.color_mode)
         if preview is not self._preview_obj or key != self._preview_key:
             self._build_preview_layer(preview)
             self._preview_key = key
@@ -193,10 +202,43 @@ class MapView(QGraphicsView):
                         add((path_for(polygon, True), no_pen, QColor(MATERIALS[material])))
                         start = end
         road = preview["left"] + list(reversed(preview["right"]))
-        add((path_for(road, True), no_pen, QColor("#596675")))
+        spanne = hoehenfarbe.bereich(preview, self.color_mode) if self.height_colors else None
+        werte = hoehenfarbe.werte(preview, self.color_mode) if spanne else []
+        if spanne and len(preview["left"]) == len(preview["pos"]):
+            # Fahrbahn in Stücken gleicher Farbstufe (Höhe bzw. Steigung als Farbe)
+            left, right, pos = preview["left"], preview["right"], preview["pos"]
+            n = len(pos)
+            start = 0
+            while start < n:
+                stufe = hoehenfarbe.stufe(werte[start], *spanne)
+                end = start + 1
+                while end < n and hoehenfarbe.stufe(werte[end], *spanne) == stufe:
+                    end += 1
+                ids = list(range(start, end)) + [end % n]
+                polygon = [left[i] for i in ids] + [right[i] for i in reversed(ids)]
+                add((path_for(polygon, True), no_pen, hoehenfarbe.stufenfarbe(stufe)))
+                start = end
+        else:
+            add((path_for(road, True), no_pen, QColor("#596675")))
         for edge in (preview["left"], preview["right"]):
             add((path_for(edge, True), cosmetic("#F5F5F0", 1), Qt.NoBrush))
-        add((path_for([(p[0], p[2]) for p in preview["pos"]], True), cosmetic("#67D9F5", 1.5), Qt.NoBrush))
+        if spanne:
+            # Kräftige Mittellinie in Höhenfarben (5 px bei jedem Zoom; die Fahrbahn allein ist von weitem zu schmal)
+            pos = preview["pos"]
+            n = len(pos)
+            start = 0
+            while start < n:
+                stufe = hoehenfarbe.stufe(werte[start], *spanne)
+                end = start + 1
+                while end < n and hoehenfarbe.stufe(werte[end], *spanne) == stufe:
+                    end += 1
+                stueck = [(pos[i % n][0], pos[i % n][2]) for i in range(start, end + 1)]
+                pen = cosmetic(hoehenfarbe.stufenfarbe(stufe).name(), 5)
+                pen.setCapStyle(Qt.RoundCap)
+                add((path_for(stueck), pen, Qt.NoBrush))
+                start = end
+        else:
+            add((path_for([(p[0], p[2]) for p in preview["pos"]], True), cosmetic("#67D9F5", 1.5), Qt.NoBrush))
 
     def _preview_pixmap(self):
         """Generator-Ebene als Bild; neu gerendert nur bei Zoom/Pan/Größe/Vorschau/Darstellung."""
@@ -214,7 +256,7 @@ class MapView(QGraphicsView):
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setTransform(t)
-        painter.setOpacity(.25 if self.stale else .65)
+        painter.setOpacity(.25 if self.stale else .9 if self.height_colors else .65)
         for path, pen, brush in self._preview_items:
             painter.setPen(pen)
             painter.setBrush(brush)
@@ -284,8 +326,11 @@ class MapView(QGraphicsView):
             return
         xs, zs = [p[0] for p in points], [p[2] for p in points]
         box = QRectF(min(xs), min(zs), max(1, max(xs) - min(xs)), max(1, max(zs) - min(zs)))
-        metres_per_pixel = max(box.width() / max(1, self.viewport().width() - 140), box.height() / max(1, self.viewport().height() - 140))
-        margin = max(10, metres_per_pixel * 70)
+        # Rand 70 px je Seite, auf kleinen Kartenflächen (kleine Bildschirme) höchstens 15 %
+        rand = min(70, int(min(self.viewport().width(), self.viewport().height()) * .15))
+        metres_per_pixel = max(box.width() / max(1, self.viewport().width() - 2 * rand),
+                               box.height() / max(1, self.viewport().height() - 2 * rand))
+        margin = max(10, metres_per_pixel * rand)
         self.fitInView(box.adjusted(-margin, -margin, margin, margin), Qt.KeepAspectRatio)
 
     def _selection(self, index):
@@ -386,18 +431,32 @@ class MapView(QGraphicsView):
         # Punkte gesammelt zeichnen (ein Aufruf je Farbe statt einer Ellipse je Punkt):
         # dicker Stift = Ring, dünnerer dunkler Stift = Füllung; Eckpunkte eckig.
         many = len(chosen) > 8           # bei größeren Gruppen keine Einzelbeschriftung
+        # Höhe als Farbe: Füllung der Punkte in ihrer Höhenfarbe (sonst verdecken dichte Punkte die Farblinie)
+        spanne = hoehenfarbe.bereich(self.preview, self.color_mode) if self.height_colors else None
+        hoehen = self._object_color_values() if spanne else []
         for group, outer, inner, colors in ((plain, 8, 5, ("#67D9F5", "#101820")),
                                             (chosen, 10 if many else 14, 6 if many else 10, ("#F1F5F9", "#005C73"))):
-            for cap, points in ((Qt.RoundCap, [xy for i, xy in group if i not in corners]),
-                                (Qt.SquareCap, [xy for i, xy in group if i in corners])):
-                if not points:
+            for cap, members in ((Qt.RoundCap, [(i, xy) for i, xy in group if i not in corners]),
+                                 (Qt.SquareCap, [(i, xy) for i, xy in group if i in corners])):
+                if not members:
                     continue
-                polygon = QPolygonF(points)
-                for size, color in zip((outer, inner), colors):
-                    pen = QPen(QColor(color), size)
+                polygon = QPolygonF([xy for _, xy in members])
+                pen = QPen(QColor(colors[0]), outer)
+                pen.setCapStyle(cap)
+                painter.setPen(pen)
+                painter.drawPoints(polygon)
+                if spanne and group is plain:
+                    stufen = {}
+                    for i, xy in members:
+                        stufen.setdefault(hoehenfarbe.stufe(hoehen[i], *spanne) if i < len(hoehen) else 0, []).append(xy)
+                    fuellungen = [(hoehenfarbe.stufenfarbe(k), QPolygonF(v)) for k, v in stufen.items()]
+                else:
+                    fuellungen = [(QColor(colors[1]), polygon)]
+                for color, punkte in fuellungen:
+                    pen = QPen(color, inner)
                     pen.setCapStyle(cap)
                     painter.setPen(pen)
-                    painter.drawPoints(polygon)
+                    painter.drawPoints(punkte)
         for i, xy in chosen:
             if many:
                 break
@@ -411,6 +470,7 @@ class MapView(QGraphicsView):
                 painter.drawText(mid + QPointF(10, 18).toPoint(), tr("Drag radius"))
         if self.preview:
             self._draw_preview_marks(painter, to_view, text_color)
+            self._draw_height_overlay(painter, to_view, width)
             if self.analysis:
                 self._draw_analysis_marks(painter, to_view, text_color)
             self._draw_zones(painter, to_view)
@@ -499,6 +559,61 @@ class MapView(QGraphicsView):
         """Radius eines Umgebungsobjekts auf der Karte (Katalogradius mal Skala)."""
         return umgebung.objekt_radius(objekt, self.env_index)
 
+    def env_front_corrections(self):
+        """``umgebung.json`` → ``vorderseiten`` (Vorderseite je Modell, im Projekt korrigiert)."""
+        return self.document.env.get("vorderseiten") or {}
+
+    def env_shape(self, objekt):
+        """Grundriss und Vorderpfeil eines Objekts in Szenenkoordinaten: {"ecken": [(x, z)] oder None, "mitte",
+        "vorne": (dx, dz), "reichweite": m} (Pflanzen ohne Grundriss und Pfeil: None)."""
+        eintrag = self.env_index.get(objekt.get("modell")) or {}
+        if eintrag.get("kategorie") in ("baum", "busch", "palme"):
+            return None
+        ecken = umgebung.grundriss(objekt, self.env_index)
+        vorne = umgebung.richtung(umgebung.vorne_welt(objekt, self.env_index, self.env_front_corrections()))
+        if ecken:
+            mx = sum(e[0] for e in ecken) / 4.0
+            mz = sum(e[1] for e in ecken) / 4.0
+            reichweite = max((e[0] - mx) * vorne[0] + (e[1] - mz) * vorne[1] for e in ecken)
+        else:
+            mx, mz = objekt["x"], objekt["z"]
+            reichweite = self.env_radius_m(objekt)
+        return {"ecken": ecken, "mitte": (mx, mz), "vorne": vorne, "reichweite": max(reichweite, 0.5)}
+
+    def _env_turned(self, objekt):
+        """Objekt mit der Drehung des laufenden Griffzugs (Vorschau)."""
+        turn = self.env_turn
+        if turn is None or objekt["id"] not in turn["orig"]:
+            return objekt
+        return dict(objekt, drehung_grad=(turn["orig"][objekt["id"]] + turn["delta"]) % 360.0)
+
+    def env_turn_handle(self):
+        """(Griffposition in der Ansicht, Mittelpunkt in der Ansicht) des Hauptobjekts der Auswahl oder None."""
+        document = self.document
+        primary = document.env_object(document.env_primary) if document.env_primary else None
+        if primary is None or not self.show_env or self.mode not in ENV_MODES:
+            return None
+        form = self.env_shape(self._env_turned(primary))
+        to_view = self._to_view()
+        scale = abs(self.transform().m11())
+        if form is None:
+            mx, mz = primary["x"], primary["z"]
+            vorne = umgebung.richtung(primary.get("drehung_grad", 0.0))
+            reichweite = self.env_radius_m(primary)
+        else:
+            (mx, mz), vorne, reichweite = form["mitte"], form["vorne"], form["reichweite"]
+        cx, cy = to_view(mx, mz)
+        laenge = reichweite * scale + ENV_TURN_HANDLE_PX + 6
+        return QPointF(cx + vorne[0] * laenge, cy + vorne[1] * laenge), QPointF(cx, cy)
+
+    def env_rotate_selection(self, delta):
+        """Auswahl um ``delta`` Grad drehen (gegen den Uhrzeigersinn positiv, wie ``drehung_grad``)."""
+        document = self.document
+        if not document.env_selected or not document.env_editable:
+            return False
+        return document.env_rotate({o["id"]: o.get("drehung_grad", 0.0) + delta for o in document.env_objects
+                                    if o["id"] in document.env_selected})
+
     def _env_hint(self):
         if not self.document.env_editable:
             return tr("Environment read-only: umgebung.json is unreadable or the project has an unknown version")
@@ -519,8 +634,12 @@ class MapView(QGraphicsView):
         if self.env_model:
             return tr("Click places “{modell}” · click an object to select it · Esc: deselect model",
                       modell=umgebung.kurzname(self.env_model))
+        if self.env_turn is not None:
+            return tr("Rotate {winkel:+.1f}° · Shift: {raster:.0f}° steps · Esc: cancel",
+                      winkel=self.env_turn["delta"], raster=ENV_TURN_STEP)
         if self.document.env_selected:
-            return tr("{anzahl} objects selected · drag: move · Del: delete · double-click: whole group",
+            return tr(("{anzahl} objects selected · drag: move · round handle, R/Shift+R or Ctrl+wheel: rotate · "
+                       "T: face the track · Del: delete"),
                       anzahl=len(self.document.env_selected))
         return tr("Choose a model in the catalogue and click to place · drag a frame to select several · Esc: back")
 
@@ -537,16 +656,24 @@ class MapView(QGraphicsView):
             selected = document.env_selected
             offset = (self.env_delta.x() * scale, self.env_delta.y() * scale) if self.env_drag and self.env_drag["active"] else (0, 0)
             colors, points, chosen = {}, {}, []
+
+            def view_points(form, dx, dy):
+                return QPolygonF([QPointF(*to_view(ex, ez)) + QPointF(dx, dy) for ex, ez in form["ecken"]])
+
             for o in document.env_objects:
-                x, y = to_view(o["x"], o["z"])
                 marked = o["id"] in selected
                 if marked:
-                    x, y = x + offset[0], y + offset[1]
+                    o = self._env_turned(o)
+                x, y = to_view(o["x"], o["z"])
+                dx, dy = offset if marked else (0, 0)
+                x, y = x + dx, y + dy
                 radius = self.env_radius_m(o) * scale
                 if not (-radius - 4 <= x <= width + radius + 4 and -radius - 4 <= y <= height + radius + 4):
                     continue
+                # Grundriss (Modell-AABB, gedreht wie im Bau) und Vorderpfeil ab etwa 3 px Objektgröße
+                form = self.env_shape(o) if radius >= 3.0 else None
                 if marked:
-                    chosen.append((x, y, radius))
+                    chosen.append((o, x, y, radius, form, dx, dy))
                     continue
                 color = umgebung.objekt_farbe(o, self.env_index)
                 if radius < 2.0:
@@ -556,22 +683,40 @@ class MapView(QGraphicsView):
                     fill, line = QColor(color), QColor(color)
                     fill.setAlpha(80 if active else 45)
                     line.setAlpha(220 if active else 120)
-                    colors[color] = (QBrush(fill), QPen(line, 1))
-                brush, pen = colors[color]
+                    colors[color] = (QBrush(fill), QPen(line, 1), QPen(line, 1.6))
+                brush, pen, arrow_pen = colors[color]
                 painter.setBrush(brush)
                 painter.setPen(pen)
-                painter.drawEllipse(QPointF(x, y), radius, radius)
+                if form is not None and form["ecken"]:
+                    painter.drawPolygon(view_points(form, 0, 0))
+                else:
+                    painter.drawEllipse(QPointF(x, y), radius, radius)
+                if form is not None:
+                    self._draw_front_arrow(painter, to_view, form, scale, arrow_pen, 0, 0)
             for color, pts in points.items():
                 pen = QPen(QColor(color), 3)
                 pen.setCapStyle(Qt.RoundCap)
                 painter.setPen(pen)
                 painter.drawPoints(QPolygonF(pts))
-            for x, y, radius in chosen:
+            for o, x, y, radius, form, dx, dy in chosen:
                 painter.setBrush(QColor(255, 255, 255, 45))
                 painter.setPen(QPen(QColor("#FFFFFF"), 2.5))
-                painter.drawEllipse(QPointF(x, y), max(radius, 4.0), max(radius, 4.0))
+                if form is not None and form["ecken"]:
+                    painter.drawPolygon(view_points(form, dx, dy))
+                else:
+                    painter.drawEllipse(QPointF(x, y), max(radius, 4.0), max(radius, 4.0))
+                if form is not None:
+                    self._draw_front_arrow(painter, to_view, form, scale, QPen(QColor("#FFD184"), 2.5), dx, dy)
                 painter.setPen(QPen(QColor("#FFD184"), 4))
                 painter.drawPoint(QPointF(x, y))
+            handle = self.env_turn_handle() if active and document.env_editable else None
+            if handle is not None and not offset[0] and not offset[1]:
+                grip, centre = handle
+                painter.setPen(QPen(QColor("#FFD184"), 1.2, Qt.DashLine))
+                painter.drawLine(centre, grip)
+                painter.setPen(QPen(QColor("#162331"), 1.5))
+                painter.setBrush(QColor("#FFD184"))
+                painter.drawEllipse(grip, 6, 6)
             painter.restore()
         if not active:
             return
@@ -606,6 +751,23 @@ class MapView(QGraphicsView):
                 radius = (self.env_index.get(self.env_model) or {}).get("radius_m") or umgebung.UNBEKANNT_RADIUS_M
                 painter.setPen(QPen(QColor("#FFFFFF"), 1.5, Qt.DashLine))
                 painter.drawEllipse(hover, max(radius * scale, 4.0), max(radius * scale, 4.0))
+        painter.restore()
+
+    def _draw_front_arrow(self, painter, to_view, form, scale, pen, dx=0.0, dy=0.0):
+        """Pfeil vom Mittelpunkt des Grundrisses über die Vorderseite hinaus (mindestens 10 px lang)."""
+        (mx, mz), (vx, vz) = form["mitte"], form["vorne"]
+        cx, cy = to_view(mx, mz)
+        laenge = max(form["reichweite"] * scale + 6.0, 10.0)
+        a = QPointF(cx + dx, cy + dy)
+        b = QPointF(a.x() + vx * laenge, a.y() + vz * laenge)
+        spitze = min(8.0, laenge * 0.45)
+        links = QPointF(b.x() - spitze * (vx * 0.87 - vz * 0.5), b.y() - spitze * (vz * 0.87 + vx * 0.5))
+        rechts = QPointF(b.x() - spitze * (vx * 0.87 + vz * 0.5), b.y() - spitze * (vz * 0.87 - vx * 0.5))
+        painter.save()
+        painter.setPen(pen)
+        painter.drawLine(a, b)
+        painter.setBrush(pen.color())
+        painter.drawPolygon(QPolygonF([b, links, rechts]))
         painter.restore()
 
     def _draw_terrain(self, painter, to_view, width, height, scale, active):
@@ -1088,6 +1250,18 @@ class MapView(QGraphicsView):
 
     # ------------------------------------------------------------------ Eingaben
     def wheelEvent(self, event):
+        if (event.modifiers() & Qt.ControlModifier and self.mode in ENV_MODES and self.document.env_selected
+                and self.document.env_editable):
+            # Strg+Rad dreht die gewählten Umgebungsobjekte: 5° je Raste, mit Umschalt 1°
+            point = event.angleDelta()
+            delta = point.y() if abs(point.y()) >= abs(point.x()) else point.x()
+            if event.inverted():
+                delta = -delta
+            if delta:
+                schritt = 1.0 if event.modifiers() & Qt.ShiftModifier else 5.0
+                self.env_rotate_selection(schritt * delta / 120.0)
+            event.accept()
+            return
         if (event.modifiers() & Qt.AltModifier and event.modifiers() & Qt.ShiftModifier
                 and self.livemap is not None):
             # Windows meldet Umschalt+Rad als waagerechtes Rad: angleDelta.x ist gesetzt, y bleibt 0.
@@ -1320,6 +1494,15 @@ class MapView(QGraphicsView):
         if self.terrain_armed and document.env_editable:
             self.terrain_place_requested.emit(self.terrain_armed, scene_point.x(), scene_point.y())
             return
+        handle = self.env_turn_handle() if document.env_editable and document.env_selected else None
+        if handle is not None and math.hypot(position.x() - handle[0].x(), position.y() - handle[0].y()) <= 9:
+            centre = self.mapToScene(handle[1].toPoint())
+            self.env_turn = {"centre": (centre.x(), centre.y()), "delta": 0.0,
+                             "start": umgebung.winkel(scene_point.x() - centre.x(), scene_point.y() - centre.y()),
+                             "orig": {o["id"]: o.get("drehung_grad", 0.0) for o in document.env_objects
+                                      if o["id"] in document.env_selected}}
+            self.viewport().update()
+            return
         hit = self.env_nearest(position)
         selected, modifiers = document.env_selected, event.modifiers()
         self.env_click_single = None
@@ -1355,7 +1538,15 @@ class MapView(QGraphicsView):
     def _env_move(self, event):
         position = event.position()
         self.env_hover = QPointF(position)
-        if self.env_area is not None:
+        if self.env_turn is not None:
+            point = self.mapToScene(position.toPoint())
+            cx, cz = self.env_turn["centre"]
+            delta = (umgebung.winkel(point.x() - cx, point.y() - cz) - self.env_turn["start"] + 180.0) % 360.0 - 180.0
+            if event.modifiers() & Qt.ShiftModifier:
+                delta = round(delta / ENV_TURN_STEP) * ENV_TURN_STEP
+            self.env_turn["delta"] = delta
+            self.viewport().update()
+        elif self.env_area is not None:
             point = self.mapToScene(position.toPoint())
             self.env_area["b"] = point
             if self.env_area["form"] == "pinsel":
@@ -1394,7 +1585,12 @@ class MapView(QGraphicsView):
 
     def _env_release(self, event):
         document = self.document
-        if self.env_area is not None:
+        if self.env_turn is not None:
+            turn, self.env_turn = self.env_turn, None
+            if abs(turn["delta"]) > 1e-6:
+                document.env_rotate({k: w + turn["delta"] for k, w in turn["orig"].items()})
+            self.viewport().update()
+        elif self.env_area is not None:
             area, self.env_area = self.env_area, None
             a, b = area["a"], area["b"]
             if area["form"] == "rechteck":
@@ -1426,8 +1622,8 @@ class MapView(QGraphicsView):
     def _env_cancel(self):
         """Laufende Umgebungsgeste verwerfen; True, wenn eine lief."""
         running = (self.env_area is not None or self.env_drag is not None or self.env_rubber is not None
-                   or self.terrain_drag is not None)
-        self.terrain_drag = None
+                   or self.terrain_drag is not None or self.env_turn is not None)
+        self.terrain_drag = self.env_turn = None
         if self.env_rubber is not None:
             document_selection = self.env_rubber["basis"]
             self.document.env_select(document_selection)
@@ -1457,6 +1653,12 @@ class MapView(QGraphicsView):
         if key == Qt.Key_A and event.modifiers() & Qt.ControlModifier:
             document.env_select({o["id"] for o in document.env_objects})
             return True
+        if key == Qt.Key_R and document.env_selected and not event.modifiers() & Qt.ControlModifier:
+            self.env_rotate_selection(-ENV_TURN_STEP if event.modifiers() & Qt.ShiftModifier else ENV_TURN_STEP)
+            return True
+        if key == Qt.Key_T and document.env_selected and not event.modifiers() & Qt.ControlModifier:
+            self.env_face_track_requested.emit()
+            return True
         if key in (Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down) and document.env_selected:
             step = 1 if event.modifiers() & Qt.ShiftModifier else 0.1
             document.env_move(document.env_selected, step * ((key == Qt.Key_Right) - (key == Qt.Key_Left)),
@@ -1464,7 +1666,57 @@ class MapView(QGraphicsView):
             return True
         return False
 
+    # ------------------------------------------------------------------ Höhe als Farbe, geteilte Ansicht
+    def _draw_height_overlay(self, painter, to_view, width):
+        """Legende der Höhenfarben und Markierung der Stelle, über der die Maus im Profil steht."""
+        spanne = hoehenfarbe.bereich(self.preview, self.color_mode)
+        if self.height_colors and spanne:
+            hoehenfarbe.legende(painter, width - 104, 64, spanne[0], spanne[1],
+                                tr("Gradient") if self.color_mode == "steigung" else tr("Height"), hell=not self.dark,
+                                hoehe=120, modus=self.color_mode)
+        if self.hover_station is not None and self.preview.get("s"):
+            i = self.station_at(self.hover_station)
+            p = self.preview["pos"][i]
+            steigung = hoehenfarbe.steigungen(self.preview)[i]
+            wert = abs(steigung) if self.color_mode == "steigung" else p[1]
+            c = QPointF(*to_view(p[0], p[2]))
+            painter.setPen(QPen(QColor("#FFFFFF"), 2.5))
+            painter.setBrush(hoehenfarbe.farbe(wert, *spanne) if self.height_colors and spanne else QColor("#FF5050"))
+            painter.drawEllipse(c, 8, 8)
+            painter.setPen(QColor("#F1F5F9" if self.dark else "#162331"))
+            painter.drawText(c + QPointF(12, -10),
+                             "%.0f m · %+.1f m · %+.1f %%" % (self.preview["s"][i], p[1], steigung))
+
+    def _object_color_values(self):
+        """Farbwert je Eingabepunkt: Höhe des Punkts oder Steigung der Vorschau an seiner Station."""
+        objects = self.object_positions()
+        if self.color_mode != "steigung":
+            return [p[1] for p in objects]
+        stations = (self.preview or {}).get("object_s") or []
+        steig = hoehenfarbe.steigungen(self.preview) if self.preview else []
+        if not steig or len(stations) != len(objects):
+            return [0.0] * len(objects)
+        return [abs(steig[self.station_at(s)]) for s in stations]
+
+    def _track_hover(self, pos):
+        """Station der nächsten Streckenstelle bis 30 px Abstand melden (Mauskopplung mit dem Profil)."""
+        if not self.preview or not self.preview.get("s") or self.preview.get("input"):
+            return
+        scene = self.mapToScene(pos.toPoint())
+        grenze = 30.0 / max(self.transform().m11(), 1e-9)
+        punkte = self.preview["pos"]
+        schritt = max(1, len(punkte) // 1500)
+        best, dist = None, grenze * grenze
+        for i in range(0, len(punkte), schritt):
+            dx, dz = punkte[i][0] - scene.x(), punkte[i][2] - scene.y()
+            d = dx * dx + dz * dz
+            if d < dist:
+                best, dist = i, d
+        self.hover_changed.emit(self.preview["s"][best] if best is not None else None)
+
     def mouseMoveEvent(self, event):
+        if self.track_hover and event.buttons() == Qt.NoButton:
+            self._track_hover(event.position())
         if self.livemap is not None and self.livemap.drag is not None:
             scene = self.mapToScene(event.position().toPoint())
             self.livemap.update_drag(scene.x(), scene.y())
@@ -1613,6 +1865,8 @@ class MapView(QGraphicsView):
     def leaveEvent(self, event):
         if self.trace is not None and self.mode == "nachzeichnen":
             self.trace.verlassen()
+        if self.track_hover:
+            self.hover_changed.emit(None)
         super().leaveEvent(event)
 
     def mouseDoubleClickEvent(self, event):

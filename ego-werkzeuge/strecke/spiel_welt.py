@@ -1047,15 +1047,11 @@ def garagen_modell(lg):
     return gi.get("gebaeude_modell", "generiert") if gi.get("gebaeude") else "keine"
 
 
-def garagen_versetzen(archiv, zustand, lg, protokoll=None):
-    """Versetzt Portimãos Garagenmodule Box für Box an die neue Boxengasse (29.10.2026).
+def boxrahmen(zustand, lg):
+    """(alt, neu, spiegeln): Rahmen (Position, 3×3) der Boxenplätze des Trägers und der neuen Strecke je Boxnummer.
 
-    Jede Instanz der ``GARAGEN_LAYER`` gehört zur nächstgelegenen Portimão-Box (``PitBox<n>``; die Module stehen dort
-    im Box-Ursprung). Ihre Lage relativ zu dieser Box wird auf die neue Box ``n`` übertragen. Liegen die Garagen auf
-    der anderen Seite als in Portimão (rechts), wird der Boxrahmen um 180° um die Hochachse gedreht (wie F1Garage in
-    ``plaetze_berechnen``). Kommandostände (``pit_perch_*``) rücken quer an die neue Boxenmauer (Innenseite, Boxengassenseite).
-    Boxen über die neue Anzahl hinaus werden mit dem letzten Abstand fortgesetzt. Muss nach ``logik_vorbereiten``
-    laufen; die Layer dürfen vorher nicht geleert werden (Regel BEHALTEN)."""
+    Neue Boxen über die neue Anzahl hinaus werden mit dem letzten Abstand fortgesetzt. ``spiegeln``: Die Garagen liegen
+    auf der anderen Seite als im Träger (Portimão: rechts); der Boxrahmen wird dann um 180° um die Hochachse gedreht."""
     sp = lg["spielformate"]
     gi = lg.get("boxengasse") or {}
     neu = {}
@@ -1083,7 +1079,20 @@ def garagen_versetzen(archiv, zustand, lg, protokoll=None):
     gseite = 1.0 if gi.get("seite", "links") == "links" else -1.0
     vq = [((garagen_alt[k][0] - alt[(k + 1) // 2][0]) @ alt[(k + 1) // 2][1].T)[0]
           for k in garagen_alt if (k + 1) // 2 in alt]
-    spiegeln = bool(vq) and np.sign(np.median(vq)) != gseite
+    return alt, neu, bool(vq) and np.sign(np.median(vq)) != gseite
+
+
+def garagen_versetzen(archiv, zustand, lg, protokoll=None):
+    """Versetzt Portimãos Garagenmodule Box für Box an die neue Boxengasse (29.10.2026).
+
+    Jede Instanz der ``GARAGEN_LAYER`` gehört zur nächstgelegenen Portimão-Box (``PitBox<n>``; die Module stehen dort
+    im Box-Ursprung). Ihre Lage relativ zu dieser Box wird auf die neue Box ``n`` übertragen. Liegen die Garagen auf
+    der anderen Seite als in Portimão (rechts), wird der Boxrahmen um 180° um die Hochachse gedreht (wie F1Garage in
+    ``plaetze_berechnen``). Kommandostände (``pit_perch_*``) rücken quer an die neue Boxenmauer (Innenseite, Boxengassenseite).
+    Boxen über die neue Anzahl hinaus werden mit dem letzten Abstand fortgesetzt. Muss nach ``logik_vorbereiten``
+    laufen; die Layer dürfen vorher nicht geleert werden (Regel BEHALTEN)."""
+    gi = lg.get("boxengasse") or {}
+    alt, neu, spiegeln = boxrahmen(zustand, lg)
     Y180 = np.diag([-1.0, 1.0, -1.0])
     # Boxenmauer im Boxrahmen (Seite gegenüber den Garagen): Boxenplatz tor_abstand_m vom Tor, innerer Rand der
     # Gasse bei breite − tor, Mauermitte mauer_abstand_m davor (querprofil.py), Innenseite − halbe Dicke

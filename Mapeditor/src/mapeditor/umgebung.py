@@ -21,8 +21,17 @@ from .i18n import N_
 SCHEMA = 1
 DATEI = "umgebung.json"
 #: Reihenfolge der Schlüssel beim Schreiben (unbekannte Schlüssel folgen danach)
-KOPF_SCHLUESSEL = ("schema", "bodenbewuchs", "gelaende", "objekte")
-OBJEKT_SCHLUESSEL = ("id", "modell", "x", "z", "hoehe_m", "drehung_grad", "skala", "gruppe")
+KOPF_SCHLUESSEL = ("schema", "bodenbewuchs", "gelaende", "vorderseiten", "objekte")
+OBJEKT_SCHLUESSEL = ("id", "modell", "x", "z", "hoehe_m", "drehung_grad", "skala", "gruppe", "boden")
+#: Bodenbezug je Objekt (optionales Feld ``boden``, wie ``strecke.umgebung.BODEN_MODI``): ``auto`` = Grundriss auf den
+#: tiefsten Bodenpunkt, Geometrie über dem Ursprung mit der Unterkante; ``ursprung`` = Modellursprung auf den Boden
+#: (bis 14.11.2026); ``unterkante`` = Unterkante der AABB immer auf den Boden. Siehe docs/mapeditor/objekte_ausrichtung.md
+BODEN_MODI = ("auto", "ursprung", "unterkante")
+BODEN_NAMEN = {"auto": N_("Automatic (lowest point)"), "ursprung": N_("Model origin"),
+               "unterkante": N_("Bottom of the model")}
+#: Herkunft der Vorderseite: Projekt (umgebung.json → vorderseiten), Originalstrecken, Annahme aus dem Grundriss
+VORNE_QUELLEN = {"projekt": N_("set in this project"), "spiel": N_("from the game's tracks"),
+                 "annahme": N_("assumed (long side)")}
 SKALA_MIN, SKALA_MAX = 0.2, 5.0
 HOEHE_MIN, HOEHE_MAX = -50.0, 500.0
 #: Grenze der Hinweisregel UMG_VIELE (UM-05)
@@ -93,6 +102,8 @@ def normalisiere_objekt(objekt):
     ergebnis["skala"] = _zahl(objekt.get("skala"), "skala", 1.0)
     gruppe = objekt.get("gruppe", "")
     ergebnis["gruppe"] = "" if gruppe is None else str(gruppe)
+    if "boden" in objekt and objekt["boden"] not in BODEN_MODI:
+        raise ValueError(f"Objekt {objekt['id']}: boden muss {', '.join(BODEN_MODI)} sein")
     return ergebnis
 
 
@@ -124,6 +135,11 @@ def normalisieren(daten):
         ergebnis["gelaende"] = gelaende
     if len(set(ids)) != len(ids):
         raise ValueError("objekte: ids müssen eindeutig sein")
+    if "vorderseiten" in daten:
+        vs = daten["vorderseiten"]
+        if not isinstance(vs, dict):
+            raise ValueError("vorderseiten: Eintrag erwartet")
+        ergebnis["vorderseiten"] = {str(m): _zahl(w, f"vorderseiten {m}") % 360.0 for m, w in vs.items()}
     return ergebnis
 
 
@@ -260,6 +276,77 @@ def objekt_radius(objekt, index):
     """Radius des Kreises auf der Karte in Metern (Katalogradius mal Skala)."""
     eintrag = index.get(objekt.get("modell")) or {}
     return float(eintrag.get("radius_m") or UNBEKANNT_RADIUS_M) * float(objekt.get("skala", 1.0))
+
+
+# ------------------------------------------------------------------ Ausrichtung (15.11.2026)
+# Gleiche Konvention wie der Bau (``strecke.umgebung.lagematrix``): Winkel a = Richtung (cos a, −sin a) in x/z; in der
+# Draufsicht (x rechts, z unten) gegen den Uhrzeigersinn ab +x. Das Modell dreht einen lokalen Winkel a auf
+# a + drehung_grad. Details und Belege: docs/mapeditor/objekte_ausrichtung.md.
+def richtung(grad):
+    """Einheitsvektor (dx, dz) des Winkels ``grad``."""
+    w = math.radians(float(grad))
+    return math.cos(w), -math.sin(w)
+
+
+def winkel(dx, dz):
+    """Winkel (0…360°) des Vektors (dx, dz) in derselben Konvention."""
+    return math.degrees(math.atan2(-float(dz), float(dx))) % 360.0
+
+
+def vorderseite(modell, index, korrekturen=None):
+    """(Vorderseite im Modellraum in Grad, Quelle ``projekt``/``spiel``/``annahme``).
+
+    ``korrekturen``: ``umgebung.json`` → ``vorderseiten``; sonst der Katalogwert ``vorne_grad`` (Werkzeugkasten,
+    aus den Originalstrecken oder angenommen); ohne ihn wie der Werkzeugkasten quer zur längeren Grundrissseite."""
+    if korrekturen and modell in korrekturen:
+        return float(korrekturen[modell]) % 360.0, "projekt"
+    eintrag = (index or {}).get(modell) or {}
+    if eintrag.get("vorne_grad") is not None:
+        return float(eintrag["vorne_grad"]) % 360.0, eintrag.get("vorne_quelle") or "spiel"
+    lo, hi = eintrag.get("aabb_min"), eintrag.get("aabb_max")
+    if lo and hi:
+        return (270.0 if hi[0] - lo[0] >= hi[2] - lo[2] else 0.0), "annahme"
+    return 270.0, "annahme"
+
+
+def vorne_welt(objekt, index, korrekturen=None):
+    """Richtung der Vorderseite in der Karte (Grad, Konvention oben)."""
+    return (vorderseite(objekt.get("modell"), index, korrekturen)[0] + float(objekt.get("drehung_grad", 0.0))) % 360.0
+
+
+def grundriss(objekt, index):
+    """Ecken [(x, z)] × 4 der Modell-AABB auf der Karte (gedreht und skaliert wie im Bau) oder None ohne AABB."""
+    eintrag = (index or {}).get(objekt.get("modell")) or {}
+    lo, hi = eintrag.get("aabb_min"), eintrag.get("aabb_max")
+    if not lo or not hi:
+        return None
+    w = math.radians(float(objekt.get("drehung_grad", 0.0)))
+    k = float(objekt.get("skala", 1.0))
+    c, s = math.cos(w) * k, math.sin(w) * k
+    x0, z0 = float(objekt["x"]), float(objekt["z"])
+    # Zeilenvektor [lx, 0, lz] × Lagematrix: x' = lx c + lz s, z' = −lx s + lz c
+    return [(x0 + lx * c + lz * s, z0 - lx * s + lz * c)
+            for lx, lz in ((lo[0], lo[2]), (hi[0], lo[2]), (hi[0], hi[2]), (lo[0], hi[2]))]
+
+
+def drehung_zur_strecke(objekt, index, punkt, korrekturen=None):
+    """``drehung_grad``, mit der die Vorderseite des Objekts auf ``punkt`` (x, z) zeigt (gerundet auf 0,1°)."""
+    ziel = winkel(punkt[0] - float(objekt["x"]), punkt[1] - float(objekt["z"]))
+    return round((ziel - vorderseite(objekt.get("modell"), index, korrekturen)[0]) % 360.0, 1) % 360.0
+
+
+def naechster_punkt(punkte, x, z):
+    """Nächster Punkt (x, z) eines Linienzugs ``punkte`` [(x, z)] zu (x, z) (Strecken zwischen den Punkten zählen)."""
+    best, best_d = None, float("inf")
+    for (ax, az), (bx, bz) in zip(punkte, list(punkte[1:]) + list(punkte[:1])):
+        dx, dz = bx - ax, bz - az
+        l2 = dx * dx + dz * dz
+        t = 0.0 if l2 <= 1e-12 else min(max(((x - ax) * dx + (z - az) * dz) / l2, 0.0), 1.0)
+        px, pz = ax + t * dx, az + t * dz
+        d = (px - x) ** 2 + (pz - z) ** 2
+        if d < best_d:
+            best, best_d = (px, pz), d
+    return best
 
 
 def objekt_farbe(objekt, index):

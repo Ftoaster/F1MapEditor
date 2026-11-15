@@ -96,7 +96,8 @@ def test_datei_standardwerte_reihenfolge_und_unbekannte_schluessel():
     assert objekt["extra"] == "bleibt"
     geschrieben = json.loads(umgebung.als_text(daten))
     assert list(geschrieben)[:3] == ["schema", "bodenbewuchs", "objekte"] and geschrieben["zukunft"] == {"a": [1]}
-    assert list(geschrieben["objekte"][0])[:8] == list(umgebung.OBJEKT_SCHLUESSEL) and geschrieben["objekte"][0]["extra"] == "bleibt"
+    pflicht = [k for k in umgebung.OBJEKT_SCHLUESSEL if k != "boden"]                  # boden ist optional (15.11.2026)
+    assert list(geschrieben["objekte"][0])[:8] == pflicht and geschrieben["objekte"][0]["extra"] == "bleibt"
     assert umgebung.als_text(daten).endswith("}\n") and "  \"schema\": 1" in umgebung.als_text(daten)
     for kaputt in ({"schema": 2}, {"objekte": "x"}, {"objekte": [{"id": "a", "modell": BAUM, "x": "1", "z": 0}]},
                    {"objekte": [{"id": "a", "modell": BAUM, "x": 1, "z": 0}] * 2}):

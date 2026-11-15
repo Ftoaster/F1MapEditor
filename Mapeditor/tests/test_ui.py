@@ -70,11 +70,11 @@ def test_global_width_and_sections_undo(window):
     assert "abschnitte" not in window.document.project.raw["fahrbahn"]
 
 
-def test_undo_theme_updates_canvas(window):
-    window.change_theme("hell")
-    assert not window.map.dark
-    window.document.undo.undo()
+def test_nur_dunkles_design(window):
+    window.set_theme("hell")                       # alte Projekte mit "thema": "hell" bleiben dunkel
     assert window.map.dark
+    menu = [a.text() for m in window.menuBar().actions() if m.menu() for a in m.menu().actions()]
+    assert not any("hell" in t.lower() or "light theme" in t.lower() for t in menu)
 
 
 def test_map_drag_and_keyboard_single_undo(app, point_project):

@@ -16,8 +16,10 @@ Einstieg:
     karte(pfad_png, daten, ...)           Draufsicht Strecke + Objekte (Farbe je Kategorie)
 
 Koordinaten: ``x``/``z`` der Objekte sind Definitionskoordinaten wie die Kontrollpunkte des Editors;
-Welt = Definition + Versatz (``strecke/platzierung.py``). Die Höhe bestimmt der Bau: oberste Fläche der neu
-erzeugten Fahrphysik (TRN~) am Punkt plus ``hoehe_m``.
+Welt = Definition + Versatz (``strecke/platzierung.py``). Die Höhe bestimmt der Bau (``bodenlage``, seit
+15.11.2026): tiefster sichtbarer Bodenpunkt unter dem Grundriss, Modelle mit Geometrie über dem Ursprung mit der
+Unterkante, plus ``hoehe_m``. Drehung und Vorderseite: ``richtung``, ``vorderseite``, ``grundriss``
+(docs/mapeditor/objekte_ausrichtung.md).
 
 Der Spielordner wird nur gelesen. Der Zwischenspeicher liegt unter ``%LOCALAPPDATA%\\ego-werkzeuge``.
 """
@@ -65,8 +67,19 @@ FARBEN = {"baum": (60, 170, 70), "busch": (150, 200, 80), "palme": (230, 200, 40
           "zelt": (240, 240, 240), "moebel": (90, 160, 230), "flagge": (230, 70, 160), "licht": (255, 240, 120),
           "sonstiges": (170, 170, 170)}
 
-_OBJEKT_SCHLUESSEL = ("id", "modell", "x", "z", "hoehe_m", "drehung_grad", "skala", "gruppe")
-_DATEI_SCHLUESSEL = ("schema", "bodenbewuchs", "gelaende", "objekte")
+_OBJEKT_SCHLUESSEL = ("id", "modell", "x", "z", "hoehe_m", "drehung_grad", "skala", "gruppe", "boden")
+_DATEI_SCHLUESSEL = ("schema", "bodenbewuchs", "gelaende", "vorderseiten", "objekte")
+#: Bodenbezug je Objekt (optionales Feld ``boden``, 15.11.2026, docs/mapeditor/objekte_ausrichtung.md):
+#: ``auto`` (Standard) = Grundriss auf den tiefsten Bodenpunkt darunter, Modelle mit Geometrie über dem Ursprung
+#: (z. B. ``jumbotron_back_b`` ab 2,1 m) mit der Unterkante; ``ursprung`` = Modellursprung auf den Boden am Mittelpunkt
+#: (Verhalten bis 14.11.2026); ``unterkante`` = Unterkante der Modell-AABB immer auf den tiefsten Bodenpunkt.
+BODEN_MODI = ("auto", "ursprung", "unterkante")
+#: ``auto`` senkt ab, wenn die Geometrie mehr als so viele Meter über dem Ursprung beginnt
+BODEN_ANHEBEN_M = 0.05
+#: Boden unter dem Grundriss schwankt um mehr als so viele Meter → UMG_SCHIEF (Teil versinkt im Hang)
+SCHIEF_M = 1.0
+#: Vorderseiten aus den Originalstrecken (analyse/umgebung_vorderseiten.py)
+VORDERSEITEN_DATEI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "daten", "umgebung_vorderseiten.json")
 _FORM_SCHLUESSEL = ("id", "x", "z", "hoehe_m", "radius_m")
 #: Geländeformen (29.10.2026, Spieltests T4/T5 zweite Fassung ✔): Grenzen je Art (Höhe, Radius in m).
 #: ``huegel``: Grundfläche im Streckenbereich, sichtbar und Fahrphysik (spiel_geometrie.huegel_anwenden), negativ = Senke.
@@ -134,8 +147,22 @@ def normalisieren(roh) -> dict:
             raise UmgebungFehler("Object %s: scale %.3g outside %.1f–%.0f" % (oid, o["skala"], SKALA_MIN, SKALA_MAX))
         g = o.get("gruppe", "")
         o["gruppe"] = "" if g is None else str(g)
+        if "boden" in o and o["boden"] not in BODEN_MODI:
+            raise UmgebungFehler("Object %s: boden must be one of %s (%r)" % (oid, ", ".join(BODEN_MODI), o["boden"]))
         neu.append(o)
     d["objekte"] = neu
+    if "vorderseiten" in d:
+        vs = d["vorderseiten"]
+        if not isinstance(vs, dict):
+            raise UmgebungFehler("umgebung.json: vorderseiten must map model IDs to degrees")
+        neu_vs = {}
+        for m, w in vs.items():
+            if not isinstance(m, str) or not m.startswith("eaid://"):
+                raise UmgebungFehler("vorderseiten: key must be a model ID eaid://… (%r)" % (m,))
+            if isinstance(w, bool) or not isinstance(w, (int, float)) or not math.isfinite(float(w)):
+                raise UmgebungFehler("vorderseiten %s: degrees must be a finite number (%r)" % (m.rsplit("/", 1)[-1], w))
+            neu_vs[m] = float(w) % 360.0
+        d["vorderseiten"] = neu_vs
     if "gelaende" in d:
         d["gelaende"] = _gelaende_normalisieren(d["gelaende"], ids)
     return d
@@ -827,6 +854,21 @@ def pruefen_mit_geprueft(daten, definition_oder_generatorausgabe=None, versatz=N
     return m, gp
 
 
+def bau_bewerten(bericht: dict, meldungen: list) -> set:
+    """Prüfregeln der Stufe ``bau`` aus dem Bericht von ``einsetzen``: UMG_SCHIEF (Hang unter dem Grundriss),
+    UMG_OHNE_BODEN (übersprungen). Hängt Meldungen an ``meldungen`` an und gibt die geprüften Regel-IDs zurück."""
+    from .pruefregeln import meldung, ort
+    for s in bericht.get("schief", []):
+        meldungen.append(meldung("UMG_SCHIEF", "Object %s stands on a slope: the ground under it varies by %.1f m "
+                                 "(set on the lowest point, the uphill side sinks in)" % (s["id"], s["spanne_m"]),
+                                 ort(None, None, s["welt"], s["id"]), ist=s["spanne_m"], soll=SCHIEF_M))
+    for u in bericht.get("uebersprungen", []):
+        w = u.get("welt") or [0.0, 0.0]
+        meldungen.append(meldung("UMG_OHNE_BODEN", "Object %s left out: no ground under it (world x %.0f, z %.0f)"
+                                 % (u["id"], w[0], w[1]), ort(None, None, [w[0], 0.0, w[1]], u["id"])))
+    return {"UMG_SCHIEF", "UMG_OHNE_BODEN"}
+
+
 def pruefen(daten, definition_oder_generatorausgabe=None, versatz=None, katalog_daten=None) -> List[dict]:
     """Prüfregeln UMG_* (``strecke/pruefregeln.py``): Meldungen mit ``ort.welt`` und ``ort.objekt`` (Objekt-ID).
 
@@ -881,6 +923,251 @@ def lagematrix(x, y, z, drehung_grad=0.0, skala=1.0) -> List[float]:
     w = math.radians(drehung_grad)
     c, s = math.cos(w) * skala, math.sin(w) * skala
     return [c, 0.0, -s, 0.0, 0.0, skala, 0.0, 0.0, s, 0.0, c, 0.0, float(x), float(y), float(z), 1.0]
+
+
+# =============================================================================== Ausrichtung und Bodenhöhe (15.11.2026)
+# Winkelkonvention (docs/mapeditor/objekte_ausrichtung.md): ein Winkel a meint die Richtung (cos a, −sin a) in x/z,
+# in der Draufsicht (x rechts, z unten) also gegen den Uhrzeigersinn ab +x. ``lagematrix`` dreht einen lokalen
+# Winkel a auf a + drehung_grad. Belegt durch die Originalstrecken (Zeilen = lokale Achsen: 143 Modelle mit
+# eindeutiger Vorderachse, transponiert nur 72) und die Bremstafeln (Portimão: lokal +X = −Fahrtrichtung).
+_VORDERSEITEN: Optional[Dict[str, float]] = None
+
+
+def richtung(grad) -> Tuple[float, float]:
+    """Einheitsvektor (dx, dz) des Winkels ``grad`` in der Konvention von ``drehung_grad``."""
+    w = math.radians(float(grad))
+    return math.cos(w), -math.sin(w)
+
+
+def winkel(dx, dz) -> float:
+    """Umkehrung von ``richtung``: Winkel (0…360°) des Vektors (dx, dz)."""
+    return math.degrees(math.atan2(-float(dz), float(dx))) % 360.0
+
+
+def vorderseiten_pfad() -> str:
+    """Zwischenspeicher der Vorderseiten (aus dem Spielordner des Nutzers berechnet, ``vorderseiten_sicherstellen``)."""
+    return os.path.join(zwischenspeicher_ordner(), "umgebung_vorderseiten.json")
+
+
+def vorderseiten_tabelle() -> Dict[str, float]:
+    """Kurzname → Vorderseite im Modellraum (Grad). Quelle: Zwischenspeicher (``vorderseiten_pfad``), sonst die
+    Arbeitsfassung ``strecke/daten/umgebung_vorderseiten.json`` (nicht im öffentlichen Stand: aus Spieldaten
+    abgeleitet); ohne beides leer (dann gilt ``vorderseite``-Annahme)."""
+    global _VORDERSEITEN
+    if _VORDERSEITEN is None:
+        _VORDERSEITEN = {}
+        for pfad in (vorderseiten_pfad(), VORDERSEITEN_DATEI):
+            try:
+                with open(pfad, encoding="utf-8") as f:
+                    _VORDERSEITEN = {k: float(v["vorne_grad"]) for k, v in (json.load(f).get("modelle") or {}).items()}
+                break
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                continue
+    return _VORDERSEITEN
+
+
+def _vorderseiten_strecke(auftrag):
+    """Arbeitsprozess: (Code, {Basis: [lokale Winkel zur Strecke in Zeilen-Lesart]}, {… transponiert}, Anzahl)."""
+    pfad, code, modelle, nah_m = auftrag
+    from ego import erp, pkg, streckenlogik
+    zeilen, spalten, n = {}, {}, 0
+    try:
+        with erp.open_erp(pfad) as a:
+            st = streckenlogik.lade(a, code)
+            xz = np.asarray(st.hauptlinie.abschnitt(0.0, 0.9999, 2.0), float)[:, [0, 2]]
+            for r in a.resources:
+                if not r.identifier.endswith(".layer"):
+                    continue
+                try:
+                    inst = pkg.lesen(r.fragments[0].read()).instanzen()
+                except Exception:  # noqa: BLE001  (fremde Layerformate)
+                    continue
+                for i in inst:
+                    if not i.modell or i.matrix is None:
+                        continue
+                    basis = re.sub(r"\.idf(\?.*)?$", "", i.modell)
+                    if basis not in modelle:
+                        continue
+                    m = np.asarray(i.matrix, float).reshape(4, 4)
+                    d = xz - m[3, [0, 2]]
+                    k = int(np.argmin((d * d).sum(1)))
+                    abst = float(math.hypot(*d[k]))
+                    if abst > nah_m or abst < 1e-3:
+                        continue
+                    theta = winkel(d[k][0], d[k][1])
+                    zeilen.setdefault(basis, []).append((theta - math.degrees(math.atan2(m[2, 0], m[0, 0]))) % 360.0)
+                    spalten.setdefault(basis, []).append((theta - math.degrees(math.atan2(m[0, 2], m[0, 0]))) % 360.0)
+                    n += 1
+    except Exception as e:  # noqa: BLE001  (Strecke ohne lesbare Logik: auslassen)
+        return code, {}, {}, -1, str(e)
+    return code, zeilen, spalten, n, ""
+
+
+def _achse(werte, mindest=4, anteil=0.6):
+    """(Achse 0/90/180/270, Anteil, Anzahl) der häufigsten Achse oder None, wenn keine überwiegt."""
+    if len(werte) < mindest:
+        return None
+    z = Counter(int(round(w / 90.0)) % 4 * 90 for w in werte)
+    a, k = z.most_common(1)[0]
+    return (a, k / len(werte), len(werte)) if k / len(werte) >= anteil else None
+
+
+def vorderseiten_auswerten(spielordner=None, katalog_daten=None, nah_m=60.0, protokoll=None) -> dict:
+    """Vorderseite der Katalogmodelle aus den Originalstrecken (nur lesend): Je Instanz ≤ ``nah_m`` von der Hauptlinie
+    die Richtung zur Strecke im Modellraum; die überwiegende lokale Achse gilt als Vorderseite (Pflanzen nie).
+    ``lesart_eindeutig`` vergleicht die Zeilen-Lesart der Matrix (Bau) mit der transponierten."""
+    from ego import parallel
+    from . import spielimport
+    log = protokoll or (lambda *_: None)
+    kd = katalog_daten or katalog(spielordner)
+    index = katalog_index(kd)
+    strecken = [s for s in spielimport.strecken(kd.get("spielordner")) if not s["rueckwaerts"]]
+    log("Vorderseiten: %d Spielstrecken auswerten …" % len(strecken))
+    modelle = frozenset(index)
+    zeilen, spalten, je_strecke = {}, {}, {}
+    for code, z, sp, n, fehler in parallel.abbilden(_vorderseiten_strecke,
+                                                     [(s["datei"], s["code"], modelle, nah_m) for s in strecken]):
+        je_strecke[code] = n if n >= 0 else fehler
+        for quelle, ziel in ((z, zeilen), (sp, spalten)):
+            for b, w in quelle.items():
+                ziel.setdefault(b, []).extend(w)
+    eindeutig = {"zeilen": sum(_achse(w) is not None for w in zeilen.values()),
+                 "spalten": sum(_achse(w) is not None for w in spalten.values())}
+    aus = {}
+    for b in sorted(zeilen):
+        a = _achse(zeilen[b])
+        if a is None or index[b]["kategorie"] in PFLANZEN:
+            continue
+        aus[b.rsplit("/", 1)[-1]] = {"vorne_grad": a[0], "anteil": round(a[1], 2), "instanzen": a[2],
+                                     "kategorie": index[b]["kategorie"]}
+    return {"schema": 1, "quelle": "Originalstrecken, Instanzen ≤ %.0f m von der Hauptlinie (umgebung.vorderseiten_"
+                                   "auswerten)" % nah_m,
+            "konvention": "vorne_grad: lokale Richtung (cos a, 0, -sin a) im Modellraum, wie drehung_grad",
+            "stempel": kd.get("stempel"), "lesart_eindeutig": eindeutig, "je_strecke": je_strecke, "modelle": aus}
+
+
+def vorderseiten_sicherstellen(spielordner=None, katalog_daten=None, neu=False, protokoll=None) -> Optional[str]:
+    """Zwischenspeicher der Vorderseiten anlegen, wenn er fehlt oder zu einem anderen Spielstand gehört (einmalig etwa
+    eine Minute); Pfad oder None ohne Spielordner/Fehler."""
+    global _VORDERSEITEN
+    pfad = vorderseiten_pfad()
+    try:
+        kd = katalog_daten or katalog(spielordner)
+    except UmgebungFehler:
+        return None
+    if not neu and os.path.exists(pfad):
+        try:
+            with open(pfad, encoding="utf-8") as f:
+                if json.load(f).get("stempel") == json.loads(json.dumps(kd.get("stempel"))):
+                    return pfad
+        except (OSError, ValueError):
+            pass
+    try:
+        daten = vorderseiten_auswerten(katalog_daten=kd, protokoll=protokoll)
+        os.makedirs(os.path.dirname(pfad), exist_ok=True)
+        tmp = pfad + ".tmp"
+        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(daten, f, ensure_ascii=False, indent=1)
+            f.write("\n")
+        os.replace(tmp, pfad)
+    except Exception:  # noqa: BLE001  (Vorderseiten sind Hilfsmittel; ohne sie gilt die Annahme)
+        return None
+    _VORDERSEITEN = None
+    return pfad
+
+
+def vorderseite(modell: str, eintrag: Optional[dict] = None, korrekturen: Optional[dict] = None) -> Tuple[float, str]:
+    """(Vorderseite im Modellraum in Grad, Quelle). Quelle ``projekt`` (``umgebung.json`` → ``vorderseiten``),
+    ``spiel`` (Auswertung der Originalstrecken) oder ``annahme``: Vorderseite quer zur längeren Seite des
+    Grundrisses, +z (270°) bei breiten Modellen (häufigste Achse der Originale: Tribünen, Bildschirme), sonst +x."""
+    if korrekturen and modell in korrekturen:
+        return float(korrekturen[modell]) % 360.0, "projekt"
+    t = vorderseiten_tabelle().get(str(modell).rsplit("/", 1)[-1])
+    if t is not None:
+        return t, "spiel"
+    if eintrag and eintrag.get("aabb_min") and eintrag.get("aabb_max"):
+        lo, hi = eintrag["aabb_min"], eintrag["aabb_max"]
+        return (270.0 if hi[0] - lo[0] >= hi[2] - lo[2] else 0.0), "annahme"
+    return 270.0, "annahme"
+
+
+def grundriss(objekt: dict, eintrag: Optional[dict], versatz=(0.0, 0.0, 0.0)) -> Optional[np.ndarray]:
+    """Ecken (4×2, x/z) der Modell-AABB in der Draufsicht, gedreht und skaliert wie ``lagematrix``; None ohne AABB.
+    Reihenfolge im Modellraum: (lo x, lo z), (hi x, lo z), (hi x, hi z), (lo x, hi z)."""
+    if not eintrag or not eintrag.get("aabb_min") or not eintrag.get("aabb_max"):
+        return None
+    lo, hi = eintrag["aabb_min"], eintrag["aabb_max"]
+    w = math.radians(float(objekt.get("drehung_grad", 0.0)))
+    k = float(objekt.get("skala", 1.0))
+    c, s = math.cos(w) * k, math.sin(w) * k
+    lokal = np.array([[lo[0], lo[2]], [hi[0], lo[2]], [hi[0], hi[2]], [lo[0], hi[2]]], float)
+    # Zeilenvektor [lx, 0, lz] × lagematrix: x' = lx c + lz s, z' = −lx s + lz c
+    x = lokal[:, 0] * c + lokal[:, 1] * s + float(objekt["x"]) + float(versatz[0])
+    z = -lokal[:, 0] * s + lokal[:, 1] * c + float(objekt["z"]) + float(versatz[2])
+    return np.c_[x, z]
+
+
+def _proben(ecken: np.ndarray) -> np.ndarray:
+    """Ecken, Kantenmitten und Mittelpunkt eines Grundrisses."""
+    mitten = (ecken + np.roll(ecken, -1, axis=0)) / 2.0
+    return np.vstack([ecken, mitten, ecken.mean(0, keepdims=True)])
+
+
+def bodenlage(objekt: dict, eintrag: Optional[dict], hoehen: "Flaechen", versatz=(0.0, 0.0, 0.0)) -> Optional[dict]:
+    """Höhe des Modellursprungs (Welt-y) für ein Objekt; None, wenn am Mittelpunkt kein Boden ist.
+
+    ``boden`` = tiefster Bodenpunkt unter Ecken, Kantenmitten und Mitte des Grundrisses (Pflanzen und Modus
+    ``ursprung``: nur der Ursprung), ``spanne`` = Höhenunterschied dort, ``ausgleich`` = Verschiebung, die die
+    Unterkante der AABB auf den Boden setzt (``auto`` nur bei Geometrie über dem Ursprung), ``y`` = boden +
+    ausgleich + hoehe_m."""
+    v = versatz
+    wx, wz = float(objekt["x"]) + v[0], float(objekt["z"]) + v[2]
+    y0 = hoehen.hoehe_nahe(wx, wz)
+    if y0 is None:
+        return None
+    modus = objekt.get("boden", "auto")
+    kat = (eintrag or {}).get("kategorie") or kategorie(objekt["modell"]) or "sonstiges"
+    werte = [y0]
+    ecken = grundriss(objekt, eintrag, v)
+    if ecken is not None:
+        for x, z in _proben(ecken):
+            h = hoehen.hoehe_nahe(float(x), float(z))
+            if h is not None:
+                werte.append(h)
+    spanne = max(werte) - min(werte)
+    pflanze = kat in PFLANZEN
+    boden = y0 if (modus == "ursprung" or pflanze) else min(werte)
+    unten = float(((eintrag or {}).get("aabb_min") or [0.0, 0.0, 0.0])[1])
+    skala = float(objekt.get("skala", 1.0))
+    ausgleich = -unten * skala if (modus == "unterkante" or (modus == "auto" and unten > BODEN_ANHEBEN_M)) else 0.0
+    return {"y": boden + ausgleich + float(objekt.get("hoehe_m", 0.0)), "boden": boden, "mitte": y0,
+            "spanne": spanne, "ausgleich": ausgleich, "pflanze": pflanze}
+
+
+def sichtflaechen(archiv) -> "Flaechen":
+    """Sichtbare Bodenflächen der gebauten Strecke (Render-Terrain ohne den Beton von Mauern und Gebäuden) als
+    Höhenquelle. Die Fahrphysik spart die Grundfläche an der Strecke aus (``spiel_geometrie.grundflaeche``: nur
+    Dreiecke ohne Berührung der Strecke); dort lag die alte Höhe bis 1,4 m über dem sichtbaren Boden (LongBoy).
+    Ohne lesbares Terrain: ``hoehenflaechen`` (Fahrphysik)."""
+    try:
+        from ego import grafik as g, grafik_terrain as gt
+        from . import spiel_geometrie as sg
+        idx = g._als_index(archiv)
+        t = g.Terrain.aus_bytes(idx[sg.TERRAIN].data())
+        ohne = {sg.KLASSEN["mauer"][0], sg.KLASSEN["gebaeude"][0]}
+        p, tri, basis = [], [], 0
+        for n in gt.terrain_lesen(archiv, sg.TERRAIN):
+            name = t.materialien[n.material].rsplit("/", 1)[-1] if isinstance(n.material, int) else str(n.material)
+            if name in ohne:
+                continue
+            p.append(np.asarray(n.positionen, np.float64)[:, :3])
+            tri.append(np.asarray(n.dreiecke, np.int64) + basis)
+            basis += len(n.positionen)
+        if p:
+            return Flaechen(np.concatenate(p), np.concatenate(tri))
+    except Exception:  # noqa: BLE001  (Träger ohne bekanntes Terrain: Fahrphysik)
+        pass
+    return hoehenflaechen(archiv)
 
 
 def ressourcen_kopieren(ziel, quellen, start, code, spielordner, praefix="umg_"):
@@ -943,8 +1230,8 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
 
     Je Objekt: Klon einer Träger-Instanz in ``speedtrees`` (Bäume, Büsche, Palmen) bzw. ``dressing`` (Rest) mit Name
     ``<layer>$umg_<id>``, uuid5-ID, Modell ``<modell>.idf?context=render``, Bindung ``<modell>.emb?context=default``
-    und Lagematrix (Drehung, Maßstab). Höhe = oberste Fläche der Fahrphysik (``hoehen``, Standard: TRN~ des Archivs)
-    plus ``hoehe_m``. Fehlende Modelle kommen samt Abhängigkeiten aus der Quell-ERP des Katalogs.
+    und Lagematrix (Drehung, Maßstab). Höhe: ``bodenlage`` auf den sichtbaren Flächen (``hoehen``, Standard:
+    ``sichtflaechen`` des Archivs) plus ``hoehe_m``; ``schief`` = Objekte auf Hängen (UMG_SCHIEF). Fehlende Modelle kommen samt Abhängigkeiten aus der Quell-ERP des Katalogs.
     Rückgabe: Bericht mit ``mipmaps`` = [(Name im ZIP, Spieldatei)] fürs Paket."""
     from ego import pkg
     from . import platzierung
@@ -953,7 +1240,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
     v = np.asarray(platzierung.VERSATZ if versatz is None else versatz, float)
     bericht = {"objekte": len(d["objekte"]), "bodenbewuchs": d["bodenbewuchs"], "gesetzt": 0, "uebersprungen": [],
                "je_layer": {}, "je_kategorie": {}, "modelle": {}, "ressourcen_neu": {}, "mipmaps": [],
-               "mipmaps_mb": 0.0, "offen": []}
+               "mipmaps_mb": 0.0, "offen": [], "schief": []}
     if not d["objekte"]:
         return bericht
     kd = katalog_daten
@@ -963,7 +1250,12 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
     if fehlen or kd is not None:
         kd = kd or katalog(spielordner)
         index = katalog_index(kd)
-    unbekannt = [m for m in fehlen if m not in index]
+    else:
+        try:   # Grundriss und Unterkante für die Bodenhöhe (bodenlage); ohne Katalog Ursprung auf den Boden
+            index = katalog_index(katalog(spielordner))
+        except UmgebungFehler:
+            index = {}
+    unbekannt =[m for m in fehlen if m not in index]
     if unbekannt:
         raise UmgebungFehler("Models neither in the carrier nor in the catalogue: %s" % ", ".join(unbekannt[:5]))
     # --- fehlende Modelle samt Abhängigkeiten kopieren (je Quell-ERP ein Index)
@@ -995,7 +1287,7 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
     bericht["mipmaps"] = sorted(alle_mips.items())
     bericht["mipmaps_mb"] = round(sum(os.path.getsize(f) for f in alle_mips.values()) / 1e6, 1)
     # --- Instanzen
-    hoehen = hoehen or hoehenflaechen(archiv)
+    hoehen = hoehen or sichtflaechen(archiv)
     pakete = {}
     namen_kat = {}
     for o in d["objekte"]:
@@ -1009,12 +1301,17 @@ def einsetzen(archiv, daten, code="portimao", versatz=None, katalog_daten=None, 
             pakete[layer] = (r, p, _vorlage(p, im_traeger), im_traeger)
         r, p, vi, im_traeger = pakete[layer]
         wx, wz = o["x"] + v[0], o["z"] + v[2]
-        y = hoehen.hoehe_nahe(wx, wz)
-        if y is None:
-            bericht["uebersprungen"].append({"id": o["id"], "grund": "keine Fläche der Fahrphysik unter dem Punkt",
+        lage = bodenlage(o, e, hoehen, v)
+        if lage is None:
+            bericht["uebersprungen"].append({"id": o["id"], "grund": "keine Bodenfläche unter dem Punkt",
                                              "welt": [round(wx, 2), round(wz, 2)]})
             continue
-        y += o["hoehe_m"]
+        y = lage["y"]
+        if lage["ausgleich"]:
+            bericht["abgesenkt"] = bericht.get("abgesenkt", 0) + 1
+        if not lage["pflanze"] and lage["spanne"] > SCHIEF_M:
+            bericht["schief"].append({"id": o["id"], "spanne_m": round(lage["spanne"], 2),
+                                      "welt": [round(wx, 2), round(y, 2), round(wz, 2)]})
         name = "%s$umg_%s" % (im_traeger, o["id"])
         uid = uuid.uuid5(uuid.NAMESPACE_URL, "ego-strecke:umgebung:" + name).bytes
         inst = pkg.instanz_hinzufuegen(p, vi, [wx, y, wz], name, uid)

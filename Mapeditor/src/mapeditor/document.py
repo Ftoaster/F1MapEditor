@@ -317,6 +317,40 @@ class Document(QObject):
                     o.update(felder)
         self.edit_env(tr("Change environment object") if len(kennungen) == 1 else tr("Change environment objects"), operation)
 
+    def env_rotate(self, drehungen, text=None):
+        """Drehung je Objekt setzen (``{id: drehung_grad}``, z. B. Drehen mit der Maus, „Face the track“), ein
+        Undo-Schritt."""
+        werte = {k: round(float(w) % 360.0, 3) % 360.0 for k, w in drehungen.items()}
+        if not werte:
+            return False
+
+        def operation(env):
+            for o in env["objekte"]:
+                if o["id"] in werte:
+                    o["drehung_grad"] = werte[o["id"]]
+        return self.edit_env(text or (tr("Rotate environment object") if len(werte) == 1
+                                      else tr("Rotate environment objects")), operation)
+
+    def env_set_front(self, werte):
+        """Vorderseite je Modell im Modellraum festlegen (``{modell: Grad}`` → ``umgebung.json`` → ``vorderseiten``,
+        ein Undo-Schritt); der Wert None entfernt die Korrektur (dann gilt der Katalogwert)."""
+        werte = dict(werte)
+        if not werte:
+            return False
+
+        def operation(env):
+            vs = dict(env.get("vorderseiten") or {})
+            for m, grad in werte.items():
+                if grad is None:
+                    vs.pop(m, None)
+                else:
+                    vs[m] = round(float(grad) % 360.0, 3)
+            if vs:
+                env["vorderseiten"] = vs
+            else:
+                env.pop("vorderseiten", None)
+        return self.edit_env(tr("Change model front"), operation)
+
     def env_set_ground_cover(self, an):
         self.edit_env(tr("Change ground cover"), lambda env: env.__setitem__("bodenbewuchs", bool(an)))
 

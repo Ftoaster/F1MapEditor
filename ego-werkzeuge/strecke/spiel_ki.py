@@ -185,7 +185,7 @@ def _interpolieren(werte, n, faktor=1):
     return (np.interp(np.linspace(0, 1, n), np.linspace(0, 1, len(werte)), werte)*faktor).tolist()
 
 
-def _bremsen(daten, gates, linien, splines, profil, modus, pit_limit):
+def _bremsen(daten, gates, linien, splines, profil, modus, pit_limit, tempo=None):
     ids = [int(x['id']) for x in linien]
     bericht = []
     for gruppe in daten.dokument.root.elements:
@@ -222,6 +222,11 @@ def _bremsen(daten, gates, linien, splines, profil, modus, pit_limit):
                     v = float(np.interp(p, profil['p'], profil['v']))
                     e.set('curvature_gate', 'false')
                     e.set('max_speed', format(v, '.12g'))
+            if tempo and nummer in tempo:
+                # Issue 5 (13.11.2026): feste Höchstgeschwindigkeit an dieser Bremslinie statt der Krümmung der Gate-Linie,
+                # damit die KI auch auf einer Runde ohne Bremspunkt (Oval) verzögern muss
+                e.set('curvature_gate', 'false')
+                e.set('max_speed', format(float(tempo[nummer]), '.6f'))
             neu.append(e)
         # Unbekannte Kinder bleiben an ihrer Position; nur bekannte Liste ersetzen.
         kinder, eingesetzt = [], False
@@ -347,7 +352,7 @@ def _ki_ressource(auftrag):
                     zeiten = _interpolieren(s.zeiten, n, faktoren[route])
                 s.zeiten_setzen(zeiten)
     elif typ == 'AIBrakeSettings':
-        _bremsen(d, g['gates'], g['linien'], g['splines'], profil, g['bremsmodus'], g['pit_limit'])
+        _bremsen(d, g['gates'], g['linien'], g['splines'], profil, g['bremsmodus'], g['pit_limit'], g.get('bremstempo'))
     elif typ not in FAHRZEUGFELDER:
         obj = d.inhalt()
         if typ in ('FuelBurnGran', 'ERSUseGran'):
@@ -387,7 +392,7 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     Profil und explizite Bremsgeschwindigkeiten sind
     Versuchsmodelle. Ohne Profil bleiben Verbrauchsformen normiert erhalten.
     """
-    erlaubt = {'modus', 'bremsmodus', 'ers_strategie', 'granular_samples', 'referenz_zeit_s', 'profil_fahrzeug', 'ohne_pakete', 'nur_typen', 'vp_abtastung'}
+    erlaubt = {'modus', 'bremsmodus', 'ers_strategie', 'granular_samples', 'referenz_zeit_s', 'profil_fahrzeug', 'ohne_pakete', 'nur_typen', 'vp_abtastung', 'bremstempo'}
     if set(optionen)-erlaubt:
         raise TypeError('Unknown AI options: '+', '.join(sorted(set(optionen)-erlaubt)))
     modus = optionen.get('modus', 'skalieren')
@@ -397,6 +402,10 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
     ohne = tuple(optionen.get('ohne_pakete') or ())
     nur_typen = frozenset(optionen.get('nur_typen') or ())
     vp_abtastung = optionen.get('vp_abtastung') or 'auto'
+    # {Bremslinien-ID: m/s}: feste Höchstgeschwindigkeit (curvature_gate aus) an einzelnen Bremslinien (Issue 5)
+    bremstempo = {int(k): float(v) for k, v in (optionen.get('bremstempo') or {}).items()}
+    if any(not math.isfinite(v) or v <= 0 for v in bremstempo.values()):
+        raise ValueError('bremstempo needs positive finite speeds')
     if vp_abtastung not in ('auto', 'skaliert', 'original'):
         raise ValueError('vp_abtastung: auto, skaliert or original')
     if modus not in ('skalieren', 'profil') or bremsmodus not in ('vorlage', 'profil'):
@@ -423,6 +432,8 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
             for a, n in zip(im_archiv, neu)):
         raise ValueError('Write the target TrackSpace first: spline points differ')
     gates, linien = _ai(archiv)
+    if set(bremstempo) - {int(l['id']) for l in linien}:
+        raise ValueError('bremstempo: unknown brake line IDs %s' % sorted(set(bremstempo) - {int(l['id']) for l in linien}))
     eingabe_gates = logik.get('spielformate', logik)['AISplineData']['gates']
     ziel_gates = {int(g['id']): g for g in eingabe_gates}
     if set(ziel_gates) != set(gates) or len(ziel_gates) != len(eingabe_gates):
@@ -504,7 +515,8 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
         gemeinsam = {'modus': modus, 'profil': profil, 'faktoren': faktoren, 'referenz': referenz,
                      'gates': projektionsgates, 'linien': linien, 'splines': neu, 'bremsmodus': bremsmodus,
                      'pit_limit': pit_limit, 'samples': samples, 'zeitfaktor': zeitfaktor,
-                     'strategie': strategie, 'gleiche_geometrie': gleiche_geometrie, 'vp_abtastung': vp_abtastung}
+                     'strategie': strategie, 'gleiche_geometrie': gleiche_geometrie, 'vp_abtastung': vp_abtastung,
+                     'bremstempo': bremstempo}
         # größte Ressourcen zuerst (zstd Stufe 19 der VPTimes ist der teuerste Teil)
         berechnet = parallel.abbilden(_ki_ressource, auftraege, gemeinsam,
                                       aufwand=[sum(f[1] for f in a[1]) for a in auftraege])
@@ -524,7 +536,7 @@ def ki_daten_anpassen(archiv, logik_json, vorlage='portimao', **optionen):
             'vp_grenze_mb': round(VP_GRENZE_BYTES/1e6, 1),
             'geaenderte_kennungen': geaendert, 'laengen_alt_m': [s.laenge for s in alt],
             'laengen_neu_m': [s.laenge for s in neu], 'laengenfaktoren': faktoren,
-            'brems_ids': sorted(int(l['id']) for l in linien),
+            'brems_ids': sorted(int(l['id']) for l in linien), 'bremstempo_m_s': bremstempo,
             'gates': len(gates), 'referenz_zeit_s': referenz,
             'profil_rundenzeit_s': float(profil['zeit'][-1]) if profil else None,
             'profil_fahrzeug': logik.get('ki_profil'),

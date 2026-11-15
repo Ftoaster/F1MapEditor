@@ -65,6 +65,8 @@ TRACK_CODES = (
 BUILD_CODES = tuple(code for code, _, _ in TRACK_CODES)
 BUILD_PVS = ("strecke", "alles")
 BUILD_ZIELE = ("ego", "swofty")
+#: Bildformate für die Flagge im Menü (Pillow im Werkzeugkasten liest sie alle)
+BUILD_FLAGGEN = (".png", ".jpg", ".jpeg", ".bmp", ".webp")
 BUILD_BIOME = ("standard", "wueste")
 BUILD_FARBTOENE = ("standard", "trocken", "saftig", "herbst")
 
@@ -192,6 +194,11 @@ def _option_args(options):
         if pvs not in BUILD_PVS:
             raise ValueError(tr("PVS variant {pvs!r} unknown.", pvs=pvs))
         args += ["--pvs-variante", pvs]
+    flagge = options.get("flagge")
+    if flagge:
+        if Path(flagge).suffix.lower() not in BUILD_FLAGGEN or not Path(flagge).is_file():
+            raise ValueError(tr("Flag image missing or not an image file: {pfad}", pfad=flagge))
+        args += ["--flagge", str(Path(flagge).resolve())]
     if options.get("traeger_teilen") and ziel == "swofty":
         args.append("--traeger-teilen")
     if "renndaten" in options:
@@ -970,7 +977,13 @@ def calculate_env_catalog(request):
     modul = _umgebung_modul(request.get("toolkit"))
     if modul is None:
         raise ValueError(tr("The toolkit does not contain environment models yet (strecke/umgebung.py is missing)."))
-    return modul.katalog(spielordner=request.get("spielordner"), neu=bool(request.get("neu")))
+    katalog = modul.katalog(spielordner=request.get("spielordner"), neu=bool(request.get("neu")))
+    if hasattr(modul, "vorderseite"):   # 15.11.2026: Vorderseite je Modell (Originalstrecken oder Annahme)
+        if hasattr(modul, "vorderseiten_sicherstellen"):   # einmalig aus dem Spielordner des Nutzers (≈ 20 s)
+            modul.vorderseiten_sicherstellen(katalog_daten=katalog, neu=bool(request.get("neu")))
+        for eintrag in katalog.get("modelle", []):
+            eintrag["vorne_grad"], eintrag["vorne_quelle"] = modul.vorderseite(eintrag["modell"], eintrag)
+    return katalog
 
 
 def calculate_env_preview(request):

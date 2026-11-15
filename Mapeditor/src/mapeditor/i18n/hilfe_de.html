@@ -51,6 +51,11 @@ es diese und öffnet die Runde dort. Überschneidet das eingefügte Stück die S
 <b>Überstand abschneiden</b> kürzt das gewählte Stück an einem offenen Ende ab der ersten Überschneidung.
 <b>Reihenfolge der Auswahl umkehren</b> dreht ein Stück um. Zum Schluss <b>Runde schließen</b> und <b>Lücken füllen</b>.
 Kreuzungen und Brücken lehnt die Prüfung ab (GE-01).</p>
+<h3>Höhen sehen</h3>
+<p><b>Ansicht → Kartenebenen → Höhe als Farbe</b> färbt die Strecke nach Höhe: blau ist der tiefste, gelb der höchste
+Punkt der Runde, mit Legende auf der Karte. <b>Farbe: Steigung</b> über dem Höhenprofil färbt stattdessen nach Steilheit
+(blau eben, gelb ab 12 %). Ist der Reiter Höhenprofil oder Querneigung offen, markiert die Maus über dem Profil dieselbe
+Stelle auf der Karte und umgekehrt.</p>
 <h3>Gerade Linien und Ecken</h3>
 <p>Kontrollpunkte verbindet eine weiche Kurve, die auf langen Geraden leicht ausbeult und an scharfen Ecken nach außen
 schwingt. <b>Bearbeiten → Zur Ecke machen</b> macht die gewählten Punkte zu Ecken (eckig gezeichnet): Die Strecke läuft genau
@@ -152,7 +157,7 @@ mehrere, Entf löscht, Doppelklick wählt die ganze Gruppe. Werkzeug <b>B</b> <b
 aufziehen oder mit dem Pinsel malen, mit Dichte (Objekte je Hektar), Modellmischung (mehrere Modelle wählen),
 zufälliger Drehung, Skalenbereich, Mindestabstand zur Strecke (Standard 15 m hinter der Mauer), Abstand der Objekte und
 Saatwert (gleicher Wert = gleiche Streuung). Jede Streuung ist eine <i>Gruppe</i> und ein Undo-Schritt. Die Objekte
-erscheinen als Kreise in Katalogröße (Farbe je Kategorie; Ansicht → Umgebung blendet sie aus). <i>Bodenbewuchs</i>
+erscheinen in Katalogröße (Farbe je Kategorie; Ansicht → Umgebung blendet sie aus): Bäume als Kreise, Gebäude, Zelte, Bildschirme … als gedrehter <b>Grundriss mit Pfeil zur Vorderseite</b>. <b>Drehen:</b> runden Griff hinter der Pfeilspitze ziehen (Umschalt: 15°-Schritte), Strg+Mausrad (5°, mit Umschalt 1°) oder R/Umschalt+R; <b>T</b> bzw. <i>Zur Strecke ausrichten</i> dreht die Vorderseite zur Mittellinie. Stimmt der Pfeil bei einem Modell nicht, dreht <i>Vorderseite +90°</i> ihn für alle Objekte dieses Modells. Der Bau setzt jedes Objekt auf den tiefsten Bodenpunkt unter seinem Grundriss (am Hang schwebt nichts) und senkt Modelle ab, deren Geometrie über ihrem Ursprung beginnt (Feld <i>Boden</i>). <i>Bodenbewuchs</i>
 lässt Gras und Unkraut des Trägers stehen. Die Prüfung meldet unbekannte Modelle, Objekte außerhalb des Streckenbereichs
 oder auf der Fahrbahn (Klick springt zum Objekt). Der Bau übernimmt die Datei <i>umgebung.json</i> des Projekts.</p>
 <p><b>Gelände:</b> Im Feld <i>Gelände</i> setzt <i>Hügel setzen</i> mit dem nächsten Klick einen Hügel in den

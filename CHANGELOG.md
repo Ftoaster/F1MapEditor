@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.0
+
+- Korean as third interface language (contributed by [Ftoaster](https://github.com/Ftoaster), PR #6): View → Language
+- Own flag in the game menu: the build dialog has a Flag row; pick any image and the build makes the three flag pictures of
+  the track from it (instead of the Portuguese flag of the carrier track)
+- Leftovers of the carrier track follow your track: garage props, rain blockers, light probes and pit-wall scenes move to
+  the new pit boxes, the podium moves with them, intro cameras fly along your centre line, Portimão's sound occluders are
+  switched off and the training programme is made from your corners (on by default)
+- Environment objects show which way they face: buildings, tents, screens, grandstands … are drawn as their real
+  footprint, turned exactly as in the game, with an arrow to their front. The front comes from the game's own tracks
+  (125 models, e.g. grandstands and big screens face the track there) or is assumed from the long side; if the arrow is
+  wrong for a model, Front +90° fixes it for all objects of that model. Rotate with the round handle at the arrow
+  (Shift: 15° steps), Ctrl+wheel (Shift: 1°) or R/Shift+R; T or Face the track turns the selection towards the track
+- Objects no longer float: the build puts the footprint on the lowest visible ground point below it (slopes of hills and
+  verges), lowers models whose geometry starts above their origin (big screens floated up to 2 m) and reads the height
+  from the visible ground instead of the driving physics (up to 1.4 m off next to the track). Per object, Ground can be
+  set back to the model origin. New checks UM-09 (object on a slope) and UM-10 (object left out, no ground)
+- New check KI-08 (error): a track on which the AI never has to brake (for example an oval without tight corners)
+  makes the game hang about 15 s after the race start (issue #5). The check names the speed range and asks for a tight
+  corner or a chicane
+- Shorter pit lanes: if the straight is short, the entry and exit transitions and the grass strip shrink automatically,
+  so a pit lane can be about 310 m long instead of 530 m (hint BO-06 tells you). Pit boxes are 13.2 m apart instead of 14 m
+- The light theme is removed; the editor always uses the dark theme (old projects with the light theme open dark)
+- Height as colour (View → Map layers): the track coloured by height (blue low, yellow high) or by gradient, on the map
+  and in the height profile. With the height profile or banking tab open, the mouse marks the same place on the map and
+  in the profile
+
 ## 0.3.7
 
 - Live map under the track, in true metres (contributed by [Ftoaster](https://github.com/Ftoaster), PR #3): Project → Live map. Satellite (Esri) or street (OpenStreetMap).

@@ -527,6 +527,13 @@ def cmd_bauen(args):
         if vorhanden and not args.ueberschreiben:
             raise BauFehler("Paket existiert bereits: %s (anderen --name/--paket-ordner wählen oder --ueberschreiben)"
                             % ", ".join(os.path.join(paket_ordner, n + ".zip") for n in vorhanden))
+    if args.flagge:   # vor dem langen Bau prüfen, nicht erst beim Einsetzen
+        try:
+            from PIL import Image
+            with Image.open(args.flagge) as bild:
+                bild.verify()
+        except Exception as fehler:
+            raise BauFehler("Flag image cannot be read: %s (%s)" % (args.flagge, fehler))
     bericht = {"zeitpunkt": datetime.datetime.now().isoformat(timespec="seconds"), "name": args.name,
                "warnungen": [], "schritte": {}, "versatz": list(platzierung.VERSATZ),
                "definition": _relativ(args.definition), "ausgabe": _relativ(aus),
@@ -618,6 +625,11 @@ def cmd_bauen(args):
             minimap_json = erg["minimap_json"]
             bericht["schritte"]["minimap"] = {"bilder": erg["bericht"].get("anzahl_bilder"),
                                               "ecken": minimap_json["textures"]["corners"]}
+    if args.flagge:   # Flagge im Menü: drei Bilder des Trägers ersetzen (docs/flagge.md)
+        from strecke import spiel_flagge
+        _log("Flagge einsetzen: %s …" % args.flagge)
+        bericht["schritte"]["flagge"] = {"bild": os.path.abspath(args.flagge),
+                                         "texturen": [t["kennung"] for t in spiel_flagge.flagge_einsetzen(a, args.flagge)]}
     # --- Umgebung (AP-U1): Klone der Träger-Instanzen vor dem Aufräumen setzen (das Aufräumen entfernt nur Originale)
     _phase("umgebung")
     welt_regeln = None
@@ -696,6 +708,12 @@ def cmd_bauen(args):
     if kb.get("mitgefuehrt"):
         _log("Kameras versetzt: %s, %d Kamerafahrten%s" % (", ".join("%s %d" % kv for kv in kb["layer"].items()),
                                                           kb["splines"], (", aus: " + ", ".join(kb["aus"])) if kb["aus"] else ""))
+    if args.traeger_reste:   # 13.11.2026: Garagenzubehör, Siegerehrung, Intro-Kameras, Trainingsprogramm (docs/traeger_reste.md)
+        from strecke import spiel_reste
+        rb = spiel_reste.reste_anpassen(a, zustand, lg, protokoll)
+        _log("Reste des Trägers nachgeführt: %s; %d Kamerafahrten; Trainingsprogramm %s Kurven" % (
+            ", ".join("%s %s" % (k, "/".join("%s %d" % kv for kv in v.items())) for k, v in rb["ebenen"].items() if v),
+            rb["kamerafahrten"], (rb["trainingsprogramm"] or {}).get("kurven", "–")))
     protokoll["schreiber"] = {k: v for k, v in zustand.schreiber.protokoll.items() if k != "gate_abbildung"}
     protokoll["ressourcen"] = geschrieben
     protokoll["weitere_plaetze_gesetzt"] = n_platz
@@ -713,6 +731,10 @@ def cmd_bauen(args):
             extra["vp_abtastung"] = args.ki_vp_abtastung
         if args.ki_nur_typen:
             extra["nur_typen"] = tuple(p.strip() for p in args.ki_nur_typen.split(",") if p.strip())
+        if getattr(args, "ki_bremstempo", ""):
+            # "ID=km/h,…": feste Höchstgeschwindigkeit an einzelnen Bremslinien (Diagnose Issue 5, Runde ohne Bremspunkt)
+            extra["bremstempo"] = {int(t.split("=")[0]): float(t.split("=")[1]) / 3.6
+                                   for t in args.ki_bremstempo.split(",") if t.strip()}
         if args.ki_ohne_pakete:
             extra["ohne_pakete"] = tuple(p.strip() for p in args.ki_ohne_pakete.split(",") if p.strip())
         bericht["schritte"]["ki_daten"] = spiel_ki.ki_daten_anpassen(
@@ -790,6 +812,9 @@ def cmd_bauen(args):
         geprueft |= pruefregeln.bau_pruefungen_bewerten(pr, m)
         if minimap_json is not None:
             geprueft |= pruefregeln.minimap_pruefen(minimap_json, m)
+        if umg_bericht is not None:   # 15.11.2026: Objekte auf Hängen / ohne Boden (UMG_SCHIEF, UMG_OHNE_BODEN)
+            from strecke import umgebung as umg
+            geprueft |= umg.bau_bewerten(umg_bericht, m)
         b = pruefregeln.bericht(m, geprueft, ["bau"])
         _streng_pruefen(args, _meldungen_senden(b, "bau", regel_meldungen, gesehen), "bau")
     # --- Draufsichten
@@ -1434,6 +1459,11 @@ def argumente(argv):
     s.add_argument("--weltkarten", action=argparse.BooleanOptionalAction, default=None,
                    help="eigene Boden-, TrackInfo- und Außenterrain-Karten (setzt --welt-uv echt; docs/welt_texturen.md); "
                         "im Profil empfohlen an, --no-weltkarten schaltet sie ab")
+    s.add_argument("--traeger-reste", action=argparse.BooleanOptionalAction, default=True,
+                   help="ortsgebundene Ebenen des Trägers nachführen: Garagenzubehör, Siegerehrung, Zwischensequenzen, "
+                        "Intro-Kameras, Klangverdecker aus, Trainingsprogramm (docs/traeger_reste.md); Standard an")
+    s.add_argument("--flagge", default=None, metavar="BILD",
+                   help="eigene Flagge im Menü statt der des Trägers: beliebiges Bild (PNG/JPG), am besten 3:2 (docs/flagge.md)")
     s.add_argument("--biom", choices=("standard", "wueste"), default="standard",
                    help="mit --weltkarten: standard = Gras, wueste = Bahrains Sand und Fels, kein Bodenbewuchs")
     s.add_argument("--farbton", choices=("standard", "trocken", "saftig", "herbst"), default="standard",
@@ -1453,6 +1483,9 @@ def argumente(argv):
                         "solange die Gesamtmenge unter 300 MB bleibt, sonst wie in der Vorlage (Mod 1.0.2 stürzt darüber ab)")
     s.add_argument("--ki-nur-typen", default="",
                    help="nur diese KI-Ressourcentypen anpassen (Komma), z. B. VPTimes; Rest unverändert")
+    s.add_argument("--ki-bremstempo", default="",
+                   help="feste Höchstgeschwindigkeit an Bremslinien, ID=km/h mit Komma (z. B. 20=200,90=200); schaltet dort "
+                        "curvature_gate ab. Nur mit --ki-daten skalieren/profil (Diagnose Issue 5)")
     s.add_argument("--ki-ohne-pakete", default="",
                    help="Fahrzeugpakete (Komma), deren KI-Daten unverändert bleiben, z. B. f1_2024_story_vehicle_package")
     s.add_argument("--pvs-korridor", type=float, default=60.0, help="Korridorbreite je Seite für --pvs-variante strecke")

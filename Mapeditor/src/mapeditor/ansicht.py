@@ -32,6 +32,9 @@ FEATURES = [
      N_(("Trees, bushes, buildings … as circles at catalogue size (colour per category); edit with the “Environment” "
          "tool (U)")), True),
     ("eingabepunkte", N_("Map layers"), N_("Input points"), N_("Control points or segment ends as handles"), True),
+    ("hoehenfarben", N_("Map layers"), N_("Height as colour"),
+     N_("Track coloured by height (blue = lowest, yellow = highest point of the lap) or by gradient – the height "
+        "profile uses the same colours"), False),
     ("beschriftungen", N_("Map layers"), N_("Zone labels"), N_(("Names of the DRS/Straight Mode zones and "
                                                                           "of the pit lane")), True),
     ("massstab", N_("Map layers"), N_("Scale"), N_("Scale bottom right"), True),

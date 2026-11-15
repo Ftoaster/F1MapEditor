@@ -293,6 +293,7 @@ Der aktuelle vollständige Teststand und der einmalige echte EXE-Bau stehen in
 [docs/stand.md](docs/stand.md).
 Details und Grenzen: [docs/stand.md](docs/stand.md).
 Offene Verbesserungsvorschläge (Durchsicht 25.10.2026): [docs/verbesserungen.md](docs/verbesserungen.md).
+UX-Analyse der ganzen Oberfläche (10.11.2026, mit Belegbildern und Reihenfolge): [docs/ux_analyse.md](docs/ux_analyse.md).
 Trailer (40 s, 1080p, mit Musik): [docs/trailer/mapeditor_trailer.mp4](docs/trailer/mapeditor_trailer.mp4), neu erzeugen mit
 `packaging/trailer.py`.
 Die beiden echten Beispieldefinitionen werden beim Rundlauf inhaltlich verglichen;

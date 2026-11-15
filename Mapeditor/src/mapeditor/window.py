@@ -455,9 +455,6 @@ class MainWindow(QMainWindow):
         self.action(edit_menu, tr("Banking: all corners automatically"), lambda: self.auto_bank(self.bank_panel.amount.value() or 4.0))
         self.action(edit_menu, tr("Banking: whole track flat"), self.flatten_bank)
         view_menu = self.menuBar().addMenu(tr("&View"))
-        self.action(view_menu, tr("Dark theme"), lambda: self.change_theme("dunkel"))
-        self.action(view_menu, tr("Light theme"), lambda: self.change_theme("hell"))
-        view_menu.addSeparator()
         for group in ansicht.GROUPS:
             submenu = view_menu.addMenu(tr(group))
             for key, g, label, tip, _ in ansicht.FEATURES:
@@ -705,6 +702,17 @@ class MainWindow(QMainWindow):
             button.clicked.connect(lambda checked=False, key=key: self.height_tool(key))
             bar.addWidget(button)
             self.height_buttons[key] = button
+        # Farbe nach Höhe oder Steigung (sichtbar bei „Höhe als Farbe“)
+        self.color_mode_box = QComboBox()
+        self.color_mode_box.addItem(tr("Colour: height"), "hoehe")
+        self.color_mode_box.addItem(tr("Colour: gradient"), "steigung")
+        self.color_mode_box.setToolTip(tr("Colour the track by height (blue low, yellow high) or by gradient "
+                                          "(blue flat, yellow 12 % and steeper)"))
+        modus = ansicht.settings().value("ansicht/farbmodus") or "hoehe"
+        self.color_mode_box.setCurrentIndex(max(0, self.color_mode_box.findData(modus)))
+        self.color_mode_box.currentIndexChanged.connect(lambda *_: self.set_color_mode(self.color_mode_box.currentData()))
+        self.color_mode_box.hide()
+        bar.addWidget(self.color_mode_box)
         page_layout.addLayout(bar)
         page_layout.addWidget(self.height, 1)
         self.results.addTab(self.height_page, tr("Height profile"))
@@ -830,6 +838,10 @@ class MainWindow(QMainWindow):
         self.map.env_place_requested.connect(self._env_place)
         self.map.env_scatter_requested.connect(self._env_scatter)
         self.map.env_disarm_requested.connect(self.env_panel.disarm)
+        self.map.env_face_track_requested.connect(self._env_face_track)
+        self.env_panel.face_track_requested.connect(self._env_face_track)
+        self.env_panel.front_turn_requested.connect(self._env_front_turn)
+        self.env_panel.front_reset_requested.connect(self._env_front_reset)
         self.map.terrain_place_requested.connect(self._terrain_place)
         center = QSplitter(Qt.Vertical)
         center.addWidget(self.map)
@@ -927,6 +939,11 @@ class MainWindow(QMainWindow):
         self.project_heading.setTextFormat(Qt.RichText)
         content_layout.addWidget(self.project_heading)
         content_layout.addWidget(horizontal, 1)
+        # Maus auf Karte und Profil markiert dieselbe Stelle
+        self.map.hover_changed.connect(self._map_hover)
+        self.height.hover_changed.connect(self._profile_hover)
+        self.bank.hover_changed.connect(self._profile_hover)
+        self.vertical_split.splitterMoved.connect(lambda *args: self._update_track_hover())
         # Startbildschirm über der Karte (leeres Projekt)
         self.welcome = WelcomePanel(self.map)
         self.welcome.chosen.connect(self._welcome_choice)
@@ -947,7 +964,7 @@ class MainWindow(QMainWindow):
         self.issue_badge = QPushButton(tr("Not checked yet"))
         self.issue_badge.setFlat(True)
         self.issue_badge.setToolTip(tr("Show check result (Check: Ctrl+Enter)"))
-        self.issue_badge.clicked.connect(lambda: self.results.setCurrentWidget(self.issue_panel))
+        self.issue_badge.clicked.connect(lambda: self.show_results(self.issue_panel))
         self.statusBar().addPermanentWidget(self.issue_badge)
         self.group_hint = QLabel(tr("To move a group, first “Convert to control points”"))
         self.group_hint.setWordWrap(True)
@@ -1101,9 +1118,6 @@ class MainWindow(QMainWindow):
         if self.document.bild_only:
             self._bild_changed()
             return
-        theme = self.document.project.manifest.get("thema", "dunkel")
-        if self.map.dark != (theme != "hell"):
-            self.set_theme(theme)
         self._refresh_objects()
         if self.properties.state() != QAbstractItemView.EditingState:
             self._refresh_properties()
@@ -2200,7 +2214,7 @@ class MainWindow(QMainWindow):
         self.env_panel.terrain_box.setVisible(mode in ("umgebung", "streuen"))
         self._refresh_bank_panel()
         if mode in ("umgebung", "streuen") and focus:
-            self.results.setCurrentWidget(self.env_panel)      # Katalog und Einstellungen zeigen (lädt den Katalog)
+            self.show_results(self.env_panel)                  # Katalog und Einstellungen zeigen (lädt den Katalog)
             self._results_tab_changed()
         self._update_welcome()
 
@@ -2349,7 +2363,7 @@ class MainWindow(QMainWindow):
 
     def request_check(self):
         """Prüfen = Fahrlinienlauf (Generator + alle Regeln); gleicher Stand → Ergebnis aus dem Zwischenspeicher."""
-        self.results.setCurrentWidget(self.issue_panel)
+        self.show_results(self.issue_panel)
         if not self.document.project.closed:
             self.request_preview()
             return
@@ -2561,6 +2575,7 @@ class MainWindow(QMainWindow):
             self.right_panel.setVisible(on)
         elif key == "unterer_bereich":
             self.results.setVisible(on)
+            self._update_track_hover()
         elif key == "querneigungsfeld":
             self.bank_feature = on
             self._refresh_properties()             # Querneigung dann wieder als Tabellenzeile
@@ -2571,9 +2586,13 @@ class MainWindow(QMainWindow):
         elif key == "statuszeile":
             self.statusBar().setVisible(on)
         elif key in getattr(self, "tab_features", {}):
-            self.results.setTabVisible(self.results.indexOf(self.tab_features[key]), on)
+            index = self.results.indexOf(self.tab_features[key])
+            if index >= 0:
+                self.results.setTabVisible(index, on)
         elif key == "fahrlinie_auto":
             self._auto_analysis_toggled(on)
+        elif key == "hoehenfarben":
+            self._apply_height_colors()
         elif key == "startbildschirm":
             self.welcome_feature = on
             self._update_welcome()
@@ -2586,6 +2605,60 @@ class MainWindow(QMainWindow):
             self.view_dialog.sync(key, on)
         if save and not (key == "fahrlinie_auto" and not self.interactive):
             ansicht.save_state(key, on)
+
+    # ------------------------------------------------------------------ Höhe als Farbe, Mauskopplung Karte/Profil
+    def _apply_height_colors(self):
+        on = bool(self.view_state.get("hoehenfarben"))
+        modus = self.color_mode_box.currentData() if hasattr(self, "color_mode_box") else "hoehe"
+        self.height.height_colors = on
+        self.height.color_mode = modus
+        self.height.update()
+        if hasattr(self, "color_mode_box"):
+            self.color_mode_box.setVisible(on)
+        if hasattr(self, "map") and (self.map.height_colors, self.map.color_mode) != (on, modus):
+            self.map.height_colors, self.map.color_mode = on, modus
+            self.map.rebuild(self.preview)
+
+    def set_color_mode(self, modus):
+        """Farbe nach Höhe oder Steigung (Karte und Profil); programmweit gemerkt."""
+        if modus not in ("hoehe", "steigung"):
+            return
+        if self.color_mode_box.currentData() != modus:
+            self.color_mode_box.setCurrentIndex(self.color_mode_box.findData(modus))
+            return                                   # currentIndexChanged ruft erneut auf
+        if self.interactive:
+            ansicht.settings().setValue("ansicht/farbmodus", modus)
+        self._apply_height_colors()
+
+    def _update_track_hover(self):
+        """Mausposition auf der Karte im Profil zeigen, wenn der Reiter Höhenprofil oder Querneigung sichtbar ist."""
+        if not hasattr(self, "vertical_split"):
+            return
+        sizes = self.vertical_split.sizes()
+        tab = (self.results.isVisible() and len(sizes) == 2 and sizes[1] > 0
+               and self.results.currentWidget() in (self.height_page, self.bank_page))
+        on = bool(tab)
+        self.map.track_hover = on
+        if not on:
+            for profile in (self.height, self.bank):
+                if profile.hover_station is not None:
+                    profile.hover_station = None
+                    profile.update()
+
+    def show_results(self, widget):
+        """Reiter unter der Karte zeigen."""
+        self.results.setCurrentWidget(widget)
+
+    def _map_hover(self, station):
+        for profile in (self.height, self.bank):
+            if profile.hover_station != station:
+                profile.hover_station = station
+                profile.update()
+
+    def _profile_hover(self, station):
+        if self.map.hover_station != station:
+            self.map.hover_station = station
+            self.map.viewport().update()
 
     def open_view_dialog(self):
         self.view_dialog = ansicht.ViewDialog(self.view_state, self)
@@ -2613,7 +2686,8 @@ class MainWindow(QMainWindow):
             return
         store = ansicht.settings()
         store.setValue("layout/horizontal", self.horizontal_split.sizes())
-        store.setValue("layout/vertikal", self.vertical_split.sizes())
+        vertikal = self.vertical_split.sizes()
+        store.setValue("layout/vertikal", vertikal)
 
     def _restore_layout(self):
         if not self.interactive:
@@ -3035,13 +3109,9 @@ class MainWindow(QMainWindow):
         except ValueError as error:
             self.error(meldung(error))
 
-    def change_theme(self, theme):
-        if not self.document.project.readonly:
-            self.document.edit(tr("Change theme"), lambda raw, meta: meta.update(thema=theme))
-        self.set_theme(theme)
-
-    def set_theme(self, theme):
-        dark = theme != "hell"
+    def set_theme(self, theme="dunkel"):
+        """Farben setzen. Seit 10.11.2026 gibt es nur das dunkle Design; ``thema`` alter Projekte wird ignoriert."""
+        dark = True
         palette = QPalette()
         for role, color in ((QPalette.Window, "#101820" if dark else "#F3F6F8"),
                             (QPalette.WindowText, "#F1F5F9" if dark else "#162331"),
@@ -3135,7 +3205,7 @@ class MainWindow(QMainWindow):
         self.output_tree.topLevelItem(1).setExpanded(True)
         self.output_tree.setColumnWidth(0, 460)
         self.output_tree.show()
-        self.results.setCurrentWidget(self.analysis_page)
+        self.show_results(self.analysis_page)
 
     def confirm_discard(self):
         if self.document.undo.isClean():
@@ -3649,6 +3719,7 @@ class MainWindow(QMainWindow):
 
     def _results_tab_changed(self, *args):
         self._refresh_bank_panel()
+        self._update_track_hover()
         if self.results.currentWidget() is self.env_panel and self.env_catalog is None and self.interactive:
             self.load_env_catalog()
 
@@ -3814,6 +3885,40 @@ class MainWindow(QMainWindow):
         if self.document.env_selected:
             self.document.env_set(self.document.env_selected, **felder)
 
+    def _env_centreline(self):
+        """Mittellinie [(x, z)] für „Face the track“: Vorschau, sonst Eingabegeometrie; None ohne Strecke."""
+        preview = self.preview if self.preview and self.preview_revision == self.document.revision else None
+        pos = (preview or {}).get("pos") or self.map.input.get("pos") or []
+        punkte = [(float(p[0]), float(p[2])) for p in pos if len(p) >= 3]
+        return punkte if len(punkte) >= 2 else None
+
+    def _env_face_track(self):
+        """Gewählte Objekte mit der Vorderseite zum nächsten Punkt der Mittellinie drehen (ein Undo-Schritt)."""
+        document = self.document
+        linie = self._env_centreline()
+        if not document.env_selected or linie is None or not document.env_editable:
+            return
+        korrekturen = document.env.get("vorderseiten") or {}
+        drehungen = {}
+        for o in document.env_objects:
+            if o["id"] in document.env_selected:
+                ziel = umgebung.naechster_punkt(linie, o["x"], o["z"])
+                if ziel is not None and math.hypot(ziel[0] - o["x"], ziel[1] - o["z"]) > 1e-6:
+                    drehungen[o["id"]] = umgebung.drehung_zur_strecke(o, self.map.env_index, ziel, korrekturen)
+        document.env_rotate(drehungen, tr("Face the track"))
+
+    def _env_front_models(self):
+        return {o["modell"] for o in self.document.env_objects if o["id"] in self.document.env_selected}
+
+    def _env_front_turn(self, grad):
+        """Vorderseite der gewählten Modelle im Modellraum um ``grad`` weiterdrehen (Korrektur je Modell)."""
+        korrekturen = self.document.env.get("vorderseiten") or {}
+        self.document.env_set_front({m: (umgebung.vorderseite(m, self.map.env_index, korrekturen)[0] + grad) % 360.0
+                                     for m in self._env_front_models()})
+
+    def _env_front_reset(self):
+        self.document.env_set_front({m: None for m in self._env_front_models()})
+
     def _env_ground_cover(self, on):
         self.document.env_set_ground_cover(on)
 
@@ -3855,7 +3960,8 @@ class MainWindow(QMainWindow):
         project = document.project
         self.env_panel.show_selection(chosen, self.map.env_index, anzahl=len(document.env_objects),
                                       bodenbewuchs=project.umgebung.get("bodenbewuchs") if project.umgebung is not None else False,
-                                      editierbar=document.env_editable)
+                                      editierbar=document.env_editable,
+                                      korrekturen=document.env.get("vorderseiten") or {})
         form = document.terrain_form(document.terrain_selected) if document.terrain_selected else None
         art = umgebung.form_art(document.env, form["id"]) if form else None
         self.env_panel.show_terrain(art, form, umgebung.form_problem(art, form, project.manifest.get("versatz", [0, 0, 0]))

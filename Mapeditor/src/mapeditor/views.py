@@ -6,6 +6,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import QWidget
 
+from . import hoehenfarbe
 from .i18n import dezimal, tr, trn
 from .mapview import MATERIALS, MATERIAL_NAMES, MapView, cosmetic, path_for  # noqa: F401  (MapView: Rückwärtskompatibilität)
 from .ux import zahl
@@ -20,6 +21,7 @@ class ProfileView(QWidget):
     nodes_selected = Signal(object, int)        # Objektindizes, Hauptindex
     heights_changed = Signal(object)            # {Objektindex: neuer Wert} (Höhe in m bzw. Querneigung in °)
     height_tool = Signal(str)                   # uebergang / rampe / eben / glaetten / eingeben
+    hover_changed = Signal(object)              # Station unter der Maus oder None (Markierung auf der Karte)
 
     GRIFF_PX = 8
 
@@ -37,6 +39,9 @@ class ProfileView(QWidget):
         self._drag = None                       # {"start": QPointF, "frame": …, "dy": float, "nodes": […]}
         self._band = None                       # Bereichsauswahl (QPointF, QPointF)
         self._pending = None                    # Maus auf dem Profil gedrückt, Richtung noch offen
+        self.height_colors = False              # Linie in Höhenfarben (gleiche Skala wie die Karte)
+        self.color_mode = "hoehe"               # Farbe nach Höhe oder Steigung (``hoehenfarbe.MODI``)
+        self.hover_station = None               # Stelle, über der die Maus auf der Karte steht
         self.setMinimumHeight(170)
         self.setAccessibleName(tr("Height profile in metres from the finish") if kind == "height" else tr(("Banking in degrees from the "
                                                                                                 "finish")))
@@ -177,8 +182,38 @@ class ProfileView(QWidget):
         if not bank:
             painter.setPen(QPen(QColor("#AABBCD"), 1.5, Qt.DashLine))
             painter.drawPath(path_for([xy(s, v) for s, v in zip(ss, complete(raw_values))]))
-        painter.setPen(QPen(QColor("#67D9F5" if self.palette().window().color().lightness() < 128 else "#005C73"), 2))
-        painter.drawPath(path_for([xy(s, v) for s, v in zip(ss, complete(values))]))
+        spanne = hoehenfarbe.bereich(data, self.color_mode) if self.height_colors and not bank else None
+        farbwerte = hoehenfarbe.werte(data, self.color_mode) if spanne else []
+        hell = self.palette().window().color().lightness() >= 128
+        if spanne and len(farbwerte) == len(values):
+            # Farben: Stücke gleicher Farbstufe als eigene Linie (Skala über die ganze Runde wie auf der Karte);
+            # die Linie zeigt immer die Höhe, gefärbt nach Höhe oder Steigung
+            werte, farben = complete(values), complete(farbwerte)
+            if hell:                             # dunkle Unterlage: Gelb und Orange bleiben auf hellem Grund lesbar
+                painter.setPen(QPen(QColor("#3A4654"), 5.5))
+                painter.drawPath(path_for([xy(s, v) for s, v in zip(ss, werte)]))
+            start = 0
+            while start < len(ss) - 1:
+                stufe = hoehenfarbe.stufe(farben[start], *spanne)
+                end = start + 1
+                while end < len(ss) - 1 and hoehenfarbe.stufe(farben[end], *spanne) == stufe:
+                    end += 1
+                painter.setPen(QPen(hoehenfarbe.stufenfarbe(stufe), 3.5))
+                painter.drawPath(path_for([xy(s, v) for s, v in zip(ss[start:end + 1], werte[start:end + 1])]))
+                start = end
+        else:
+            painter.setPen(QPen(QColor("#67D9F5" if self.palette().window().color().lightness() < 128 else "#005C73"), 2))
+            painter.drawPath(path_for([xy(s, v) for s, v in zip(ss, complete(values))]))
+        if self.hover_station is not None and s0 <= self.hover_station <= s1:
+            k = min(range(len(data["s"])), key=lambda k: abs(data["s"][k] - self.hover_station))
+            p = QPointF(*xy(data["s"][k], values[k]))
+            painter.setPen(QPen(text, 1, Qt.DotLine))
+            painter.drawLine(QPointF(p.x(), plot.top()), QPointF(p.x(), plot.bottom()))
+            painter.setPen(QPen(QColor("#FFFFFF"), 2))
+            farbe = (hoehenfarbe.farbe(farbwerte[k], *spanne) if spanne and k < len(farbwerte) else QColor("#FF5050"))
+            painter.setBrush(farbe)
+            painter.drawEllipse(p, 6, 6)
+            painter.setBrush(Qt.NoBrush)
         x = xy(self.station, lo)[0]
         painter.setPen(QPen(QColor("#D4AA61"), 1.5, Qt.DashLine))
         painter.drawLine(QPointF(x, plot.top()), QPointF(x, plot.bottom()))
@@ -340,6 +375,13 @@ class ProfileView(QWidget):
             self.update()
             return
         self.setCursor(Qt.SizeVerCursor if self.editable and self._hit(pos) is not None else Qt.ArrowCursor)
+        if self._frame and event.buttons() == Qt.NoButton:
+            plot = self._frame[0]
+            self.hover_changed.emit(self._station_at(pos.x()) if plot.left() <= pos.x() <= plot.right() else None)
+
+    def leaveEvent(self, event):
+        self.hover_changed.emit(None)
+        super().leaveEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MiddleButton:

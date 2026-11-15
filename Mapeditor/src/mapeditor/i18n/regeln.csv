@@ -65,5 +65,8 @@ UMG_VIELE;UM-05;Very many environment objects (more than 3,000, performance);Seh
 UMG_HUEGEL_LAGE;UM-06;Hill/hollow with its centre outside the track area;Hügel/Senke mit Mitte außerhalb des Streckenbereichs;언덕/움푹한 곳의 중심이 트랙 영역 밖
 UMG_BERG_LAGE;UM-07;Mountain with its centre inside the track area or more than 12 km from the centre;Berg mit Mitte im Streckenbereich oder mehr als 12 km von der Mitte entfernt;산의 중심이 트랙 영역 안이거나 중심에서 12 km보다 멂
 UMG_BERG_RAND;UM-08;Mountain reaches the edge of the track area and is cut off there;Berg reicht an den Rand des Streckenbereichs und wird dort abgeschnitten;산이 트랙 영역 가장자리에 닿아 그 자리에서 잘림
+UMG_SCHIEF;UM-09;Environment object on a slope: the ground under its footprint varies by more than 1 m;Umgebungsobjekt am Hang: Der Boden unter dem Grundriss schwankt um mehr als 1 m;환경 오브젝트가 경사면에 있음: 바닥면 아래 지면이 1 m 넘게 차이 남
+UMG_OHNE_BODEN;UM-10;Environment object left out: no ground under it;Umgebungsobjekt ausgelassen: kein Boden darunter;환경 오브젝트 제외됨: 아래에 지면이 없음
 GRID_IN_KURVE;SA-01;Starting grid is longer than the straight: grid slots lie in a corner or on banking;Startaufstellung länger als die Gerade: Startplätze liegen in einer Kurve oder auf Querneigung;출발 그리드가 직선보다 김: 그리드 자리가 코너나 뱅크 위에 있음
 BOX_BEGRENZT;BO-06;Pit lane shortened to stay on the straight;Boxengasse gekürzt, damit sie auf der Geraden bleibt;직선에 머물도록 피트 레인을 줄임
+KI_OHNE_BREMSZONE;KI-08;No braking zone on the lap: the AI drives flat out all the way round;Keine Bremszone auf der Runde: Die KI fährt die ganze Runde Vollgas;랩에 브레이킹 존이 없음: AI가 한 바퀴 내내 풀 스로틀로 달림

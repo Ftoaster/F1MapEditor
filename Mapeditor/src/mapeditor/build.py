@@ -12,7 +12,7 @@ import uuid
 import zipfile
 
 from PySide6.QtCore import QElapsedTimer, QEvent, Qt, QTimer, QUrl
-from PySide6.QtGui import QBrush, QColor, QDesktopServices, QPainter
+from PySide6.QtGui import QBrush, QColor, QDesktopServices, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QComboBox, QDialog, QFrame, QGridLayout, QScrollArea, QSizePolicy, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QTableWidget, QTableWidgetItem,
@@ -268,6 +268,27 @@ class BuildDialog(QDialog):
         self.note = QLineEdit()
         self.note.setPlaceholderText(tr("What's new? (e.g. “Turn 11 apex, 50 m boards”) – appears in the playtest log"))
         form.addRow(tr("What's new?"), self.note)
+        # Flagge im Menü: beliebiges Bild statt der Flagge des Trägers (Portugal), docs/flagge.md
+        self.flag_path = ""
+        self.flag_preview = QLabel()
+        self.flag_preview.setFixedSize(48, 32)
+        self.flag_text = ElidedLabel()
+        self.flag_choose = QPushButton(tr("Choose …"))
+        self.flag_clear = QPushButton(tr("Remove"))
+        self.flag_choose.clicked.connect(self.choose_flag)
+        self.flag_clear.clicked.connect(lambda: self.set_flag(""))
+        flag_row = QHBoxLayout()
+        flag_row.addWidget(self.flag_preview)
+        flag_row.addWidget(self.flag_text, 1)
+        flag_row.addWidget(self.flag_choose)
+        flag_row.addWidget(self.flag_clear)
+        self.flag_label = QLabel(tr("Flag"))
+        tip = tr("Flag shown with the track in the game menus. Any picture works, ideally about 3:2; it is cropped to "
+                 "fill. Without a picture the track shows the carrier's flag (Portugal).")
+        for widget in (self.flag_label, self.flag_preview, self.flag_text, self.flag_choose):
+            widget.setToolTip(tip)
+        form.addRow(self.flag_label, flag_row)
+        self.set_flag(settings.get("flagge", ""))
         try:
             root = toolkit_path(self.project.manifest.get("werkzeugkasten"))
             carrier = str(default_carrier(root))
@@ -793,8 +814,42 @@ class BuildDialog(QDialog):
         self.advanced.setVisible(on)
         self.advanced_toggle.setText(tr("Advanced build options ▾") if on else tr("Advanced build options ▸"))
 
+    def flag_file(self):
+        """Gewähltes Flaggenbild als Pfad (Namen ohne Ordner liegen im Projektordner); None ohne Flagge."""
+        if not self.flag_path:
+            return None
+        path = Path(self.flag_path).expanduser()
+        return path if path.is_absolute() else Path(self.project.basis) / path
+
+    def set_flag(self, path):
+        """Flagge setzen oder mit leerem Pfad entfernen; Bilder im Projektordner merkt sich das Projekt ohne Ordner."""
+        path = str(path or "")
+        folder = self.project.folder
+        if path and folder and Path(path).is_absolute() and Path(path).parent == Path(folder):
+            path = Path(path).name
+        self.flag_path = path
+        file = self.flag_file()
+        image = QPixmap(str(file)) if file and file.is_file() else QPixmap()
+        self.flag_preview.setPixmap(image.scaled(self.flag_preview.size(), Qt.KeepAspectRatioByExpanding,
+                                                 Qt.SmoothTransformation) if not image.isNull() else QPixmap())
+        if not path:
+            self.flag_text.set_full(tr("carrier's flag (Portugal)"))
+        elif image.isNull():
+            self.flag_text.set_full(tr("Picture cannot be read: {pfad}", pfad=file))
+        else:
+            self.flag_text.set_full(str(file))
+        self.flag_clear.setEnabled(bool(path))
+
+    def choose_flag(self):
+        start = str(self.flag_file() or self.project.folder or "")
+        value, _ = QFileDialog.getOpenFileName(self, tr("Choose flag picture"), start,
+                                               tr("Pictures (*.png *.jpg *.jpeg *.bmp *.webp)"))
+        if value:
+            self.set_flag(value)
+
     def options(self):
         return {"ziel": self.target.currentData(), "traeger_teilen": self.shared_carrier.isChecked(),
+                "flagge": str(self.flag_file() or ""),
                 "streckencode": self.code.currentData(),
                 "renndaten": self.race_data.isChecked(), "raster": self.grid_size.currentData(),
                 "streckenname": self.track_name.text().strip(),
@@ -910,6 +965,7 @@ class BuildDialog(QDialog):
             check_space(output, packages)
             settings = {"ausgabe": str(output), "pakete": str(packages), "traeger": str(carrier),
                         "ki_profil": self.ki_profil.isChecked(), **self.options()}
+            settings["flagge"] = self.flag_path          # im Projektordner nur der Dateiname: Projekt bleibt verschiebbar
             self.main.document.edit(tr("Change build settings"), lambda raw, meta: meta.update(bauen=settings))
             if not self.main.save_project():
                 return
