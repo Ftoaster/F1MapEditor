@@ -24,7 +24,8 @@ DIST = EDITOR / "dist"
 ZIEL = DIST / "Mapeditor"
 
 # Whitelist: nur Code und kleine Daten. Keine Tests, Analysen, Ergebnisse, Testausgaben.
-KOPIEREN = [("strecke", ["*.py", "beispiele/*.json", "fahrzeuge/*.json"]), ("ego", ["*.py"]),
+KOPIEREN = [("strecke", ["*.py", "beispiele/*.json", "fahrzeuge/*.json", "daten/*.json",
+                          "daten/vorschau/asphalt/*.png", "daten/vorschau/skid/*.png"]), ("ego", ["*.py"]),
             (".", ["neue_strecke_tool.py", "paket_tool.py", "erp_tool.py", "strecke_tool.py", "injektor_tool.py"])]
 MAX_DATEI = 1_000_000  # Sicherung: nichts über 1 MB (keine ERPs/Pakete)
 

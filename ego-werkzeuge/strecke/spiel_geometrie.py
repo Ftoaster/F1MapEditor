@@ -868,6 +868,24 @@ def geometrie_einsetzen(archiv: erp.ErpFile, netz_npz: str, **optionen) -> dict:
                    vorlagen={k: v for k, v in vorlagen.items()},
                    loch=dict(x0=loch['x0'], z0=loch['z0'], kante=loch['kante'],
                              randvertices=int(len(loch['rand'])), ersatz=loch['ersatz']))
+    asphalt = optionen.get('asphalt_vorlage')
+    skid = optionen.get('skid_vorlage')
+    bericht['mipmaps'] = []
+    if (asphalt and asphalt != 'traeger') or (skid and skid != 'traeger'):
+        from strecke import asphalt_vorlagen
+        code = optionen.get('code') or 'portimao'
+        spiel = optionen.get('spielordner')
+        try:
+            if asphalt and asphalt != 'traeger':
+                bericht['asphalt_vorlage'] = asphalt_vorlagen.einsetzen(
+                    archiv, asphalt, spielordner=spiel, code=code)
+                bericht['mipmaps'] += list(bericht['asphalt_vorlage'].get('mipmaps') or [])
+            if skid and skid != 'traeger':
+                bericht['skid_vorlage'] = asphalt_vorlagen.skid_einsetzen(
+                    archiv, skid, spielordner=spiel, code=code)
+                bericht['mipmaps'] += list(bericht['skid_vorlage'].get('mipmaps') or [])
+        except asphalt_vorlagen.VorlagenFehler as e:
+            raise GeometrieFehler(str(e))
     if (pos[:, 0].min() <= loch['x0'] or pos[:, 0].max() >= loch['x0'] + loch['kante']
             or pos[:, 2].min() <= loch['z0'] or pos[:, 2].max() >= loch['z0'] + loch['kante']):
         raise GeometrieFehler('Placed track does not lie completely inside the hole of the outer terrain')

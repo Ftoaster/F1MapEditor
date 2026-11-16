@@ -203,6 +203,16 @@ def test_build_options_weltkarten(tmp_path):
         build_command(*basis, "x4", options={"weltkarten": True, "biom": "mond"})
     with pytest.raises(ValueError):
         build_command(*basis, "x5", options={"weltkarten": True, "farbton": "neon"})
+    flaeche = build_command(*basis, "x6", options={"asphalt_vorlage": "monza"})
+    assert flaeche[flaeche.index("--asphalt-vorlage") + 1] == "monza"
+    assert "--asphalt-vorlage" not in build_command(*basis, "x7", options={"asphalt_vorlage": "traeger"})
+    with pytest.raises(ValueError):
+        build_command(*basis, "x8", options={"asphalt_vorlage": "../monza"})
+    spuren = build_command(*basis, "x9", options={"skid_vorlage": "silverstone"})
+    assert spuren[spuren.index("--skid-vorlage") + 1] == "silverstone"
+    assert "--skid-vorlage" not in build_command(*basis, "x10", options={"skid_vorlage": "traeger"})
+    with pytest.raises(ValueError):
+        build_command(*basis, "x11", options={"skid_vorlage": "../x"})
 
 
 def test_build_options_note_and_nonmodal(window, tmp_path):

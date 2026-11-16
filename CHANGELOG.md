@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Track surface and tyre marks in the build dialog: choose a circuit from a fixed catalog
+  (`ego-werkzeuge/strecke/daten/fahrbahn.json`). At build time the textures are copied from the F1 25 game folder
+  (lossless, same path as the desert biome), so no extracted PNGs are needed in the repo. Default remains the
+  Portimão carrier (package byte-identical). Rebuild the catalog with
+  `python -m strecke.asphalt_vorlagen analysieren <game folder>` (asphalt and skid groups by texture MD5).
+  Pre-build checks FB-01/FB-02 report an unknown template or a missing game folder
+
 ## 0.4.0
 
 - Korean as third interface language (contributed by [Ftoaster](https://github.com/Ftoaster), PR #6): View → Language

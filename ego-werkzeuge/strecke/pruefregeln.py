@@ -113,6 +113,7 @@ QUELLEN = {
     "paket": "ego-werkzeuge/paket_tool.py",
     "recherche": "docs/recherche_generierung.md",
     "umgebung": "docs/zwischenstand/umgebung_vertrag.md",
+    "fahrbahn": "ego-werkzeuge/strecke/asphalt_vorlagen.py",
 }
 
 
@@ -324,6 +325,13 @@ _R = [
           "(docs/mapeditor/objekte_ausrichtung.md)"),
     Regel("UMG_OHNE_BODEN", "UM-10", WARNUNG, "bau", "Environment object left out: no ground under it",
           QUELLEN["umgebung"], "Höhe nur aus den sichtbaren Flächen im Streckenbereich (umgebung.bodenlage)"),
+    # ---------------------------------------------------------------- Fahrbahn / Reifenspuren (PR #7)
+    Regel("FAHRBAHN_UNBEKANNT", "FB-01", FEHLER, "profil",
+          "Unknown track surface or tyre-mark template", QUELLEN["fahrbahn"],
+          "fahrbahn.json; Build-Dialog und --asphalt-vorlage / --skid-vorlage"),
+    Regel("FAHRBAHN_SPIELORDNER", "FB-02", FEHLER, "profil",
+          "Track surface/tyre marks need the F1 25 game folder", QUELLEN["fahrbahn"],
+          "Texturen werden beim Bau aus den Strecken-ERPs kopiert (wie biom_wueste)"),
 ]
 REGELN: Dict[str, Regel] = {r.id: r for r in _R}
 assert len(REGELN) == len(_R), "doppelte Regel-ID"
@@ -988,8 +996,34 @@ def bau_pruefungen_bewerten(pr: dict, m: list) -> set:
 
 
 # =============================================================================== Profil
+def fahrbahn_pruefen(asphalt_vorlage=None, skid_vorlage=None, m=None) -> set:
+    """Unbekannte Fahrbahn-/Skid-Vorlage oder fehlender Spielordner (vor dem Generator)."""
+    from . import asphalt_vorlagen, umgebung
+    m = m if m is not None else []
+    gp = {"FAHRBAHN_UNBEKANNT", "FAHRBAHN_SPIELORDNER"}
+    braucht_spiel = False
+    for art, wert, gruppe in (
+            ("track surface", asphalt_vorlage or "traeger", asphalt_vorlagen.asphalt_katalog()),
+            ("tyre marks", skid_vorlage or "traeger", asphalt_vorlagen.skid_katalog())):
+        if not wert:
+            continue
+        try:
+            _key, ein = asphalt_vorlagen._aufloesen(gruppe, wert)
+        except asphalt_vorlagen.VorlagenFehler:
+            m.append(meldung("FAHRBAHN_UNBEKANNT", "Unknown %s %r" % (art, wert), ist=wert))
+            continue
+        if not ein.get("traeger"):
+            braucht_spiel = True
+    if braucht_spiel and umgebung.spielordner_finden() is None:
+        m.append(meldung(
+            "FAHRBAHN_SPIELORDNER",
+            "Track surface/tyre marks need the F1 25 game folder (Tools → Set F1 25 game folder)",
+            soll="F1 25 game folder"))
+    return gp
+
+
 def profil_pruefen(streckencode=None, pvs_variante=None, nur_original_pvs=False, ohne_geometrie=False,
-                   ohne_minimap=False, m=None, ziel="ego") -> set:
+                   ohne_minimap=False, asphalt_vorlage=None, skid_vorlage=None, m=None, ziel="ego") -> set:
     from . import streckencode as sc
     m = m if m is not None else []
     gp = set()
@@ -1017,6 +1051,7 @@ def profil_pruefen(streckencode=None, pvs_variante=None, nur_original_pvs=False,
         m.append(meldung("GEOMETRIE_ABGESCHALTET", "Build %s: diagnostics only, not a complete driving package"
                          % " und ".join(t for t, an in (("ohne Geometrie", ohne_geometrie),
                                                        ("ohne Minimap", ohne_minimap)) if an)))
+    gp |= fahrbahn_pruefen(asphalt_vorlage, skid_vorlage, m)
     return gp
 
 

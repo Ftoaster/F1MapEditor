@@ -1434,3 +1434,21 @@ Zoom out of the map;Herauszoomen;축소;window.py
 {name} at {s} m from the finish · Ctrl+Z: undo;{name} bei {s} m ab Ziel · Strg+Z: rückgängig;{name}: 결승선에서 {s} m · Ctrl+Z: 되돌리기;window.py
 {name} “{id}” placed ({hoehe} m, radius {radius} m) · Ctrl+Z undoes.;{name} „{id}“ gesetzt ({hoehe} m, Radius {radius} m) · Strg+Z macht rückgängig.;{name} “{id}”을(를) 놓았습니다 ({hoehe} m, 반경 {radius} m) · Ctrl+Z로 실행 취소.;window.py
 {n} object banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.|{n} objects banked towards the corner inside (up to {maximum}°) · Ctrl+Z undoes.;{n} Objekt zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.|{n} Objekte zur Kurveninnenseite geneigt (bis {maximum}°) · Strg+Z macht rückgängig.;오브젝트 {n}개를 코너 안쪽으로 기울였습니다 (최대 {maximum}°) · Ctrl+Z로 실행 취소.|오브젝트 {n}개를 코너 안쪽으로 기울였습니다 (최대 {maximum}°) · Ctrl+Z로 실행 취소.;window.py
+Replaces the asphalt textures with the chosen circuit. The pit lane stays Portimão. Bahrain, Imola, Madrid, Melbourne and Suzuka supply only the base texture.;Ersetzt die Asphalttexturen durch die der gewählten Strecke. Die Boxengasse bleibt Portimão. Bahrain, Imola, Madrid, Melbourne und Suzuka liefern nur die Basiskarte.;선택한 서킷의 아스팔트 텍스처로 바꿉니다. 피트 레인은 포르티망을 유지합니다. 바레인·이몰라·마드리드·멜버른·스즈카는 기본 텍스처만 제공합니다.;build.py
+Replaces the dark tyre marks along the track. The picture is a strip wrapped along the road, not a map of the corners.;Ersetzt die dunklen Reifenspuren entlang der Strecke. Das Bild ist ein Streifen, der der Straße folgt, keine Karte der Kurven.;트랙을 따라가는 어두운 타이어 마크를 바꿉니다. 코너 지도가 아니라 도로를 따라 감기는 스트립입니다.;build.py
+Track surface;Fahrbahnoberfläche;트랙 표면;build.py
+Tyre marks;Reifenspuren;타이어 마크;build.py
+Type 1;Typ 1;타입 1;build.py
+Type 2;Typ 2;타입 2;build.py
+Type 3;Typ 3;타입 3;build.py
+Type 4;Typ 4;타입 4;build.py
+Type 5;Typ 5;타입 5;build.py
+Type 6;Typ 6;타입 6;build.py
+Type 7;Typ 7;타입 7;build.py
+Type 8;Typ 8;타입 8;build.py
+Type 9;Typ 9;타입 9;build.py
+Type 10;Typ 10;타입 10;build.py
+Type 11;Typ 11;타입 11;build.py
+Type 12;Typ 12;타입 12;build.py
+Unknown track surface {wert!r}.;Fahrbahnoberfläche {wert!r} unbekannt.;알 수 없는 트랙 표면 {wert!r}.;adapter.py
+Unknown tyre marks {wert!r}.;Reifenspuren {wert!r} unbekannt.;알 수 없는 타이어 마크 {wert!r}.;adapter.py

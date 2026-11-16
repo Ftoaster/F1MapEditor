@@ -1,0 +1,312 @@
+{
+ "version": 2,
+ "asphalt": {
+  "reihenfolge": [
+   "abu_dhabi",
+   "austria",
+   "losail",
+   "miami",
+   "silverstone",
+   "spa_francorchamps",
+   "bahrain",
+   "imola",
+   "madrid",
+   "suzuka",
+   "traeger"
+  ],
+  "vorlagen": {
+   "abu_dhabi": {
+    "name": "Abu Dhabi / Baku (+11)",
+    "aliase": [
+     "abu_dhabi",
+     "baku",
+     "brazil",
+     "jeddah",
+     "las_vegas",
+     "mexico",
+     "monaco",
+     "montreal",
+     "monza",
+     "shanghai",
+     "singapore",
+     "texas",
+     "zandvoort",
+     "type1"
+    ],
+    "strecke": "abu_dhabi",
+    "material": "eaid://environment_package/tracks/abu_dhabi/terrain/materials/track_surface_a.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_a_03_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_detail_a_01_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_detail_a_01_s.tif"
+    },
+    "vorschau": "type1.png"
+   },
+   "austria": {
+    "name": "Austria",
+    "aliase": [
+     "austria",
+     "type2"
+    ],
+    "strecke": "austria",
+    "material": "eaid://environment_package/tracks/austria/terrain/materials/ast_ontrack_a.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_tint_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_tint_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_tint_a_01_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_detail_a_01_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_detail_a_01_s.tif"
+    },
+    "vorschau": "type2.png"
+   },
+   "losail": {
+    "name": "Losail",
+    "aliase": [
+     "losail",
+     "type4"
+    ],
+    "strecke": "losail",
+    "material": "eaid://environment_package/tracks/losail/terrain/materials/los_track_a.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_b_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_b_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_surface_b_01_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/losail/los_track_detail_01_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/losail/los_track_detail_01_s.tif"
+    },
+    "vorschau": "type4.png"
+   },
+   "miami": {
+    "name": "Miami",
+    "aliase": [
+     "miami",
+     "type5"
+    ],
+    "strecke": "miami",
+    "material": "eaid://environment_package/tracks/miami/terrain/materials/mia_track_a.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mia_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mia_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mia_asphalt_a_01_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/detail/core_track_detail_02_v_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/detail/core_track_detail_02_v_s.tif"
+    },
+    "vorschau": "type5.png"
+   },
+   "silverstone": {
+    "name": "Silverstone",
+    "aliase": [
+     "silverstone",
+     "type6"
+    ],
+    "strecke": "silverstone",
+    "material": "eaid://environment_package/tracks/silverstone/terrain/materials/sil_track_01_main.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/sil_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/sil_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/sil_asphalt_a_01_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/detail/core_track_detail_02_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/detail/core_track_detail_02_s.tif"
+    },
+    "vorschau": "type6.png"
+   },
+   "spa_francorchamps": {
+    "name": "Spa-Francorchamps",
+    "aliase": [
+     "spa_francorchamps",
+     "type7"
+    ],
+    "strecke": "spa_francorchamps",
+    "material": "eaid://environment_package/tracks/spa_francorchamps/terrain/materials/spa_track_a.material",
+    "shader": "ts_ribbon",
+    "experimentell": false,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/spa_francorchamps/spa_asphalt_a_07b_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/spa_francorchamps/spa_asphalt_a_07_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/spa_francorchamps/spa_asphalt_a_07b_s.tif",
+     "me_detailAlbedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/spa_francorchamps/spa_francochamps_track_detail_01_b_bm.tif",
+     "me_detailSurfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/spa_francorchamps/spa_francochamps_track_detail_01_c_s.tif"
+    },
+    "vorschau": "type7.png"
+   },
+   "bahrain": {
+    "name": "Bahrain",
+    "aliase": [
+     "bahrain",
+     "type8"
+    ],
+    "strecke": "bahrain",
+    "material": "eaid://environment_package/tracks/bahrain/terrain/materials/bah_track_a_01_main.material",
+    "shader": "lt_ribbon",
+    "experimentell": true,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/bah_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/bah_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/bah_asphalt_a_01_s.tif"
+    },
+    "vorschau": "type8.png"
+   },
+   "imola": {
+    "name": "Imola",
+    "aliase": [
+     "imola",
+     "type9"
+    ],
+    "strecke": "imola",
+    "material": "eaid://environment_package/tracks/imola/terrain/materials/imo_track_a.material",
+    "shader": "lt_ribbon",
+    "experimentell": true,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/imo_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/imo_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/imo_asphalt_a_01_shiney_ps_levels_s.tif"
+    },
+    "vorschau": "type9.png"
+   },
+   "madrid": {
+    "name": "Madrid",
+    "aliase": [
+     "madrid",
+     "type10"
+    ],
+    "strecke": "madrid",
+    "material": "eaid://environment_package/tracks/madrid/terrain/materials/mad_track_on_a_01.material",
+    "shader": "lt_ribbon",
+    "experimentell": true,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mad_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mad_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/mad_asphalt_a_01_s.tif"
+    },
+    "vorschau": "type10.png"
+   },
+   "suzuka": {
+    "name": "Suzuka",
+    "aliase": [
+     "suzuka",
+     "type11"
+    ],
+    "strecke": "suzuka",
+    "material": "eaid://environment_package/tracks/suzuka/terrain/materials/suz_track_a_01_main.material",
+    "shader": "lt_ribbon",
+    "experimentell": true,
+    "slots": {
+     "me_albedoMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/core_asphalt_a_01_dh.tif",
+     "me_normalMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/suz_asphalt_a_01_n.tif",
+     "me_surfaceMap": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/asphalt/core_asphalt_a_01_s.tif"
+    },
+    "vorschau": "type11.png"
+   },
+   "traeger": {
+    "traeger": true,
+    "name": "Carrier (Portimão) / Hungaroring / Catalunya",
+    "aliase": [
+     "catalunya",
+     "hungaroring",
+     "portimao",
+     "traeger",
+     "type12",
+     "type3"
+    ],
+    "vorschau": "type12.png"
+   }
+  }
+ },
+ "skid": {
+  "reihenfolge": [
+   "traeger",
+   "abu_dhabi",
+   "hungaroring",
+   "imola",
+   "losail"
+  ],
+  "vorlagen": {
+   "traeger": {
+    "traeger": true,
+    "name": "Carrier (Portimão)",
+    "aliase": [
+     "traeger",
+     "portimao",
+     "type5"
+    ],
+    "vorschau": "traeger.png"
+   },
+   "abu_dhabi": {
+    "name": "Abu Dhabi / Austria / Monaco (+13)",
+    "aliase": [
+     "abu_dhabi",
+     "austria",
+     "austria_reverse",
+     "baku",
+     "brazil",
+     "jeddah",
+     "las_vegas",
+     "mexico",
+     "monaco",
+     "montreal",
+     "monza",
+     "shanghai",
+     "singapore",
+     "texas",
+     "zandvoort",
+     "zandvoort_reverse",
+     "type1"
+    ],
+    "strecke": "abu_dhabi",
+    "quelle": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_skidmark_a_01_bm.tif",
+    "vorschau": "abu_dhabi.png"
+   },
+   "hungaroring": {
+    "name": "Hungaroring",
+    "aliase": [
+     "hungaroring",
+     "type2"
+    ],
+    "strecke": "hungaroring",
+    "quelle": "eaid://environment_package/core_assets/shared_textures/terrain/textures/track/core_track_skidmark_a_02_bm.tif",
+    "vorschau": "hungaroring.png"
+   },
+   "imola": {
+    "name": "Imola / Bahrain / Madrid / Melbourne / Suzuka",
+    "aliase": [
+     "bahrain",
+     "imola",
+     "madrid",
+     "melbourne",
+     "suzuka",
+     "type3"
+    ],
+    "strecke": "imola",
+    "quelle": "eaid://environment_package/core_assets/shared_textures/terrain/textures/skidmarks/core_track_skidmark_a_00_v_lt_bm.tif",
+    "vorschau": "imola.png"
+   },
+   "losail": {
+    "name": "Losail / Catalunya / Miami / Silverstone / Spa-Francorchamps",
+    "aliase": [
+     "catalunya",
+     "losail",
+     "miami",
+     "silverstone",
+     "silverstone_reverse",
+     "spa_francorchamps",
+     "type4"
+    ],
+    "strecke": "losail",
+    "quelle": "eaid://environment_package/core_assets/shared_textures/terrain/textures/skidmarks/core_track_skidmark_a_00_v_bm.tif",
+    "vorschau": "losail.png"
+   }
+  }
+ }
+}

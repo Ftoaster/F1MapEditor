@@ -28,6 +28,8 @@ STRECKENCODE_NICHT_IN_DB;CO-02;Track code not in the game database – track can
 STRECKENCODE_TRAEGER;CO-03;Package keeps the carrier code portimao (collides with an installed Portimão mod);Paket behält den Trägercode portimao (kollidiert mit einer installierten Portimão-Mod);패키지가 캐리어 코드 portimao 를 유지함 (설치된 포르티망 모드와 충돌)
 PVS_PROFIL;PL-01;PVS not along the track (original PVS or “everything visible”);PVS nicht entlang der Strecke (Original-PVS bzw. „alles sichtbar“);PVS가 트랙을 따르지 않음 (원본 PVS 또는 “모두 보임”)
 GEOMETRIE_ABGESCHALTET;PK-03;Build without new geometry or minimap – not a complete driving package;Bau ohne neue Geometrie bzw. Minimap – kein vollständiges Fahrpaket;새 기하 또는 미니맵 없이 빌드함 – 완전한 주행 패키지가 아님
+FAHRBAHN_UNBEKANNT;FB-01;Unknown track surface or tyre-mark template;Unbekannte Fahrbahnoberfläche oder Reifenspuren-Vorlage;알 수 없는 트랙 표면 또는 타이어 마크 템플릿
+FAHRBAHN_SPIELORDNER;FB-02;Track surface/tyre marks need the F1 25 game folder;Fahrbahnoberfläche/Reifenspuren brauchen den F1-25-Spielordner;트랙 표면/타이어 마크에는 F1 25 게임 폴더가 필요함
 KI_BREMSLINIE_AUSSERHALB_KURVE;KI-01;Main braking line is not inside a corner (corner_start … next corner_end);Haupt-Bremslinie liegt nicht innerhalb einer Kurve (corner_start … nächstes corner_end);메인 브레이킹 라인이 코너 안에 있지 않음 (corner_start … 다음 corner_end)
 KI_BREMSLINIEN_ABSTAND;KI-02;Main braking lines too close (same gate or < 3 gates apart);Haupt-Bremslinien zu dicht (gleiches Gate bzw. < 3 Gates Abstand);메인 브레이킹 라인이 너무 가까움 (같은 게이트 또는 게이트 3개 미만)
 KI_BREMSLINIEN_ID_SATZ;KI-02;Braking-line IDs duplicated or not equal to the ID set of the .brakelinesettings;Bremslinien-IDs doppelt oder nicht gleich dem ID-Satz der .brakelinesettings;브레이킹 라인 ID가 중복되거나 .brakelinesettings 의 ID 집합과 같지 않음

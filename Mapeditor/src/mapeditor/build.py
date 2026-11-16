@@ -33,6 +33,13 @@ BUILD_STATES = [N_("läuft"), N_("abgebrochen"), N_("fehlgeschlagen"), N_("mit_t
 #: Bau erfolgreich (Paket geprüft)
 GOOD_BUILDS = {"ok", "mit_traegerabweichung"}
 
+#: Alte gespeicherte Skid-Schlüssel → Katalogschlüssel (fahrbahn.json).
+SKID_ALT = {
+    "type1": "abu_dhabi", "type2": "hungaroring", "type3": "imola", "type4": "losail", "type5": "traeger",
+    "portimao": "traeger", "catalunya": "losail", "miami": "losail",
+    "silverstone": "losail", "spa_francorchamps": "losail",
+    "bahrain": "imola", "madrid": "imola", "melbourne": "imola", "suzuka": "imola",
+}
 #: Zustände der Statuskarte: Kennung → (Text, Farbe, Symbol)
 BUILD_STATES_UI = {"ready": (N_("Ready"), "#5BD08A", "●"), "checking": (N_("Checking"), "#D6A94A", "◐"),
                    "building": (N_("Building"), "#5AA9E6", "◐"), "working": (N_("Working"), "#5AA9E6", "◐"),
@@ -415,6 +422,39 @@ class BuildDialog(QDialog):
         advanced.addRow("", self.world_maps)
         advanced.addRow(tr("Landscape"), self.biome)
         advanced.addRow(tr("Colour tone"), self.tint)
+        advanced.setLabelAlignment(Qt.AlignRight | Qt.AlignTop)
+        self.asphalt = QComboBox()
+        self.asphalt.setToolTip(tr("Replaces the asphalt textures with the chosen circuit (copied from the F1 25 "
+                                   "game folder at build time). The pit lane stays Portimão. Needs Tools → Set F1 25 "
+                                   "game folder. Rebuild the list with: python -m strecke.asphalt_vorlagen "
+                                   "analysieren <game folder>."))
+        self.asphalt_preview = QLabel()
+        self.asphalt_preview.setFixedSize(160, 160)
+        self.asphalt_preview.setAlignment(Qt.AlignCenter)
+        asphalt_row = QWidget()
+        asphalt_layout = QHBoxLayout(asphalt_row)
+        asphalt_layout.setContentsMargins(0, 0, 0, 0)
+        asphalt_layout.setAlignment(Qt.AlignTop)
+        asphalt_layout.addWidget(self.asphalt, 1, Qt.AlignTop)
+        asphalt_layout.addWidget(self.asphalt_preview, 0, Qt.AlignTop)
+        self._fill_asphalt(settings.get("asphalt_vorlage", "traeger"))
+        self.asphalt.currentIndexChanged.connect(self._asphalt_preview)
+        advanced.addRow(tr("Track surface"), asphalt_row)
+        self.skid = QComboBox()
+        self.skid.setToolTip(tr("Replaces the dark tyre marks along the track (copied from the game at build time). "
+                                "Carrier leaves Portimão unchanged. Needs the F1 25 game folder."))
+        self.skid_preview = QLabel()
+        self.skid_preview.setFixedSize(160, 160)
+        self.skid_preview.setAlignment(Qt.AlignCenter)
+        skid_row = QWidget()
+        skid_layout = QHBoxLayout(skid_row)
+        skid_layout.setContentsMargins(0, 0, 0, 0)
+        skid_layout.setAlignment(Qt.AlignTop)
+        skid_layout.addWidget(self.skid, 1, Qt.AlignTop)
+        skid_layout.addWidget(self.skid_preview, 0, Qt.AlignTop)
+        self._fill_skid(settings.get("skid_vorlage", "traeger"))
+        self.skid.currentIndexChanged.connect(self._skid_preview)
+        advanced.addRow(tr("Tyre marks"), skid_row)
         fixed = QLabel(tr(("Fixed in the profile: pit lane correction, activation template portimao, main variant "
                            "only.")))
         fixed.setWordWrap(True)
@@ -854,7 +894,119 @@ class BuildDialog(QDialog):
                 "renndaten": self.race_data.isChecked(), "raster": self.grid_size.currentData(),
                 "streckenname": self.track_name.text().strip(),
                 "pvs_variante": self.pvs.currentData(), "weltkarten": self.world_maps.isChecked(),
-                "biom": self.biome.currentData(), "farbton": self.tint.currentData()}
+                "biom": self.biome.currentData(), "farbton": self.tint.currentData(),
+                "asphalt_vorlage": self.asphalt.currentData() or "traeger",
+                "skid_vorlage": self.skid.currentData() or "traeger"}
+
+    def _fahrbahn_katalog(self):
+        """``strecke/daten/fahrbahn.json`` aus dem Werkzeugkasten (ohne Spieltexturen)."""
+        pfad = (toolkit_path(self.project.manifest.get("werkzeugkasten"))
+                / "strecke" / "daten" / "fahrbahn.json")
+        return json.loads(pfad.read_text(encoding="utf-8"))
+
+    def _fahrbahn_vorschau_ordner(self, art):
+        """Vorschaubilder: Werkzeugkasten, dann %LOCALAPPDATA%\\Mapeditor\\fahrbahn_vorschau\\<art>."""
+        root = toolkit_path(self.project.manifest.get("werkzeugkasten"))
+        kandidaten = [
+            root / "strecke" / "daten" / "vorschau" / art,
+            Path(os.environ.get("LOCALAPPDATA") or "") / "Mapeditor" / "fahrbahn_vorschau" / art,
+        ]
+        return [p for p in kandidaten if p.is_dir()]
+
+    def _fahrbahn_vorschau_setzen(self, label, eintrag, art, schluessel=None):
+        """160×160-Vorschau aus PNG; fehlt die Datei → Gedankenstrich."""
+        name = (eintrag or {}).get("vorschau") or ((schluessel or "") + ".png")
+        datei = None
+        for ordner in self._fahrbahn_vorschau_ordner(art):
+            kandidat = ordner / name
+            if kandidat.is_file():
+                datei = kandidat
+                break
+        if datei is not None:
+            label.setPixmap(QPixmap(str(datei)).scaled(
+                160, 160, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            label.setText("")
+        else:
+            label.setPixmap(QPixmap())
+            label.setText("–")
+
+    def _fill_asphalt(self, gewählt):
+        """Fahrbahnoberflächen aus fahrbahn.json, Anzeige als Streckenname."""
+        self._asphalt_katalog = {}
+        self.asphalt.clear()
+        alias = {}
+        reihenfolge = []
+        try:
+            daten = self._fahrbahn_katalog().get("asphalt") or {}
+            self._asphalt_katalog = daten.get("vorlagen") or {}
+            reihenfolge = list(daten.get("reihenfolge") or [])
+        except (OSError, ValueError, json.JSONDecodeError):
+            self._asphalt_katalog = {}
+        if "traeger" in reihenfolge:
+            reihenfolge = ["traeger"] + [k for k in reihenfolge if k != "traeger"]
+        for key in reihenfolge:
+            eintrag = self._asphalt_katalog.get(key) or {}
+            data = "traeger" if eintrag.get("traeger") else key
+            for alt in eintrag.get("aliase") or []:
+                alias[alt] = data
+            label = eintrag.get("name") or key.replace("_", " ").title()
+            self.asphalt.addItem(label, data)
+        gewählt = alias.get(gewählt, gewählt)
+        if self.asphalt.count() == 0:
+            self.asphalt.addItem(tr("Carrier (Portimão)"), "traeger")
+        idx = self.asphalt.findData(gewählt)
+        self.asphalt.setCurrentIndex(idx if idx >= 0 else 0)
+        self._asphalt_preview()
+
+    def _asphalt_eintrag(self):
+        data = self.asphalt.currentData()
+        if data in self._asphalt_katalog:
+            return self._asphalt_katalog[data]
+        if data == "traeger":
+            return next((e for e in self._asphalt_katalog.values() if e.get("traeger")), {})
+        return {}
+
+    def _asphalt_preview(self, *_args):
+        """Albedo-Vorschau der gewählten Oberfläche."""
+        self._fahrbahn_vorschau_setzen(
+            self.asphalt_preview, self._asphalt_eintrag(), "asphalt", self.asphalt.currentData())
+
+    def _fill_skid(self, gewählt):
+        """Reifenspuren wie skid_vergleich/목록.txt (gleiche Streifen zusammengefasst)."""
+        self._skid_katalog = {}
+        self.skid.clear()
+        gewählt = SKID_ALT.get(gewählt, gewählt)
+        reihenfolge = []
+        try:
+            daten = self._fahrbahn_katalog().get("skid") or {}
+            self._skid_katalog = daten.get("vorlagen") or {}
+            reihenfolge = list(daten.get("reihenfolge") or list(self._skid_katalog))
+            # Aliase aus dem Katalog nachziehen (abu_dhabi → Gruppe)
+            for key, eintrag in self._skid_katalog.items():
+                for alt in eintrag.get("aliase") or []:
+                    if gewählt == alt:
+                        gewählt = key
+        except (OSError, ValueError, json.JSONDecodeError):
+            self._skid_katalog = {}
+        if "traeger" in reihenfolge:
+            reihenfolge = ["traeger"] + [k for k in reihenfolge if k != "traeger"]
+        for key in reihenfolge:
+            eintrag = self._skid_katalog.get(key)
+            if not eintrag:
+                continue
+            self.skid.addItem(eintrag.get("name") or key, key)
+        if self.skid.count() == 0:
+            self.skid.addItem(tr("Carrier (Portimão)"), "traeger")
+        if self.skid.findData(gewählt) < 0:
+            gewählt = "traeger"
+        self.skid.setCurrentIndex(max(0, self.skid.findData(gewählt)))
+        self._skid_preview()
+
+    def _skid_preview(self, *_args):
+        """Kanalvorschau (R/Alpha/B) wie in skid_vergleich."""
+        key = self.skid.currentData()
+        self._fahrbahn_vorschau_setzen(
+            self.skid_preview, self._skid_katalog.get(key) or {}, "skid", key)
 
     def _update_profile_hint(self, *args):
         """Eine Zeile Zusammenfassung vor dem Bau: Ziel, Code, Sichtbarkeit, Raster, Name, Größe."""
